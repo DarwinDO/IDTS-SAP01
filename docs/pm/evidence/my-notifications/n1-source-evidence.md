@@ -29,7 +29,9 @@ The completed independent review of `be56f788d874e356b2d6fa4129d06c3a9e930e62` r
 
 Added evidence: four SQLite uniqueness constraints reject duplicates while nullable legacy source keys remain valid; loopback HTTP verifies anonymous denial, paging rejection, Vietnamese copy, cross-user action denial and read-state reload; real service requests verify XSUAA identity/role mismatch and PM self-only behavior. Hydration handles invalid XOR/recipient safely, and the backfill checks frozen upper/lower dates plus 500-row batches. Browser/BTP/HANA runtime acceptance is not claimed.
 
-Same-reviewer re-review is pending. Draft PR/push is additionally held for current human Ownership Knowledge Gate evidence: the repository contains an older notification assessment dated 2026-08-12, not a current N1 assessment. No score, teach-back or approval has been fabricated.
+Same-reviewer re-review completed at `7dad8f18e148568d83380cabf2deba80eb432398`: GO for N1 source, 0 Critical / 0 Major / 0 Important / 0 Minor. All five previous findings are closed. The reviewer reran static JS/compiler/model/diff checks and inspected, but did not rerun, runtime suites; the executor's fresh matrix above is the runtime evidence.
+
+Draft PR/push remains held for current human Ownership Knowledge Gate evidence: the repository contains an older notification assessment dated 2026-08-12, not a current N1 assessment. No score, teach-back or approval has been fabricated. The closing commit after this reviewed source changes documentation only. No N1 remote branch or PR has been created.
 
 ## Tooling and simplicity
 
@@ -43,6 +45,8 @@ Task 1–4 có RED/GREEN; review đầu tại `be56f788d874e356b2d6fa4129d06c3a9
 
 Matrix mới ngày 27/08/2026 PASS: model/service/backfill, outbox Bug, immediate kick, access notifications, XSUAA 13/13, secret scan, rules 8/8, depth 15/15, AI DevKit 5/5, EDMX/HANA, diff/mirror/scope. Warning compiler duy nhất là attachment có sẵn. Log HTTP 401/400/404 là case negative mong đợi. Test chứng minh unique constraint, nullable source key cũ, HTTP locale/auth/paging/read-reload, XSUAA qua service, PM chỉ inbox của mình, XOR/recipient an toàn và backfill 500 row/batch với cutoff hai đầu.
 
-Đang chờ cùng reviewer kiểm lại. Chưa push/PR vì còn cần evidence Ownership Knowledge Gate N1 hiện tại; repo chỉ có assessment notification cũ ngày 12/08. Không tự ghi điểm, teach-back hoặc approval. Không migrate HANA/HDI, chạy backfill thật, deploy, gửi mail/provider, sửa user/role/data, Jira/Drive hoặc mở N2. Giữ junction dependency đã kiểm lock parity; không install/upgrade/đổi lockfile. Canonical business docs giữ nguyên vì không đổi quyết định đã duyệt.
+Cùng reviewer đã kiểm lại source `7dad8f18e148568d83380cabf2deba80eb432398` và trả GO với 0 Critical / 0 Major / 0 Important / 0 Minor. Reviewer tự chạy static JS/compiler/model/diff và chỉ đọc runtime suite; runtime evidence là matrix executor đã chạy mới ở trên. Commit closure sau SHA review chỉ đổi docs.
+
+Chưa push/PR vì còn cần evidence Ownership Knowledge Gate N1 hiện tại; repo chỉ có assessment notification cũ ngày 12/08. Không tự ghi điểm, teach-back hoặc approval. Không migrate HANA/HDI, chạy backfill thật, deploy, gửi mail/provider, sửa user/role/data, Jira/Drive hoặc mở N2. Giữ junction dependency đã kiểm lock parity; không install/upgrade/đổi lockfile. Canonical business docs giữ nguyên vì không đổi quyết định đã duyệt.
 
 OfficeCLI 1.0.145 chỉ preflight Markdown; dùng TDD/debug/review/verify/Ponytail/CAP/API testing/AI DevKit và context-reentry. CAP MCP không gọi được; dùng compiler, test runtime và tài liệu CDL chính thức. Không dùng security connector, provider, Gmail, Jira/Drive. Tái sử dụng CAP CQL/i18n và helper identity/link, không thêm hạ tầng.

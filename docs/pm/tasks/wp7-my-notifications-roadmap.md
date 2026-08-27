@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1 SOURCE IMPLEMENTED — FINAL MATRIX AND EXACT-HEAD REVIEW PENDING`
+`N1 SOURCE VERIFIED — DRAFT PR HELD FOR CURRENT HUMAN KNOWLEDGE GATE`
 
 ### Authority
 
@@ -27,13 +27,13 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-Planning PR #360 and Gate 6.5 are merged. N1 uses exact base `8ac9327b93b70633e96d2b6f09bb379a5afb681f` and implements Tasks 1–4 with RED/GREEN evidence. The next boundary is the fresh full source matrix and one bounded exact-head review; only zero unresolved Critical/Major/Important permits one Draft N1 PR. Migration, backfill execution, deployment and N2 remain unapproved.
+Planning PR #360 and Gate 6.5 are merged. N1 uses exact base `8ac9327b93b70633e96d2b6f09bb379a5afb681f`; Tasks 1–4 and the fresh full matrix are complete. Same-reviewer re-review at `7dad8f18e148568d83380cabf2deba80eb432398` returned zero Critical/Major/Important/Minor. Push and one Draft N1 PR are held for current human Knowledge Gate evidence; no human PASS is inferred from source review. Migration, backfill execution, deployment and N2 remain unapproved.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`ĐÃ IMPLEMENT SOURCE N1 — ĐANG CHỜ FULL MATRIX VÀ REVIEW EXACT-HEAD`
+`SOURCE N1 ĐÃ KIỂM ĐỊNH — DRAFT PR CHỜ KNOWLEDGE GATE HIỆN TẠI CỦA MEMBER`
 
 ### Thẩm quyền
 
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-Planning PR #360 và Gate 6.5 đã merge. N1 dùng base chính xác `8ac9327b93b70633e96d2b6f09bb379a5afb681f` và đã implement Tasks 1–4 với bằng chứng RED/GREEN. Boundary tiếp theo là full source matrix mới và một review exact-head có giới hạn; chỉ khi không còn Critical/Major/Important mới được tạo một Draft PR N1. Migration, chạy backfill, deploy và N2 vẫn chưa được duyệt.
+Planning PR #360 và Gate 6.5 đã merge. N1 dùng base chính xác `8ac9327b93b70633e96d2b6f09bb379a5afb681f`; Tasks 1–4 và full matrix mới đã hoàn tất. Cùng reviewer kiểm lại tại `7dad8f18e148568d83380cabf2deba80eb432398` với 0 Critical/Major/Important/Minor. Push và một Draft PR N1 đang chờ evidence Knowledge Gate hiện tại của member; không suy ra human PASS từ source review. Migration, chạy backfill, deploy và N2 vẫn chưa được duyệt.
