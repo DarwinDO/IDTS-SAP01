@@ -13,6 +13,7 @@ const BUGS = 'idts.cap.Bugs'
 const NOTIFICATIONS = 'idts.cap.Notifications'
 const USERS = 'idts.cap.Users'
 const DEVELOPER_PROFILES = 'idts.cap.DeveloperProfiles'
+const HISTORY_LOGS = 'idts.cap.HistoryLogs'
 const CANDIDATE_PAGE_SIZE = 500
 const URGENT_SLA_HOURS = 4
 const STANDARD_SLA_HOURS = 24
@@ -43,34 +44,43 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
     skipped: 0
   }
 
-  for (let offset = 0; ; offset += CANDIDATE_PAGE_SIZE) {
-    const candidates = await readCandidatePage(tx, businessDate, offset)
+  let lastID
+  for (;;) {
+    const candidates = await readCandidatePage(tx, businessDate, lastID)
     if (!candidates.length) break
     result.candidates += candidates.length
-    const recipients = await readOverdueRecipients(tx, candidates)
 
-    for (const bug of candidates) {
+    for (const candidate of candidates) {
+      // Candidate rows are only a bounded snapshot. Lock and re-read the Bug before deriving any entry.
+      const bug = await readCurrentBug(tx, candidate.ID)
+      if (!bug) {
+        result.skipped += 1
+        continue
+      }
+      const anchors = await readScheduleAnchors(tx, bug)
       const urgent = isUrgent(bug)
       if (bug.status_code === STATUS.PENDING_ASSIGNMENT) {
         for (const recipientID of pmIDs) {
           await writeScheduledEvent(tx, bug, {
             eventType: 'PENDING_ASSIGNMENT',
             message: `${bug.bugNumber || 'Bug'} is waiting for assignment.`,
-            sourceKey: `PENDING_ASSIGNMENT:${bug.ID}:${recipientID}`,
+            sourceKey: boundedSourceKey(`PENDING_ASSIGNMENT:${bug.ID}:${recipientID}`),
             recipientID,
-            emailRequired: urgent
+            emailRequired: urgent,
+            requirePM: true
           }, emailConfig, result, 'pendingAssignment')
         }
 
         const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
-        if (isSlaDue(bug, instant, thresholdHours)) {
+        if (isSlaDue({ ...bug, pendingAssignmentAt: anchors.pendingAssignmentAt }, instant, thresholdHours)) {
           for (const recipientID of pmIDs) {
             await writeScheduledEvent(tx, bug, {
               eventType: 'PENDING_ASSIGNMENT',
               message: `${bug.bugNumber || 'Bug'} has been pending assignment for ${thresholdHours} hours.`,
-              sourceKey: `SLA:${bug.ID}:${thresholdHours}h:${recipientID}`,
+              sourceKey: boundedSourceKey(`SLA:${bug.ID}:${thresholdHours}h:${recipientID}`),
               recipientID,
-              emailRequired: urgent
+              emailRequired: urgent,
+              requirePM: true
             }, emailConfig, result, 'sla')
           }
         }
@@ -78,37 +88,70 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
 
       if (isOverdue(bug, businessDate)) {
         const dueDate = String(bug.dueDate).slice(0, 10)
+        const recipients = await readOverdueRecipients(tx, [bug])
         for (const recipientID of recipients.get(bug.ID) || []) {
           await writeScheduledEvent(tx, bug, {
             eventType: 'OVERDUE',
             message: `${bug.bugNumber || 'Bug'} is overdue.`,
-            sourceKey: `OVERDUE:${bug.ID}:${dueDate}:${recipientID}`,
+            sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchors.overdueCycleID}:${recipientID}`),
             recipientID,
-            emailRequired: false
+            emailRequired: false,
+            requirePM: false
           }, emailConfig, result, 'overdue')
         }
       }
     }
 
     if (candidates.length < CANDIDATE_PAGE_SIZE) break
+    const nextID = candidates.at(-1)?.ID
+    if (!nextID || nextID === lastID) break
+    lastID = nextID
   }
 
   return result
 }
 
-async function readCandidatePage (tx, businessDate, offset) {
+async function readCandidatePage (tx, businessDate, lastID) {
   // Chỉ đọc hai nhóm scheduler, mỗi page bounded; client không thể truyền filter/ID để mở rộng scope.
+  const query = SELECT.from(BUGS)
+    .columns(
+      'ID', 'bugNumber', 'status_code', 'priority_code', 'severity_code',
+      'createdAt', 'dueDate', 'nextProcessorUser_ID', 'assignee_ID'
+    )
+    .where`(status_code = ${STATUS.PENDING_ASSIGNMENT} or (dueDate < ${businessDate} and status_code != ${STATUS.CLOSED}))`
+    .orderBy('ID asc')
+    .limit(CANDIDATE_PAGE_SIZE)
+  if (lastID) query.and`ID > ${lastID}`
+  return tx.run(query)
+}
+
+function readCurrentBug (tx, bugID) {
   return tx.run(
-    SELECT.from(BUGS)
+    SELECT.one.from(BUGS)
       .columns(
         'ID', 'bugNumber', 'status_code', 'priority_code', 'severity_code',
-        'createdAt', 'modifiedAt', 'dueDate', 'nextProcessorUser_ID', 'assignee_ID'
+        'createdAt', 'dueDate', 'nextProcessorUser_ID', 'assignee_ID'
       )
-      .where({ status_code: { in: [STATUS.PENDING_ASSIGNMENT] } })
-      .or({ dueDate: { '<': businessDate }, status_code: { '!=': STATUS.CLOSED } })
-      .orderBy('ID asc')
-      .limit(CANDIDATE_PAGE_SIZE, offset)
+      .where({ ID: bugID })
+      .forUpdate()
   )
+}
+
+async function readScheduleAnchors (tx, bug) {
+  const logs = await tx.run(
+    SELECT.from(HISTORY_LOGS)
+      .columns('event_ID', 'fieldName', 'newValue', 'createdAt')
+      .where({ bug_ID: bug.ID, fieldName: { in: ['status', 'dueDate'] } })
+      .orderBy('createdAt desc', 'event_ID desc')
+  )
+  const pendingLog = logs.find(log => log.fieldName === 'status' && log.newValue === STATUS.PENDING_ASSIGNMENT)
+  const dueDate = bug.dueDate ? String(bug.dueDate).slice(0, 10) : null
+  const dueDateLog = dueDate && logs.find(log => log.fieldName === 'dueDate' && String(log.newValue).slice(0, 10) === dueDate)
+  return {
+    pendingAssignmentAt: pendingLog?.createdAt || bug.createdAt,
+    // History event IDs are immutable cycle identities; the created-at fallback covers legacy Bugs without due-date audit.
+    overdueCycleID: dueDateLog?.event_ID || `CREATED:${bug.ID}:${bug.createdAt || ''}`
+  }
 }
 
 async function readOverdueRecipients (tx, candidates) {
@@ -133,6 +176,14 @@ async function readOverdueRecipients (tx, candidates) {
 }
 
 async function writeScheduledEvent (tx, bug, entry, emailConfig, result, bucket) {
+  // The Bug is locked/re-read by the caller immediately before this write; re-check the recipient while still in that tx.
+  const recipient = await tx.run(
+    SELECT.one.from(USERS).columns('ID', 'active', 'role_code').where({ ID: entry.recipientID }).forUpdate()
+  )
+  if (!recipient?.active || (entry.requirePM && recipient.role_code !== 'PM')) {
+    result.skipped += 1
+    return {}
+  }
   const existing = await tx.run(SELECT.one.from(NOTIFICATIONS).columns('ID').where({ sourceKey: entry.sourceKey }))
   const written = await writeNotificationRecord(tx, {
     bugID: bug.ID,
@@ -152,7 +203,7 @@ async function writeScheduledEvent (tx, bug, entry, emailConfig, result, bucket)
 }
 
 function isSlaDue (bug, now, thresholdHours) {
-  const anchor = new Date(bug.modifiedAt || bug.createdAt)
+  const anchor = new Date(bug.pendingAssignmentAt || bug.createdAt)
   return !Number.isNaN(anchor.getTime()) && now.getTime() - anchor.getTime() >= thresholdHours * 60 * 60 * 1000
 }
 
@@ -162,6 +213,11 @@ function isOverdue (bug, businessDate) {
 
 function isUrgent (bug) {
   return bug.priority_code === 'CRITICAL' || URGENT_SEVERITIES.has(bug.severity_code)
+}
+
+function boundedSourceKey (sourceKey) {
+  if (sourceKey.length > 255) throw schedulerError(500, 'SCHEDULE_SOURCE_KEY_TOO_LONG', 'Scheduled notification source key is too long.')
+  return sourceKey
 }
 
 function normalizeNow (value) {

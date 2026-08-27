@@ -32,7 +32,11 @@ const IDS = Object.freeze({
   urgent: 'a3000000-0000-4000-8000-000000000001',
   standard: 'a3000000-0000-4000-8000-000000000002',
   overdue: 'a3000000-0000-4000-8000-000000000003',
-  closed: 'a3000000-0000-4000-8000-000000000004'
+  closed: 'a3000000-0000-4000-8000-000000000004',
+  staleClosed: 'a3000000-0000-4000-8000-000000000005',
+  edited: 'a3000000-0000-4000-8000-000000000006',
+  staleAssigned: 'a3000000-0000-4000-8000-000000000007',
+  staleDueDate: 'a3000000-0000-4000-8000-000000000008'
 })
 
 const BASE_NOW = new Date('2026-08-27T04:00:00.000Z')
@@ -87,8 +91,10 @@ async function main () {
     bug(IDS.urgent, 'BUG-SCHEDULED-URGENT', 'CRITICAL', 'MAJOR', '2026-08-27T00:00:00.000Z', null, null),
     bug(IDS.standard, 'BUG-SCHEDULED-STANDARD', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', null, null),
     bug(IDS.overdue, 'BUG-SCHEDULED-OVERDUE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
-    bug(IDS.closed, 'BUG-SCHEDULED-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-20T00:00:00.000Z', '2026-08-20', IDS.owner, IDS.assigneeProfile, 'CLOSED')
+    bug(IDS.closed, 'BUG-SCHEDULED-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-20T00:00:00.000Z', '2026-08-20', IDS.owner, IDS.assigneeProfile, 'CLOSED'),
+    bug(IDS.edited, 'BUG-SCHEDULED-EDITED', 'HIGH', 'MAJOR', '2026-08-27T04:00:00.000Z', null, null)
   ]))
+  await addStatusHistory(db, IDS.edited, 'a7000000-0000-4000-8000-000000000001')
 
   const boundedQueries = []
   const boundedTx = {
@@ -127,8 +133,18 @@ async function main () {
   assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: standardSla.ID }), 0,
     'standard SLA stays on inbox/digest policy')
 
-  const overdueOwner = await notificationBySource(db, `OVERDUE:${IDS.overdue}:2026-08-26:${IDS.owner}`)
-  const overdueAssignee = await notificationBySource(db, `OVERDUE:${IDS.overdue}:2026-08-26:${IDS.assigneeUser}`)
+  // Editing a still-pending Bug must not reset the SLA clock to mutable modifiedAt.
+  await db.run(UPDATE('idts.cap.Bugs').set({ title: 'Edited while still pending', modifiedAt: '2026-08-28T02:00:00.000Z' }).where({ ID: IDS.edited }))
+  await discoverScheduledNotifications({ tx: db, now: new Date('2026-08-28T04:00:00.000Z'), emailConfig: emailConfig() })
+  assert.ok(await notificationBySource(db, `SLA:${IDS.edited}:24h:${IDS.pm}`),
+    'standard SLA uses the immutable Pending Assignment entry anchor after an unrelated edit')
+
+  const overdueOwner = (await db.run(SELECT.from('idts.cap.Notifications').where({
+    bug_ID: IDS.overdue, eventType_code: 'OVERDUE', recipient_ID: IDS.owner
+  }))).at(0)
+  const overdueAssignee = (await db.run(SELECT.from('idts.cap.Notifications').where({
+    bug_ID: IDS.overdue, eventType_code: 'OVERDUE', recipient_ID: IDS.assigneeUser
+  }))).at(0)
   assert.ok(overdueOwner?.ID, 'overdue notifies the current action owner')
   assert.ok(overdueAssignee?.ID, 'a different technical assignee receives an inbox-only item')
   assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: overdueOwner.ID }), 0)
@@ -143,9 +159,64 @@ async function main () {
   assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: IDS.overdue, eventType_code: 'OVERDUE' }), beforeCycleCount,
     'repeating the same schedule is a no-op')
   await db.run(UPDATE('idts.cap.Bugs').set({ dueDate: '2026-08-25' }).where({ ID: IDS.overdue }))
+  await addDueDateHistory(db, IDS.overdue, '2026-08-26', '2026-08-25', 'a5000000-0000-4000-8000-000000000001')
   await discoverScheduledNotifications({ tx: db, now: BASE_NOW, emailConfig: emailConfig() })
-  assert.ok(await notificationBySource(db, `OVERDUE:${IDS.overdue}:2026-08-25:${IDS.owner}`),
+  assert.ok((await db.run(SELECT.from('idts.cap.Notifications').where({
+    bug_ID: IDS.overdue, eventType_code: 'OVERDUE', recipient_ID: IDS.owner
+  }))).length >= 2,
     'changing dueDate establishes a new overdue cycle')
+  await db.run(UPDATE('idts.cap.Bugs').set({ dueDate: '2026-08-26' }).where({ ID: IDS.overdue }))
+  await addDueDateHistory(db, IDS.overdue, '2026-08-25', '2026-08-26', 'a5000000-0000-4000-8000-000000000002')
+  const beforeReusedDate = await count(db, 'idts.cap.Notifications', { bug_ID: IDS.overdue, eventType_code: 'OVERDUE' })
+  await discoverScheduledNotifications({ tx: db, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: IDS.overdue, eventType_code: 'OVERDUE' }), beforeReusedDate + 2,
+    'reusing a prior due date still creates a new cycle for both overdue recipients')
+
+  await db.run(INSERT.into('idts.cap.Bugs').entries([
+    bug(IDS.staleClosed, 'BUG-SCHEDULED-STALE-CLOSED', 'CRITICAL', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
+    bug(IDS.staleAssigned, 'BUG-SCHEDULED-STALE-ASSIGNED', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', null, null),
+    bug(IDS.staleDueDate, 'BUG-SCHEDULED-STALE-DUE-DATE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile, 'ASSIGNED')
+  ]))
+
+  // A mutable candidate set must use keyset pagination, not OFFSET.
+  const keysetRows = Array.from({ length: 501 }, (_, index) => ({
+    ID: `keyset-${String(index + 1).padStart(4, '0')}`,
+    bugNumber: `KEYSET-${index + 1}`,
+    status_code: 'PENDING_ASSIGNMENT',
+    priority_code: 'LOW',
+    severity_code: 'MINOR',
+    createdAt: '2026-08-27T00:00:00.000Z',
+    modifiedAt: '2026-08-27T00:00:00.000Z',
+    dueDate: null,
+    nextProcessorUser_ID: null,
+    assignee_ID: null
+  }))
+  const keysetQueries = []
+  const keysetTx = {
+    run: async query => {
+      if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+        keysetQueries.push(query)
+        return keysetQueries.length === 1 ? keysetRows.slice(0, 500) : keysetRows.slice(500)
+      }
+      return []
+    }
+  }
+  await discoverScheduledNotifications({ tx: keysetTx, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(keysetQueries.length, 2, 'keyset discovery reads the second bounded page')
+  assert.equal(keysetQueries[1].SELECT.limit.offset, undefined, 'second candidate page does not use OFFSET')
+  assert.match(JSON.stringify(keysetQueries[1].SELECT.where), /ID.*>.*keyset-0500/,
+    'second candidate page starts strictly after the last ID')
+
+  // Re-read and lock the Bug immediately before writing; stale close/assignment/due-date changes must not emit.
+  await assertStaleCandidateSkipped(db, IDS.staleClosed,
+    { status_code: 'CLOSED', dueDate: '2026-08-20' },
+    'a Bug closed after candidate selection is revalidated before notification insert')
+  await assertStaleCandidateSkipped(db, IDS.staleAssigned,
+    { status_code: 'ASSIGNED', assignee_ID: IDS.assigneeProfile, nextProcessorUser_ID: IDS.assigneeUser },
+    'a Bug assigned after candidate selection is revalidated before notification insert')
+  await assertStaleCandidateSkipped(db, IDS.staleDueDate,
+    { dueDate: '2026-08-30' },
+    'a Bug rescheduled after candidate selection is revalidated before notification insert')
 
   const nonSchedulerRequest = new cds.Request({
     user: new cds.User({ id: 'ordinary-user', roles: ['authenticated-user'] }),
@@ -191,6 +262,77 @@ function bug (ID, bugNumber, priority_code, severity_code, modifiedAt, dueDate, 
     createdAt: modifiedAt,
     modifiedAt
   }
+}
+
+async function assertStaleCandidateSkipped (db, bugID, update, message) {
+  let candidateRead = false
+  const tx = {
+    run: async query => {
+      if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500 && !candidateRead) {
+        candidateRead = true
+        const rows = await db.run(query)
+        await db.run(UPDATE('idts.cap.Bugs').set(update).where({ ID: bugID }))
+        return rows.filter(row => row.ID === bugID)
+      }
+      return db.run(query)
+    }
+  }
+  await discoverScheduledNotifications({ tx, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID }), 0, message)
+}
+
+async function addDueDateHistory (db, bugID, oldValue, newValue, eventID) {
+  await db.run(INSERT.into('idts.cap.HistoryEvents').entries({
+    ID: eventID,
+    bug_ID: bugID,
+    actor_ID: IDS.pm,
+    actorRole_code: 'PM',
+    actionType_code: 'EDIT',
+    summary: 'Changed due date for scheduled QA.',
+    createdAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z',
+    modifiedAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z'
+  }))
+  await db.run(INSERT.into('idts.cap.HistoryLogs').entries({
+    ID: eventID.endsWith('001') ? 'a6000000-0000-4000-8000-000000000001' : 'a6000000-0000-4000-8000-000000000002',
+    bug_ID: bugID,
+    event_ID: eventID,
+    actor_ID: IDS.pm,
+    actorRole_code: 'PM',
+    actionType_code: 'EDIT',
+    fieldName: 'dueDate',
+    fieldLabel: 'Due Date',
+    oldValue,
+    newValue,
+    createdAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z',
+    modifiedAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z'
+  }))
+}
+
+async function addStatusHistory (db, bugID, eventID) {
+  await db.run(INSERT.into('idts.cap.HistoryEvents').entries({
+    ID: eventID,
+    bug_ID: bugID,
+    actor_ID: IDS.pm,
+    actorRole_code: 'PM',
+    actionType_code: 'CREATE',
+    summary: 'Entered Pending Assignment for scheduled QA.',
+    createdAt: '2026-08-27T04:00:00.000Z',
+    modifiedAt: '2026-08-27T04:00:00.000Z'
+  }))
+  await db.run(INSERT.into('idts.cap.HistoryLogs').entries({
+    ID: 'a8000000-0000-4000-8000-000000000001',
+    bug_ID: bugID,
+    event_ID: eventID,
+    actor_ID: IDS.pm,
+    actorRole_code: 'PM',
+    actionType_code: 'CREATE',
+    fieldName: 'status',
+    fieldLabel: 'Status',
+    oldValue: null,
+    newValue: 'PENDING_ASSIGNMENT',
+    createdAt: '2026-08-27T04:00:00.000Z',
+    modifiedAt: '2026-08-27T04:00:00.000Z'
+  }))
 }
 
 main().catch(error => {

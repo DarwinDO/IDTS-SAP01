@@ -17,6 +17,23 @@
 - **English — boundary:** No schema/lockfile/dependency/MTA/XSUAA/provider/runtime/user/role/data/deployment/junction/PR/push/N5 mutation. Task 11 digest and later rollout/acceptance remain pending.
 - **Tiếng Việt — boundary:** Không mutation schema/lockfile/dependency/MTA/XSUAA/provider/runtime/user/role/data/deploy/junction/PR/push/N5. Digest Task 11 và rollout/acceptance sau vẫn pending.
 
+## 2026-08-27 — N4 Task 10 fix round 1 RED
+
+- **English — product/review regression (under fix):** Fix-round QA now reproduces the Important SLA-anchor finding: after an unrelated edit changes mutable `modifiedAt` on a still-Pending Assignment Bug, `npm run qa:my-notifications:scheduled` fails because the required 24-hour source event is missing. Root cause is the prior implementation using `modifiedAt` as the age anchor; the fix must derive the immutable Pending Assignment entry from HistoryEvents/HistoryLogs (with a safe legacy fallback) without schema or client-controlled state.
+- **Tiếng Việt — regression product/review (đang xử lý):** QA fix round đã tái hiện finding Important về SLA anchor: sau khi edit không liên quan đổi `modifiedAt` mutable của Bug vẫn Pending Assignment, `npm run qa:my-notifications:scheduled` fail vì thiếu source event 24 giờ bắt buộc. Root cause là implementation trước dùng `modifiedAt` làm mốc tuổi; fix phải derive entry Pending Assignment bất biến từ HistoryEvents/HistoryLogs (có fallback legacy an toàn), không đổi schema hoặc state do client điều khiển.
+
+- **English — test-harness/implementation issue (under fix):** The first fix-round GREEN attempt used a grouped nested CQN `IN` expression for the single `PENDING_ASSIGNMENT` status, which CAP SQLite rejects as `Unsupported expr`. No data or product state changed; replace it with the portable equality expression and rerun the same focused suite.
+- **Tiếng Việt — lỗi test-harness/implementation (đang xử lý):** Lần GREEN đầu của fix round dùng CQN `IN` lồng nhóm cho một status `PENDING_ASSIGNMENT`, bị CAP SQLite từ chối với `Unsupported expr`. Không có data hoặc product state nào đổi; thay bằng biểu thức equality portable và chạy lại cùng focused suite.
+
+- **English — fix-round focused GREEN:** The rerun passes after replacing the unsupported CQN shape. The focused suite now proves immutable HistoryLogs status anchoring after a mutable edit, close/assignment/due-date stale-candidate revalidation, 500-row `ID > lastID` keyset continuation, and a new overdue source key when a due date is reused. No schema, dependency, lockfile, runtime or external state changed.
+- **Tiếng Việt — focused GREEN fix round:** Lần chạy lại PASS sau khi thay CQN shape không được hỗ trợ. Focused suite nay chứng minh anchor status HistoryLogs bất biến sau mutable edit, revalidate candidate stale khi close/assign/đổi due date, keyset `ID > lastID` bounded 500 row và source key Overdue mới khi reuse due date cũ. Không đổi schema, dependency, lockfile, runtime hoặc external state.
+
+- **English — read-only tooling issue (logged after fix-round verification):** A one-line CQN inspection through PowerShell failed before execution because the shell interpreted JavaScript template-literal backticks (`Expected ident`). No repository, runtime, provider, user/role, data or external state changed; the production CQN shape was already covered by the passing focused suite.
+- **Tiếng Việt — lỗi tooling read-only (đã log sau verify fix round):** Một lệnh inspect CQN one-line qua PowerShell fail trước khi chạy vì shell diễn giải backtick của JavaScript template literal (`Expected ident`). Không đổi repository, runtime, provider, user/role, data hoặc external state; CQN production đã được covered bởi focused suite PASS.
+
+- **English — read-only host process issue:** A post-amend Git identity check was rejected before process start with `CreateProcess ... directory name is invalid` from the unified PowerShell runner. No Git/source/runtime/external state changed; the check is being retried with a simpler command invocation.
+- **Tiếng Việt — lỗi host process read-only:** Lệnh Git kiểm identity sau amend bị runner PowerShell unified từ chối trước khi process start với `CreateProcess ... directory name is invalid`. Không đổi Git/source/runtime/external state; sẽ retry bằng invocation đơn giản hơn.
+
 - **English — tooling issue (resolved in session):** The first cleanup attempt for the self-created temporary `.tmp-task10-edmx.txt` was rejected by the PowerShell execution policy before the command ran. An explicit `cmd /c del` against that exact temporary path removed it successfully; no repository/runtime state changed and the file is not in the Task 10 diff.
 - **Tiếng Việt — lỗi tooling (đã xử lý trong phiên):** Lần cleanup đầu cho file tạm tự tạo `.tmp-task10-edmx.txt` bị execution policy của PowerShell từ chối trước khi chạy command. `cmd /c del` với đúng path file tạm đã xóa thành công; không có repository/runtime state nào đổi và file không nằm trong diff Task 10.
 
@@ -9710,3 +9727,16 @@ Vietnamese:
 - Vietnamese — Đã xử lý lỗi test harness: fixture history cũ dùng display name trong khi identity resolver đã không còn chấp nhận giá trị đó. Sau khi chỉ sửa actor test sang email seed, guard tiếp theo chặn đúng developer chưa có ACTIVE identity access. Fixture nay chỉ tạo liên kết ACTIVE khớp hash cho hai developer test trong SQLite memory. Chạy mới toàn bộ bảy scenario history PASS, exit 0 (27/08/2026). Không sửa guard production hoặc identity/dữ liệu thật.
 - English — Tooling ledger: the initial patch referenced rollback evidence absent from this fresh `origin/dev` base and was rejected before writing; retried against the actual N2 status tail. A Windows `rg` filename wildcard produced error 123; explicit paths/`-g` are used instead. Two minimal root/Bug UI dependency junctions reuse the existing locked primary trees after hash parity and absent-target checks; no install/upgrade/lockfile mutation. OfficeCLI 1.0.145 preflight passed; Markdown requires repo-native editing.
 - Vietnamese — Nhật ký tooling: patch đầu tham chiếu evidence rollback chưa có tại base mới nên bị từ chối trước khi ghi; đã dùng đúng phần cuối status N2. Wildcard filename của `rg` trên Windows báo error 123, thay bằng path cụ thể/`-g`. Chỉ tạo hai junction dependency root/Bug UI sau kiểm hash lockfile và target chưa tồn tại; không install/upgrade/đổi lockfile. OfficeCLI 1.0.145 PASS preflight; Markdown dùng chỉnh sửa native trong repo.
+### 2026-08-27 — N4 Task 10 review-package tooling limitation
+
+- Classification: tooling issue.
+- Symptom/location: invoking the Superpowers SDD `review-package` helper through `bash` failed before package creation because `/bin/bash` is unavailable in this Windows host (`WSL ... execvpe(/bin/bash) failed: No such file or directory`).
+- Root cause/status: the default `bash.exe` resolved to WSL, whose `/bin/bash` runtime is unavailable. No repository/source mutation resulted from the failed invocation.
+- Resolution/evidence: explicit Git Bash `C:\Program Files\Git\bin\bash.exe` is available (`GNU bash 5.2.37`) and will run the canonical SDD helper. Owner: DonHV coordinator; no product fix required.
+
+### 2026-08-27 — N4 Task 10 independent review NO-GO
+
+- Classification: product defects found in source review; exact reviewed commit `a40c696e36576df5f7c4f8e8eff75dc87cf54ff7`.
+- Result: Spec FAIL / quality Not Approved; 0 Critical, 4 Important, 1 Minor.
+- Important findings: mutable `modifiedAt` makes the SLA anchor unstable; candidate state can become stale before write; OFFSET paging can skip/duplicate rows during concurrent changes; a due date reused in a later cycle collides with the prior source key. The reviewer also noted a Minor redundant source lookup that can miscount a concurrent winner.
+- Status/owner: open; original Luna/max implementer owns RED-first fix round 1. Task 11, push, PR, Ready and deploy remain blocked until scoped re-review clears all Important findings.

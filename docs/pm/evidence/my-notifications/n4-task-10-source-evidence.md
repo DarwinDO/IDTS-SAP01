@@ -21,6 +21,12 @@
 - OfficeCLI preflight `officecli --version` returned `1.0.145`; Markdown was edited with repository-native tooling because OfficeCLI does not edit Markdown.
 - No database schema, lockfile, dependency, MTA/XSUAA, provider, runtime, user/role/data, deployment, junction, push, PR or N5 mutation was performed.
 
+### Fix round 1
+
+The exact-head review found four Important correctness gaps. Fix-round RED was witnessed by extending the focused suite with regressions for an edited Pending Assignment Bug, lock-time close/assignment/due-date revalidation, 501-row keyset continuation and due-date reversion. The first run failed at the edited-Bug assertion because mutable `modifiedAt` suppressed the required SLA event; a grouped CQN portability error encountered during the fix was also logged and corrected before GREEN.
+
+GREEN now derives Pending Assignment age from the latest immutable status `HistoryLogs.createdAt` (legacy fallback to Bug `createdAt`), locks/re-reads each candidate before deriving events, re-checks active recipients in the same transaction, uses `ID > lastID` keyset pages of 500, and adds the immutable due-date HistoryEvent identity to the Overdue source key. The existing transactional writer and email/outbox separation remain unchanged.
+
 ## Tiếng Việt
 
 - Owner/member: DonHV.
@@ -41,3 +47,9 @@
 - CAP compile chỉ còn warning vocabulary attachment `NonUpdateableProperties` đã có từ trước. CAP/UI5 MCP không callable, nên không claim MCP PASS; evidence dùng local CAP compile và SQLite QA.
 - Preflight OfficeCLI `officecli --version` trả `1.0.145`; Markdown được sửa bằng tooling native của repo vì OfficeCLI không edit Markdown.
 - Không thực hiện mutation schema database, lockfile, dependency, MTA/XSUAA, provider, runtime, user/role/data, deploy, junction, push, PR hoặc N5.
+
+### Fix round 1
+
+Review exact-head tìm thấy bốn Important gap về correctness. RED fix round được witness bằng cách mở rộng focused suite cho Bug Pending Assignment bị edit, revalidate close/assignment/due-date ngay lúc lock, tiếp nối keyset 501 row và due-date revert. Lần chạy đầu fail ở assertion Bug bị edit vì `modifiedAt` mutable đã suppress SLA event bắt buộc; một lỗi portability CQN group gặp trong lúc fix cũng đã được log và sửa trước GREEN.
+
+GREEN nay derive tuổi Pending Assignment từ `HistoryLogs.createdAt` bất biến của status (fallback `Bug.createdAt` cho legacy), lock/đọc lại từng candidate trước khi derive event, kiểm tra lại recipient active trong cùng transaction, dùng page keyset `ID > lastID` tối đa 500, và thêm identity `HistoryEvent` bất biến của due-date vào source key Overdue. Writer transactional hiện có và tách email/outbox vẫn giữ nguyên.
