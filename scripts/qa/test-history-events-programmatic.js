@@ -41,7 +41,7 @@ function user (id, roles) {
   return new cds.User({ id, roles })
 }
 
-async function callAction (srv, bugID, actionName, data = {}, requestUser = user('NhanT', ['TESTER', 'authenticated-user'])) {
+async function callAction (srv, bugID, actionName, data = {}, requestUser = user('nhant@example.local', ['TESTER', 'authenticated-user'])) {
   const req = new cds.Request({
     method: 'POST',
     event: actionName,
@@ -52,7 +52,7 @@ async function callAction (srv, bugID, actionName, data = {}, requestUser = user
   return srv.dispatch(req)
 }
 
-async function updateBug (srv, bugID, patch, requestUser = user('NhanT', ['TESTER', 'authenticated-user'])) {
+async function updateBug (srv, bugID, patch, requestUser = user('nhant@example.local', ['TESTER', 'authenticated-user'])) {
   const req = new cds.Request({
     method: 'PATCH',
     event: 'UPDATE',
@@ -109,6 +109,22 @@ async function main () {
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
+
+  // Assignment now requires linked active identity access; fixture-only setup, never relax the guard.
+  for (const [suffix, email, hashChar] of [['003', 'datdt@example.local', 'd'], ['002', 'sangvn@example.local', 'c']]) {
+    const userID = `10000000-0000-0000-0000-000000000${suffix}`
+    const identityHash = hashChar.repeat(64)
+    await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: identityHash }).where({ ID: userID }))
+    await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
+      ID: cds.utils.uuid(), targetEmailNormalized: email, requestedRole_code: 'DEVELOPER',
+      userAdminRequested: false, status_code: 'ACTIVE',
+      requestedBy_ID: '10000000-0000-0000-0000-000000000001',
+      expiresAt: '2099-01-01T00:00:00.000Z', tokenNonce: `history-${suffix}`,
+      tokenHash: identityHash, identityKeyHash: identityHash,
+      identityEmailNormalized: email, activeUser_ID: userID, provisioningVersion: 3,
+      correlationId: cds.utils.uuid()
+    }))
+  }
 
   const srv = await cds.serve('BugService').from(csn)
 
@@ -177,9 +193,9 @@ async function verifyAssignScenario (srv) {
 
 async function verifyResubmitScenario (srv) {
     await callAction(srv, BUG1, 'assignToDeveloper', { assigneeID: DEV_DAT, note: 'Prepare resubmit flow' })
-    await callAction(srv, BUG1, 'markInReview', {}, user('DatDT', ['DEVELOPER', 'authenticated-user']))
-    await callAction(srv, BUG1, 'startProgress', {}, user('DatDT', ['DEVELOPER', 'authenticated-user']))
-    await callAction(srv, BUG1, 'requestMoreInformation', { reason: 'Need more browser evidence for timeline check' }, user('DatDT', ['DEVELOPER', 'authenticated-user']))
+    await callAction(srv, BUG1, 'markInReview', {}, user('datdt@example.local', ['DEVELOPER', 'authenticated-user']))
+    await callAction(srv, BUG1, 'startProgress', {}, user('datdt@example.local', ['DEVELOPER', 'authenticated-user']))
+    await callAction(srv, BUG1, 'requestMoreInformation', { reason: 'Need more browser evidence for timeline check' }, user('datdt@example.local', ['DEVELOPER', 'authenticated-user']))
     await callAction(srv, BUG1, 'resubmitToDeveloper', { note: 'Tester updated the missing details and evidence.' })
     const resubmitEvent = await latestHistoryEvent(srv, BUG1, 'RESUBMIT_TO_DEVELOPER')
     rec(
@@ -195,7 +211,7 @@ async function verifyResubmitScenario (srv) {
 }
 
 async function verifyRejectScenario (srv) {
-    await callAction(srv, BUG3, 'rejectBug', { reason: 'Wrong classification for backend timeline contract test' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
+    await callAction(srv, BUG3, 'rejectBug', { reason: 'Wrong classification for backend timeline contract test' }, user('sangvn@example.local', ['DEVELOPER', 'authenticated-user']))
     const rejectEvent = await latestHistoryEvent(srv, BUG3, 'REJECT_BUG')
     rec('HE-06 reject summary is readable', rejectEvent?.summary?.includes('Rejected bug for follow-up.'), rejectEvent?.summary || 'missing summary')
     rec('HE-07 reject reason remains on event payload', rejectEvent?.reason === 'Wrong classification for backend timeline contract test', rejectEvent?.reason || 'missing reason')
@@ -207,7 +223,7 @@ async function verifyRejectScenario (srv) {
 }
 
 async function verifyCloseScenario (srv) {
-    await callAction(srv, BUG3, 'resolveBug', { note: 'Resolved before close event verification' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
+    await callAction(srv, BUG3, 'resolveBug', { note: 'Resolved before close event verification' }, user('sangvn@example.local', ['DEVELOPER', 'authenticated-user']))
     await callAction(srv, BUG3, 'closeBug', {})
     const closeEvent = await latestHistoryEvent(srv, BUG3, 'CLOSE_BUG')
     rec('HE-10 close summary is readable', closeEvent?.summary?.includes('Closed bug.'), closeEvent?.summary || 'missing summary')
@@ -219,7 +235,7 @@ async function verifyCloseScenario (srv) {
 }
 
 async function verifyPendingScenario (srv) {
-    await callAction(srv, BUG3, 'rejectBug', { reason: 'Prepare pending-assignment summary normalization test' }, user('SangVN', ['DEVELOPER', 'authenticated-user']))
+    await callAction(srv, BUG3, 'rejectBug', { reason: 'Prepare pending-assignment summary normalization test' }, user('sangvn@example.local', ['DEVELOPER', 'authenticated-user']))
     await callAction(srv, BUG3, 'moveToPendingAssignment', {})
     const movedPendingEvent = await latestHistoryEvent(srv, BUG3, 'MOVE_TO_PENDING_ASSIGNMENT')
     rec(
