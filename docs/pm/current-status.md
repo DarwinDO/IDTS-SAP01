@@ -2,11 +2,11 @@
 
 Last updated: 2026-08-27
 
-## 2026-08-27 My Notifications N2 source candidate
+## 2026-08-27 My Notifications N2 merged and live UI rollback
 
-- N1 PR #361 is merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`. N2 uses that exact base on `feature/wp7-notifications-inbox-ui-donhv`; Tasks 5–6 are locally green for the dedicated OData client, native SAPUI5 inbox, i18n, lifecycle cleanup, responsive/keyboard checks and focused lint/build.
-- Final independent source review is GO at `8b902ce3e4b44c15d04e6a99f1b22f79348a5bbc`, 0 Critical / 0 Major / 0 Important. Exactly one N2 PR [#362](https://github.com/DarwinDO/IDTS-SAP01/pull/362) is OPEN/Draft targeting `dev`. No migration/backfill execution, deployment, provider/email/data/user/role change, Ready/merge or N3. Detailed evidence: `docs/pm/evidence/my-notifications/n2-source-evidence.md`.
-- Tiếng Việt: N1 #361 đã merge; N2 Tasks 5–6 GREEN local, review source GO 0 Critical/Major/Important và đúng một Draft #362 đã mở vào `dev`. Không migration/backfill thật/deploy/email-data-role/Ready/merge/N3.
+- N1 PR #361 is merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`. N2 PR [#362](https://github.com/DarwinDO/IDTS-SAP01/pull/362) merged at `c722c355df5ff786d372002e20ab10864b4780ab`; exact source review remained 0 Critical / 0 Major / 0 Important and CI/focused regressions were green.
+- A content-only N2 rollout rendered the bell but live acceptance correctly found CAP notification metadata 404 because N1 backend/schema has not passed the separately sequenced N6 rollout. DonHV approved rollback operation `a4a2b351-a1fd-11f1-b41e-eeee0a9795f8`, restoring Bug UI `0.0.6` and preserving User Administration `1.0.17`. Final browser check shows no bell/metadata errors, Bug grid present; final check is `DEMO READY`. No CAP/DB/schema/migration/backfill/provider/email/user/role/data mutation ran.
+- Tiếng Việt: N1 #361 và N2 #362 đã merge. Rollout UI N2 phát hiện đúng dependency CAP N1/N6 chưa deploy nên DonHV duyệt rollback content exact. Live đã trở lại Bug UI `0.0.6`, giữ User Administration `1.0.17`, không còn chuông/lỗi metadata, Bug grid vẫn hoạt động và final `DEMO READY`. Chưa deploy CAP/DB/schema/migration/backfill hoặc đổi dữ liệu thật.
 
 ## 2026-08-27 My Notifications N1 merged baseline
 
@@ -39,7 +39,7 @@ Last updated: 2026-08-27
 | Active SangVN AI operational metrics | IDTS-97 adds allowlisted best-effort operation status/latency fields and a PM-only bounded aggregate without exposing prompts, responses, raw errors, emails, endpoints or secrets. DonHV approved the same emergency deadline exception for the missing metrics/privacy Knowledge Gate; the exception is not a learner PASS. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; IDTS-45 now documents a private logical-backup helper and recommends upgrading Render PostgreSQL before expiry if shared QA remains needed. Sprint 04 is tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
 | Knowledge readiness | `IDTS-82` is In Progress. From 2026-07-13, every member must pass the ownership Knowledge Gate before nontrivial work and before PR merge/Jira Done. Debug Labs, a progress register, and a PR-body validator are being added; source-comment retrofit is split into IDTS-83 to IDTS-85 and QA validation is IDTS-86. |
-| My Notifications delivery | Planning #360 and N1 #361 are merged. N2 UI source candidate is locally verified from exact N1 merge base `e35d09c0`; independent review and one Draft N2 PR remain. Job Scheduler remains recovery/SLA/Overdue/digest/retention, not normal prompt-email latency. No deployment or migration is implied. |
+| My Notifications delivery | Planning #360, N1 #361 and N2 #362 are merged. The premature content-only N2 live rollout was rolled back after CAP metadata 404 proved N6 was not yet executed; Bug UI `0.0.6` is live and `DEMO READY`. Next is N3 source, then N4/N5, then separately approved N6 migration/backfill/CAP/UI acceptance. |
 | Active audit refactor | `IDTS-89` is complete: Knowledge Gate 90% PASS; PR #163 merged normally and runtime-only deploy `dep-d9gtkhrrjlhs73d4mhqg` is live at merge SHA `97792e8`. Database preservation, 11/11 exact ActionTypes, 11/11 legacy ActionTypes, health, protected-route, error-log, and authenticated reversible exact-action smoke checks pass. Auto-deploy remains off and pre-deploy remains `true`. |
 | Developer demo pool | `IDTS-90` is complete: PR #165 merged, Shared QA was updated by a narrow transaction only, and authenticated OData now exposes 12 Developer profiles with varied availability/workload plus 30 responsibility rows. No runtime deploy or broad seed reload was used. |
 
