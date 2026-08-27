@@ -2,6 +2,8 @@
 
 ## English
 
+Draft handoff: exactly one PR was created — [#362](https://github.com/DarwinDO/IDTS-SAP01/pull/362), OPEN/Draft targeting `dev`, initially pushed at `d5035f873e9da9eb2619e5939b8ebad2182f8c4c`. Reviewed source remains `8b902ce3e4b44c15d04e6a99f1b22f79348a5bbc`; post-review/PR closure is documentation only. Final GitHub head/check readback is recorded in the handoff. Worktree and exact-lock-parity dependency junctions remain preserved.
+
 ### Scope and baseline
 
 - Owner: DonHV; branch `feature/wp7-notifications-inbox-ui-donhv`.
@@ -27,6 +29,8 @@ Luna received only shell/i18n/shell-QA/mirror scope. It produced the initial she
 - First exact-head review at `a3a61435d1affc73525baff1af6d30a989504ac3` returned NO-GO: 0 Critical / 1 Major / 3 Important / 3 Minor. Fix wave closed mark-all local-state races, category/event icon/label, immediate post-assignment badge refresh, shared error reset, native ResponsivePopover behavior and stale mirror wording. Re-review at `5acb98f21eec456a2232ac1e1aa07064118e6406` closed those findings but found one new Major: an invalid standalone `InvisibleMessageMode` module import. RED now checks the real module; exact-head `8b902ce3e4b44c15d04e6a99f1b22f79348a5bbc` imports supported `sap/ui/core/library`. Final same-reviewer scoped verdict is GO with 0 Critical / 0 Major / 0 Important. NVDA is not installed; no NVDA PASS is fabricated. Existing Knowledge Gate PASS is reused by DonHV confirmation; no new assessment/score/date. Push and one Draft N2 PR are authorized; Ready/merge/deploy/N3 are not.
 
 ## Tiếng Việt
+
+Bàn giao Draft: đã tạo đúng một PR [#362](https://github.com/DarwinDO/IDTS-SAP01/pull/362), OPEN/Draft vào `dev`, head push đầu `d5035f873e9da9eb2619e5939b8ebad2182f8c4c`. Source đã review giữ tại `8b902ce3e4b44c15d04e6a99f1b22f79348a5bbc`; closure sau review/PR chỉ đổi docs. Exact head/check cuối đọc từ GitHub trong handoff. Giữ worktree và junction dependency đúng lock parity.
 
 ### Scope và baseline
 

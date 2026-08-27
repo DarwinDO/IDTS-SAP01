@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1 MERGED — N2 SOURCE REVIEW GO; DRAFT PR HANDOFF NEXT`
+`N1 MERGED — N2 DRAFT PR #362 OPEN; STOP BEFORE MERGE/DEPLOY/N3`
 
 ### Authority
 
@@ -33,7 +33,7 @@ N1 PR #361 merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`; this is the exa
 
 ### Trạng thái
 
-`N1 ĐÃ MERGE — SOURCE N2 REVIEW GO; TIẾP THEO BÀN GIAO DRAFT PR`
+`N1 ĐÃ MERGE — DRAFT PR N2 #362 ĐÃ MỞ; DỪNG TRƯỚC MERGE/DEPLOY/N3`
 
 ### Thẩm quyền
 

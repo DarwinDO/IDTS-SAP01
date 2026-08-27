@@ -5,8 +5,8 @@ Last updated: 2026-08-27
 ## 2026-08-27 My Notifications N2 source candidate
 
 - N1 PR #361 is merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`. N2 uses that exact base on `feature/wp7-notifications-inbox-ui-donhv`; Tasks 5–6 are locally green for the dedicated OData client, native SAPUI5 inbox, i18n, lifecycle cleanup, responsive/keyboard checks and focused lint/build.
-- Final independent source review is GO at `8b902ce3e4b44c15d04e6a99f1b22f79348a5bbc`, with 0 Critical / 0 Major / 0 Important. One Draft N2 PR handoff remains. No migration/backfill execution, deployment, provider/email/data/user/role change, Ready/merge or N3. Detailed evidence: `docs/pm/evidence/my-notifications/n2-source-evidence.md`.
-- Tiếng Việt: N1 #361 đã merge; N2 Tasks 5–6 GREEN local và review source cuối GO tại SHA trên, 0 Critical/Major/Important. Còn bàn giao một Draft N2 PR; không migration/backfill thật/deploy/email-data-role/N3.
+- Final independent source review is GO at `8b902ce3e4b44c15d04e6a99f1b22f79348a5bbc`, 0 Critical / 0 Major / 0 Important. Exactly one N2 PR [#362](https://github.com/DarwinDO/IDTS-SAP01/pull/362) is OPEN/Draft targeting `dev`. No migration/backfill execution, deployment, provider/email/data/user/role change, Ready/merge or N3. Detailed evidence: `docs/pm/evidence/my-notifications/n2-source-evidence.md`.
+- Tiếng Việt: N1 #361 đã merge; N2 Tasks 5–6 GREEN local, review source GO 0 Critical/Major/Important và đúng một Draft #362 đã mở vào `dev`. Không migration/backfill thật/deploy/email-data-role/Ready/merge/N3.
 
 ## 2026-08-27 My Notifications N1 merged baseline
 
