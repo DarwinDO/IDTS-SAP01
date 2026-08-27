@@ -20,7 +20,7 @@ const TMP_DIR = path.join(process.cwd(), '.tmp')
 const DB_FILE = path.join(TMP_DIR, 'qa-comments-attachments.sqlite')
 
 function makeUser () {
-  return new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
+  return new cds.User({ id: 'nhant@example.local', roles: ['TESTER', 'authenticated-user'] })
 }
 
 async function dispatchCreate (srv, entity, data) {
