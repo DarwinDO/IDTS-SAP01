@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml`
 
+## Selected mention picker (N3 Task 8)
+
+**English:** The comment composer has a visibly labelled native `MultiComboBox` for server-authorized internal recipients. It deliberately does not use `loadItems` because SAPUI5 documents that `MultiComboBox` does not support that inherited event. Typing `@name` in the TextArea remains ordinary comment text.
+
+**Tiếng Việt:** Comment composer có `MultiComboBox` native với label rõ ràng cho recipient nội bộ đã được server authorize. Control cố ý không dùng `loadItems` vì SAPUI5 nêu rõ `MultiComboBox` không hỗ trợ inherited event này. Gõ `@name` trong TextArea vẫn chỉ là text comment thông thường.
+
 ## IDTS-122 update
 
 The comment composer and Post action are disabled/hidden for a Closed Bug; the historical comment list remains visible.

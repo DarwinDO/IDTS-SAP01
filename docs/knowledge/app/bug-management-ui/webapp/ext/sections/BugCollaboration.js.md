@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/sections/BugCollaboration.js`
 
+## Selected mention flow (N3 Task 8)
+
+**English:** On a saved Bug context, the native multi-select calls the bound candidate operation with `$$ownRequest` and UI5 1.148 `invoke`, not deprecated `execute`. The controller clears candidates and selections when the Bug context changes, ignores stale responses by comparing the captured path, and sends only selected UUIDs as `mentionedUserIDs`. It clears text and selections only after `addComment` succeeds.
+
+**Tiếng Việt:** Trên Bug đã lưu, multi-select native gọi candidate operation bound với `$$ownRequest` và `invoke` của UI5 1.148, không dùng `execute` đã deprecated. Controller xóa candidate/selection khi Bug context đổi, bỏ response stale bằng so sánh path đã capture và chỉ gửi UUID được chọn qua `mentionedUserIDs`. Text/selection chỉ được clear sau khi `addComment` thành công.
+
 ## IDTS-122 collaboration behavior
 
 Comments and attachment mutation controls are disabled/hidden for Closed Bugs while existing content remains readable. The extension must refresh state after Reopen; backend parent-Bug guards remain authoritative for direct OData calls.

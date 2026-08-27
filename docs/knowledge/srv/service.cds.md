@@ -1,5 +1,11 @@
 # Knowledge: `srv/service.cds`
 
+## Selected internal comment mentions (N3 Task 8)
+
+**English:** `Bugs.getMentionCandidates()` is a Bug-bound, read-only picker contract that returns only internal user ID, display name, and role. `addComment` keeps legacy callers compatible because `mentionedUserIDs` is optional; selected IDs are revalidated by CAP before the comment is inserted. Follow the contract to `srv/service.js` and `srv/bug-service/actions.js`; do not derive recipients from comment text.
+
+**Tiếng Việt:** `Bugs.getMentionCandidates()` là contract picker read-only theo Bug, chỉ trả ID user nội bộ, display name và role. `addComment` vẫn tương thích caller cũ vì `mentionedUserIDs` là optional; CAP kiểm tra lại ID đã chọn trước khi INSERT comment. Trace sang `srv/service.js` và `srv/bug-service/actions.js`; không suy recipient từ text comment.
+
 ## N1 notification source-key privacy
 
 **English:** The `BugService.Notifications` projection excludes the new `sourceKey`. This keeps private producer idempotency data out of the existing public API as well as the personal inbox DTO. Without this exclusion, the wildcard would silently publish the new database field. Check together: `db/schema.cds`, `srv/notification.cds`, compiled EDMX and `test-my-notifications-model.js`. Ordinary `BugService.Bugs` read policy is unchanged. Owner DonHV; backup NhanT.

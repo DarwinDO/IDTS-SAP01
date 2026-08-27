@@ -26,12 +26,21 @@ const uiManifest = JSON.parse(manifest)
 
 assert(controller.includes('BugService.addComment(...)'), 'Comment must use the bound OData V4 action path')
 assert(controller.includes('.setParameter("content", content)'), 'Comment must set the bound action parameter')
+assert(controller.includes('.setParameter("mentionedUserIDs", mentionedUserIDs)'), 'Comment must send selected UUIDs separately from text')
+assert(controller.includes('BugService.getMentionCandidates(...)'), 'Mention picker must load candidates through the Bug-bound server operation')
+assert(commentsFragment.includes('modelContextChange'), 'Mention candidates must refresh for the current Bug context')
+assert(controller.includes('operation.invoke("$direct")'), 'UI5 1.148 bound mention function must use invoke, not deprecated execute')
+assert(!controller.includes('operation.execute("$direct")'), 'Mention function must not use deprecated execute')
+assert(!controller.includes('loadItems'), 'MultiComboBox must not use unsupported loadItems')
 assert(/\.invoke\(|\.execute\(/.test(controller), 'Comment must invoke the action through OData V4 model APIs')
-assert(!controller.includes('invoke("$direct")'), 'Comment action must use the model update group so UI5 can manage CSRF through the OData batch lifecycle')
+assert(controller.includes('operation.invoke("$auto")'), 'Comment action must use the model update group so UI5 can manage CSRF through the OData batch lifecycle')
 assert(controller.includes('idtsCommentsFeed'), 'Comment success must refresh the comments feed, not the complete Object Page context')
 assert(controller.includes('getBinding("items")'), 'Comment refresh must use the public list binding API')
 assert(controller.includes('requestRefresh("$direct")'), 'Comment refresh must use the Promise-returning OData V4 requestRefresh API')
 assert(commentsFragment.includes('$$ownRequest: true'), 'The relative comments list binding must own its request before requestRefresh() is supported')
+assert(commentsFragment.includes('idtsMentionRecipients'), 'Comments must expose a visible mention recipient picker')
+assert(commentsFragment.includes('MultiComboBox'), 'Mention picker must use a native multi-selection control')
+assert(commentsFragment.includes('commentsMentionRecipientsLabel'), 'Mention picker needs a visible localized label')
 assert(!controller.includes('new XMLHttpRequest()'), 'Collaboration writes must not use raw XMLHttpRequest')
 assert(!controller.includes('pendingCreateAttachmentsByBugId'), 'Custom browser-memory attachment queue must be retired')
 assert(!controller.includes('BugService.draftEdit'), 'Attachment handling must not manually orchestrate draftEdit')
@@ -105,6 +114,12 @@ async function verifyCommentOperation (options = {}) {
     setValueState: state => { calls.valueState = state },
     getMetadata: () => ({ getAllAggregations: () => ({}) })
   }
+  const mentionPicker = {
+    getId: () => 'view--idtsMentionRecipients',
+    getSelectedKeys: () => ['00000000-0000-4000-8000-000000000002'],
+    setSelectedKeys: value => { calls.clearedMentionKeys = value },
+    getMetadata: () => ({ getAllAggregations: () => ({}) })
+  }
   const commentsFeed = {
     getId: () => 'view--idtsCommentsFeed',
     getBinding: name => name === 'items' ? {
@@ -119,7 +134,7 @@ async function verifyCommentOperation (options = {}) {
   const root = {
     getId: () => 'view--root',
     getMetadata: () => ({ getAllAggregations: () => ({ content: {} }) }),
-    getAggregation: name => name === 'content' ? [textArea, commentsFeed] : null,
+    getAggregation: name => name === 'content' ? [textArea, mentionPicker, commentsFeed] : null,
     getParent: () => null
   }
   const source = {
@@ -139,8 +154,9 @@ async function verifyCommentOperation (options = {}) {
         define: (dependencies, factory) => {
           module = factory(
             { error: message => { calls.error = message } },
-            { show: message => { calls.toast = message } }
-          )
+            { show: message => { calls.toast = message } },
+            { constructor: function () {} }
+          );
         }
       }
     }
@@ -151,7 +167,7 @@ async function verifyCommentOperation (options = {}) {
   await new Promise(resolve => setTimeout(resolve, 0))
 
   assert.strictEqual(calls.path, bugContext.getPath() + '/BugService.addComment(...)')
-  assert.deepStrictEqual(calls.parameters, { content: 'verified comment' })
+  assert.deepStrictEqual(calls.parameters, { content: 'verified comment', mentionedUserIDs: ['00000000-0000-4000-8000-000000000002'] })
   assert.strictEqual(calls.invoked, '$auto')
   assert.strictEqual(calls.rootRefreshed, false)
   assert.strictEqual(calls.enabled, true)
@@ -166,6 +182,7 @@ async function verifyCommentOperation (options = {}) {
 
   assert.strictEqual(calls.listRefreshed, '$direct')
   assert.strictEqual(calls.clearedValue, '')
+  assert.deepStrictEqual(Array.from(calls.clearedMentionKeys), [])
   assert.strictEqual(calls.error, undefined)
   assert.strictEqual(
     calls.toast,

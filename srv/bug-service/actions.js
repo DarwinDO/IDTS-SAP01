@@ -5,6 +5,7 @@ const { INSERT, SELECT, UPDATE } = cds.ql
 
 const {
   ACTION,
+  COMMENT_ROLES,
   COORDINATOR_ROLES,
   EVENT,
   STATUS
@@ -26,6 +27,7 @@ const {
 } = require('./history')
 
 const { writeNotificationAndSchedule } = require('../email/worker')
+const { readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const { determineNextProcessor, validateAssignee, validateTransition } = require('./bug-write')
 const { assertBugOpenForMutation, enforceActionPermission } = require('./permissions')
@@ -144,7 +146,7 @@ async function addComment (req, entities) {
   assertBugOpenForMutation(req, bug)
 
   const actor = await resolveRequestUser(req, entities)
-  if (!actor || !new Set(['TESTER', 'DEVELOPER', 'PM']).has(actor.role_code)) {
+  if (!actor || !COMMENT_ROLES.has(actor.role_code)) {
     return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
   }
 
@@ -154,6 +156,7 @@ async function addComment (req, entities) {
   }
 
   const tx = cds.tx(req)
+  const recipients = await validateMentionRecipients({ tx, req, actor, mentionedUserIDs: req.data.mentionedUserIDs, entities })
   const commentID = cds.utils.uuid()
   await tx.run(
     INSERT.into(entities.Comments).entries({
@@ -180,7 +183,59 @@ async function addComment (req, entities) {
     ]
   })
 
+  for (const recipient of recipients) {
+    await writeNotificationAndSchedule(req, {
+      bugID: bug.ID,
+      recipientID: recipient.ID,
+      eventType: EVENT.COMMENT_MENTIONED,
+      message: `You were mentioned in a Bug comment: ${content.slice(0, 200)}`,
+      sourceKey: `MENTION:${commentID}:${recipient.ID}`,
+      emailRequired: true
+    })
+  }
+
   return tx.run(SELECT.one.from(entities.Bugs).where({ ID: bug.ID }))
+}
+
+async function validateMentionRecipients ({ tx, req, actor, mentionedUserIDs, entities }) {
+  // ID do UI chọn vẫn phải revalidate trước INSERT; text @name không có quyền tự tạo recipient.
+  const ids = [...new Set((Array.isArray(mentionedUserIDs) ? mentionedUserIDs : []).map(id => typeof id === 'string' ? id.trim() : ''))]
+  if (ids.some(id => !/^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(id))) {
+    return req.reject(400, 'Mention recipients must be valid internal user IDs.', 'mentionedUserIDs')
+  }
+  if (ids.length > 20) return req.reject(400, 'At most 20 mention recipients can be selected.', 'mentionedUserIDs')
+  const recipientIDs = ids.filter(id => id !== actor.ID)
+  if (!recipientIDs.length) return []
+
+  const users = await tx.run(SELECT.from(entities.Users).columns('ID', 'displayName', 'role_code', 'active').where({ ID: { in: recipientIDs } }))
+  const recipients = recipientIDs.map(id => users.find(user => user.ID === id))
+  const readiness = await readActiveIdentityAccessByUser(tx, recipientIDs)
+  if (recipients.some(user => !user || user.active !== true || !COMMENT_ROLES.has(user.role_code) || !readiness.get(user.ID)?.ready)) {
+    return req.reject(400, 'Mention recipients must be active, authorized internal users.', 'mentionedUserIDs')
+  }
+  return recipients
+}
+
+async function getMentionCandidates (req, entities) {
+  // Chỉ trả DTO an toàn cho picker của Bug hiện tại; không lộ email, identity hash hoặc provider data.
+  const bug = await readBug(req, entities, bugIDFrom(req))
+  if (!bug) return req.reject(404, 'Bug not found.')
+  assertBugOpenForMutation(req, bug)
+  const actor = await resolveRequestUser(req, entities)
+  if (!actor || !COMMENT_ROLES.has(actor.role_code)) {
+    return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
+  }
+
+  const tx = cds.tx(req)
+  // Không phân trang picker: trả trọn tập eligible để UI không âm thầm bỏ selection ở page sau.
+  const users = await tx.run(SELECT.from(entities.Users)
+    .columns('ID', 'displayName', 'role_code', 'active')
+    .where({ active: true, role_code: { in: [...COMMENT_ROLES] } })
+    .orderBy('displayName', 'ID'))
+  const readiness = await readActiveIdentityAccessByUser(tx, users.map(user => user.ID))
+  return users
+    .filter(user => user.ID !== actor.ID && readiness.get(user.ID)?.ready)
+    .map(user => ({ ID: user.ID, displayName: user.displayName, roleCode: user.role_code }))
 }
 
 // Một transition hợp lệ phải kiểm tra actor + trạng thái nguồn/đích + reason trước khi ghi audit/notification.
@@ -354,5 +409,7 @@ module.exports = {
   reassignRetestOwner,
   resubmitToDeveloper,
   addComment,
+  getMentionCandidates,
+  validateMentionRecipients,
   transitionBug
 }

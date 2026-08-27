@@ -1,5 +1,11 @@
 # Knowledge: `srv/notification/_i18n/notifications.properties`
 
+## Comment-mentioned inbox copy (N3 Task 8)
+
+**English:** `BUG_COMMENT_MENTIONED_*` supplies the safe localized inbox title and summary. It must not contain the selected recipient list, raw comment body, provider status, or delivery detail.
+
+**Tiếng Việt:** `BUG_COMMENT_MENTIONED_*` cung cấp title/summary inbox đã localize và an toàn. Không đưa danh sách recipient đã chọn, raw comment body, provider status hoặc delivery detail vào copy này.
+
 ## English
 
 This English fallback CAP bundle provides bounded display titles and summaries for the additive Bug event vocabulary: assignment/reassignment/removal, owner change, lifecycle progress and completion, pending assignment, overdue, and later mention/escalation codes, plus access role-change/reactivation. It contains no recipient, audit reason, provider data, or external URL. `srv/notification/inbox.js` selects keys only after validating source eligibility and passes the caller locale to CAP's native fallback. The unavailable key prevents unsupported records from making a false success claim.

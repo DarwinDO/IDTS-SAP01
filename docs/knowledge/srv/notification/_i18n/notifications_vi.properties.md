@@ -1,5 +1,11 @@
 # Knowledge: `srv/notification/_i18n/notifications_vi.properties`
 
+## Comment-mentioned inbox copy (N3 Task 8)
+
+**English:** The Vietnamese `BUG_COMMENT_MENTIONED_*` entries mirror the same safe inbox semantics as the default bundle and remain independent of raw comment content.
+
+**Tiếng Việt:** Các entry `BUG_COMMENT_MENTIONED_*` tiếng Việt giữ cùng semantics inbox an toàn với bundle mặc định và độc lập với raw comment content.
+
 ## English
 
 This Vietnamese CAP bundle provides bounded display titles and summaries for the additive Bug event vocabulary: assignment/reassignment/removal, owner change, lifecycle progress and completion, pending assignment, overdue, and later mention/escalation codes, plus access role-change/reactivation. It contains no recipient, audit reason, provider data, or external URL. `srv/notification/inbox.js` selects keys only after validating source eligibility and passes the caller locale to CAP's native fallback. The unavailable key prevents unsupported records from making a false success claim.

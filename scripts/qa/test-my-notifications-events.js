@@ -12,10 +12,11 @@ const { SELECT } = cds.ql
 
 const { normalizeEmailConfig } = require('../../srv/email/config')
 const { writeNotificationRecord } = require('../../srv/email/outbox')
+const { buildEmailMessage } = require('../../srv/email/template')
 const { buildLifecycleNotification } = require('../../srv/bug-service/history')
 const { hydrateNotificationPage } = require('../../srv/notification/inbox')
 const { recordBugChangeSideEffects } = require('../../srv/bug-service/history')
-const { resubmitToDeveloper, reassignRetestOwner } = require('../../srv/bug-service/actions')
+const { addComment, getMentionCandidates, resubmitToDeveloper, reassignRetestOwner } = require('../../srv/bug-service/actions')
 
 function emailConfig () {
   return normalizeEmailConfig({
@@ -25,13 +26,40 @@ function emailConfig () {
     username: 'test-user',
     password: 'test-password',
     fromAddress: 'no-reply@example.test',
-    fromName: 'IDTS Test'
+    fromName: 'IDTS Test',
+    baseUrl: 'https://idts.example.test'
   })
 }
 
 async function count (db, entity, where) {
   const row = await db.run(SELECT.one.from(entity).columns('count(*) as count').where(where))
   return Number(row?.count || 0)
+}
+
+function commentRequest (actor, bugID, content, mentionedUserIDs = []) {
+  return new cds.Request({
+    user: new cds.User({ id: actor.email, roles: [actor.role_code, 'authenticated-user'] }),
+    params: [{ ID: bugID }],
+    data: { content, mentionedUserIDs }
+  })
+}
+
+async function makeIdentityReady (db, user, requestedByID) {
+  const hash = `mention-ready-${user.ID}`
+  await db.run(cds.ql.UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: hash }).where({ ID: user.ID }))
+  await db.run(cds.ql.INSERT.into('idts.cap.UserOnboardingRequests').entries({
+    ID: cds.utils.uuid(),
+    targetEmailNormalized: user.email,
+    requestedRole_code: user.role_code,
+    status_code: 'ACTIVE',
+    requestedBy_ID: requestedByID,
+    expiresAt: '2030-01-01T00:00:00.000Z',
+    tokenNonce: `mention-${user.ID}`,
+    tokenHash: `mention-token-${user.ID}`,
+    identityKeyHash: hash,
+    activeUser_ID: user.ID,
+    correlationId: cds.utils.uuid()
+  }))
 }
 
 async function main () {
@@ -53,6 +81,92 @@ async function main () {
   const routeOwner = await db.run(SELECT.one.from(entities.Users).where({ active: true, ID: { '!=': routeActor.ID } }))
   const routeAssignee = await db.run(SELECT.one.from(entities.DeveloperProfiles).columns('ID'))
   assert.ok(routeOwner?.ID, 'fixture has a distinct current owner')
+
+  // RED contract: selected UUIDs (not @text) drive a single transactional mention event.
+  const mentionRecipient = await db.run(SELECT.one.from(entities.Users).where({
+    active: true,
+    ID: { '!=': routeActor.ID },
+    role_code: { in: ['TESTER', 'DEVELOPER', 'PM'] }
+  }))
+  await makeIdentityReady(db, mentionRecipient, routeActor.ID)
+  const mentionEntities = { ...entities, Comments: 'idts.cap.Comments' }
+  const candidateReq = commentRequest(routeActor, bug.ID, '')
+  const candidates = await db.tx(candidateReq, () => getMentionCandidates(candidateReq, mentionEntities))
+  const candidate = candidates.find(row => row.ID === mentionRecipient.ID)
+  assert.deepEqual(Object.keys(candidate).sort(), ['ID', 'displayName', 'roleCode'], 'picker returns only safe candidate fields')
+  assert.ok(!candidates.some(row => row.ID === routeActor.ID), 'picker excludes the comment author')
+  const mentionContent = '<script>alert(1)</script>' + 'x'.repeat(240)
+  const mentionReq = commentRequest(routeActor, bug.ID, mentionContent, [mentionRecipient.ID, mentionRecipient.ID, routeActor.ID])
+  await db.tx(mentionReq, () => addComment(mentionReq, mentionEntities))
+  const mentionComment = await db.run(SELECT.one.from('idts.cap.Comments').where({ bug_ID: bug.ID, content: mentionContent }))
+  assert.ok(mentionComment?.ID, 'selected mention persists its source comment')
+  const mentionSource = `MENTION:${mentionComment.ID}:${mentionRecipient.ID}`
+  const mentionNotification = await db.run(SELECT.one.from('idts.cap.Notifications').where({ sourceKey: mentionSource }))
+  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: mentionSource }), 1, 'duplicate IDs produce one recipient event')
+  assert.equal(mentionNotification?.eventType_code, 'COMMENT_MENTIONED')
+  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: mentionNotification.ID }), 1)
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: mentionNotification.ID }), 1, 'comment mention creates the durable email outbox row')
+  const expectedMentionMessage = `You were mentioned in a Bug comment: ${mentionContent.slice(0, 200)}`
+  assert.equal(mentionNotification.message, expectedMentionMessage, 'notification stores exactly the capped 200-character comment excerpt')
+  const mentionDelivery = await db.run(SELECT.one.from('idts.cap.NotificationDeliveries').where({ notification_ID: mentionNotification.ID }))
+  assert.ok(mentionDelivery.textBody.includes(expectedMentionMessage), 'email text includes exactly the capped comment excerpt')
+  assert.ok(mentionDelivery.htmlBody.includes('&lt;script&gt;alert(1)&lt;/script&gt;'), 'email HTML escapes the comment excerpt')
+  assert.ok(!mentionDelivery.htmlBody.includes('<script>alert(1)</script>'), 'email HTML never embeds raw comment markup')
+  const linkedMentionEmail = buildEmailMessage({
+    notificationID: mentionNotification.ID,
+    recipientEmail: mentionRecipient.email,
+    eventType: 'COMMENT_MENTIONED',
+    eventTypeName: 'Comment Mentioned',
+    message: expectedMentionMessage,
+    bug: { ID: bug.ID, bugNumber: 'BUG-TEST', title: 'Mention test', statusName: 'New' },
+    config: emailConfig()
+  })
+  assert.match(linkedMentionEmail.html, /href="https:\/\/idts\.example\.test\/idtsbugmanagementui\/index\.html#\/Bugs\(ID=/, 'email uses the existing allowlisted Bug link when configured')
+
+  const authorOnlyReq = commentRequest(routeActor, bug.ID, 'Author-only selected mention.', [routeActor.ID])
+  await db.tx(authorOnlyReq, () => addComment(authorOnlyReq, mentionEntities))
+  assert.equal(await count(db, 'idts.cap.Notifications', { eventType_code: 'COMMENT_MENTIONED' }), 1, 'author is excluded from mention recipients')
+
+  const typedOnlyReq = commentRequest(routeActor, bug.ID, '@typed-name only.', [])
+  await db.tx(typedOnlyReq, () => addComment(typedOnlyReq, mentionEntities))
+  assert.equal(await count(db, 'idts.cap.Notifications', { eventType_code: 'COMMENT_MENTIONED' }), 1, 'typed @name alone creates zero mentions')
+
+  const invalidMentionReq = commentRequest(routeActor, bug.ID, 'Invalid mention must roll back.', ['00000000-0000-4000-8000-000000000099'])
+  await assert.rejects(
+    db.tx(invalidMentionReq, () => addComment(invalidMentionReq, mentionEntities)),
+    /mention/i
+  )
+  assert.equal(await count(db, 'idts.cap.Comments', { bug_ID: bug.ID, content: 'Invalid mention must roll back.' }), 0, 'invalid recipient rejects before comment INSERT')
+  assert.equal(await count(db, 'idts.cap.Notifications', { eventType_code: 'COMMENT_MENTIONED' }), 1, 'rollback leaves no notification')
+
+  const tooManyIDs = Array.from({ length: 21 }, (_, index) => `20000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`)
+  const tooManyReq = commentRequest(routeActor, bug.ID, 'Too many mentions must roll back.', tooManyIDs)
+  await assert.rejects(db.tx(tooManyReq, () => addComment(tooManyReq, mentionEntities)), /20 mention/i)
+  assert.equal(await count(db, 'idts.cap.Comments', { bug_ID: bug.ID, content: 'Too many mentions must roll back.' }), 0, 'more than 20 recipients rejects before comment INSERT')
+
+  const inactiveID = '20000000-0000-4000-8000-000000000101'
+  const unreadyID = '20000000-0000-4000-8000-000000000102'
+  const unsupportedID = '20000000-0000-4000-8000-000000000103'
+  await db.run(cds.ql.INSERT.into(entities.Users).entries([
+    { ID: inactiveID, displayName: 'Inactive mention recipient', email: 'inactive-mention@example.test', role_code: 'TESTER', active: false },
+    { ID: unreadyID, displayName: 'Unready mention recipient', email: 'unready-mention@example.test', role_code: 'DEVELOPER', active: true },
+    { ID: unsupportedID, displayName: 'Unsupported mention recipient', email: 'unsupported-mention@example.test', role_code: 'ADMIN', active: true }
+  ]))
+  await makeIdentityReady(db, { ID: unsupportedID, email: 'unsupported-mention@example.test', role_code: 'ADMIN' }, routeActor.ID)
+  for (const [recipientID, label] of [[inactiveID, 'inactive'], [unreadyID, 'identity-unready'], [unsupportedID, 'unsupported-role']]) {
+    const rejectedContent = `${label} mention must roll back.`
+    const rejectedReq = commentRequest(routeActor, bug.ID, rejectedContent, [recipientID])
+    await assert.rejects(db.tx(rejectedReq, () => addComment(rejectedReq, mentionEntities)), /active, authorized/i)
+    assert.equal(await count(db, 'idts.cap.Comments', { bug_ID: bug.ID, content: rejectedContent }), 0, `${label} recipient rejects before comment INSERT`)
+  }
+
+  const legacyContent = 'Legacy caller omits mention IDs.'
+  const legacyReq = new cds.Request({
+    user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }),
+    params: [{ ID: bug.ID }], data: { content: legacyContent }
+  })
+  await db.tx(legacyReq, () => addComment(legacyReq, mentionEntities))
+  assert.equal(await count(db, 'idts.cap.Comments', { bug_ID: bug.ID, content: legacyContent }), 1, 'legacy caller without mentionedUserIDs remains compatible')
 
   // Production route: history side effects receive a CAP request and persist all lifecycle records.
   const routeReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })

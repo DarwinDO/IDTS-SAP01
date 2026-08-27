@@ -1,5 +1,11 @@
 # Knowledge: `srv/notification/inbox.js`
 
+## Comment-mentioned inbox summary (N3 Task 8)
+
+**English:** `COMMENT_MENTIONED` is explicitly whitelisted as a Bug inbox event and action-required summary. Hydration still verifies recipient ownership and returns localized title/summary rather than comment text or delivery/provider details.
+
+**Tiếng Việt:** `COMMENT_MENTIONED` được whitelist rõ ràng là Bug inbox event cần hành động. Hydration vẫn kiểm recipient ownership và trả title/summary đã localize, không trả text comment hoặc chi tiết delivery/provider.
+
 ## English
 
 This module is the server-authoritative personal inbox boundary. It resolves one active internal actor through the existing immutable-identity/platform-role helper before reading any inbox row. The recipient predicate is applied before category, read-state, order and paging, so PM or UserAdmin capability never grants another user's inbox.

@@ -29,6 +29,24 @@
             enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true &amp;&amp; ${canAddComment} === true }"
             class="sapUiTinyMarginTop"
           />
+          <!-- Multi-select chỉ hiển thị candidate do CAP đã authorize; gõ @name trong TextArea không tự tạo mention. -->
+          <Label
+            text="{i18n>commentsMentionRecipientsLabel}"
+            labelFor="idtsMentionRecipients"
+            class="sapUiTinyMarginTop"
+          />
+          <MultiComboBox
+            id="idtsMentionRecipients"
+            core:require="{ Collaboration: 'idts/bugmanagementui/ext/sections/BugCollaboration' }"
+            width="100%"
+            placeholder="{i18n>commentsMentionRecipientsPlaceholder}"
+            modelContextChange="Collaboration.onMentionContextChanged"
+            enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true &amp;&amp; ${canAddComment} === true }"
+            items="{mentionRecipients>/items}"
+          >
+            <core:Item key="{mentionRecipients>ID}" text="{mentionRecipients>displayName}" additionalText="{mentionRecipients>roleCode}" />
+          </MultiComboBox>
+          <Text text="{i18n>commentsMentionRecipientsHelp}" class="sapUiTinyMarginTop" />
           <HBox justifyContent="End" class="sapUiTinyMarginTop">
             <Button
               core:require="{ Collaboration: 'idts/bugmanagementui/ext/sections/BugCollaboration' }"

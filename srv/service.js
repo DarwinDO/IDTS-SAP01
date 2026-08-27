@@ -33,6 +33,7 @@ const { bugIDFrom, readBug } = require('./bug-service/helpers')
 const { assertBugOpenForMutation, enforceBugCreatePermission, enforceBugEditPermission } = require('./bug-service/permissions')
 const {
   assignToDeveloper,
+  getMentionCandidates,
   reassignRetestOwner,
   resubmitToDeveloper,
   addComment,
@@ -169,6 +170,8 @@ module.exports = class BugService extends cds.ApplicationService {
     // Action nghiệp vụ từ Object Page đi vào các handler dưới đây. Các action chuyển status dùng chung
     // `transitionBug`: đó là nơi kiểm quyền, kiểm transition, update DB và ghi side effects.
     this.on('assignToDeveloper', req => assignToDeveloper(req, entities))
+    // Candidate mention luôn lấy theo Bug context ở backend; UI không tự đọc Users trực tiếp.
+    this.on('getMentionCandidates', req => getMentionCandidates(req, entities))
     this.on('reassignRetestOwner', req => reassignRetestOwner(req, entities))
     this.on('addComment', req => addComment(req, entities))
     this.on('moveToPendingAssignment', req => transitionBug(req, entities, {
