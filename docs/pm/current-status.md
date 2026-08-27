@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-27
 
+## 2026-08-27 My Notifications N1 Draft handoff
+
+- N1 Tasks 1–4 are source-verified in Draft PR [#361](https://github.com/DarwinDO/IDTS-SAP01/pull/361), based on merged planning PR #360 at `8ac9327b93b70633e96d2b6f09bb379a5afb681f`. Fresh caller-only API, persistence/backfill and email regressions pass; exact-source review at `7dad8f18e148568d83380cabf2deba80eb432398` has zero Critical/Major/Important/Minor findings. Later changes are documentation-only.
+- DonHV reaffirmed use of existing Knowledge Gate PASS; the repeated assessment HOLD was corrected without inventing a new assessment. This is not release completion: no N1 merge/deploy/live migration/backfill or N2. See `docs/pm/evidence/my-notifications/n1-source-evidence.md` and PR checks for final head/CI.
+- Tiếng Việt: source N1 Tasks 1–4 đã kiểm định và mở Draft #361; suite liên quan PASS, review source không còn finding. Dùng lại PASS đã có theo DonHV, không tạo bài thi mới. Dừng trước merge/deploy/migration/backfill thật/N2; exact head/CI nằm ở PR và evidence.
+
 ## 2026-08-27 WP8 Gate 6.5 live closure
 
 - Source PR #358 merged into `dev` at `e587aa5b1603d32c89ce01b4bcab9854f07eb157`. The additive HANA migration created only `UserAccessNotificationDeliveries` and its unique source-audit index; existing aggregate counts and the protected Users digest were preserved.

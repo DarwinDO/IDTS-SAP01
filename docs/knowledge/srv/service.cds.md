@@ -1,5 +1,11 @@
 # Knowledge: `srv/service.cds`
 
+## N1 notification source-key privacy
+
+**English:** The `BugService.Notifications` projection excludes the new `sourceKey`. This keeps private producer idempotency data out of the existing public API as well as the personal inbox DTO. Without this exclusion, the wildcard would silently publish the new database field. Check together: `db/schema.cds`, `srv/notification.cds`, compiled EDMX and `test-my-notifications-model.js`. Ordinary `BugService.Bugs` read policy is unchanged. Owner DonHV; backup NhanT.
+
+**Tiếng Việt:** Projection `BugService.Notifications` loại `sourceKey` mới để dữ liệu idempotency nội bộ không lọt vào API hiện có hoặc DTO inbox. Nếu thiếu exclusion, wildcard sẽ âm thầm publish field database mới. Kiểm tra cùng `db/schema.cds`, `srv/notification.cds`, EDMX và `test-my-notifications-model.js`. Không đổi policy đọc `BugService.Bugs`. Owner DonHV; backup NhanT.
+
 ## 2026-08-26 DeveloperWorkloads access-readiness contract
 
 ### English
