@@ -24,7 +24,9 @@ Status: IN PROGRESS. This is not a runtime, delivery, acceptance or release PASS
 
 ### Implementation and final gate
 
-Task 7 is running; Tasks 8–9, integrated matrix, independent review and Draft PR are pending. Detailed task reports are temporary coordination artifacts; verified results will be copied here before final handoff.
+Task 7 is complete at reviewed source head `c46426b914943d5c3dae56e18e2808171629b143`. It adds stable lifecycle codes and exact recipient/channel policy, source/history-derived idempotency keys, authoritative Bug locking before source-key reuse, inbox-only assignment removal, prompt action-owner handoffs, safe server/UI hydration and localized labels. Real SQLite QA covers persisted owner-only, assignment removal, resubmit and retest-owner routes plus independently started producer transactions. The test records its limitation honestly: SQLite serializes the overlap and cannot emulate a HANA lock wait; the production contract uses portable CAP `forUpdate()` plus the unique source key.
+
+Task 7 review started NO-GO with 4 Important findings. Three fix rounds closed source-key concurrency handling, missed producer routes, the `PENDING_ASSIGNMENT`/removal semantic collision and incomplete/stale mirrors. Final scoped review returned clean, with no remaining Critical/Major/Important finding. Focused event/history/outbox/immediate/UI client-shell/lint/build commands passed as recorded in the untracked task report. Tasks 8–9, integrated matrix, final independent whole-branch review and Draft PR remain pending.
 
 ## Tiếng Việt
 
@@ -48,4 +50,6 @@ Trạng thái: ĐANG LÀM. Không phải PASS runtime, giao email, nghiệm thu 
 
 ### Implementation và gate cuối
 
-Task 7 đang làm; Tasks 8–9, matrix tích hợp, review và Draft PR còn chờ. Kết quả đã verify sẽ được ghi vào evidence này trước handoff cuối.
+Task 7 đã hoàn tất tại source head đã review `c46426b914943d5c3dae56e18e2808171629b143`. Phần này thêm mã lifecycle ổn định, đúng người nhận/kênh, source key từ history, lock Bug trước dedupe, removal chỉ inbox, handoff owner gửi prompt, hydrate/nhãn dịch an toàn. QA SQLite thật kiểm owner-only, bỏ assignee, resubmit, đổi retest owner và hai producer khởi động độc lập. Giới hạn được ghi rõ: SQLite serialize overlap nên không mô phỏng chờ lock HANA; contract production dùng CAP `forUpdate()` portable cùng unique source key.
+
+Review Task 7 ban đầu NO-GO với 4 Important. Ba vòng fix đã đóng concurrency source key, route producer thiếu, trùng nghĩa `PENDING_ASSIGNMENT`/removal và mirror thiếu/cũ. Re-review cuối sạch, không còn Critical/Major/Important. Các lệnh event/history/outbox/immediate/UI client-shell/lint/build tập trung PASS trong report local không track. Tasks 8–9, matrix tích hợp, review toàn branch cuối và Draft PR còn chờ.

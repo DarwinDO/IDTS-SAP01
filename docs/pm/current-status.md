@@ -5,8 +5,8 @@ Last updated: 2026-08-27
 ## 2026-08-27 My Notifications N3 source execution
 
 - N2 #362 is merged at `c722c355df5ff786d372002e20ab10864b4780ab`; that exact commit is the isolated N3 base. DonHV authorized continuing through N3 source completion. Tasks 7–9 cover lifecycle channels, selected mentions, escalation and final access indexing.
-- Task 7 first review found four Important gaps; remediation is in progress. No N3 Draft PR, deployment or release PASS yet. The live UI rollback remains separate; N3 does not redeploy the bell or change live email/data. Details: `docs/pm/evidence/my-notifications/n3-source-evidence.md`.
-- Tiếng Việt: N2 #362 đã merge tại SHA trên, là base N3 riêng. DonHV duyệt làm tới xong source N3; review Task 7 có bốn Important đang sửa. Chưa Draft PR/deploy/release PASS cho N3. Giữ nguyên rollback UI live, không tự bật chuông hoặc đổi email/dữ liệu thật.
+- Task 7 is clean after three scoped fix/re-review rounds at `c46426b914943d5c3dae56e18e2808171629b143`; no Critical/Major/Important remains for that task. Task 8 selected mentions is in progress. No N3 Draft PR, deployment or release PASS yet. The live UI rollback remains separate; N3 does not redeploy the bell or change live email/data. Details: `docs/pm/evidence/my-notifications/n3-source-evidence.md`.
+- Tiếng Việt: N2 #362 đã merge tại SHA trên, là base N3 riêng. Task 7 sạch review sau ba vòng fix/re-review tại SHA trên, không còn Critical/Major/Important; Task 8 mention được chọn đang làm. Chưa Draft PR/deploy/release PASS cho N3. Giữ nguyên rollback UI live, không tự bật chuông hoặc đổi email/dữ liệu thật.
 
 ## 2026-08-27 My Notifications N2 source candidate
 
