@@ -130,6 +130,8 @@ async function main () {
   assert.equal(userBRows.length, 1)
   assert.equal(userBRows[0].category, 'ACCESS')
   assert.equal(userBRows[0].eventType, 'CHANGE_ROLE')
+  assert.equal(userBRows[0].summary, 'Your access role changed.')
+  assert.doesNotMatch(userBRows[0].summary, /safely/i, 'raw audit details do not enter the public DTO')
   assert.equal(userBRows[0].targetPath, '/idtsbugmanagementui/index.html')
 
   const unread = await service.send({ event: 'getMyUnreadNotificationCount', user: actorA })

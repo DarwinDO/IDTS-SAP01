@@ -19,6 +19,10 @@ const ACTION_REQUIRED_EVENTS = new Set([
   'REACTIVATE',
   'CHANGE_ROLE'
 ])
+const ACCESS_SUMMARY_BY_EVENT = Object.freeze({
+  CHANGE_ROLE: 'Your access role changed.',
+  REACTIVATE: 'Your access was reactivated.'
+})
 
 async function resolveNotificationActor (req) {
   const actor = await resolveRequestUser(req, {})
@@ -138,7 +142,7 @@ async function hydrateNotificationPage (tx, rows) {
     : []
   const accessSources = accessIDs.length
     ? await tx.run(SELECT.from(ACCESS_AUDITS)
-        .columns('ID', 'action', 'result', 'detailsSummary')
+        .columns('ID', 'action', 'result')
         .where({ ID: { in: accessIDs } }))
     : []
   const bugsByID = new Map(bugSources.map(source => [source.ID, source]))
@@ -171,7 +175,7 @@ function accessSummary (row, source) {
     category: 'ACCESS',
     eventType,
     title: titleFor(eventType),
-    summary: safeText(source.detailsSummary, 500),
+    summary: ACCESS_SUMMARY_BY_EVENT[eventType] || null,
     priority: null,
     actionRequired: supported,
     targetPath: supported ? '/idtsbugmanagementui/index.html' : null

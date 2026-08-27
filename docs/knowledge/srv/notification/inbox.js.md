@@ -4,7 +4,7 @@
 
 This module is the server-authoritative personal inbox boundary. It resolves one active internal actor through the existing immutable-identity/platform-role helper before reading any inbox row. The recipient predicate is applied before category, read-state, order and paging, so PM or UserAdmin capability never grants another user's inbox.
 
-`readInboxPage` enforces default 25, maximum 100, maximum skip 10000, and stable `occurredAt desc, ID desc` ordering. `hydrateNotificationPage` performs at most one bulk Bug-notification read and one bulk access-audit read for a page. It maps only safe DTO fields; missing or unsupported sources have no deep link, and access navigation is limited to final applied role-change/reactivation events.
+`readInboxPage` enforces default 25, maximum 100, maximum skip 10000, and stable `occurredAt desc, ID desc` ordering. `hydrateNotificationPage` performs at most one bulk Bug-notification read and one bulk access-audit read for a page. It maps only safe DTO fields; access audit details are not selected and user copy comes from an event allowlist. Missing or unsupported sources have no deep link, and access navigation is limited to final applied role-change/reactivation events.
 
 `markMyNotificationRead` updates only the caller-owned unread row whose `modifiedAt` still matches. A second tab that repeats the same version receives the already-read DTO; an unread stale row returns a safe conflict, while another user's ID is indistinguishable from not found. `markAllMyNotificationsRead` includes `occurredAt <= throughOccurredAt`, so later arrivals remain unread.
 
@@ -19,7 +19,7 @@ This module is the server-authoritative personal inbox boundary. It resolves one
 
 Module này là boundary inbox cá nhân có server làm authority. Nó resolve đúng một actor nội bộ active qua helper immutable-identity/platform-role hiện có trước khi đọc bất kỳ inbox row nào. Predicate người nhận được áp trước category, read-state, order và paging, nên quyền PM hoặc UserAdmin không cho phép đọc inbox user khác.
 
-`readInboxPage` enforce mặc định 25, tối đa 100, skip tối đa 10000 và thứ tự ổn định `occurredAt desc, ID desc`. `hydrateNotificationPage` chạy tối đa một bulk read Bug notification và một bulk read access audit cho mỗi page. Module chỉ map field DTO an toàn; source thiếu/không hỗ trợ không có deep link, còn navigation access chỉ dành cho role-change/reactivation cuối đã applied.
+`readInboxPage` enforce mặc định 25, tối đa 100, skip tối đa 10000 và thứ tự ổn định `occurredAt desc, ID desc`. `hydrateNotificationPage` chạy tối đa một bulk read Bug notification và một bulk read access audit cho mỗi page. Module chỉ map field DTO an toàn; không select chi tiết access audit và copy cho user lấy từ event allowlist. Source thiếu/không hỗ trợ không có deep link, còn navigation access chỉ dành cho role-change/reactivation cuối đã applied.
 
 `markMyNotificationRead` chỉ update row unread thuộc caller khi `modifiedAt` còn khớp. Tab thứ hai lặp cùng version nhận DTO đã đọc; row còn unread nhưng stale trả conflict an toàn, còn ID của user khác trông giống not found. `markAllMyNotificationsRead` có điều kiện `occurredAt <= throughOccurredAt`, nên notification đến sau vẫn unread.
 
