@@ -10,4 +10,6 @@ Owner: DonHV. `NotificationShell.js` waits for the ResourceBundle before creatin
 
 N2 tạo bundle tiếng Việt này cho shell thông báo của Bug Management. Nó mirror mọi key `notification*` trong bundle fallback và tiếng Anh: tên chuông/count accessible, tiêu đề panel, filter trạng thái/category, chữ read-state, marker cần xử lý, thời gian fallback, mark-all, loading/empty/load-more/retry và lỗi an toàn. Không chứa wording backend/provider/audit thô.
 
+N3 thêm đúng các lifecycle label giống bundle fallback/English, giữ `ASSIGNMENT_REMOVED` tách khỏi `PENDING_ASSIGNMENT`.
+
 Owner: DonHV. `NotificationShell.js` chờ ResourceBundle trước khi tạo control. Thiếu/lệch key sẽ làm lộ key kỹ thuật hoặc fallback không nhất quán. Kiểm cùng ba property bundle, QA UI và fixture browser local `?lang=vi`. Giữ UTF-8 tiếng Việt, không có ký tự replacement/mojibake.

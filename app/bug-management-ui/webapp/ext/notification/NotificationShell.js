@@ -100,7 +100,7 @@ sap.ui.define([
 
     function eventLabel(bundle, eventType) {
         var code = String(eventType || "").toUpperCase();
-        var known = ["ASSIGNED", "NEED_MORE_INFORMATION", "REJECTED", "UPDATED", "OVERDUE", "CLOSED", "RESOLVED", "RETEST_REQUIRED", "REOPENED", "RESUBMITTED", "REASSIGNED", "RETEST_OWNER_CHANGED", "PENDING_ASSIGNMENT", "CHANGE_ROLE", "REACTIVATE"];
+        var known = ["ASSIGNED", "NEED_MORE_INFORMATION", "REJECTED", "UPDATED", "OVERDUE", "CLOSED", "RESOLVED", "RETEST_REQUIRED", "REOPENED", "RESUBMITTED", "REASSIGNED", "RETEST_OWNER_CHANGED", "PENDING_ASSIGNMENT", "ASSIGNMENT_REMOVED", "OWNER_CHANGED", "CHANGE_ROLE", "REACTIVATE"];
         return known.indexOf(code) >= 0 ? text(bundle, "notificationEvent" + code) : text(bundle, "notificationEventOther");
     }
 

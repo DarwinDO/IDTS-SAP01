@@ -21,6 +21,8 @@ async function writeNotificationRecord (tx, entry, config) {
   // Hàm chỉ tạo outbox PENDING/SKIPPED, không gọi Brevo/SMTP nên lỗi provider không rollback Bug.
   if (!entry?.bugID || !entry?.recipientID || !entry?.eventType) return {}
 
+  // Lock the authoritative Bug before source lookup so producers for one Bug serialize before a unique insert.
+  await tx.run(SELECT.one.from(ENTITIES.Bugs).columns('ID').where({ ID: entry.bugID }).forUpdate())
   const sourceKey = typeof entry.sourceKey === 'string' && entry.sourceKey.trim() ? entry.sourceKey.trim() : null
   const existing = sourceKey && await tx.run(SELECT.one.from(ENTITIES.Notifications)
     .columns('ID').where({ sourceKey }))

@@ -11,3 +11,5 @@ Important anchor: the `BUG_*`, `ACCESS_*` and `UNAVAILABLE_TITLE` keys are a con
 Bundle CAP Vietnamese cung cấp title/summary có giới hạn cho sáu loại event Bug hiện có và role-change/reactivation cuối. Không chứa recipient, audit reason, provider data hoặc URL ngoài. `srv/notification/inbox.js` chỉ chọn key sau khi validate source, rồi truyền locale caller cho fallback native CAP. Key không khả dụng ngăn record không hỗ trợ phát thông báo thành công giả.
 
 Điểm neo: các key `BUG_*`, `ACCESS_*` và `UNAVAILABLE_TITLE` là contract với mapper. Thiếu key làm DTO trống; dịch không tương đương làm sai ý nghĩa event. Kiểm hai bundle, mapper và test HTTP Anh/Việt cùng nhau. Owner DonHV; backup NhanT. Giữ title <=160 và summary <=500 ký tự.
+
+N3 bổ sung key lifecycle tiếng Việt, gồm `ASSIGNMENT_REMOVED` và `OWNER_CHANGED`; hai code này không được thay bằng `PENDING_ASSIGNMENT` hoặc legacy `UPDATED` vì ý nghĩa/action-required khác nhau.

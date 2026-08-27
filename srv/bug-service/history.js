@@ -82,14 +82,12 @@ async function recordBugChangeSideEffects (req, entities, changes, finalBug) {
   const previousAssigneeUserID = assigneeChange?.oldValue
     ? await userIDForDeveloper(req, entities, assigneeChange.oldValue)
     : null
-  if (statusChange) {
-    await writeNotificationForStatus(req, entities, finalBug, statusChange.newValue, {
-      historyID,
-      changes,
-      previousAssigneeUserID
-    })
-  } else if (assigneeChange?.newValue) {
-    await writeNotificationForStatus(req, entities, finalBug, STATUS.ASSIGNED, {
+  const ownerChange = changes.find(change => change.fieldName === 'nextProcessorUser')
+  if (statusChange || assigneeChange || ownerChange) {
+    const lifecycleStatus = statusChange?.newValue ||
+      (assigneeChange?.newValue ? STATUS.ASSIGNED :
+        (assigneeChange ? STATUS.PENDING_ASSIGNMENT : finalBug.status_code))
+    await writeNotificationForStatus(req, entities, finalBug, lifecycleStatus, {
       historyID,
       changes,
       previousAssigneeUserID
@@ -459,7 +457,7 @@ function buildLifecycleNotification ({ bug, status, changes = [], historyID, pre
   if (status === STATUS.PENDING_ASSIGNMENT && previousAssigneeUserID) {
     return notificationWithSource(bug, historyID, {
       recipientID: previousAssigneeUserID,
-      eventType: EVENT.PENDING_ASSIGNMENT,
+      eventType: EVENT.ASSIGNMENT_REMOVED,
       emailRequired: false,
       message: `${bug.bugNumber || 'Bug'} was moved to Pending Assignment.`
     })
@@ -530,7 +528,7 @@ function buildLifecycleNotification ({ bug, status, changes = [], historyID, pre
   if ([STATUS.IN_REVIEW, STATUS.IN_PROGRESS].includes(status) && ownerChanged && bug.nextProcessorUser_ID) {
     return notificationWithSource(bug, historyID, {
       recipientID: bug.nextProcessorUser_ID,
-      eventType: EVENT.UPDATED,
+      eventType: EVENT.OWNER_CHANGED,
       emailRequired: true,
       message: `${bug.bugNumber || 'Bug'} is now assigned to you for the current workflow step.`
     })
