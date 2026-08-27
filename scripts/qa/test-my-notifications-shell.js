@@ -102,11 +102,11 @@ function loadShell (client, globals) {
   return shell
 }
 
-function row (index, readAt = null) {
+function row (index, readAt = null, eventType = 'ASSIGNED') {
   return {
     notificationID: `11111111-1111-4111-8111-${String(index).padStart(12, '0')}`,
     category: index % 2 ? 'BUG' : 'ACCESS',
-    eventType: 'ASSIGNED',
+    eventType,
     title: `Notification ${index}`,
     summary: 'Safe summary',
     priority: index === 1 ? 'CRITICAL' : 'NORMAL',
@@ -128,7 +128,7 @@ async function main () {
     search: async (model, options) => {
       calls.search.push(options)
       if (resolveSearch) return resolveSearch()
-      return Array.from({ length: 25 }, (_, index) => row(index + 1))
+      return [row(1, null, 'COMMENT_MENTIONED'), ...Array.from({ length: 24 }, (_, index) => row(index + 2))]
     },
     unreadCount: async () => { calls.unread += 1; return 120 },
     markRead: async (model, notification) => { calls.markRead.push(notification); throw new Error('private backend detail') },
@@ -195,7 +195,8 @@ async function main () {
   assert.equal(list.items.length, 25, 'first page is 25 rows')
   assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationUnread'), 'unread state has a literal marker')
   assert.ok(globals.created.Icon.some(icon => icon.src === 'sap-icon://bug'), 'Bug rows render a category icon')
-  assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventASSIGNED'), 'rows render the localized event type')
+  assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventCOMMENT_MENTIONED'), 'persisted comment mentions render their localized event label')
+  assert.ok(!list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventOther'), 'persisted comment mentions do not fall back to the generic event label')
 
   const countBeforeSignal = calls.unread
   globals.window['idts:notification-change']()
