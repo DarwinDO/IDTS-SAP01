@@ -44,13 +44,13 @@ function commentRequest (actor, bugID, content, mentionedUserIDs = []) {
   })
 }
 
-async function makeIdentityReady (db, user, requestedByID) {
+async function makeIdentityReady (db, user, requestedByID, requestedRoleCode = user.role_code) {
   const hash = `mention-ready-${user.ID}`
   await db.run(cds.ql.UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: hash }).where({ ID: user.ID }))
   await db.run(cds.ql.INSERT.into('idts.cap.UserOnboardingRequests').entries({
     ID: cds.utils.uuid(),
     targetEmailNormalized: user.email,
-    requestedRole_code: user.role_code,
+    requestedRole_code: requestedRoleCode,
     status_code: 'ACTIVE',
     requestedBy_ID: requestedByID,
     expiresAt: '2030-01-01T00:00:00.000Z',
@@ -217,13 +217,18 @@ async function main () {
     ID: 'de000000-0000-4000-8000-000000000009', displayName: 'Escalation PM',
     email: 'escalation-pm@example.test', role_code: 'PM', active: true
   }
+  const staleEscalationPm = {
+    ID: 'de000000-0000-4000-8000-000000000011', displayName: 'Stale Escalation PM',
+    email: 'stale-escalation-pm@example.test', role_code: 'PM', active: true
+  }
   const escalationAssignee = { ID: 'de000000-0000-4000-8000-000000000010', user_ID: escalationAssigneeUser.ID }
-  await db.run(INSERT.into(entities.Users).entries([escalationAssigneeUser, escalationPm]))
+  await db.run(INSERT.into(entities.Users).entries([escalationAssigneeUser, escalationPm, staleEscalationPm]))
   await db.run(INSERT.into(entities.DeveloperProfiles).entries({
     ...escalationAssignee, availabilityStatus_code: 'AVAILABLE', workloadLimit: 5, active: true
   }))
   await makeIdentityReady(db, escalationAssigneeUser, routeActor.ID)
   await makeIdentityReady(db, escalationPm, routeActor.ID)
+  await makeIdentityReady(db, staleEscalationPm, routeActor.ID, 'TESTER')
   const escalationBug = {
     ...routeBug,
     assignee_ID: escalationAssignee.ID,
@@ -249,6 +254,8 @@ async function main () {
   const [escalationSummary] = await hydrateNotificationPage(db, [escalationInbox], 'en')
   assert.equal(escalationSummary.actionRequired, true, 'escalation consumer marks the material event as requiring action')
   assert.deepEqual([...new Set(escalationEvents.map(row => row.recipient_ID))].sort(), [escalationAssigneeUser.ID, escalationPm.ID].sort(), 'assignee and current owner dedupe while aligned PM is added')
+  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { recipient_ID: staleEscalationPm.ID }), 0, 'stale requested role PM receives no escalation inbox entry')
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { recipientEmail: staleEscalationPm.email }), 0, 'stale requested role PM receives no escalation email outbox row')
 
   const escalationCount = escalationEvents.length
   const sameRankReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })

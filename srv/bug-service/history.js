@@ -135,9 +135,17 @@ function escalationForChange (changes, fieldName, ranks, eventType) {
 
 async function activeAlignedPmIDs (req, entities) {
   const tx = cds.tx(req)
-  const pms = await tx.run(SELECT.from(entities.Users).columns('ID').where({ active: true, role_code: 'PM' }))
+  const pms = await tx.run(SELECT.from(entities.Users).columns('ID', 'role_code').where({ active: true, role_code: 'PM' }))
   const readiness = await readActiveIdentityAccessByUser(tx, pms.map(pm => pm.ID))
-  return pms.map(pm => pm.ID).filter(id => readiness.get(id)?.ready)
+  return pms
+    .filter(pm => {
+      const access = readiness.get(pm.ID)
+      return access?.ready && access.requests.some(request =>
+        request.identityKeyHash === access.user.externalIdentityKeyHash &&
+        request.requestedRole_code === pm.role_code
+      )
+    })
+    .map(pm => pm.ID)
 }
 
 async function recordCommentCreateSideEffects (req, data, entities) {
