@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2 MERGED — N3 IN PROGRESS; SOURCE-ONLY DRAFT PR BOUNDARY`
+`N1/N2 MERGED — N3 MERGED — N4 TASK 10 SOURCE COMPLETE; LOCAL COMMIT BOUNDARY`
 
 ### Authority
 
@@ -27,13 +27,13 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-N1 #361 and N2 #362 are merged; N3 froze exact base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 and the final review fix are complete at source head `979a3ef878b0cf58aa55796203845788852030b1`. Exactly one N3 PR [#364](https://github.com/DarwinDO/IDTS-SAP01/pull/364) is OPEN/Draft targeting `dev`. Final review is GO, 0 Critical/Major/Important, with one safe deferred Minor; final verification is green. Existing Knowledge Gate PASS is reused. No Ready, merge, deployment, migration, backfill, live email or N4 is authorized. Live UI remains rolled back; source completion is not runtime acceptance.
+N1 #361 and N2 #362 are merged; N3 is the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Task 10 is locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, source-key idempotency, protected `NotificationService.processNotificationSchedules`, focused fixed-clock QA, and bilingual mirrors. The local commit is the only requested mutation; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action is claimed. Task 11 digest remains pending. Live UI remains rolled back; source completion is not runtime acceptance.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`N1/N2 ĐÃ MERGE — N3 ĐANG LÀM; BOUNDARY CHỈ SOURCE VÀ DRAFT PR`
+`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 TASK 10 HOÀN TẤT SOURCE; BOUNDARY COMMIT LOCAL`
 
 ### Thẩm quyền
 
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-N1 #361 và N2 #362 đã merge; N3 freeze base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 và fix final review hoàn tất tại source head `979a3ef878b0cf58aa55796203845788852030b1`. Đúng một PR N3 [#364](https://github.com/DarwinDO/IDTS-SAP01/pull/364) OPEN/Draft vào `dev`. Review cuối GO 0 Critical/Major/Important, một Minor an toàn defer; full verification GREEN. Dùng lại Knowledge Gate PASS. Không Ready, merge, deploy, migration, backfill, email thật hoặc N4. UI live vẫn rollback; source xong không phải runtime acceptance.
+N1 #361 và N2 #362 đã merge; N3 là predecessor đã merge tại frozen base Task 10 `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Task 10 đã hoàn tất source cục bộ trên `feature/wp7-notifications-sla-digest-donhv`: discovery Pending Assignment/SLA/Overdue bounded, idempotency source key, protected `NotificationService.processNotificationSchedules`, QA clock cố định và mirror song ngữ. Chỉ mutation commit local được yêu cầu; không claim PR, Ready, merge, deploy, migration, backfill, email thật, provider, user/role/data hay N5. Digest Task 11 vẫn pending. UI live vẫn rollback; source xong không phải runtime acceptance.

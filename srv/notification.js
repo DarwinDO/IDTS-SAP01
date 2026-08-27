@@ -9,11 +9,13 @@ const {
   markMyNotificationRead,
   searchMyNotifications
 } = require('./notification/inbox')
+const { processNotificationSchedules } = require('./notification/scheduled')
 
 class NotificationService extends cds.ApplicationService {
   init () {
     this.on('searchMyNotifications', searchMyNotifications)
     this.on('getMyUnreadNotificationCount', getMyUnreadNotificationCount)
+    this.on('processNotificationSchedules', processNotificationSchedules)
     this.on('markMyNotificationRead', markMyNotificationRead)
     this.on('markAllMyNotificationsRead', markAllMyNotificationsRead)
     return super.init()
