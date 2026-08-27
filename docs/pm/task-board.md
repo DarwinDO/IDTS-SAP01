@@ -10,6 +10,7 @@ Vietnamese: Chi dung board nay de theo doi trang thai cap cao. Chi tiet cong vie
 
 | ID | Task | Output |
 | --- | --- | --- |
+| WP8 | User Administration roadmap after PR #318 | Gates 1–6.5 are complete. Gate 6.5 source PR #358 merged at `e587aa5b1603d32c89ce01b4bcab9854f07eb157`; additive HANA migration, selective CAP/User Administration `1.0.17` rollout, unified Operations acceptance, controlled Tester notification acceptance, restored final access, and `DEMO READY` passed. |
 | IDTS-90 | Expand demo Developer accounts and responsibility coverage | PR #165 merged; Shared QA now has 12 Developers with varied availability/workload and 30 responsibility rows; narrow UPSERT and authenticated read-model verification passed. |
 | PM-001 | Create PM delivery pack | `docs/pm/` structure, status files, work packages, Sprint 1 plan. |
 | BA-001 | Create BA documentation pack | `docs/ba/` baseline. |
@@ -135,7 +136,6 @@ Vietnamese:
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |
-| WP8 | User Administration roadmap after PR #318 | DonHV | Gate 6.3 is complete. PR #351 fixed the live Workload Actions-column mismatch, merged at `5812b29f49a8a00ff79a877a347b911b0a851858`, and User Administration `1.0.15` was deployed content-only. Final `DEMO READY`; PM reacceptance passed for View workload, details ownership fields and exact Bug Object Page navigation. Gate 6.4 requires a new approval. |
 | IDTS-116 | Bug: Restore BTP comment posting and attachment upload with SAP-standard controls | DonHV | In Progress: PR #278 merged at `3744697` and app version `0.0.3` is live. A controlled BTP browser check confirms comment POST, immediate feed refresh and hard-reload persistence PASS without a refresh-warning toast. Full attachment upload/save/reload/download-hash/delete acceptance remains before closure. |
 | IDTS-117 | Bug: Restore explicit SAP BTP re-login after sign-out | DonHV | Done: PR #254 merged at `d733771`; selective AppRouter rollout passed and two complete Sign Out → explicit XSUAA sign-in → Fiori cycles passed. Evidence is under `docs/pm/evidence/idts-117/btp-rollout/`. |
 | IDTS-113 | Migrate IDTS Shared QA runtime and data to SAP BTP | DonHV | In Progress: HANA/AppRouter/XSUAA PM, Job Scheduler + Brevo, History/Notifications, S3 adapter, AI disabled/fallback no-mutation, restart persistence and rollback platform-readiness PASS on deployed SHA `3504931`. SangVN/DatDT/NhanT BTP users, role collections and exact HANA identity alignment are verified; member-owned interactive login/role-matrix evidence remains. Render is not a hot HANA replica. Remaining: live member sign-ins, browser picker evidence and final Technical Specification EN integration under IDTS-112. |
