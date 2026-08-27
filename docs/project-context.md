@@ -70,8 +70,12 @@ Vietnamese: Tren SAP BTP, AppRouter/XSUAA xac thuc SAP identity, CAP map identit
 - Eligible Bug and onboarding deliveries receive a one-shot post-commit processing kick for prompt UX; the scheduler remains the retry/recovery path.
 - Existing historical notifications are not automatically emailed after IDTS-36 deployment.
 - Email v1 uses the CAP database outbox; Redis, RabbitMQ, BullMQ, and provider-specific SDKs are not required.
+- Approved next direction: add caller-only `My Notifications` read state/index across Bug and material User Access sources. PM/UserAdmin may inspect safe Operations delivery diagnostics but may not read another user's personal inbox.
+- Important Bug status/ownership events, comment mentions, Critical/Blocker escalation and eligible access changes use the existing post-commit immediate kick as the primary prompt-email path. They do not wait for the hourly recovery schedule in normal operation.
+- Job Scheduler remains the recovery/retry path and adds scheduled Pending Assignment/Overdue discovery, four-hour Critical/Blocker or 24-hour normal SLA reminders, weekday 08:00 `Asia/Bangkok` digest generation and 90-day inbox-index cleanup.
+- Transition backfills at most 30 days of Bug notifications into the inbox index without generating email; historical access audits are not backfilled.
 
-Vietnamese: `Notifications` la source event trong app; `NotificationDeliveries` la email outbox rieng, luu payload snapshot an toan, status, so lan thu, lich retry, loi da lam sach va worker lock. SAP BTP dung private config cho Brevo API; local/integration co the dung SMTP/Nodemailer. Job Scheduling Service goi protected CAP endpoint de xu ly outbox; provider fail chi doi delivery status, khong rollback assignment hoac lifecycle action. Notification lich su khong tu dong gui lai. V1 khong can Redis/RabbitMQ/BullMQ.
+Vietnamese: `Notifications` la source event trong app; `NotificationDeliveries` la email outbox rieng, luu payload snapshot an toan, status, so lan thu, lich retry, loi da lam sach va worker lock. SAP BTP dung private config cho Brevo API; local/integration co the dung SMTP/Nodemailer. Event Bug/access can hanh dong dung immediate kick sau commit lam duong email chinh, khong cho lich recovery mot gio. Job Scheduler xu ly recovery/retry, phat hien Pending Assignment/Overdue, SLA 4/24 gio, digest 08:00 ngay thuong theo `Asia/Bangkok` va cleanup inbox index 90 ngay. `My Notifications` chi cho caller; PM/UserAdmin chi xem diagnostic an toan trong Operations. Transition chi backfill toi da 30 ngay Bug notification, khong gui lai email va khong backfill access audit lich su. V1 khong can Redis/RabbitMQ/BullMQ.
 
 ## Roles
 

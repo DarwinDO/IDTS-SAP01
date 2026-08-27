@@ -730,6 +730,18 @@ Có thể dùng:
 
 **Vietnamese:** IDTS giữ `Notifications` trong app làm source event. Việc gửi email dùng record outbox `NotificationDeliveries` riêng với status `PENDING`, `SENT`, `FAILED` hoặc `SKIPPED`. Notification và outbox instruction được lưu cùng thay đổi nghiệp vụ, nhưng kết nối SMTP được worker nền xử lý sau. Lỗi SMTP không được rollback assignment, thay đổi status, comment hoặc workflow bug khác. SMTP bị tắt/thiếu cấu hình, recipient inactive hoặc email recipient thiếu/sai phải được ghi `SKIPPED`. SMTP credential và raw transport error không được lưu vào dữ liệu nghiệp vụ hoặc expose qua OData.
 
+### **BR-30B - Email cần hành động phải được kick ngay sau commit; lịch chỉ làm recovery và tổng hợp**
+
+**English:** Important Bug status/ownership events, comment mentions, Critical/Blocker escalation, and eligible access changes create a durable outbox instruction in the business transaction and register the shared email worker's one-shot immediate kick only after commit succeeds. They must not wait for the next hourly Job Scheduler run during normal operation. SAP Job Scheduling Service remains the durable recovery/retry path and performs scheduled Pending Assignment SLA, Overdue, weekday digest, and retention work. Immediate and scheduled workers share the same provider, retry, claim, and lock rules. A delivery failure never rolls back the committed workflow or creates a replacement business event.
+
+**Vietnamese:** Event status/ownership Bug quan trọng, mention trong comment, escalation Critical/Blocker và access change đủ điều kiện phải tạo outbox instruction bền vững trong transaction nghiệp vụ, rồi chỉ đăng ký immediate kick một lần cho email worker dùng chung sau khi commit thành công. Khi vận hành bình thường, chúng không được chờ lần Job Scheduler một giờ tiếp theo. SAP Job Scheduling Service vẫn là đường recovery/retry bền vững và chạy theo lịch cho SLA Pending Assignment, Overdue, digest ngày thường và retention. Immediate và scheduled worker dùng chung provider, retry, claim và lock. Delivery lỗi không rollback workflow đã commit hoặc tạo business event thay thế.
+
+### **BR-30C - My Notifications là inbox cá nhân, không phải màn hình giám sát chung**
+
+**English:** Each authenticated caller may read or update only their own active-user inbox index and read state. PM and UserAdmin do not gain access to another user's personal inbox. Bug and access source records remain authoritative; the inbox stores only safe recipient/source references, occurrence time, and read state. Delivery failures and technical retry details remain in the authorized Operations area. Inbox index retention is 90 days; a transition backfill may index at most 30 days of existing Bug notifications without generating email or rewriting history.
+
+**Vietnamese:** Mỗi caller đã xác thực chỉ được đọc hoặc cập nhật inbox index và read state của chính active user đó. PM và UserAdmin không có quyền mở inbox cá nhân của user khác. Record nguồn Bug/access vẫn là authority; inbox chỉ giữ tham chiếu recipient/source an toàn, thời gian xảy ra và read state. Lỗi delivery cùng chi tiết retry kỹ thuật vẫn nằm trong vùng Operations có quyền. Retention inbox index là 90 ngày; bước chuyển đổi chỉ được index tối đa 30 ngày Bug notification hiện có mà không sinh email hoặc rewrite lịch sử.
+
 ---
 
 # **J. Business Rules về audit/history**
