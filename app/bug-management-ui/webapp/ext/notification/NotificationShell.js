@@ -19,7 +19,7 @@ sap.ui.define([
     "sap/ui/core/Item",
     "sap/ui/core/Icon",
     "sap/ui/core/InvisibleMessage",
-    "sap/ui/core/InvisibleMessageMode",
+    "sap/ui/core/library",
     "sap/ui/core/format/DateFormat",
     "idts/bugmanagementui/ext/notification/NotificationClient"
 ], function (
@@ -42,7 +42,7 @@ sap.ui.define([
     Item,
     Icon,
     InvisibleMessage,
-    InvisibleMessageMode,
+    coreLibrary,
     DateFormat,
     NotificationClient
 ) {
@@ -347,7 +347,7 @@ sap.ui.define([
             var invisibleMessage = InvisibleMessage && typeof InvisibleMessage.getInstance === "function"
                 ? InvisibleMessage.getInstance()
                 : null;
-            if (invisibleMessage && typeof invisibleMessage.announce === "function") invisibleMessage.announce(message, InvisibleMessageMode.Polite);
+            if (invisibleMessage && typeof invisibleMessage.announce === "function") invisibleMessage.announce(message, coreLibrary.InvisibleMessageMode.Polite);
         } catch {
             // Announcement là hỗ trợ accessibility; badge nhìn thấy vẫn giữ trạng thái chính.
         }

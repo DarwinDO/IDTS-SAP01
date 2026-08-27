@@ -8,7 +8,7 @@
 
 The popover keeps category/read filters, loaded rows and scroll state between closes. Each reset freezes a timestamp before the server page request; **Mark all as read** forwards that same snapshot so later arrivals remain unread. Page 1 contains 25 rows, **Load more** appends server order up to the service's 10,000 skip boundary. Request version counters ignore stale filter/count results.
 
-Rows use literal **Unread/Read** text in addition to semantic state, wrap safe title/summary, show category/time and an **Action required** marker. Selection tries to mark read, refreshes the badge, then follows only `NotificationClient.safeTargetPath`; a transient read failure does not trap navigation. Closing restores focus to the bell and `InvisibleMessage` announces changed unread counts politely.
+Rows use literal **Unread/Read** text in addition to semantic state, wrap safe title/summary, show category/time and an **Action required** marker. Selection tries to mark read, refreshes the badge, then follows only `NotificationClient.safeTargetPath`; a transient read failure does not trap navigation. Closing restores focus to the bell and `InvisibleMessage` announces changed unread counts with `InvisibleMessageMode.Polite` exported by the supported `sap/ui/core/library` module.
 
 ### Important source anchors
 
@@ -30,7 +30,7 @@ Owner: DonHV. Break first at `init`, then `loadPage`, `refreshUnread`, `markAll`
 
 Popover giữ filter category/read, row đã nạp và scroll state khi đóng/mở. Mỗi lần reset đóng băng timestamp trước request page server; **Đánh dấu tất cả đã đọc** chuyển đúng snapshot đó để notification đến sau vẫn chưa đọc. Trang đầu có 25 row, **Tải thêm** nối tiếp thứ tự server tới giới hạn skip 10.000. Counter version bỏ kết quả filter/count cũ đến muộn.
 
-Row có chữ **Chưa đọc/Đã đọc** ngoài semantic state, wrap title/summary an toàn, hiện category/thời gian và marker **Cần xử lý**. Khi chọn, shell thử mark-read, refresh badge rồi chỉ đi theo `safeTargetPath`; lỗi read tạm thời không nhốt user. Đóng popover trả focus về chuông, `InvisibleMessage` thông báo lịch sự khi unread count đổi.
+Row có chữ **Chưa đọc/Đã đọc** ngoài semantic state, wrap title/summary an toàn, hiện category/thời gian và marker **Cần xử lý**. Khi chọn, shell thử mark-read, refresh badge rồi chỉ đi theo `safeTargetPath`; lỗi read tạm thời không nhốt user. Đóng popover trả focus về chuông, `InvisibleMessage` dùng `InvisibleMessageMode.Polite` được export từ module hỗ trợ `sap/ui/core/library` khi unread count đổi.
 
 ### Anchor source quan trọng
 

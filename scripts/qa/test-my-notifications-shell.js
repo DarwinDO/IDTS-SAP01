@@ -81,13 +81,13 @@ function loadShell (client, globals) {
     'sap/ui/core/Item': control('Item', globals),
     'sap/ui/core/Icon': control('Icon', globals),
     'sap/ui/core/InvisibleMessage': { getInstance: () => ({ announce: message => { globals.announcements.push(message) } }) },
-    'sap/ui/core/InvisibleMessageMode': { Polite: 'Polite' },
+    'sap/ui/core/library': { InvisibleMessageMode: { Polite: 'Polite' } },
     'sap/ui/core/format/DateFormat': { getDateTimeInstance: () => ({ format: value => `formatted:${value}` }) },
     'sap/ui/Device': { system: { phone: false } },
     'idts/bugmanagementui/ext/notification/NotificationClient': client
   }
   const context = {
-    sap: { ui: { define: (deps, factory) => { shell = factory(...deps.map(dep => classes[dep])) } } },
+    sap: { ui: { define: (deps, factory) => { globals.loadedDeps = deps; shell = factory(...deps.map(dep => classes[dep])) } } },
     document: globals.document,
     window: globals.window,
     setInterval: globals.setInterval,
@@ -159,6 +159,8 @@ async function main () {
   }
   const host = { dataset: {}, controls: [] }
   const shellModule = loadShell(client, globals)
+  assert.ok(globals.loadedDeps.includes('sap/ui/core/library'), 'use the real UI5 core library export for InvisibleMessageMode')
+  assert.ok(!globals.loadedDeps.includes('sap/ui/core/InvisibleMessageMode'), 'do not depend on a nonexistent UI5 module')
   const model = {}
   const bundle = { getText: (key, args) => args ? `${key}:${args.join(',')}` : key }
   const component = { getModel: name => name === 'notifications' ? model : name === 'i18n' ? { getResourceBundle: () => Promise.resolve(bundle) } : null }
