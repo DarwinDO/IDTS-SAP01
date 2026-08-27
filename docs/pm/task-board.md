@@ -134,9 +134,9 @@ Vietnamese:
 
 ## In Progress
 
-My Notifications: WP7-NOTIFY is in progress. N1 #361 and N2 #362 are merged. N3 Tasks 7–9 are implemented/task-reviewed and the integrated matrix passes at `459782b660df938e99da5f3c3913d573166d03e8`; final whole-branch review and one Draft PR remain. No deploy/migration/real backfill/Ready/merge/N4. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
+My Notifications: WP7-NOTIFY is in progress. N1 #361 and N2 #362 are merged. N3 Tasks 7–9 plus final review fix are complete at source head `979a3ef878b0cf58aa55796203845788852030b1`; final scoped review is GO with 0 Critical/Major/Important and one deferred Minor. Fresh matrix passes; closure docs, push and one Draft PR remain. No deploy/migration/real backfill/Ready/merge/N4. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
 
-Tiếng Việt: WP7-NOTIFY đang thực hiện; N1 #361 và N2 #362 đã merge. N3 Tasks 7–9 đã implement/task-review và full matrix PASS tại SHA trên; còn final review toàn branch và một Draft PR. Không deploy/migration/backfill thật/Ready/merge/N4.
+Tiếng Việt: WP7-NOTIFY đang thực hiện; N1 #361 và N2 #362 đã merge. N3 Tasks 7–9 cùng fix final review hoàn tất tại source head trên; scoped review cuối GO 0 Critical/Major/Important, một Minor defer. Full matrix PASS; còn closure docs, push và một Draft PR. Không deploy/migration/backfill thật/Ready/merge/N4.
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |

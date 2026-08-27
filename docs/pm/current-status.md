@@ -5,8 +5,8 @@ Last updated: 2026-08-27
 ## 2026-08-27 My Notifications N3 source execution
 
 - N2 #362 is merged at `c722c355df5ff786d372002e20ab10864b4780ab`; that exact commit is the isolated N3 base. DonHV authorized continuing through N3 source completion. Tasks 7–9 cover lifecycle channels, selected mentions, escalation and final access indexing.
-- Tasks 7–9 are implemented and task-reviewed at `459782b660df938e99da5f3c3913d573166d03e8`. The fresh integrated source matrix, CAP/HANA compile, UI lint/build and protected-path guards pass; one Task 8 Minor about UUID case normalization is explicitly handed to final review. The next boundary is one bounded whole-branch source/security review, remediation if needed, and one Draft PR. No N3 deployment or release PASS; live UI rollback remains unchanged.
-- Tiếng Việt: Tasks 7–9 đã implement và task-review tại SHA trên. Full matrix source mới, compile CAP/HANA, UI lint/build và guard path đều PASS; một Minor Task 8 về normalize UUID hoa/thường được chuyển rõ sang final review. Boundary tiếp theo là một review source/security toàn branch, sửa nếu cần, rồi đúng một Draft PR. Chưa deploy/release PASS N3; live UI rollback giữ nguyên.
+- Tasks 7–9 and the final review fix are complete at source head `979a3ef878b0cf58aa55796203845788852030b1`. Final scoped re-review is GO with 0 Critical/Major/Important and one accepted/deferred Minor about UUID case normalization. Fresh final source matrix, CAP/HANA compile, UI lint/build and protected guards pass. Next boundary: closure docs, push and exactly one Draft PR only. No deployment/release PASS; live UI rollback remains unchanged.
+- Tiếng Việt: Tasks 7–9 và fix final review hoàn tất tại source head trên. Scoped re-review cuối GO 0 Critical/Major/Important, còn một Minor được chấp nhận/defer về normalize UUID hoa/thường. Full matrix source cuối, compile CAP/HANA, UI lint/build và protected guard PASS. Boundary tiếp: closure docs, push và đúng một Draft PR. Chưa deploy/release PASS; live UI rollback giữ nguyên.
 
 ## 2026-08-27 My Notifications N2 source candidate
 

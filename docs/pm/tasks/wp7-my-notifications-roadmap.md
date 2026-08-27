@@ -27,7 +27,7 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-N1 #361 and N2 #362 are merged; N3 froze exact base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 are implemented and task-reviewed at `459782b660df938e99da5f3c3913d573166d03e8`: lifecycle/channel policy, selected mentions, upward escalation and final access indexing. Fresh integrated verification is green. Existing Knowledge Gate PASS is reused by DonHV confirmation. One final bounded whole-branch review, any required fix and one Draft PR remain. No Ready, merge, deployment, migration, backfill, live email or N4 is authorized. Live UI remains rolled back pending the coordinated rollout; source completion is not runtime acceptance.
+N1 #361 and N2 #362 are merged; N3 froze exact base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 and the final review fix are complete at source head `979a3ef878b0cf58aa55796203845788852030b1`: lifecycle/channel policy, selected mentions, upward escalation and final access indexing. Final scoped review is GO, 0 Critical/Major/Important, with one safe deferred Minor. Fresh final verification is green. Existing Knowledge Gate PASS is reused by DonHV confirmation. Closure docs, push and exactly one Draft PR remain. No Ready, merge, deployment, migration, backfill, live email or N4 is authorized. Live UI remains rolled back; source completion is not runtime acceptance.
 
 ## Tiếng Việt
 
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-N1 #361 và N2 #362 đã merge; N3 freeze base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 đã implement/task-review tại `459782b660df938e99da5f3c3913d573166d03e8`: lifecycle/kênh gửi, mention được chọn, escalation tăng mức và access index cuối. Full verification mới GREEN. Dùng lại Knowledge Gate PASS theo xác nhận DonHV. Còn final review toàn branch, fix nếu cần và một Draft PR. Không Ready, merge, deploy, migration, backfill, email thật hoặc N4. UI live vẫn rollback chờ rollout phối hợp; source xong không phải runtime acceptance.
+N1 #361 và N2 #362 đã merge; N3 freeze base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 và fix final review hoàn tất tại source head `979a3ef878b0cf58aa55796203845788852030b1`: lifecycle/kênh gửi, mention được chọn, escalation tăng mức và access index cuối. Scoped review cuối GO 0 Critical/Major/Important, còn một Minor an toàn defer. Full verification cuối GREEN. Dùng lại Knowledge Gate PASS theo xác nhận DonHV. Còn closure docs, push và đúng một Draft PR. Không Ready, merge, deploy, migration, backfill, email thật hoặc N4. UI live vẫn rollback; source xong không phải runtime acceptance.
