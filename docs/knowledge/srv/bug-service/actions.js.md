@@ -247,3 +247,9 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
 `transitionBug` passes `enforceIdentityAccess` only when the action supplies a different assignee. Lifecycle transitions that keep an existing assignee do not turn the new-link readiness rule into an ownership migration. The backend remains authoritative even if the UI value help is bypassed.
 
 `transitionBug` chi truyen `enforceIdentityAccess` khi action cung cap assignee khac. Lifecycle transition giu assignee hien tai khong bien rule readiness thanh migration ownership. Backend van la authority ke ca khi bypass value help tren UI.
+
+## N3 lifecycle delivery policy
+
+**English.** Lifecycle actions reuse the history ID as their notification source key. Resubmit and retest-owner reassignment select their stable event codes and require prompt email; assignment removal is planned by history as inbox-only. The action transaction still owns authorization and business updates.
+
+**Tiếng Việt.** Lifecycle action dùng lại history ID làm source key notification. Resubmit và đổi retest owner chọn stable event code và cần email prompt; bỏ assignment do history lập plan inbox-only. Transaction action vẫn sở hữu authorization và business update.

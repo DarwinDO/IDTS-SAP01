@@ -13,8 +13,8 @@ const MAX_PAGE_SIZE = 100
 const MAX_PAGE_SKIP = 10000
 const CATEGORIES = new Set(['ALL', 'BUG', 'ACCESS'])
 const READ_STATES = new Set(['ALL', 'UNREAD', 'READ'])
-const BUG_EVENTS = new Set(['ASSIGNED', 'NEED_MORE_INFORMATION', 'REJECTED', 'UPDATED', 'OVERDUE', 'CLOSED'])
-const ACTION_REQUIRED_EVENTS = new Set(['ASSIGNED', 'NEED_MORE_INFORMATION', 'REJECTED'])
+const BUG_EVENTS = new Set(['ASSIGNED', 'NEED_MORE_INFORMATION', 'REJECTED', 'UPDATED', 'OVERDUE', 'CLOSED', 'RESOLVED', 'RETEST_REQUIRED', 'REOPENED', 'RESUBMITTED', 'REASSIGNED', 'RETEST_OWNER_CHANGED', 'PENDING_ASSIGNMENT'])
+const ACTION_REQUIRED_EVENTS = new Set(['ASSIGNED', 'NEED_MORE_INFORMATION', 'REJECTED', 'RESOLVED', 'RETEST_REQUIRED', 'REOPENED', 'RESUBMITTED', 'REASSIGNED', 'RETEST_OWNER_CHANGED'])
 // Bundle riêng dùng fallback native CAP; không dịch raw audit/message có thể chứa dữ liệu riêng.
 const texts = cds.i18n.bundle4({ basename: 'notifications', roots: [__dirname], model: undefined })
 

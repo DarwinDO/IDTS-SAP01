@@ -6,6 +6,7 @@ const { INSERT, SELECT, UPDATE } = cds.ql
 const {
   ACTION,
   COORDINATOR_ROLES,
+  EVENT,
   STATUS
 } = require('./constants')
 
@@ -14,7 +15,8 @@ const {
   readBug,
   reasonTarget,
   resolveRequestUser,
-  trimToNull
+  trimToNull,
+  userIDForDeveloper
 } = require('./helpers')
 
 const {
@@ -110,7 +112,7 @@ async function resubmitToDeveloper (req, entities) {
     })
   }
 
-  await writeHistoryEvent(req, entities, {
+  const historyID = await writeHistoryEvent(req, entities, {
     bugID,
     actorID: actorUser?.ID || oldBug.reporter_ID,
     actionType: ACTION.RESUBMIT_TO_DEVELOPER,
@@ -123,8 +125,10 @@ async function resubmitToDeveloper (req, entities) {
     await writeNotificationAndSchedule(req, {
       bugID,
       recipientID: updatedBug.nextProcessorUser_ID,
-      eventType: 'UPDATED',
-      message: `${updatedBug.bugNumber || 'Bug'} was resubmitted with additional information.`
+      eventType: EVENT.RESUBMITTED,
+      message: `${updatedBug.bugNumber || 'Bug'} was resubmitted with additional information.`,
+      sourceKey: `STATUS:${historyID}:${updatedBug.nextProcessorUser_ID}`,
+      emailRequired: true
     })
   }
 
@@ -259,7 +263,7 @@ async function transitionBug (req, entities, options) {
     })
   }
 
-  await writeHistoryEvent(req, entities, {
+  const historyID = await writeHistoryEvent(req, entities, {
     bugID,
     actorID,
     actionType: options.actionType,
@@ -267,7 +271,14 @@ async function transitionBug (req, entities, options) {
     changes: historyChanges
   })
 
-  await writeNotificationForStatus(req, entities, updatedBug, options.status)
+  const assigneeChange = historyChanges.find(change => change.fieldName === 'assignee')
+  await writeNotificationForStatus(req, entities, updatedBug, options.status, {
+    historyID,
+    changes: historyChanges,
+    previousAssigneeUserID: assigneeChange?.oldValue
+      ? await userIDForDeveloper(req, entities, assigneeChange.oldValue)
+      : null
+  })
   return updatedBug
 }
 
@@ -315,7 +326,7 @@ async function reassignRetestOwner (req, entities) {
   const tx = cds.tx(req)
   await tx.run(UPDATE(entities.Bugs).set(patch).where({ ID: bugID }))
   const updatedBug = await tx.run(SELECT.one.from(entities.Bugs).where({ ID: bugID }))
-  await writeHistoryEvent(req, entities, {
+  const historyID = await writeHistoryEvent(req, entities, {
     bugID,
     actorID: actor.ID,
     actionType: ACTION.REASSIGN_RETEST_OWNER,
@@ -330,8 +341,10 @@ async function reassignRetestOwner (req, entities) {
   await writeNotificationAndSchedule(req, {
     bugID,
     recipientID: target.ID,
-    eventType: 'UPDATED',
-    message: `${updatedBug.bugNumber || 'Bug'} was assigned to you for retest continuity.`
+    eventType: EVENT.RETEST_OWNER_CHANGED,
+    message: `${updatedBug.bugNumber || 'Bug'} was assigned to you for retest continuity.`,
+    sourceKey: `STATUS:${historyID}:${target.ID}`,
+    emailRequired: true
   })
   return updatedBug
 }

@@ -36,7 +36,7 @@ async function recordCreateSideEffects (req, data, entities) {
   const actor = await resolveRequestUser(req, entities)
   const actorID = actor?.ID || bug.reporter_ID || (await firstUserByRole(req, entities, 'TESTER'))?.ID
 
-  await writeHistoryEvent(req, entities, {
+  const historyID = await writeHistoryEvent(req, entities, {
     bugID: data.ID,
     actorID,
     actionType: ACTION.CREATE,
@@ -51,7 +51,7 @@ async function recordCreateSideEffects (req, data, entities) {
     ]
   })
 
-  await writeNotificationForStatus(req, entities, bug, bug.status_code)
+  await writeNotificationForStatus(req, entities, bug, bug.status_code, { historyID })
 }
 
 async function recordUpdateSideEffects (req, entities) {
@@ -69,7 +69,7 @@ async function recordBugChangeSideEffects (req, entities, changes, finalBug) {
     ? actionTypeForChange(changes.find(change => change.fieldName === 'assignee'))
     : actionTypeForChange(changes[0])
 
-  await writeHistoryEvent(req, entities, {
+  const historyID = await writeHistoryEvent(req, entities, {
     bugID: finalBug.ID,
     actorID,
     actionType: eventActionType,
@@ -79,10 +79,21 @@ async function recordBugChangeSideEffects (req, entities, changes, finalBug) {
 
   const statusChange = changes.find(change => change.fieldName === 'status')
   const assigneeChange = changes.find(change => change.fieldName === 'assignee')
+  const previousAssigneeUserID = assigneeChange?.oldValue
+    ? await userIDForDeveloper(req, entities, assigneeChange.oldValue)
+    : null
   if (statusChange) {
-    await writeNotificationForStatus(req, entities, finalBug, statusChange.newValue)
+    await writeNotificationForStatus(req, entities, finalBug, statusChange.newValue, {
+      historyID,
+      changes,
+      previousAssigneeUserID
+    })
   } else if (assigneeChange?.newValue) {
-    await writeNotificationForStatus(req, entities, finalBug, STATUS.ASSIGNED)
+    await writeNotificationForStatus(req, entities, finalBug, STATUS.ASSIGNED, {
+      historyID,
+      changes,
+      previousAssigneeUserID
+    })
   }
 }
 
@@ -272,6 +283,7 @@ async function writeHistoryEvent (req, entities, entry) {
       reason
     }))
   ))
+  return eventID
 }
 
 async function enrichHistoryChanges (req, entities, changes) {
@@ -418,78 +430,121 @@ function genericEditSummary (changes) {
   return `Updated ${labels.length} bug fields.`
 }
 
-async function writeNotificationForStatus (req, entities, bug, status) {
+async function writeNotificationForStatus (req, entities, bug, status, context = {}) {
   // Xác định recipient từ status/next owner rồi ghi notification + email outbox; không gửi provider trực tiếp ở đây.
-  const notification = notificationTargetForStatus(bug, status)
+  const notification = buildLifecycleNotification({ bug, status, ...context })
   if (!notification?.recipientID || !notification.eventType) return
 
   await writeNotificationAndSchedule(req, {
     bugID: bug.ID,
     recipientID: notification.recipientID,
     eventType: notification.eventType,
-    message: notification.message
+    message: notification.message,
+    sourceKey: notification.sourceKey,
+    emailRequired: notification.emailRequired
   })
 }
 
-function notificationTargetForStatus (bug, status) {
+function buildLifecycleNotification ({ bug, status, changes = [], historyID, previousAssigneeUserID, eventType } = {}) {
   // Mapping thuần từ status/Bug sang recipient và message intent; return null khi trạng thái không cần thông báo.
+  if (!bug || !historyID) return null
+  const assigneeChanged = changes.some(change => change.fieldName === 'assignee')
+  const ownerChanged = changes.some(change => change.fieldName === 'nextProcessorUser')
+  const recipientID = status === STATUS.CLOSED ? bug.reporter_ID : bug.nextProcessorUser_ID
+  const lifecycle = (recipientID && eventType)
+    ? { recipientID, eventType, emailRequired: true }
+    : null
+
+  if (lifecycle) return notificationWithSource(bug, historyID, lifecycle)
+  if (status === STATUS.PENDING_ASSIGNMENT && previousAssigneeUserID) {
+    return notificationWithSource(bug, historyID, {
+      recipientID: previousAssigneeUserID,
+      eventType: EVENT.PENDING_ASSIGNMENT,
+      emailRequired: false,
+      message: `${bug.bugNumber || 'Bug'} was moved to Pending Assignment.`
+    })
+  }
   if (status === STATUS.ASSIGNED && bug.nextProcessorUser_ID) {
-    return {
+    return notificationWithSource(bug, historyID, {
       recipientID: bug.nextProcessorUser_ID,
-      eventType: EVENT.ASSIGNED,
-      message: `${bug.bugNumber || 'Bug'} has been assigned.`
-    }
+      eventType: assigneeChanged && changes.find(change => change.fieldName === 'assignee')?.oldValue ? EVENT.REASSIGNED : EVENT.ASSIGNED,
+      emailRequired: true,
+      message: `${bug.bugNumber || 'Bug'} has been ${assigneeChanged ? 'reassigned' : 'assigned'}.`
+    })
   }
 
   if (status === STATUS.NEED_MORE_INFORMATION && bug.nextProcessorUser_ID) {
-    return {
+    return notificationWithSource(bug, historyID, {
       recipientID: bug.nextProcessorUser_ID,
       eventType: EVENT.NEED_MORE_INFORMATION,
+      emailRequired: true,
       message: `${bug.bugNumber || 'Bug'} needs more information.`
-    }
+    })
   }
 
   if (status === STATUS.REJECTED && bug.nextProcessorUser_ID) {
-    return {
+    return notificationWithSource(bug, historyID, {
       recipientID: bug.nextProcessorUser_ID,
       eventType: EVENT.REJECTED,
+      emailRequired: true,
       message: `${bug.bugNumber || 'Bug'} was rejected and needs follow-up.`
-    }
+    })
   }
 
   if (status === STATUS.RESOLVED && bug.nextProcessorUser_ID) {
-    return {
+    return notificationWithSource(bug, historyID, {
       recipientID: bug.nextProcessorUser_ID,
-      eventType: EVENT.UPDATED,
+      eventType: EVENT.RESOLVED,
+      emailRequired: true,
       message: `${bug.bugNumber || 'Bug'} is resolved and ready for verification.`
-    }
+    })
   }
 
   if (status === STATUS.RETEST_REQUIRED && bug.nextProcessorUser_ID) {
-    return {
+    return notificationWithSource(bug, historyID, {
       recipientID: bug.nextProcessorUser_ID,
-      eventType: EVENT.UPDATED,
+      eventType: EVENT.RETEST_REQUIRED,
+      emailRequired: true,
       message: `${bug.bugNumber || 'Bug'} requires retest.`
-    }
+    })
   }
 
   if (status === STATUS.REOPENED && bug.nextProcessorUser_ID) {
-    return {
+    return notificationWithSource(bug, historyID, {
       recipientID: bug.nextProcessorUser_ID,
-      eventType: EVENT.UPDATED,
+      eventType: EVENT.REOPENED,
+      emailRequired: true,
       message: `${bug.bugNumber || 'Bug'} was reopened and needs follow-up.`
-    }
+    })
   }
 
   if (status === STATUS.CLOSED && bug.reporter_ID) {
-    return {
+    return notificationWithSource(bug, historyID, {
       recipientID: bug.reporter_ID,
       eventType: EVENT.CLOSED,
+      emailRequired: true,
       message: `${bug.bugNumber || 'Bug'} has been closed.`
-    }
+    })
+  }
+
+  if ([STATUS.IN_REVIEW, STATUS.IN_PROGRESS].includes(status) && ownerChanged && bug.nextProcessorUser_ID) {
+    return notificationWithSource(bug, historyID, {
+      recipientID: bug.nextProcessorUser_ID,
+      eventType: EVENT.UPDATED,
+      emailRequired: true,
+      message: `${bug.bugNumber || 'Bug'} is now assigned to you for the current workflow step.`
+    })
   }
 
   return null
+}
+
+function notificationWithSource (bug, historyID, notification) {
+  return {
+    ...notification,
+    message: notification.message || `${bug.bugNumber || 'Bug'} was updated.`,
+    sourceKey: `STATUS:${historyID}:${notification.recipientID}`
+  }
 }
 
 async function actorForAction (req, entities, bug, actionType) {
@@ -542,5 +597,6 @@ module.exports = {
   importantChanges,
   writeHistoryEvent,
   writeNotificationForStatus,
+  buildLifecycleNotification,
   actorForAction
 }

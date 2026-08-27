@@ -39,3 +39,9 @@ English: `hydrateNotificationPage` now validates XOR and source-recipient agreem
 Tiếng Việt: `hydrateNotificationPage` kiểm tra XOR và recipient nguồn khớp recipient index trước khi trả nội dung. Source thiếu/không biết và access chưa APPLIED dùng DTO không khả dụng đã localize, không báo thành công. Text lấy từ bundle CAP `notifications` (fallback Anh và bản Việt) theo `req.locale`; không select message/audit reason thô. Priority Bug đọc trong cùng bulk query, không thêm query mỗi row. Navigation dùng lại `buildBugLink`, kiểm UUID và active key. Owner DonHV, backup NhanT; debug tại bước map source sang DTO, kiểm cùng `srv/email/template.js`, hai properties file và QA service/wire.
 
 Never accept a recipient ID from the client, never hydrate before caller scope, and never add external URLs. New sources require one bounded bulk read and an allowlisted mapper. / Không nhận recipient ID từ client, không hydrate trước khi scope caller và không thêm URL ngoài. Source mới cần một bulk read bounded và mapper theo allowlist.
+
+## N3 lifecycle event hydration
+
+**English.** The bounded Bug-event allowlist now recognizes lifecycle-specific codes including resolved, retest, reopened, resubmitted, reassigned, retest-owner changed, and assignment removed. Action-required remains true only for events that need a user response.
+
+**Tiếng Việt.** Allowlist Bug event có giới hạn nay nhận các code lifecycle riêng gồm resolved, retest, reopened, resubmitted, reassigned, đổi retest owner và bỏ assignment. `actionRequired` chỉ true cho event cần người dùng phản hồi.

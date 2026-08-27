@@ -129,3 +129,9 @@ The SAP attachment plugin uses a transactional outbox for external object-store 
 **Tiếng Việt.** Lịch sử xóa attachment được xác định tại boundary `SAVE` của draft. Handler so sánh snapshot attachment active trước Save với metadata active sau Save. Một thao tác xóa đã commit tạo đúng một `HistoryEvent` dễ đọc và một `HistoryLog` ở mức field; draft bị discard không tạo lịch sử xóa. Audit chỉ chứa attachment ID và filename đã giới hạn; không chứa storage URL, object key, hash, binary hoặc diagnostic của provider.
 
 SAP attachment plugin dùng transactional outbox cho external object store. Vì vậy history chứng minh business deletion đã commit trong CAP/HANA, không khẳng định object S3 đã bị xóa vật lý ngay cùng thời điểm.
+
+## N3 lifecycle notification source keys
+
+**English.** `writeHistoryEvent` returns the persisted history ID. Lifecycle planning derives `STATUS:<historyID>:<recipientID>` only after that audit source exists, then writes an idempotent notification. Owner-stable In Review/In Progress returns no plan; an owner change uses the existing `UPDATED` event. Check `actions.js`, `outbox.js`, the event catalog, and inbox mapper together.
+
+**Tiếng Việt.** `writeHistoryEvent` trả về ID history đã persist. Lifecycle tạo `STATUS:<historyID>:<recipientID>` chỉ sau khi audit source tồn tại, rồi ghi notification idempotent. In Review/In Progress không đổi owner không tạo plan; đổi owner dùng event `UPDATED` hiện có. Kiểm cùng `actions.js`, `outbox.js`, event catalog và inbox mapper.

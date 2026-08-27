@@ -205,3 +205,9 @@ Gate 6.5 export helper `formatFrom(config)` hiện có thay vì nhân đôi logi
   **Phải kiểm tra cùng**: `srv/user-admin/delivery.js:6,150`, `srv/user-admin/access-delivery.js:6,145` và regression sender.
 
 **Safe editing / Sửa an toàn:** Keep this a small pure formatter export; do not move sending, retry, or provider configuration into this module. / Giữ đây là export formatter thuần nhỏ; không đưa việc gửi, retry hoặc cấu hình provider vào module này.
+
+## N3 source and channel policy
+
+**English.** `writeNotificationRecord` writes the Bug notification and its personal inbox index in the same transaction. A supplied source key reuses the existing record; `emailRequired:false` returns `IN_APP_ONLY` without an EMAIL row, while explicit prompt paths create one PENDING delivery for the existing post-commit worker.
+
+**Tiếng Việt.** `writeNotificationRecord` ghi Bug notification và index inbox cá nhân trong cùng transaction. Source key được cung cấp sẽ dùng lại record có sẵn; `emailRequired:false` trả `IN_APP_ONLY` không tạo EMAIL row, còn đường prompt tạo một PENDING delivery cho worker post-commit hiện có.

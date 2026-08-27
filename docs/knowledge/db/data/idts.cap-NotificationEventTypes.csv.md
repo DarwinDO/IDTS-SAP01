@@ -102,3 +102,9 @@ Phần này nói rõ file này liên kết với file nào, liên kết nằm �
 - Source line count at documentation time: 7
 - Documentation style: learning-oriented explanation, not line listing only
 - Last reviewed: 2026-06-22
+
+## N3 lifecycle codes
+
+**English.** N3 adds additive stable codes for lifecycle, ownership, mention and escalation producers without rewriting legacy rows. `RESOLVED`, `RETEST_REQUIRED`, `REOPENED`, `RESUBMITTED`, `REASSIGNED`, `RETEST_OWNER_CHANGED`, and `PENDING_ASSIGNMENT` are consumed by the server inbox mapper and UI labels.
+
+**Tiếng Việt.** N3 thêm code ổn định theo kiểu additive cho producer lifecycle, ownership, mention và escalation, không sửa legacy row. `RESOLVED`, `RETEST_REQUIRED`, `REOPENED`, `RESUBMITTED`, `REASSIGNED`, `RETEST_OWNER_CHANGED` và `PENDING_ASSIGNMENT` được dùng bởi inbox mapper server và UI label.
