@@ -14,6 +14,6 @@ RETEST_OWNER_CHANGED,Retest Owner Changed,Tester responsible for retest changed,
 COMMENT_MENTIONED,Comment Mentioned,User was mentioned in a bug comment,130,true,1
 PRIORITY_ESCALATED,Priority Escalated,Bug priority increased,140,true,2
 SEVERITY_ESCALATED,Severity Escalated,Bug severity increased,150,true,2
-PENDING_ASSIGNMENT,Pending Assignment,Bug assignment was removed,160,true,2
+PENDING_ASSIGNMENT,Pending Assignment,Bug is waiting for PM assignment,160,true,2
 ASSIGNMENT_REMOVED,Assignment Removed,Bug assignment was removed for the previous developer,170,true,1
 OWNER_CHANGED,Current Owner Changed,Bug workflow ownership changed,180,true,1

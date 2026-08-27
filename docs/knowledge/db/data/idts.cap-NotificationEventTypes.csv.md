@@ -108,3 +108,5 @@ Phần này nói rõ file này liên kết với file nào, liên kết nằm �
 **English.** N3 adds additive stable codes for lifecycle, ownership, mention and escalation producers without rewriting legacy rows. `RESOLVED`, `RETEST_REQUIRED`, `REOPENED`, `RESUBMITTED`, `REASSIGNED`, `RETEST_OWNER_CHANGED`, and `PENDING_ASSIGNMENT` are consumed by the server inbox mapper and UI labels.
 
 **Tiếng Việt.** N3 thêm code ổn định theo kiểu additive cho producer lifecycle, ownership, mention và escalation, không sửa legacy row. `RESOLVED`, `RETEST_REQUIRED`, `REOPENED`, `RESUBMITTED`, `REASSIGNED`, `RETEST_OWNER_CHANGED` và `PENDING_ASSIGNMENT` được dùng bởi inbox mapper server và UI label.
+
+`PENDING_ASSIGNMENT` mô tả Bug đang chờ PM giao việc; chỉ `ASSIGNMENT_REMOVED` mô tả việc Developer trước đó bị bỏ assignment. / `PENDING_ASSIGNMENT` means a Bug awaits PM assignment; only `ASSIGNMENT_REMOVED` means the previous Developer lost the assignment.

@@ -5,6 +5,8 @@ process.env.NODE_ENV = 'test'
 process.env.CDS_ENV = 'test'
 
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 const cds = require('@sap/cds')
 const { SELECT } = cds.ql
 
@@ -123,6 +125,16 @@ async function main () {
   assert.ok(retestNotification.sourceKey.endsWith(`:${newRetestOwner.ID}`))
   assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: retestNotification.ID }), 1)
   assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: retestNotification.ID }), 1)
+
+  const catalog = fs.readFileSync(path.join(__dirname, '../../db/data/idts.cap-NotificationEventTypes.csv'), 'utf8')
+  const uiBundles = ['i18n.properties', 'i18n_en.properties', 'i18n_vi.properties']
+    .map(file => fs.readFileSync(path.join(__dirname, '../../app/bug-management-ui/webapp/i18n', file), 'utf8'))
+  assert.match(catalog, /^PENDING_ASSIGNMENT,Pending Assignment,Bug is waiting for PM assignment,/m)
+  assert.match(catalog, /^ASSIGNMENT_REMOVED,Assignment Removed,Bug assignment was removed for the previous developer,/m)
+  for (const bundle of uiBundles) {
+    assert.doesNotMatch(bundle, /notificationEventPENDING_ASSIGNMENT=(Assignment removed|Đã bỏ giao việc)/)
+    assert.match(bundle, /notificationEventASSIGNMENT_REMOVED=(Assignment removed|Đã bỏ giao việc)/)
+  }
 
   const historyID = cds.utils.uuid()
   const sourceKey = `STATUS:${historyID}:${recipient.ID}`

@@ -8,10 +8,10 @@ Important anchor: the `BUG_*`, `ACCESS_*` and `UNAVAILABLE_TITLE` keys are a con
 
 ## Tiếng Việt
 
-Bundle CAP English fallback cung cấp title/summary có giới hạn cho sáu loại event Bug hiện có và role-change/reactivation cuối. Không chứa recipient, audit reason, provider data hoặc URL ngoài. `srv/notification/inbox.js` chỉ chọn key sau khi validate source, rồi truyền locale caller cho fallback native CAP. Key không khả dụng ngăn record không hỗ trợ phát thông báo thành công giả.
+English fallback supplies bounded safe title/summary pairs for the additive Bug event vocabulary: assignment/reassignment/removal, owner change, lifecycle progress and completion, pending assignment, overdue, and later mention/escalation codes, plus access role-change/reactivation. It contains no recipient, audit reason, provider data, or external URL. `srv/notification/inbox.js` selects a key only after source validation and passes caller locale to CAP fallback; an unavailable key never turns an unsupported record into a success claim.
 
 ## N3 lifecycle keys
 
-English: lifecycle codes have matching safe title/summary keys, including distinct `ASSIGNMENT_REMOVED`; `PENDING_ASSIGNMENT` remains reserved for a future PM queue event. Vietnamese: code lifecycle có title/summary an toàn tương ứng, gồm `ASSIGNMENT_REMOVED` riêng; `PENDING_ASSIGNMENT` vẫn dành cho event PM queue sau này.
+Vietnamese: bundle fallback cung cấp cặp title/summary an toàn, có giới hạn cho vocabulary Bug additive: giao/giao lại/bỏ giao, đổi owner, tiến trình và hoàn tất lifecycle, pending assignment, overdue, và code mention/escalation sau này, cùng access role-change/reactivation. Không chứa recipient, audit reason, provider data hoặc URL ngoài. `srv/notification/inbox.js` chỉ chọn key sau khi validate source và truyền locale caller cho CAP fallback; key unavailable không biến record không hỗ trợ thành success claim. `ASSIGNMENT_REMOVED` mô tả previous Developer, còn `PENDING_ASSIGNMENT` mô tả PM queue.
 
 Điểm neo: các key `BUG_*`, `ACCESS_*` và `UNAVAILABLE_TITLE` là contract với mapper. Thiếu key làm DTO trống; dịch không tương đương làm sai ý nghĩa event. Kiểm hai bundle, mapper và test HTTP Anh/Việt cùng nhau. Owner DonHV; backup NhanT. Giữ title <=160 và summary <=500 ký tự.

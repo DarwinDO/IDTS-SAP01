@@ -12,4 +12,6 @@ Bundle CAP Vietnamese cung cấp title/summary có giới hạn cho sáu loại 
 
 Điểm neo: các key `BUG_*`, `ACCESS_*` và `UNAVAILABLE_TITLE` là contract với mapper. Thiếu key làm DTO trống; dịch không tương đương làm sai ý nghĩa event. Kiểm hai bundle, mapper và test HTTP Anh/Việt cùng nhau. Owner DonHV; backup NhanT. Giữ title <=160 và summary <=500 ký tự.
 
-N3 bổ sung key lifecycle tiếng Việt, gồm `ASSIGNMENT_REMOVED` và `OWNER_CHANGED`; hai code này không được thay bằng `PENDING_ASSIGNMENT` hoặc legacy `UPDATED` vì ý nghĩa/action-required khác nhau.
+English: the Vietnamese bundle mirrors safe bounded title/summary keys for the expanded additive Bug vocabulary—assignment/reassignment/removal, owner change, lifecycle progress/completion, pending assignment, overdue, and later mention/escalation—plus access role-change/reactivation. `ASSIGNMENT_REMOVED` remains previous-Developer wording; `PENDING_ASSIGNMENT` remains PM queue wording. These codes are not interchangeable with legacy `UPDATED` because meaning and action-required behavior differ.
+
+Tiếng Việt: bundle tiếng Việt mirror các key title/summary an toàn, có giới hạn cho vocabulary Bug additive mở rộng—giao/giao lại/bỏ giao, đổi owner, tiến trình/hoàn tất lifecycle, pending assignment, overdue và mention/escalation sau này—cùng access role-change/reactivation. `ASSIGNMENT_REMOVED` vẫn là wording Developer trước đó; `PENDING_ASSIGNMENT` vẫn là wording hàng đợi PM. Các code này không thay thế legacy `UPDATED` vì ý nghĩa và action-required khác nhau.
