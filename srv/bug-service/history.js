@@ -443,17 +443,12 @@ async function writeNotificationForStatus (req, entities, bug, status, context =
   })
 }
 
-function buildLifecycleNotification ({ bug, status, changes = [], historyID, previousAssigneeUserID, eventType } = {}) {
+function buildLifecycleNotification ({ bug, status, changes = [], historyID, previousAssigneeUserID } = {}) {
   // Mapping thuần từ status/Bug sang recipient và message intent; return null khi trạng thái không cần thông báo.
   if (!bug || !historyID) return null
   const assigneeChanged = changes.some(change => change.fieldName === 'assignee')
   const ownerChanged = changes.some(change => change.fieldName === 'nextProcessorUser')
   const recipientID = status === STATUS.CLOSED ? bug.reporter_ID : bug.nextProcessorUser_ID
-  const lifecycle = (recipientID && eventType)
-    ? { recipientID, eventType, emailRequired: true }
-    : null
-
-  if (lifecycle) return notificationWithSource(bug, historyID, lifecycle)
   if (status === STATUS.PENDING_ASSIGNMENT && previousAssigneeUserID) {
     return notificationWithSource(bug, historyID, {
       recipientID: previousAssigneeUserID,

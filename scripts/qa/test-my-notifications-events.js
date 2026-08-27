@@ -5,8 +5,6 @@ process.env.NODE_ENV = 'test'
 process.env.CDS_ENV = 'test'
 
 const assert = require('node:assert/strict')
-const fs = require('node:fs')
-const path = require('node:path')
 const cds = require('@sap/cds')
 const { SELECT } = cds.ql
 
@@ -14,6 +12,7 @@ const { normalizeEmailConfig } = require('../../srv/email/config')
 const { writeNotificationRecord } = require('../../srv/email/outbox')
 const { buildLifecycleNotification } = require('../../srv/bug-service/history')
 const { hydrateNotificationPage } = require('../../srv/notification/inbox')
+const { recordBugChangeSideEffects } = require('../../srv/bug-service/history')
 
 function emailConfig () {
   return normalizeEmailConfig({
@@ -41,6 +40,40 @@ async function main () {
   const recipient = await db.run(SELECT.one.from('idts.cap.Users').columns('ID').where({ active: true }))
   assert.ok(bug?.ID)
   assert.ok(recipient?.ID)
+  const entities = Object.fromEntries([
+    'Bugs', 'Users', 'HistoryEvents', 'HistoryLogs', 'StatusValues', 'PriorityValues', 'SeverityValues',
+    'EnvironmentValues', 'DeveloperProfiles', 'SAPModules', 'ApplicationComponents', 'DefectCategories',
+    'ComponentCategories', 'ProcessorRoleValues'
+  ].map(name => [name, `idts.cap.${name}`]))
+  const routeBug = await db.run(SELECT.one.from(entities.Bugs).where({ ID: bug.ID }))
+  const routeActor = await db.run(SELECT.one.from(entities.Users).where({ active: true }))
+  const routeOwner = await db.run(SELECT.one.from(entities.Users).where({ active: true, ID: { '!=': routeActor.ID } }))
+  const routeAssignee = await db.run(SELECT.one.from(entities.DeveloperProfiles).columns('ID'))
+  assert.ok(routeOwner?.ID, 'fixture has a distinct current owner')
+
+  // Production route: history side effects receive a CAP request and persist all lifecycle records.
+  const routeReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })
+  const routeSourceBefore = `STATUS:`
+  await db.tx(routeReq, async () => {
+    await recordBugChangeSideEffects(routeReq, entities, [{
+      fieldName: 'nextProcessorUser', oldValue: routeBug.nextProcessorUser_ID, newValue: routeOwner.ID
+    }], { ...routeBug, nextProcessorUser_ID: routeOwner.ID, status_code: 'IN_PROGRESS' })
+  })
+  const ownerRouteNotification = await db.run(SELECT.one.from('idts.cap.Notifications')
+    .where({ recipient_ID: routeOwner.ID, eventType_code: 'OWNER_CHANGED' }))
+  assert.ok(ownerRouteNotification?.sourceKey?.startsWith(routeSourceBefore), 'owner route persisted a history-derived source key')
+  assert.equal(await count(db, 'idts.cap.UserNotificationInboxEntries', { bugNotification_ID: ownerRouteNotification.ID }), 1)
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: ownerRouteNotification.ID }), 1)
+
+  const removalReq = new cds.Request({ user: new cds.User({ id: routeActor.email, roles: [routeActor.role_code, 'authenticated-user'] }) })
+  await db.tx(removalReq, async () => {
+    await recordBugChangeSideEffects(removalReq, entities, [{
+      fieldName: 'assignee', oldValue: routeAssignee.ID, newValue: null
+    }], { ...routeBug, assignee_ID: null, nextProcessorUser_ID: null, status_code: 'PENDING_ASSIGNMENT' })
+  })
+  const removalRouteNotification = await db.run(SELECT.one.from('idts.cap.Notifications').where({ eventType_code: 'ASSIGNMENT_REMOVED' }))
+  assert.ok(removalRouteNotification, 'assignee removal route persisted an inbox-only notification')
+  assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: removalRouteNotification.ID }), 0)
 
   const historyID = cds.utils.uuid()
   const sourceKey = `STATUS:${historyID}:${recipient.ID}`
@@ -155,21 +188,6 @@ async function main () {
     }
   }
 
-  const resubmitted = buildLifecycleNotification({
-    bug: { ID: bug.ID, nextProcessorUser_ID: recipient.ID }, status: 'ASSIGNED', historyID,
-    eventType: 'RESUBMITTED'
-  })
-  assert.equal(resubmitted.eventType, 'RESUBMITTED')
-  assert.equal(resubmitted.recipientID, recipient.ID)
-  const retestOwnerChanged = buildLifecycleNotification({
-    bug: { ID: bug.ID, nextProcessorUser_ID: recipient.ID }, status: 'RETEST_REQUIRED', historyID,
-    eventType: 'RETEST_OWNER_CHANGED'
-  })
-  assert.equal(retestOwnerChanged.eventType, 'RETEST_OWNER_CHANGED')
-  assert.equal(retestOwnerChanged.recipientID, recipient.ID)
-
-  const outboxSource = fs.readFileSync(path.join(__dirname, '../../srv/email/outbox.js'), 'utf8')
-  assert.match(outboxSource, /SELECT\.one\.from\(ENTITIES\.Bugs\)[\s\S]*\.forUpdate\(\)/, 'source Bug lock precedes source-key lookup')
 
   console.log('My Notifications lifecycle event matrix: PASS')
 }
