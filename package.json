@@ -86,6 +86,7 @@
     "qa:user-admin-workload:programmatic": "node scripts/qa/test-user-admin-workload.js",
     "qa:user-admin-operations:programmatic": "node scripts/qa/test-user-admin-operations-audit.js",
     "qa:user-access-notifications:programmatic": "node scripts/qa/test-user-access-notifications.js",
+    "qa:my-notifications:model": "node scripts/qa/test-my-notifications-model.js",
     "qa:existing-user-identity-link:programmatic": "node scripts/qa/test-existing-user-identity-link.js",
     "qa:user-admin-active-users:programmatic": "node scripts/qa/test-user-admin-active-users.js",
     "qa:user-admin-access-lifecycle:programmatic": "node scripts/qa/test-user-admin-access-lifecycle.js",
