@@ -51,6 +51,8 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
     if (!candidates.length) break
     result.candidates += candidates.length
 
+    // Lock recipient trước profile, rồi profile trước Bug để giữ thứ tự User -> Profile -> Bug.
+    const candidateLocks = await prepareCandidateLocks(tx, candidates)
     const currentBugs = []
     for (const candidate of candidates) {
       // Candidate rows are only a bounded snapshot. Lock and re-read the Bug before deriving any entry.
@@ -67,7 +69,7 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
     }
 
     const anchors = await readScheduleAnchors(tx, currentBugs, businessDate)
-    const overdueRecipients = await readOverdueRecipients(tx, currentBugs)
+    const overdueRecipients = await readOverdueRecipients(tx, currentBugs, candidateLocks)
     for (const bug of currentBugs) {
       const anchor = anchors.get(bug.ID) || {}
       const urgent = isUrgent(bug)
@@ -120,6 +122,47 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
   }
 
   return result
+}
+
+async function prepareCandidateLocks (tx, candidates) {
+  const profileIDs = [...new Set(candidates.map(row => row.assignee_ID).filter(Boolean))]
+  const profiles = profileIDs.length
+    ? await tx.run(
+      SELECT.from(DEVELOPER_PROFILES)
+        .columns('ID', 'user_ID')
+        .where({ ID: { in: profileIDs } })
+        .orderBy('ID asc')
+        .limit(CANDIDATE_PAGE_SIZE)
+    )
+    : []
+  const userIDs = [...new Set([
+    ...candidates.map(row => row.nextProcessorUser_ID).filter(Boolean),
+    ...profiles.map(row => row.user_ID).filter(Boolean)
+  ])]
+  const users = userIDs.length
+    ? await tx.run(
+      SELECT.from(USERS)
+        .columns('ID', 'active')
+        .where({ ID: { in: userIDs } })
+        .orderBy('ID asc')
+        .limit(RECIPIENT_USER_PAGE_SIZE)
+        .forUpdate()
+    )
+    : []
+  const lockedProfiles = profileIDs.length
+    ? await tx.run(
+      SELECT.from(DEVELOPER_PROFILES)
+        .columns('ID')
+        .where({ ID: { in: profileIDs } })
+        .orderBy('ID asc')
+        .limit(CANDIDATE_PAGE_SIZE)
+        .forUpdate()
+    )
+    : []
+  return {
+    profileIDs: new Set(lockedProfiles.map(row => row.ID).filter(Boolean)),
+    userIDs: new Set(users.map(row => row.ID).filter(Boolean))
+  }
 }
 
 function isScheduledCandidate (bug, businessDate) {
@@ -231,8 +274,8 @@ async function readLatestDueDateEvents (tx, bugs, dueRows) {
   )
 }
 
-async function readOverdueRecipients (tx, candidates) {
-  // Candidate IDs are bounded to one page; keep bulk reads lock-free to preserve the assignment path's Profile -> Bug order.
+async function readOverdueRecipients (tx, candidates, candidateLocks = {}) {
+  // Candidate bounded một page; User -> Profile đã lock trước khi lock Bug.
   const profileIDs = [...new Set(candidates.map(row => row.assignee_ID).filter(Boolean))]
   const profiles = profileIDs.length
     ? await tx.run(SELECT.from(DEVELOPER_PROFILES)
@@ -241,10 +284,13 @@ async function readOverdueRecipients (tx, candidates) {
       .orderBy('ID asc')
       .limit(CANDIDATE_PAGE_SIZE))
     : []
+  const lockedProfiles = candidateLocks.profileIDs instanceof Set ? candidateLocks.profileIDs : new Set()
+  const lockedUsers = candidateLocks.userIDs instanceof Set ? candidateLocks.userIDs : new Set()
+  const eligibleProfiles = profiles.filter(profile => lockedProfiles.has(profile.ID))
   const userIDs = [...new Set([
     ...candidates.map(row => row.nextProcessorUser_ID).filter(Boolean),
-    ...profiles.map(row => row.user_ID).filter(Boolean)
-  ])]
+    ...eligibleProfiles.map(row => row.user_ID).filter(Boolean)
+  ].filter(userID => lockedUsers.has(userID)))]
   const users = userIDs.length
     ? await tx.run(SELECT.from(USERS)
       .columns('ID', 'active')
@@ -253,7 +299,7 @@ async function readOverdueRecipients (tx, candidates) {
       .limit(RECIPIENT_USER_PAGE_SIZE))
     : []
   const activeUsers = new Set(users.map(row => row.ID))
-  const userByProfile = new Map(profiles.filter(row => activeUsers.has(row.user_ID)).map(row => [row.ID, row.user_ID]))
+  const userByProfile = new Map(eligibleProfiles.filter(row => lockedUsers.has(row.user_ID) && activeUsers.has(row.user_ID)).map(row => [row.ID, row.user_ID]))
   return new Map(candidates.map(bug => {
     const currentOwner = activeUsers.has(bug.nextProcessorUser_ID) ? bug.nextProcessorUser_ID : null
     const assignee = userByProfile.get(bug.assignee_ID) || null

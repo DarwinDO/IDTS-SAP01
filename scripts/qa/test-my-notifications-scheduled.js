@@ -37,7 +37,8 @@ const IDS = Object.freeze({
   edited: 'a3000000-0000-4000-8000-000000000006',
   staleAssigned: 'a3000000-0000-4000-8000-000000000007',
   staleDueDate: 'a3000000-0000-4000-8000-000000000008',
-  staleRecipient: 'a3000000-0000-4000-8000-000000000009'
+  staleRecipient: 'a3000000-0000-4000-8000-000000000009',
+  staleProfile: 'a3000000-0000-4000-8000-000000000010'
 })
 
 const BASE_NOW = new Date('2026-08-27T04:00:00.000Z')
@@ -177,7 +178,8 @@ async function main () {
     bug(IDS.staleClosed, 'BUG-SCHEDULED-STALE-CLOSED', 'CRITICAL', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
     bug(IDS.staleAssigned, 'BUG-SCHEDULED-STALE-ASSIGNED', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', null, null),
     bug(IDS.staleDueDate, 'BUG-SCHEDULED-STALE-DUE-DATE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile, 'ASSIGNED'),
-    bug(IDS.staleRecipient, 'BUG-SCHEDULED-STALE-RECIPIENT', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile, 'ASSIGNED')
+    bug(IDS.staleRecipient, 'BUG-SCHEDULED-STALE-RECIPIENT', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile, 'ASSIGNED'),
+    bug(IDS.staleProfile, 'BUG-SCHEDULED-STALE-PROFILE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-26', IDS.pm, IDS.assigneeProfile, 'ASSIGNED')
   ]))
 
   // A mutable candidate set must use keyset pagination, not OFFSET.
@@ -228,15 +230,18 @@ async function main () {
   const bulkProfileQueries = []
   const bulkUserQueries = []
   const bulkFinalUserLocks = []
+  const bulkQueryOrder = []
   const bulkTx = {
     run: async query => {
       const from = query.SELECT?.from?.ref?.[0]
       if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
         bulkCandidateQueries.push(query)
+        bulkQueryOrder.push('candidate-page')
         return bulkCandidateQueries.length === 1 ? bulkCandidates : []
       }
       if (from === 'idts.cap.Bugs' && query.SELECT.one && Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') && query.SELECT.columns?.length > 1) {
         bulkCurrentQueries.push(query)
+        bulkQueryOrder.push('bug-lock')
         const where = JSON.stringify(query.SELECT.where)
         return bulkCandidates.find(row => where.includes(row.ID)) || null
       }
@@ -250,11 +255,13 @@ async function main () {
       }
       if (from === 'idts.cap.DeveloperProfiles') {
         bulkProfileQueries.push(query)
+        bulkQueryOrder.push(Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') ? 'profile-lock' : 'profile-recheck')
         return [{ ID: IDS.assigneeProfile, user_ID: IDS.assigneeUser, active: true }]
       }
       if (from === 'idts.cap.Users' && !query.SELECT.one) {
         if (JSON.stringify(query.SELECT.where).includes('role_code')) return [{ ID: 'bulk-pm', active: true, role_code: 'PM' }]
         bulkUserQueries.push(query)
+        bulkQueryOrder.push(Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') ? 'user-lock' : 'user-recheck')
         return [
           { ID: IDS.owner, active: true },
           { ID: IDS.assigneeUser, active: true }
@@ -278,16 +285,26 @@ async function main () {
     'history anchors are resolved in a bounded number of page bulk queries')
   assert.ok(bulkHistoryQueries.every(query => query.SELECT.limit?.rows?.val <= 500),
     'history anchor bulk queries are individually bounded')
-  assert.equal(bulkProfileQueries.length, 1, 'overdue profiles are resolved in one page-bounded bulk query')
-  assert.equal(bulkUserQueries.length, 1, 'overdue recipient users are resolved in one page-bounded bulk query')
+  assert.equal(bulkProfileQueries.length, 3, 'overdue profiles use one preload, one lock and one page-bounded eligibility recheck')
+  assert.equal(bulkUserQueries.length, 2, 'overdue recipient users use one lock and one page-bounded eligibility recheck')
   assert.ok(bulkProfileQueries.every(query => query.SELECT.limit?.rows?.val <= 500),
     'overdue profile bulk queries are individually bounded')
   assert.ok(bulkUserQueries.every(query => query.SELECT.limit?.rows?.val <= 1000),
     'overdue user bulk queries are individually bounded')
-  assert.ok(bulkProfileQueries.every(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')),
-    'bulk profile eligibility reads do not acquire a Bug-to-Profile lock')
-  assert.ok(bulkUserQueries.every(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')),
-    'bulk user eligibility reads do not acquire a Bug-to-User lock')
+  assert.equal(bulkProfileQueries.filter(query => Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')).length, 1,
+    'one page-bounded profile query acquires the Profile lock')
+  assert.ok(bulkProfileQueries.filter(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')).length === 2,
+    'profile preload and eligibility recheck stay lock-free')
+  assert.ok(bulkUserQueries.some(query => Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')),
+    'one page-bounded user query acquires recipient locks before profiles')
+  assert.ok(bulkUserQueries.filter(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')).length === 1,
+    'user eligibility recheck stays lock-free after Bug revalidation')
+  assert.ok(bulkProfileQueries.slice(-1).every(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')),
+    'profile eligibility recheck stays lock-free after Bug revalidation')
+  assert.ok(bulkQueryOrder.indexOf('user-lock') >= 0 &&
+    bulkQueryOrder.indexOf('user-lock') < bulkQueryOrder.indexOf('profile-lock') &&
+    bulkQueryOrder.indexOf('profile-lock') < bulkQueryOrder.indexOf('bug-lock'),
+  'scheduler acquires User -> Profile -> Bug locks')
   assert.ok(bulkFinalUserLocks.length > 0,
     'each written recipient keeps a final locked User revalidation')
 
@@ -305,6 +322,8 @@ async function main () {
   // A recipient returned by the bulk read can change before its writer call; the final lock must reject it.
   await assertStaleRecipientSkipped(db, IDS.staleRecipient, IDS.owner,
     'a recipient deactivated after bulk resolution is revalidated before notification insert')
+  await assertStaleProfileSkipped(db, IDS.staleProfile, IDS.assigneeProfile, IDS.assigneeUser,
+    'a DeveloperProfile deactivated after bulk resolution is revalidated before notification insert')
 
   const nonSchedulerRequest = new cds.Request({
     user: new cds.User({ id: 'ordinary-user', roles: ['authenticated-user'] }),
@@ -390,6 +409,34 @@ async function assertStaleRecipientSkipped (db, bugID, recipientID, message) {
     }
   }
   await discoverScheduledNotifications({ tx, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID, recipient_ID: recipientID }), 0, message)
+}
+
+async function assertStaleProfileSkipped (db, bugID, profileID, recipientID, message) {
+  let candidateRead = false
+  let profileBulkRead = false
+  const tx = {
+    run: async query => {
+      const from = query.SELECT?.from?.ref?.[0]
+      if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500 && !candidateRead) {
+        candidateRead = true
+        const rows = await db.run(query)
+        return rows.filter(row => row.ID === bugID)
+      }
+      if (from === 'idts.cap.DeveloperProfiles' && !query.SELECT.one && !profileBulkRead &&
+          JSON.stringify(query.SELECT.where).includes(profileID)) {
+        profileBulkRead = true
+        const rows = await db.run(query)
+        await db.run(UPDATE('idts.cap.DeveloperProfiles').set({ active: false }).where({ ID: profileID }))
+        return rows
+      }
+      return db.run(query)
+    }
+  }
+  await discoverScheduledNotifications({ tx, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(profileBulkRead, true, 'race fixture deactivates the profile after its real bulk preload')
+  const profile = await db.run(SELECT.one.from('idts.cap.DeveloperProfiles').columns('active').where({ ID: profileID }))
+  assert.equal(profile?.active, false, 'race fixture commits the profile deactivation before notification readback')
   assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID, recipient_ID: recipientID }), 0, message)
 }
 

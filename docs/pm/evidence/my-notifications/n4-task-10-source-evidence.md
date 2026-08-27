@@ -65,3 +65,21 @@ GREEN nay derive tuổi Pending Assignment từ `HistoryLogs.createdAt` bất bi
 Scoped re-review của fix head `bfd8bf1773278edd25201e4b2c0b069f0cd7b958` tìm thấy một Important mới về query amplification: HistoryLogs và recipient Overdue bị đọc từng candidate. RED được witness bằng page đủ 500 candidate và hai recipient mỗi candidate; `npm run qa:my-notifications:scheduled` fail tại `history anchors are resolved in a bounded number of page bulk queries`.
 
 GREEN nay vẫn giữ một lock-time Bug re-read cho từng candidate, sau đó resolve anchor status/due-date mới nhất bằng aggregate HistoryLogs bounded và profile/user Overdue bằng một bulk query bounded mỗi page. Bulk read không lock để giữ đúng thứ tự lock hiện có của assignment `DeveloperProfile -> Bug`; lock/revalidate User từng recipient ngay trước writer vẫn giữ nguyên, nên recipient đã preload active nhưng chuyển inactive không thể pass. Assertion query-count focused chứng minh 500 candidate re-read, tối đa ba history query bounded, một profile query và một recipient-user query cho page đủ; anchor bất biến, keyset paging, source key và tách prompt/digest vẫn giữ nguyên.
+
+## Addendum / Phụ lục — fix rounds 3 and 4
+
+### Fix round 3
+
+Scoped re-review found that page-level `forUpdate()` profile/user reads after Bug locks could invert the existing assignment order. The fix kept profile/user bulk reads lock-free and retained final per-recipient User locking, preserving `DeveloperProfile -> Bug` assignment ordering while keeping page bounds. Focused full-page QA asserted profile/user query shape and final User revalidation.
+
+### Fix round 4
+
+The scoped re-review then found that lock-free DeveloperProfile eligibility could become stale if profile deactivation committed after the bulk read. TDD RED was witnessed against `b11649896235f604aebaee5a4963a35becc9d728` by a real SQLite fixture that deactivated the persisted profile after its bulk preload and observed one stale technical-assignee notification (`1 !== 0`, exit 1). GREEN preloads profile-to-user pairs, locks candidate Users and then candidate profile IDs once per page before any Bug row (`User -> DeveloperProfile -> Bug`), then performs one page-bounded active-profile/User recheck after Bug lock-time revalidation and accepts only IDs from the prelocked sets. The focused fixture now rejects the deactivated profile while preserving active current-action-owner handling, keyset paging, immutable anchors, source-key idempotency, bounded reads and final User locks. SQLite verifies persisted stale-state behavior but cannot prove HANA row-lock/concurrency semantics; maximum HANA `IN` cardinality remains unverified.
+
+### Fix round 3
+
+Scoped re-review nhận thấy profile/user read page-level bằng `forUpdate()` sau Bug lock có thể đảo thứ tự lock hiện có của assignment. Fix giữ bulk profile/user read lock-free và giữ User lock cuối theo recipient, bảo toàn thứ tự assignment `DeveloperProfile -> Bug` trong khi vẫn bounded theo page. QA full-page focused assert query shape profile/user và final User revalidation.
+
+### Fix round 4
+
+Scoped re-review sau đó nhận thấy eligibility DeveloperProfile lock-free có thể stale nếu profile deactivate commit sau bulk read. RED TDD được witness tại `b11649896235f604aebaee5a4963a35becc9d728` bằng fixture SQLite thật: deactivate profile persisted sau preload bulk và thấy một notification stale cho technical assignee (`1 !== 0`, exit 1). GREEN preload cặp profile-user, lock User candidate rồi lock DeveloperProfile candidate một lần bounded theo page trước mọi Bug row (`User -> DeveloperProfile -> Bug`), sau đó recheck profile/User active một lần bounded theo page sau Bug revalidation và chỉ nhận ID thuộc set đã prelock. Fixture focused nay reject profile đã deactivate, đồng thời giữ current-action-owner active, keyset paging, anchor bất biến, source-key idempotency, bounded read và final User lock. SQLite verify stale state persisted nhưng không chứng minh row-lock/concurrency HANA; cardinality `IN` tối đa trên HANA vẫn chưa verify.
