@@ -251,6 +251,9 @@ entity Notifications : cuid, managed {
   deliveries     : Composition of many NotificationDeliveries on deliveries.notification = $self;
 }
 
+extend Notifications with { sourceKey : String(255); }
+annotate Notifications with @assert.unique.notificationSourceKey: [ sourceKey ];
+
 entity NotificationDeliveries : cuid, managed {
   // Outbox email lưu message snapshot, retry/lock/status. Provider credential không thuộc entity này.
   notification      : Association to Notifications not null;
@@ -390,6 +393,18 @@ entity UserIdentityAuditEvents : cuid, managed {
 
 annotate UserIdentityAuditEvents with @assert.unique.identityAuditCorrelationAction: [ correlationId, action ];
 
+entity UserNotificationInboxEntries : cuid, managed {
+  // Personal inbox index: source records remain authoritative; this row owns only recipient/read state.
+  recipient        : Association to Users not null;
+  bugNotification  : Association to Notifications;
+  accessAuditEvent : Association to UserIdentityAuditEvents;
+  occurredAt       : Timestamp not null;
+  readAt           : Timestamp;
+}
+
+annotate UserNotificationInboxEntries with @assert.unique.inboxBugSource: [ bugNotification ];
+annotate UserNotificationInboxEntries with @assert.unique.inboxAccessSource: [ accessAuditEvent ];
+
 entity UserAccessNotificationDeliveries : cuid, managed {
   // Outbox riêng cho access-change; source audit event là business idempotency key.
   sourceAuditEvent    : Association to UserIdentityAuditEvents not null;
@@ -413,6 +428,33 @@ entity UserAccessNotificationDeliveries : cuid, managed {
 }
 
 annotate UserAccessNotificationDeliveries with @assert.unique.accessAuditDelivery: [ sourceAuditEvent ];
+
+entity NotificationDigestDeliveries : cuid, managed {
+  // One stored digest snapshot per recipient/business date/type; the shared worker owns delivery attempts.
+  recipient         : Association to Users not null;
+  businessDate      : Date not null;
+  digestType        : String(30) not null;
+  windowStart       : Timestamp not null;
+  windowEnd         : Timestamp not null;
+  snapshotAt        : Timestamp not null;
+  itemCount         : Integer not null;
+  subject           : String(255) not null;
+  textBody          : LargeString not null;
+  htmlBody          : LargeString not null;
+  status            : Association to NotificationDeliveryStatuses not null;
+  attemptCount      : Integer default 0 not null;
+  nextAttemptAt     : Timestamp;
+  lastAttemptAt     : Timestamp;
+  sentAt            : Timestamp;
+  lastErrorCode     : String(80);
+  lastErrorSummary  : String(500);
+  providerMessageId : String(255);
+  lockedUntil       : Timestamp;
+  lockToken         : String(64);
+}
+
+annotate NotificationDigestDeliveries
+  with @assert.unique.digestRecipientDateType: [ recipient, businessDate, digestType ];
 
 entity DuplicateLinks : cuid, managed {
   // Liên kết duplicate chỉ được tạo khi user xác nhận; kết quả AI Similar Bugs tự nó không insert entity này.

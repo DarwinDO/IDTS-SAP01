@@ -559,3 +559,57 @@ Delta model Gate 5 là additive: chỉ unique constraint/index và một audit t
 Keep this schema change additive. Never add seed CSV or `.hdbtabledata` for delivery rows, and never run HDI from a source-documentation gate. Compare generated HANA artifacts against the frozen baseline before approving migration.
 
 Giữ thay đổi schema này additive. Không thêm seed CSV hoặc `.hdbtabledata` cho delivery row và không chạy HDI từ gate tài liệu source. Phải so sánh artifact HANA generated với baseline đã freeze trước khi duyệt migration.
+
+## N1 personal notification persistence / Persistence thông báo cá nhân N1
+
+### English
+
+`Notifications.sourceKey` is a nullable idempotency key for new Bug notification producers. Existing rows remain valid with `null`; producers introduced in later gates must use a stable business key so a replay cannot create a second source event.
+
+`UserNotificationInboxEntries` is a federated personal index. It stores the resolved internal recipient, the occurrence timestamp, optional read timestamp, and a link to either one Bug notification or one final access audit. Source notifications and audits remain authoritative and are never copied into this table. The service handler must enforce the exactly-one-source XOR rule because portable CDS cannot express that constraint consistently across SQLite and HANA. The two unique source annotations prevent one source record from appearing twice in the inbox.
+
+`NotificationDigestDeliveries` stores one immutable message snapshot for each recipient, business date, and digest type. It deliberately follows the existing delivery status, retry, provider-result, and bounded worker-lock shape, so later digest work can reuse the same sender/worker conventions without adding a provider or worker. N1 adds only source structure; it performs no migration, backfill, or delivery.
+
+#### Important source anchors
+
+- **Location**: `db/schema.cds` — `Notifications.sourceKey` and `@assert.unique.notificationSourceKey`.
+  **IDTS concept**: stable source-event idempotency for new Bug notification producers.
+  **Impact if broken**: retries or concurrent producers can create duplicate inbox and email intent.
+  **Must check together**: `srv/email/outbox.js`, future notification event producers, and `scripts/qa/test-my-notifications-model.js`.
+- **Location**: `db/schema.cds` — `UserNotificationInboxEntries` and its two source uniqueness annotations.
+  **IDTS concept**: caller-owned read state over authoritative Bug/access sources.
+  **Impact if broken**: one source can appear twice, read state can be attributed to the wrong user, or source history can be duplicated.
+  **Must check together**: `srv/notification/inbox.js`, `srv/notification.cds`, and the notification service/backfill QA.
+- **Location**: `db/schema.cds` — `NotificationDigestDeliveries` and `@assert.unique.digestRecipientDateType`.
+  **IDTS concept**: one retryable stored digest snapshot per recipient/date/type.
+  **Impact if broken**: scheduled reruns can send different or duplicate digest messages under one business window.
+  **Must check together**: future `srv/notification/digest.js`, the existing email worker, and scheduled notification QA.
+
+### Tiếng Việt
+
+`Notifications.sourceKey` là khóa idempotency nullable cho producer notification Bug mới. Row cũ vẫn hợp lệ khi giá trị là `null`; producer ở gate sau phải dùng business key ổn định để replay không tạo source event thứ hai.
+
+`UserNotificationInboxEntries` là index inbox cá nhân liên nguồn. Entity chỉ lưu người nhận nội bộ đã resolve, thời điểm xảy ra, thời điểm đọc tùy chọn và liên kết tới đúng một Bug notification hoặc một access audit cuối. Notification/audit nguồn vẫn là authority và không bị copy vào bảng này. Handler service phải enforce rule XOR đúng một source vì CDS portable không biểu diễn constraint này ổn định trên cả SQLite và HANA. Hai annotation unique ngăn một source xuất hiện hai lần trong inbox.
+
+`NotificationDigestDeliveries` lưu một snapshot nội dung bất biến cho mỗi người nhận, ngày nghiệp vụ và loại digest. Entity cố ý theo shape status/retry/provider-result/worker-lock có giới hạn hiện có để gate digest sau dùng lại sender/worker chung mà không thêm provider hoặc worker. N1 chỉ thêm cấu trúc source; không chạy migration, backfill hoặc delivery.
+
+#### Các điểm neo quan trọng
+
+- **Vị trí**: `db/schema.cds` — `Notifications.sourceKey` và `@assert.unique.notificationSourceKey`.
+  **Khái niệm IDTS**: idempotency source event ổn định cho producer notification Bug mới.
+  **Ảnh hưởng nếu sai**: retry hoặc producer chạy đồng thời có thể tạo trùng intent inbox và email.
+  **Phải kiểm tra cùng**: `srv/email/outbox.js`, producer notification tương lai và `scripts/qa/test-my-notifications-model.js`.
+- **Vị trí**: `db/schema.cds` — `UserNotificationInboxEntries` và hai annotation unique cho source.
+  **Khái niệm IDTS**: read state thuộc caller trên source Bug/access có authority.
+  **Ảnh hưởng nếu sai**: một source có thể xuất hiện hai lần, read state bị gắn nhầm user hoặc lịch sử source bị duplicate.
+  **Phải kiểm tra cùng**: `srv/notification/inbox.js`, `srv/notification.cds` và QA service/backfill notification.
+- **Vị trí**: `db/schema.cds` — `NotificationDigestDeliveries` và `@assert.unique.digestRecipientDateType`.
+  **Khái niệm IDTS**: một snapshot digest lưu bền vững và retry được cho mỗi người nhận/ngày/loại.
+  **Ảnh hưởng nếu sai**: scheduler chạy lại có thể gửi nội dung digest khác hoặc trùng cho cùng business window.
+  **Phải kiểm tra cùng**: `srv/notification/digest.js` tương lai, email worker hiện có và QA scheduled notification.
+
+### Safe editing / Sửa an toàn
+
+Keep source associations nullable individually but enforce exactly one in the notification handler. Never cascade inbox cleanup into source history. Treat every schema change as migration-sensitive and verify both HANA and EDMX compilation before approval.
+
+Giữ từng association source nullable nhưng enforce đúng một source trong notification handler. Không bao giờ cascade cleanup inbox sang source history. Mọi thay đổi schema đều nhạy cảm với migration và phải compile cả HANA lẫn EDMX trước khi duyệt.
