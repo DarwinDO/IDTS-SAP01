@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1 SOURCE VERIFIED — DRAFT PR #361 OPEN; STOP BEFORE MERGE/DEPLOY/N2`
+`N1 MERGED — N2 DRAFT PR #362 OPEN; STOP BEFORE MERGE/DEPLOY/N3`
 
 ### Authority
 
@@ -27,13 +27,13 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-Planning PR #360 and Gate 6.5 are merged. N1 uses exact base `8ac9327b93b70633e96d2b6f09bb379a5afb681f`; Tasks 1–4 and the fresh full matrix are complete. Same-reviewer re-review at `7dad8f18e148568d83380cabf2deba80eb432398` returned zero Critical/Major/Important/Minor. DonHV reaffirmed existing PASS and authorized push plus one Draft N1 PR. Reuse the original notification gate dated 2026-08-12 (100%) and 2026-08-20 composite (90%) linked in `docs/pm/evidence/my-notifications/n1-source-evidence.md`; this supersedes the mistaken daily-assessment HOLD, not a new assessment or source-derived human PASS. Migration, backfill execution, deployment and N2 remain unapproved.
+N1 PR #361 merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`; this is the exact N2 base. N2 Tasks 5–6 are locally verified: OData client, native bell/badge/popover, filters, paging, read actions, safe deep link, i18n, lifecycle cleanup, responsive browser and focused lint/build. Existing PASS remains reused by DonHV confirmation. One bounded exact-head review and one Draft N2 PR remain. Migration, backfill execution, deployment, Ready/merge and N3 are unapproved.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`SOURCE N1 ĐÃ KIỂM ĐỊNH — DRAFT PR #361 ĐÃ MỞ; DỪNG TRƯỚC MERGE/DEPLOY/N2`
+`N1 ĐÃ MERGE — DRAFT PR N2 #362 ĐÃ MỞ; DỪNG TRƯỚC MERGE/DEPLOY/N3`
 
 ### Thẩm quyền
 
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-Planning PR #360 và Gate 6.5 đã merge. N1 dùng base chính xác `8ac9327b93b70633e96d2b6f09bb379a5afb681f`; Tasks 1–4 và full matrix mới đã hoàn tất. Cùng reviewer kiểm lại tại `7dad8f18e148568d83380cabf2deba80eb432398` với 0 Critical/Major/Important/Minor. DonHV xác nhận lại PASS đã có và duyệt push cùng một Draft PR N1. Tái sử dụng gate notification ngày 12/08/2026 (100%) và composite 20/08 (90%) được dẫn trong `docs/pm/evidence/my-notifications/n1-source-evidence.md`; thay thế HOLD đánh giá theo ngày đã ghi nhầm, không phải bài đánh giá mới hay human PASS suy từ review source. Migration, chạy backfill, deploy và N2 vẫn chưa được duyệt.
+N1 PR #361 đã merge tại `e35d09c0deef129f0d986457c847fe7fc28b90d4`, là base N2 chính xác. N2 Tasks 5–6 đã verify local: client OData, chuông/badge/popover native, filter, paging, read action, deep link an toàn, i18n, cleanup lifecycle, browser responsive và lint/build tập trung. Tiếp tục dùng PASS cũ theo xác nhận DonHV. Còn một review exact-head có giới hạn và một Draft N2 PR. Chưa duyệt migration, chạy backfill, deploy, Ready/merge hoặc N3.

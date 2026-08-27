@@ -134,9 +134,9 @@ Vietnamese:
 
 ## In Progress
 
-My Notifications: WP7-NOTIFY is in progress; planning #360 merged and N1 Tasks 1–4 are source-verified in OPEN/Draft PR #361. Fresh matrix passes and source review has zero findings; existing human PASS is reused with DonHV's explicit confirmation. No merge/deploy/migration/real backfill/N2. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
+My Notifications: WP7-NOTIFY is in progress. N1 #361 merged; N2 source review is GO with zero Critical/Major/Important and exactly one OPEN/Draft PR #362 targets `dev`. No deploy/migration/real backfill/Ready/merge/N3. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
 
-Tiếng Việt: WP7-NOTIFY đang thực hiện; planning #360 đã merge, source N1 Tasks 1–4 đã kiểm định trong Draft #361. Matrix mới PASS, review không còn finding; dùng PASS cũ theo xác nhận của DonHV. Chưa merge/deploy/migration/backfill thật/N2.
+Tiếng Việt: WP7-NOTIFY đang thực hiện; N1 #361 đã merge, review source N2 GO không còn Critical/Major/Important và đúng một Draft #362 đang mở vào `dev`. Chưa deploy/migration/backfill thật/Ready/merge/N3.
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |

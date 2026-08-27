@@ -162,3 +162,9 @@ AppRouter cookie ma khong dua platform token vao code browser.
 
 Thu tu debug: `auth-guard.js` -> `AuthService.me` (chi BTP) ->
 `bootstrap-ui5.js` -> ComponentSupport -> request `$metadata` dau tien.
+
+## N2 notification host / Host notification N2
+
+**English.** `idtsNotificationShellHost` precedes the profile host and receives a native UI5 toolbar. The existing full-height selector excludes both shell hosts so the new toolbar does not occupy a viewport. There is no new custom notification CSS or auth bypass. Check `NotificationShell`, `Component.js` and responsive browser screenshots together.
+
+**Tiếng Việt.** `idtsNotificationShellHost` đứng trước profile host, nhận toolbar UI5 native. Selector full-height có sẵn loại hai shell host để toolbar mới không chiếm cả viewport. Không có CSS notification custom mới hoặc bypass auth. Kiểm cùng `NotificationShell`, `Component.js` và screenshot browser responsive.

@@ -392,6 +392,10 @@ sap.ui.define([
                 model.refresh();
             }
             MessageToast.show(getText(view, "smartAssignAssignedToast", [candidate.developerName]));
+            // Assignment có thể tạo notification; yêu cầu shell refresh count ngay, không chờ poll 30 giây.
+            if (typeof window !== "undefined" && typeof window.dispatchEvent === "function") {
+                window.dispatchEvent(new Event("idts:notification-change"));
+            }
         });
     }
 

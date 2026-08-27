@@ -114,6 +114,12 @@ Với `IDTS-53`, component này cũng gọi `ProfileShell.init()`. Đây là ch�
 
 ## Gate 6.4 session capability / Capability trong session Gate 6.4
 
+### N2 notification lifecycle / Vòng đời notification N2
+
+**English.** After base model initialization and profile setup, `init()` creates `NotificationShell` with this component. `exit()` destroys it before base teardown so polling/listeners cannot survive destruction. Check the named `notifications` model, stable index host and shell `destroy` together. Authentication remains in the existing pre-bootstrap guard.
+
+**Tiếng Việt.** Sau khi base khởi tạo model và profile, `init()` tạo `NotificationShell` với component hiện tại. `exit()` destroy nó trước base teardown để polling/listener không sống sau khi hủy. Kiểm cùng model `notifications`, host index ổn định và `destroy` của shell. Xác thực vẫn ở guard trước bootstrap.
+
 **English.** `init()` copies only the strict server Boolean `user.canAdministerUsers === true` into `session>/canAdministerUsers`. The manifest uses it to hide and disable the User Administration action; the action handler checks the safe profile again at click time. This model is UX state, never backend authorization.
 
 **Tiếng Việt.** `init()` chỉ copy Boolean nghiêm ngặt `user.canAdministerUsers === true` vào `session>/canAdministerUsers`. Manifest dùng giá trị này để ẩn và disable action User Administration; handler kiểm tra lại safe profile lúc bấm. Model này chỉ là state UX, không thay authorization backend.

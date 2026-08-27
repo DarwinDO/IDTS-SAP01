@@ -16,9 +16,10 @@ sap.ui.define(
         "sap/fe/core/AppComponent",
         "sap/ui/model/json/JSONModel",
         "idts/bugmanagementui/ext/login/LoginController",
-        "idts/bugmanagementui/ext/login/ProfileShell"
+        "idts/bugmanagementui/ext/login/ProfileShell",
+        "idts/bugmanagementui/ext/notification/NotificationShell"
     ],
-    function (AppComponent, JSONModel, LoginSession, ProfileShell) {
+    function (AppComponent, JSONModel, LoginSession, ProfileShell, NotificationShell) {
         "use strict";
         return AppComponent.extend("idts.bugmanagementui.Component", {
             metadata: { manifest: "json" },
@@ -37,6 +38,16 @@ sap.ui.define(
                 // rồi ProfileShell gắn avatar/menu theo user trong session; breakpoint ở đây khi shell thiếu.
                 AppComponent.prototype.init.apply(this, arguments);
                 ProfileShell.init();
+                this._notificationShell = NotificationShell.init(this);
+            },
+
+            exit: function () {
+                // Timer/listener inbox thuộc vòng đời component, không sống qua logout/destroy.
+                if (this._notificationShell) {
+                    this._notificationShell.destroy();
+                    this._notificationShell = null;
+                }
+                AppComponent.prototype.exit.apply(this, arguments);
             }
         });
     }
