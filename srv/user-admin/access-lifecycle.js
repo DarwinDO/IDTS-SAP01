@@ -17,6 +17,7 @@ async function requestSuspend (req, dependencies) {
   await assertNotFinalAdministrator(tx, user.ID)
 
   const now = req.timestamp || new Date()
+  const completedAt = now instanceof Date ? now.toISOString() : new Date(now).toISOString()
   const userChanged = await tx.run(
     UPDATE(USERS).set({ active: false }).where({ ID: user.ID, active: true })
   )
@@ -48,8 +49,35 @@ async function requestSuspend (req, dependencies) {
     fromState: 'ACTIVE',
     toState: 'SUSPENDED',
     correlationId,
+    completedAt,
     summary: reason
   })
+  const finalUser = await tx.run(SELECT.one.from(USERS).columns('ID', 'role_code', 'active').where({ ID: user.ID }))
+  const finalRequest = await tx.run(SELECT.one.from(REQUESTS).columns('ID', 'status_code').where({ ID: request.ID }))
+  const finalAudit = await dependencies.insertIdentityAudit(tx, {
+    operationID: null,
+    requestID: finalRequest.ID,
+    actorID: administrator.ID,
+    targetUserID: finalUser.ID,
+    action: 'SUSPEND',
+    result: 'APPLIED',
+    fromState: 'ACTIVE',
+    toState: finalRequest.status_code,
+    correlationId,
+    completedAt,
+    summary: 'Local access suspension was applied.'
+  })
+  const delivery = await dependencies.writeUserAccessDelivery({
+    tx,
+    auditEvent: finalAudit,
+    targetUserID: finalUser.ID,
+    eventType: 'ACCESS_SUSPENDED',
+    effectiveRole: finalUser.role_code,
+    effectiveAccessState: finalRequest.status_code,
+    completedAt,
+    emailConfig: dependencies.getEmailConfig()
+  })
+  if (delivery.deliveryStatus === 'PENDING') dependencies.scheduleImmediateEmailOutbox(req)
   return dependencies.onboardingResult({
     ...request,
     status_code: 'SUSPENDED',

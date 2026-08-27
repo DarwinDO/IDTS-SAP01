@@ -100,6 +100,16 @@ async function expectRejected (operation, status, code) {
 }
 
 async function runProgrammaticLifecycleChecks () {
+  cds.env.idts.email = {
+    enabled: true,
+    provider: 'smtp',
+    host: 'smtp.example.invalid',
+    port: 587,
+    username: 'controlled-user',
+    password: 'controlled-password',
+    fromAddress: 'no-reply@example.invalid',
+    baseUrl: 'https://idts.example.invalid'
+  }
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db
   await db.run(INSERT.into('idts.cap.Users').entries([
@@ -207,12 +217,62 @@ async function runProgrammaticLifecycleChecks () {
       action: 'REQUEST_SUSPEND'
     })
   )
+  const appliedSuspensionAudit = await db.run(
+    SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({
+      onboardingRequest_ID: TARGET_REQUEST_ID,
+      targetUser_ID: TARGET_ID,
+      action: 'SUSPEND',
+      result: 'APPLIED'
+    })
+  )
+  const suspensionDelivery = await db.run(
+    SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ targetUser_ID: TARGET_ID })
+  )
   assert.equal(suspendedUser.active, false)
   assert.equal(suspendedRequest.status_code, 'SUSPENDED')
   assert.equal(suspendedRequest.provisioningVersion, 8)
   assert.equal(suspendedSessions.filter(session => session.ID !== TARGET_SESSION_REVOKED_ID).every(session => session.revokedAt), true)
   assert.equal(suspendedSessions.find(session => session.ID === TARGET_SESSION_REVOKED_ID).revokedAt, '2026-08-20T12:01:00.000Z')
   assert.equal(suspensionAudit.result, 'QUEUED')
+  assert.ok(appliedSuspensionAudit, 'local suspend appends a separate final APPLIED audit')
+  assert.equal(
+    Date.parse(suspensionAudit.createdAt) <= Date.parse(appliedSuspensionAudit.createdAt),
+    true,
+    'queued suspend audit is not later than its final APPLIED audit'
+  )
+  assert.deepEqual({
+    operationID: appliedSuspensionAudit.operation_ID,
+    requestID: appliedSuspensionAudit.onboardingRequest_ID,
+    actorID: appliedSuspensionAudit.actor_ID,
+    targetUserID: appliedSuspensionAudit.targetUser_ID,
+    action: appliedSuspensionAudit.action,
+    result: appliedSuspensionAudit.result,
+    fromState: appliedSuspensionAudit.fromState,
+    toState: appliedSuspensionAudit.toState,
+    correlationId: appliedSuspensionAudit.correlationId,
+    completedAt: appliedSuspensionAudit.createdAt
+  }, {
+    operationID: null,
+    requestID: TARGET_REQUEST_ID,
+    actorID: ADMIN_ONE_ID,
+    targetUserID: TARGET_ID,
+    action: 'SUSPEND',
+    result: 'APPLIED',
+    fromState: 'ACTIVE',
+    toState: 'SUSPENDED',
+    correlationId: suspended.correlationId,
+    completedAt: appliedSuspensionAudit.createdAt
+  })
+  assert.equal(suspensionDelivery.sourceAuditEvent_ID, appliedSuspensionAudit.ID)
+  assert.equal(suspensionDelivery.eventType, 'ACCESS_SUSPENDED')
+  assert.equal(suspensionDelivery.status_code, 'PENDING')
+  assert.match(suspensionDelivery.textBody, /Effective role: Tester/)
+  assert.match(suspensionDelivery.textBody, /Access state: Suspended/)
+  assert.equal(
+    suspensionDelivery.textBody.split('\n').find(line => line.startsWith('Completed at: ')),
+    `Completed at: ${appliedSuspensionAudit.createdAt}`
+  )
+  assert.equal(await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ sourceAuditEvent_ID: suspensionAudit.ID })), undefined)
   assert.equal(suspendedRequest.latestOperation_ID, null)
   assert.equal((await db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: TARGET_REQUEST_ID }))).length, beforeOperations.length)
   const suspendedActiveUserRows = await service.send({
@@ -256,6 +316,7 @@ async function runProgrammaticLifecycleChecks () {
   assert.equal(reactivationOperation.desiredUserAdmin, false)
   assert.equal(reactivationAudit.result, 'QUEUED')
   assert.equal((await db.run(SELECT.one.from('idts.cap.Users').where({ ID: TARGET_ID }))).active, false)
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries').where({ targetUser_ID: TARGET_ID }))).length, 1, 'queued reactivation creates no delivery')
 
   const matchingProviderCalls = []
   const matchingProvider = {
@@ -307,6 +368,19 @@ async function runProgrammaticLifecycleChecks () {
   assert.equal((await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: TARGET_REQUEST_ID }))).status_code, 'ACTIVE')
   assert.equal((await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: claimed.operationID }))).state, 'SUCCEEDED')
   assert.equal((await db.run(SELECT.from('idts.cap.AuthSessions').where({ user_ID: TARGET_ID }))).filter(session => session.revokedAt).length, 3)
+  const finalReactivationAudit = await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({
+    operation_ID: claimed.operationID,
+    action: 'REACTIVATE',
+    result: 'APPLIED'
+  }))
+  const reactivationDelivery = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({
+    sourceAuditEvent_ID: finalReactivationAudit.ID
+  }))
+  assert.equal(reactivationDelivery.eventType, 'ACCESS_REACTIVATED')
+  assert.equal(reactivationDelivery.status_code, 'PENDING')
+  assert.match(reactivationDelivery.textBody, /Effective role: Tester/)
+  assert.match(reactivationDelivery.textBody, /Access state: Active/)
+  assert.equal((await db.run(SELECT.from('idts.cap.UserAccessNotificationDeliveries').where({ targetUser_ID: TARGET_ID }))).length, 2)
 
   const concurrent = await Promise.allSettled([
     service.send({

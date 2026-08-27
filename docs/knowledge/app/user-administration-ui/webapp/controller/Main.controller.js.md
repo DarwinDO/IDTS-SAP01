@@ -230,3 +230,53 @@ Change Role khởi tạo `currentRole === role` và không đọc Developer prof
 **English.** `onOpenBugManagement()` calls guarded `window.location.assign("/idtsbugmanagementui/index.html")`. The fixed same-origin path keeps the current tab and AppRouter session, and it carries no token, domain, query, fragment, or `returnTo`. The guard makes the method a no-op when the browser navigation API is unavailable. This handler performs no OData call or data mutation.
 
 **Tiếng Việt.** `onOpenBugManagement()` gọi có guard `window.location.assign("/idtsbugmanagementui/index.html")`. Path cùng origin cố định giữ tab hiện tại và AppRouter session, không mang token, domain, query, fragment hoặc `returnTo`. Guard làm handler không thao tác khi API navigation của browser không có. Handler không gọi OData và không thay đổi dữ liệu.
+
+## Gate 6.5 unified Delivery controller / Controller Delivery hợp nhất Gate 6.5
+
+### English
+
+The existing `deliveries` JSON model gains one persisted allowlisted type (`ALL`, `INVITATION`, `ACCESS_CHANGE`). `_loadDeliveries` calls only `searchAdministrationDeliveries`, preserves busy/error/refresh/load-more request ordering, and normalizes the approved DTO into friendly localized type/event labels, masked/safe text, and em-dash timestamp fallbacks. `onRetryDelivery` accepts exactly the two concrete row types and dispatches the corresponding OData action; unknown or missing types show the existing safe error and call no action.
+
+- **Location**: `Main.controller.js:20-31,1266-1297` — label allowlists and `_normalizeDeliveryRow`.
+  **IDTS concept**: UI consumes only the safe DTO and never infers raw access/provider meaning.
+  **Impact if broken**: unknown codes can be shown as valid events, empty details become ambiguous, or unsafe fields can leak into the model.
+  **Must check together**: three i18n bundles, `DeliveryDetails.fragment.xml`, and safe-field UI tests.
+- **Location**: `Main.controller.js:247-250,1570-1593` — type filter and unified loader.
+  **IDTS concept**: one Operations table over server-bounded invitation/access data with preserved paging state.
+  **Impact if broken**: changing filters can mix stale pages, duplicate rows, or call the legacy invitation-only endpoint.
+  **Must check together**: `Main.view.xml:386-410`, `srv/user-admin/operations-audit.js:107-202`, and paging tests.
+- **Location**: `Main.controller.js:282-294` — `onRetryDelivery`.
+  **IDTS concept**: exact-type fail-closed retry dispatch while CAP remains authoritative.
+  **Impact if broken**: an unknown/access row can fall back to `retryOnboardingDelivery` or bypass confirmation.
+  **Must check together**: `srv/user-admin.cds:242-248`, backend retry guards, and unknown/missing-type regression.
+- **Location**: `Main.controller.js:1705-1761` — session-state type read/write.
+  **IDTS concept**: Delivery filter state survives dialogs/refresh without accepting arbitrary stored values.
+  **Impact if broken**: stale or malicious session state can request an invalid delivery type.
+  **Must check together**: filter options and `administrationDeliveryType` server validation.
+
+### Tiếng Việt
+
+JSON model `deliveries` hiện có thêm một type allowlist được lưu trong session (`ALL`, `INVITATION`, `ACCESS_CHANGE`). `_loadDeliveries` chỉ gọi `searchAdministrationDeliveries`, giữ busy/error/refresh/load-more và thứ tự request, rồi normalize DTO đã duyệt thành label type/event thân thiện đã localize, text đã che/an toàn và fallback timestamp em dash. `onRetryDelivery` chỉ nhận hai type row cụ thể và dispatch action OData tương ứng; type lạ hoặc thiếu hiện lỗi an toàn hiện có và không gọi action.
+
+- **Vị trí**: `Main.controller.js:20-31,1266-1297` — allowlist label và `_normalizeDeliveryRow`.
+  **Khái niệm IDTS**: UI chỉ dùng DTO an toàn và không suy diễn raw access/provider meaning.
+  **Ảnh hưởng nếu sai**: code lạ có thể hiện như event hợp lệ, detail rỗng mơ hồ hoặc field không an toàn leak vào model.
+  **Phải kiểm tra cùng**: ba i18n bundle, `DeliveryDetails.fragment.xml` và test safe field UI.
+- **Vị trí**: `Main.controller.js:247-250,1570-1593` — filter type và loader hợp nhất.
+  **Khái niệm IDTS**: một bảng Operations trên dữ liệu invitation/access bounded từ server với paging state được giữ.
+  **Ảnh hưởng nếu sai**: đổi filter có thể trộn page stale, trùng row hoặc gọi endpoint chỉ invitation cũ.
+  **Phải kiểm tra cùng**: `Main.view.xml:386-410`, `srv/user-admin/operations-audit.js:107-202` và test paging.
+- **Vị trí**: `Main.controller.js:282-294` — `onRetryDelivery`.
+  **Khái niệm IDTS**: dispatch retry fail-closed theo exact type, CAP vẫn authoritative.
+  **Ảnh hưởng nếu sai**: row lạ/access có thể fallback sang `retryOnboardingDelivery` hoặc bỏ confirmation.
+  **Phải kiểm tra cùng**: `srv/user-admin.cds:242-248`, guard retry backend và regression type lạ/thiếu.
+- **Vị trí**: `Main.controller.js:1705-1761` — đọc/ghi type trong session state.
+  **Khái niệm IDTS**: filter Delivery sống qua dialog/refresh mà không nhận giá trị stored tùy ý.
+  **Ảnh hưởng nếu sai**: session state stale hoặc độc hại có thể request delivery type không hợp lệ.
+  **Phải kiểm tra cùng**: option filter và validation server `administrationDeliveryType`.
+
+### Safe editing / Sửa an toàn
+
+Reuse the one model, table, dialog, formatter, and action helper. Keep unknown types fail-closed, never add raw body/provider/audit/lock fields, and do not treat UI `canRetry` as authorization.
+
+Tái sử dụng một model, table, dialog, formatter và action helper. Giữ type lạ fail-closed, không thêm raw body/provider/audit/lock field và không xem `canRetry` UI là authorization.

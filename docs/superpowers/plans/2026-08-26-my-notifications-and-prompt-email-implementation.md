@@ -12,8 +12,8 @@
 
 ## Global Constraints
 
-- Planning base: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`; every gate fetches and freezes a new exact upstream SHA.
-- N1 cannot start until Gate 6.5 is merged and `origin/dev` contains `UserAccessNotificationDeliveries` plus final APPLIED access-audit hooks. If absent, stop; never copy a Draft-PR branch into N1.
+- Original planning base: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`; refreshed dependency baseline after Gate 6.5 closure: `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`. Every source gate still fetches and freezes its own latest exact upstream SHA.
+- N1 precondition is satisfied at `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`: Gate 6.5 is merged and the tree contains `UserAccessNotificationDeliveries` plus final APPLIED access-audit hooks. N1 must re-prove this at its own start; never copy a feature/Draft-PR branch into N1.
 - Preserve domain source/audit and delivery tables as authorities. Inbox stores recipient/source/read state only.
 - Resolve one authenticated active internal user and enforce XSUAA/business-role alignment before scope, filter, order, page, count, hydration or mutation. PM/UserAdmin cannot read another user's inbox.
 - Prompt mail uses `writeNotificationAndSchedule()` and `scheduleImmediateEmailOutbox()` after commit. Hourly Job Scheduler remains recovery, not normal status-email latency.

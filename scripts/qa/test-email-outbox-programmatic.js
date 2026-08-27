@@ -19,6 +19,7 @@ const { normalizeEmailConfig } = require('../../srv/email/config')
 const { buildBugLink, buildEmailMessage } = require('../../srv/email/template')
 const {
   processEmailDeliveries,
+  formatFrom,
   sanitizeTransportError,
   writeNotificationRecord
 } = require('../../srv/email/outbox')
@@ -67,6 +68,7 @@ async function main () {
   const disabled = normalizeEmailConfig({ enabled: false })
   assert.equal(disabled.enabled, false)
   assert.equal(disabled.ready, false)
+  assert.equal(formatFrom(enabledConfig()), '"IDTS Test" <no-reply@example.test>')
 
   const invalidReplyTo = enabledConfig({ replyTo: '<optional-reply-to@example.test>' })
   assert.equal(invalidReplyTo.ready, false)

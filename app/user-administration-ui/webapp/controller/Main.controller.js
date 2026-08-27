@@ -17,6 +17,17 @@ sap.ui.define([
 	const WORKLOAD_SELECT = "developerProfileID,developerUserID,identityAccessReady,developerName,developerEmail,availabilityStatusCode,availabilityStatusName,availabilityCriticality,workloadLimit,openOwnedBugCount,overdueOwnedBugCount,currentActionItemCount,estimatedEffortHoursTotal,isOverloaded,active";
 	const WORKLOAD_BUG_SELECT = "ID,bugNumber,title,status_code,priority_code,severity_code,dueDate,estimatedEffortHours,assigneeDisplayName,currentActionOwnerDisplayName";
 	const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
+	const DELIVERY_TYPE_LABEL_KEYS = Object.freeze({
+		INVITATION: "invitationDeliveryType",
+		ACCESS_CHANGE: "accessChangeDeliveryType"
+	});
+	const DELIVERY_EVENT_LABEL_KEYS = Object.freeze({
+		INVITATION: "invitationDeliveryType",
+		ACCESS_ROLE_CHANGED: "roleChangedEvent",
+		ACCESS_SUSPENDED: "suspendedEvent",
+		ACCESS_REACTIVATED: "reactivatedEvent",
+		ACCESS_REVOKED: "revokedEvent"
+	});
 
 	return BaseController.extend("idts.useradministrationui.controller.Main", {
 		onInit: function () {
@@ -57,7 +68,7 @@ sap.ui.define([
 				impact: null
 			}), "businessCatalogs");
 			this.setModel(new JSONModel({ items: [] }), "requests");
-			this.setModel(new JSONModel({ items: [], query: oSessionState.deliveryQuery, status: oSessionState.deliveryStatus, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "deliveries");
+			this.setModel(new JSONModel({ items: [], query: oSessionState.deliveryQuery, status: oSessionState.deliveryStatus, deliveryType: oSessionState.deliveryType, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "deliveries");
 			this.setModel(new JSONModel({ items: [], state: oSessionState.operationState, operationType: oSessionState.operationType, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "operations");
 			this.setModel(new JSONModel({ items: [], action: oSessionState.auditAction, result: oSessionState.auditResult, from: oSessionState.auditFrom, to: oSessionState.auditTo, nextSkip: 0, pageSize: 25, hasMore: false, loaded: false, busy: false, error: false, selected: null, detailsBusy: false }), "audit");
 			this.setModel(new JSONModel({ emailDeliveryState: "UNKNOWN", provisioningBrokerState: "UNKNOWN", lastSuccessfulReconciliationAt: null, loaded: false, busy: false, error: false }), "adminReadiness");
@@ -233,6 +244,12 @@ sap.ui.define([
 			await this._loadDeliveries();
 		},
 
+		onDeliveryTypeChange: async function (oEvent) {
+			this.getModel("deliveries").setProperty("/deliveryType", oEvent.getParameter("selectedItem")?.getKey?.() || "ALL");
+			this._saveActiveUsersSessionState();
+			await this._loadDeliveries();
+		},
+
 		onProvisioningFilterChange: async function () {
 			this._saveActiveUsersSessionState();
 			await this._loadOperations();
@@ -259,9 +276,19 @@ sap.ui.define([
 		},
 
 		onRetryOnboardingDelivery: async function (oEvent) {
+			return this.onRetryDelivery(oEvent);
+		},
+
+		onRetryDelivery: async function (oEvent) {
 			const oRow = this._operationsRowFromEvent(oEvent, "deliveries");
-			if (!oRow || !await this._confirm("retryDeliveryConfirmation")) return;
-			await this._invokeOperationsAction("retryOnboardingDelivery", {
+			if (!oRow) return false;
+			if (!["ACCESS_CHANGE", "INVITATION"].includes(oRow.deliveryType)) {
+				MessageBox.error(await this._text("operationsActionFailed"));
+				return false;
+			}
+			if (!await this._confirm("retryDeliveryConfirmation")) return false;
+			const sAction = oRow.deliveryType === "ACCESS_CHANGE" ? "retryUserAccessDelivery" : "retryOnboardingDelivery";
+			return this._invokeOperationsAction(sAction, {
 				deliveryID: oRow.deliveryID,
 				expectedModifiedAt: oRow.modifiedAt
 			}, "deliveryRetryQueued", "deliveries");
@@ -1236,6 +1263,38 @@ sap.ui.define([
 			return oEvent?.getSource?.().getBindingContext(sModelName)?.getObject?.() || null;
 		},
 
+		_normalizeDeliveryRow: async function (oRow) {
+			const sEmpty = await this._text("emptyDetail");
+			const sDeliveryType = DELIVERY_TYPE_LABEL_KEYS[oRow?.deliveryType] ? oRow.deliveryType : "";
+			const sEventType = DELIVERY_EVENT_LABEL_KEYS[oRow?.eventType] ? oRow.eventType : "";
+			const [sDeliveryTypeLabel, sEventTypeLabel] = await Promise.all([
+				this._text(DELIVERY_TYPE_LABEL_KEYS[sDeliveryType] || "emptyDetail"),
+				this._text(DELIVERY_EVENT_LABEL_KEYS[sEventType] || "emptyDetail")
+			]);
+			const safeText = (sValue, sFallback = sEmpty) => typeof sValue === "string" && sValue.trim() ? sValue : sFallback;
+			return {
+				deliveryID: safeText(oRow?.deliveryID, ""),
+				deliveryType: sDeliveryType,
+				eventType: sEventType,
+				deliveryTypeLabel: sDeliveryTypeLabel,
+				eventTypeLabel: sEventTypeLabel,
+				recipientDisplay: safeText(oRow?.recipientDisplay),
+				status: safeText(oRow?.status, ""),
+				attemptCount: Number.isFinite(Number(oRow?.attemptCount)) ? Number(oRow.attemptCount) : 0,
+				nextAttemptAt: oRow?.nextAttemptAt || null,
+				nextAttemptAtDisplay: oRow?.nextAttemptAt || sEmpty,
+				lastAttemptAt: oRow?.lastAttemptAt || null,
+				lastAttemptAtDisplay: oRow?.lastAttemptAt || sEmpty,
+				sentAt: oRow?.sentAt || null,
+				sentAtDisplay: oRow?.sentAt || sEmpty,
+				errorCode: safeText(oRow?.errorCode, ""),
+				errorSummary: safeText(oRow?.errorSummary, ""),
+				safeErrorSummary: safeText(oRow?.errorSummary || oRow?.safeErrorSummary),
+				canRetry: oRow?.canRetry === true,
+				modifiedAt: oRow?.modifiedAt || null
+			};
+		},
+
 		_ensureActiveUsersLoaded: function () {
 			const oActiveUsersModel = this.getModel("activeUsers");
 			if (oActiveUsersModel.getProperty("/loaded")) return Promise.resolve();
@@ -1506,7 +1565,8 @@ sap.ui.define([
 			oModel.setProperty("/busy", true);
 			oModel.setProperty("/error", false);
 			try {
-				const oOperation = this.getView().getModel().bindContext("/searchOnboardingDeliveries(...)");
+				const oOperation = this.getView().getModel().bindContext("/searchAdministrationDeliveries(...)");
+				oOperation.setParameter("deliveryType", oModel.getProperty("/deliveryType") || "ALL");
 				oOperation.setParameter("status", oModel.getProperty("/status") || null);
 				oOperation.setParameter("query", oModel.getProperty("/query") || "");
 				oOperation.setParameter("skip", iSkip);
@@ -1514,7 +1574,7 @@ sap.ui.define([
 				await oOperation.invoke("$direct");
 				const oContext = oOperation.getBoundContext();
 				const oResult = await (oContext ? oContext.requestObject() : {});
-				const aItems = Array.isArray(oResult) ? oResult : (oResult?.value || []);
+				const aItems = await Promise.all((Array.isArray(oResult) ? oResult : (oResult?.value || [])).map(oRow => this._normalizeDeliveryRow(oRow)));
 				const aExisting = bAppending ? oModel.getProperty("/items") || [] : [];
 				if (iRequest === this._deliveriesRequest) {
 					oModel.setProperty("/items", aExisting.concat(aItems));
@@ -1643,7 +1703,7 @@ sap.ui.define([
 		},
 
 		_readActiveUsersSessionState: function () {
-			const oDefault = { selectedTab: "access", selectedAccessTab: "requests", selectedDeveloperTab: "developerWorkload", selectedOperationsTab: "deliveries", query: "", includeNonActive: false, workloadQuery: "", deliveryQuery: "", deliveryStatus: "", operationState: "", operationType: "", auditAction: "", auditResult: "", auditFrom: "", auditTo: "" };
+			const oDefault = { selectedTab: "access", selectedAccessTab: "requests", selectedDeveloperTab: "developerWorkload", selectedOperationsTab: "deliveries", query: "", includeNonActive: false, workloadQuery: "", deliveryQuery: "", deliveryStatus: "", deliveryType: "ALL", operationState: "", operationType: "", auditAction: "", auditResult: "", auditFrom: "", auditTo: "" };
 			if (typeof window === "undefined" || !window.sessionStorage) return oDefault;
 			try {
 				const oSaved = JSON.parse(window.sessionStorage.getItem("idts.userAdministration.activeUsers") || "{}");
@@ -1665,6 +1725,7 @@ sap.ui.define([
 					workloadQuery: typeof oSaved.workloadQuery === "string" ? oSaved.workloadQuery : oDefault.workloadQuery,
 					deliveryQuery: typeof oSaved.deliveryQuery === "string" ? oSaved.deliveryQuery : oDefault.deliveryQuery,
 					deliveryStatus: typeof oSaved.deliveryStatus === "string" ? oSaved.deliveryStatus : oDefault.deliveryStatus,
+					deliveryType: ["ALL", "INVITATION", "ACCESS_CHANGE"].includes(oSaved.deliveryType) ? oSaved.deliveryType : oDefault.deliveryType,
 					operationState: typeof oSaved.operationState === "string" ? oSaved.operationState : oDefault.operationState,
 					operationType: typeof oSaved.operationType === "string" ? oSaved.operationType : oDefault.operationType,
 					auditAction: typeof oSaved.auditAction === "string" ? oSaved.auditAction : oDefault.auditAction,
@@ -1692,6 +1753,7 @@ sap.ui.define([
 					workloadQuery: this.getModel("workload")?.getProperty("/query") || "",
 					deliveryQuery: this.getModel("deliveries")?.getProperty("/query") || "",
 					deliveryStatus: this.getModel("deliveries")?.getProperty("/status") || "",
+					deliveryType: this.getModel("deliveries")?.getProperty("/deliveryType") || "ALL",
 					operationState: this.getModel("operations")?.getProperty("/state") || "",
 					operationType: this.getModel("operations")?.getProperty("/operationType") || "",
 					auditAction: this.getModel("audit")?.getProperty("/action") || "",

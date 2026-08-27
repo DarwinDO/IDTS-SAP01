@@ -32,3 +32,25 @@ Version `1.0.11` them tab/dialog Business Catalogs Gate 5. Dependency va build c
   **IDTS concept**: HTML5 content release identity.
   **Impact if broken**: New UI copy or controls can be hidden behind stale cached content after a successful content deployment.
   **Must check together**: `package-lock.json`, `webapp/manifest.json`, UI build ZIP, and live AppRouter readback.
+
+## Gate 6.5 cache identity `1.0.17` / Cache identity Gate 6.5 `1.0.17`
+
+### English
+
+The top-level application version advances from `1.0.16` to `1.0.17` so the unified Delivery filter, labels, details fallback, and typed retry UI have a new HTML5 content identity. Scripts, dev dependencies, name, license, and description are unchanged.
+
+- **Location**: `app/user-administration-ui/package.json:3` — `version`.
+  **IDTS concept**: reviewed User Administration content cache identity.
+  **Impact if broken**: clients can retain the old Operations UI after a later approved content deployment.
+  **Must check together**: `package-lock.json:3,9`, `webapp/manifest.json:10`, semantic JSON parity check, lint, and build.
+
+### Tiếng Việt
+
+Version ứng dụng top-level tăng từ `1.0.16` lên `1.0.17` để filter Delivery hợp nhất, label, fallback details và UI retry theo type có HTML5 content identity mới. Script, dev dependency, name, license và description không đổi.
+
+- **Vị trí**: `app/user-administration-ui/package.json:3` — `version`.
+  **Khái niệm IDTS**: cache identity của content User Administration đã review.
+  **Ảnh hưởng nếu sai**: client có thể giữ UI Operations cũ sau lần content deploy được duyệt sau này.
+  **Phải kiểm tra cùng**: `package-lock.json:3,9`, `webapp/manifest.json:10`, check semantic JSON parity, lint và build.
+
+**Safe editing / Sửa an toàn:** Change only the version for this gate; do not upgrade dependencies or rewrite scripts. / Gate này chỉ đổi version; không upgrade dependency hoặc rewrite script.

@@ -20,6 +20,7 @@ const {
 const { getUserAdminConfig } = require('./user-admin/config')
 const { getEmailConfig } = require('./email/config')
 const { scheduleImmediateEmailOutbox } = require('./email/worker')
+const { writeUserAccessDelivery } = require('./user-admin/access-delivery')
 const { identityKeyHash, selectActiveUserForRequest } = require('./auth/identity-map')
 const { isXsuaaRuntime } = require('./auth/platform-role')
 const {
@@ -71,7 +72,10 @@ class UserAdministrationService extends cds.ApplicationService {
       insertAccessOperation,
       insertIdentityAudit,
       normalizeReason,
-      onboardingResult
+      onboardingResult,
+      getEmailConfig,
+      scheduleImmediateEmailOutbox,
+      writeUserAccessDelivery
     }
     this.on('requestSuspend', req => requestSuspend(req, accessLifecycleDependencies))
     this.on('requestReactivate', req => requestReactivate(req, accessLifecycleDependencies))
@@ -929,19 +933,34 @@ async function insertAccessOperation (tx, options) {
 }
 
 async function insertIdentityAudit (tx, options) {
-  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+  const auditEvent = {
     ID: cds.utils.uuid(),
-    operation_ID: options.operationID || null,
-    onboardingRequest_ID: options.requestID,
-    actor_ID: options.actorID || null,
-    targetUser_ID: options.targetUserID || null,
+    operationID: options.operationID || null,
+    requestID: options.requestID,
+    actorID: options.actorID || null,
+    targetUserID: options.targetUserID || null,
     action: options.action,
-    result: 'QUEUED',
-    fromState: options.fromState,
-    toState: options.toState,
+    result: options.result || 'QUEUED',
+    fromState: options.fromState || null,
+    toState: options.toState || null,
     correlationId: options.correlationId,
+    completedAt: new Date(options.completedAt || Date.now()).toISOString()
+  }
+  await tx.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+    ID: auditEvent.ID,
+    operation_ID: auditEvent.operationID,
+    onboardingRequest_ID: auditEvent.requestID,
+    actor_ID: auditEvent.actorID,
+    targetUser_ID: auditEvent.targetUserID,
+    action: auditEvent.action,
+    result: auditEvent.result,
+    fromState: auditEvent.fromState,
+    toState: auditEvent.toState,
+    correlationId: auditEvent.correlationId,
+    createdAt: auditEvent.completedAt,
     detailsSummary: options.summary
   }))
+  return auditEvent
 }
 
 function provisioningIdempotencyKey (requestID, operationType, expectedVersion) {

@@ -6,7 +6,7 @@
 
 - Design owner: DonHV.
 - Approved interactively: 2026-08-26, Asia/Bangkok.
-- Frozen planning baseline: `origin/dev` at `e355f95d7d0eb61e2bd675a35709270454e62276`.
+- Original planning baseline: `origin/dev` at `e355f95d7d0eb61e2bd675a35709270454e62276`; refreshed implementation dependency baseline after Gate 6.5 closure: `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`.
 - Planning branch: `docs/wp8-my-notifications-design-donhv`.
 - This document approves architecture and implementation planning only. It does not authorize product source changes, schema deployment, HANA/HDI migration, provider calls, real email, user/role/data mutation, Ready, merge, rollout, or release.
 
@@ -34,7 +34,7 @@ The baseline already has:
 - `writeNotificationAndSchedule()` and `scheduleImmediateEmailOutbox()` for a one-shot post-commit kick;
 - protected `processEmailOutbox()` for SAP Job Scheduler recovery;
 - shared provider configuration and sender creation;
-- User Administration access audit and the separately planned `UserAccessNotificationDeliveries` contract;
+- deployed User Administration access audit and `UserAccessNotificationDeliveries` contract from merged Gate 6.5;
 - same-origin Bug Management and User Administration navigation.
 
 The design reuses these. It does not add Redis, RabbitMQ, BullMQ, SAP Event Mesh, a second worker, a second provider adapter, or a general workflow engine.

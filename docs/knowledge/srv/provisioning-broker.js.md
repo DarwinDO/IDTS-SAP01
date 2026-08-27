@@ -41,3 +41,33 @@ Trước khi hoàn tất `LINK_EXISTING`, request và operation phải có cùng
 Expired-lease reconciliation also rotates the correlation for `LINK_EXISTING`; before the transaction updates the request state to `BLOCKED_MANUAL_REVIEW`, it writes that same reconciliation correlation to the request. The next UserAdmin reconcile/retry requeue performs the same conditional binding before the broker can claim and complete the link. Non-link operation types do not receive this request-correlation patch.
 
 Reconcile lease hết hạn cũng rotate correlation của `LINK_EXISTING`; trước khi transaction đổi request sang `BLOCKED_MANUAL_REVIEW`, nó ghi cùng reconciliation correlation vào request. Lần requeue reconcile/retry kế tiếp của UserAdmin cũng bind có điều kiện trước khi broker claim và complete link. Operation type không phải link không nhận patch correlation request này.
+
+## Gate 6.5 final completion hook / Hook completion cuối Gate 6.5
+
+### English
+
+Provider-backed completion now receives the request context, persists a timestamped final audit, and calls `writeUserAccessDelivery` only when the broker result is exactly `APPLIED` and the operation action maps to `CHANGE_ROLE`, `REACTIVATE`, or `REVOKE`. `NOOP_ALREADY_DESIRED`, failures, ambiguous results, and Developer-profile audit actions produce no access delivery. A pending row registers the existing post-commit email kick; the broker transaction never calls the provider email transport.
+
+- **Location**: `srv/provisioning-broker.js:149-252` — `completeSuccess` final audit and delivery creation.
+  **IDTS concept**: notify only after provider proof and local state application commit together.
+  **Impact if broken**: users may be told access changed while it is queued/failed, or completion can roll back because email transport failed.
+  **Must check together**: `srv/user-admin/access-delivery.js:63-107`, `srv/user-admin.js:935-969`, and provisioning/access notification tests.
+- **Location**: `srv/provisioning-broker.js:479-507` — `appendAudit(..., completedAt)`.
+  **IDTS concept**: the delivery snapshot uses the same deterministic completion timestamp as its source audit.
+  **Impact if broken**: audit chronology and user-facing completion time diverge.
+  **Must check together**: `srv/user-admin/access-lifecycle.js:19-80` and timestamp assertions.
+
+### Tiếng Việt
+
+Completion có provider giờ nhận request context, persist audit cuối có timestamp và chỉ gọi `writeUserAccessDelivery` khi kết quả broker đúng `APPLIED` và action map tới `CHANGE_ROLE`, `REACTIVATE` hoặc `REVOKE`. `NOOP_ALREADY_DESIRED`, failure, kết quả ambiguous và audit Developer profile không tạo access delivery. Row `PENDING` chỉ đăng ký immediate email kick hiện có sau commit; transaction broker không gọi email transport.
+
+- **Vị trí**: `srv/provisioning-broker.js:149-252` — audit cuối và tạo delivery trong `completeSuccess`.
+  **Khái niệm IDTS**: chỉ thông báo sau khi provider proof và local state được apply cùng transaction.
+  **Ảnh hưởng nếu sai**: user có thể nhận thông báo khi access mới queued/failed, hoặc completion bị rollback vì email transport lỗi.
+  **Phải kiểm tra cùng**: `srv/user-admin/access-delivery.js:63-107`, `srv/user-admin.js:935-969` và test provisioning/access notification.
+- **Vị trí**: `srv/provisioning-broker.js:479-507` — `appendAudit(..., completedAt)`.
+  **Khái niệm IDTS**: snapshot delivery dùng cùng completion timestamp xác định với source audit.
+  **Ảnh hưởng nếu sai**: thứ tự audit và thời điểm completion hiển thị cho user bị lệch.
+  **Phải kiểm tra cùng**: `srv/user-admin/access-lifecycle.js:19-80` và assertion timestamp.
+
+**Safe editing / Sửa an toàn:** Keep the APPLIED/action allowlist and post-commit boundary together. Never broaden this hook to queued, no-op, failure, or responsibility-only audits. / Giữ allowlist APPLIED/action và boundary sau commit cùng nhau. Không mở rộng hook sang audit queued, no-op, failure hoặc chỉ đổi responsibility.

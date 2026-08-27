@@ -390,6 +390,30 @@ entity UserIdentityAuditEvents : cuid, managed {
 
 annotate UserIdentityAuditEvents with @assert.unique.identityAuditCorrelationAction: [ correlationId, action ];
 
+entity UserAccessNotificationDeliveries : cuid, managed {
+  // Outbox riêng cho access-change; source audit event là business idempotency key.
+  sourceAuditEvent    : Association to UserIdentityAuditEvents not null;
+  targetUser          : Association to Users not null;
+  recipientEmail      : String(255) not null;
+  eventType           : String(40) not null;
+  templateKey         : String(80) not null;
+  subject             : String(255) not null;
+  textBody            : LargeString not null;
+  htmlBody            : LargeString not null;
+  status              : Association to NotificationDeliveryStatuses not null;
+  attemptCount        : Integer default 0 not null;
+  nextAttemptAt       : Timestamp;
+  lastAttemptAt       : Timestamp;
+  sentAt              : Timestamp;
+  lastErrorCode       : String(80);
+  lastErrorSummary    : String(500);
+  providerMessageId   : String(255);
+  lockedUntil         : Timestamp;
+  lockToken           : String(64);
+}
+
+annotate UserAccessNotificationDeliveries with @assert.unique.accessAuditDelivery: [ sourceAuditEvent ];
+
 entity DuplicateLinks : cuid, managed {
   // Liên kết duplicate chỉ được tạo khi user xác nhận; kết quả AI Similar Bugs tự nó không insert entity này.
   sourceBug    : Association to Bugs not null;

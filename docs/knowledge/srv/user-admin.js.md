@@ -150,3 +150,33 @@ Giữ file này chỉ làm wiring. Validation catalog, đếm impact, audit và 
 Keep `srv/user-admin.js` as composition/wiring. Put masking, page clamping, safe output mapping, readiness derivation, and delivery retry guards in `operations-audit.js`; keep provider execution outside this service action. Re-run CAP EDMX and the User Administration, onboarding, access, and immediate-kick regressions after changing registration.
 
 Giữ `srv/user-admin.js` là file composition/wiring. Đưa masking, clamp page, mapping output an toàn, readiness derivation và guard retry delivery vào `operations-audit.js`; không thực thi provider trong action service này. Khi đổi registration, chạy lại CAP EDMX cùng regression User Administration, onboarding, access và immediate-kick.
+
+## Gate 6.5 access-delivery dependencies / Dependency access-delivery Gate 6.5
+
+### English
+
+`UserAdministrationService.init` injects `getEmailConfig`, `scheduleImmediateEmailOutbox`, and `writeUserAccessDelivery` into the existing access-lifecycle module. `insertIdentityAudit` now returns a normalized in-memory audit object with the exact persisted timestamp so the same transaction can use it as the source for delivery creation. The default result remains `QUEUED`; callers must explicitly request `APPLIED`.
+
+- **Location**: `srv/user-admin.js:70-80` — `accessLifecycleDependencies`.
+  **IDTS concept**: local suspension uses the same final-audit/outbox policy without coupling the lifecycle module to provider code.
+  **Impact if broken**: suspend can send before commit, skip the outbox, or instantiate a second sender.
+  **Must check together**: `srv/user-admin/access-lifecycle.js:10-86`, `srv/user-admin/access-delivery.js`, and immediate-kick tests.
+- **Location**: `srv/user-admin.js:935-969` — `insertIdentityAudit`.
+  **IDTS concept**: persisted audit identity/result/time are reused exactly by completion delivery.
+  **Impact if broken**: a delivery can reference a non-persisted audit or show a timestamp different from the business completion.
+  **Must check together**: `srv/provisioning-broker.js:479-507` and chronology/idempotency tests.
+
+### Tiếng Việt
+
+`UserAdministrationService.init` inject `getEmailConfig`, `scheduleImmediateEmailOutbox` và `writeUserAccessDelivery` vào module access lifecycle hiện có. `insertIdentityAudit` giờ trả object audit in-memory đã normalize với đúng timestamp persist để cùng transaction dùng làm nguồn tạo delivery. Result mặc định vẫn là `QUEUED`; caller phải yêu cầu `APPLIED` rõ ràng.
+
+- **Vị trí**: `srv/user-admin.js:70-80` — `accessLifecycleDependencies`.
+  **Khái niệm IDTS**: suspend local dùng cùng policy audit cuối/outbox mà không couple lifecycle module với provider code.
+  **Ảnh hưởng nếu sai**: suspend có thể gửi trước commit, bỏ qua outbox hoặc tạo sender thứ hai.
+  **Phải kiểm tra cùng**: `srv/user-admin/access-lifecycle.js:10-86`, `srv/user-admin/access-delivery.js` và test immediate kick.
+- **Vị trí**: `srv/user-admin.js:935-969` — `insertIdentityAudit`.
+  **Khái niệm IDTS**: identity/result/time audit đã persist được delivery completion dùng lại chính xác.
+  **Ảnh hưởng nếu sai**: delivery có thể tham chiếu audit chưa persist hoặc hiển thị timestamp khác business completion.
+  **Phải kiểm tra cùng**: `srv/provisioning-broker.js:479-507` và test chronology/idempotency.
+
+**Safe editing / Sửa an toàn:** Keep this file as dependency wiring; completion policy belongs in lifecycle/broker and delivery policy belongs in `access-delivery.js`. / Giữ file này là wiring dependency; policy completion thuộc lifecycle/broker và policy delivery thuộc `access-delivery.js`.

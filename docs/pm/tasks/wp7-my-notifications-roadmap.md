@@ -4,12 +4,12 @@
 
 ### Status
 
-`DESIGN APPROVED — IMPLEMENTATION PLAN WRITTEN; SOURCE NOT STARTED`
+`DESIGN AND IMPLEMENTATION PLAN APPROVED — N1 PRECONDITION SATISFIED; SOURCE NOT STARTED`
 
 ### Authority
 
 - Owner: DonHV.
-- Design baseline: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`.
+- Original design baseline: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`; refreshed Gate 6.5 dependency baseline: `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`.
 - Authoritative design: `docs/superpowers/specs/2026-08-26-my-notifications-and-delivery-design.md`.
 - Authoritative implementation plan: `docs/superpowers/plans/2026-08-26-my-notifications-and-prompt-email-implementation.md`.
 - This roadmap does not authorize source/schema/runtime/external mutations.
@@ -27,18 +27,18 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-DonHV reviews the detailed implementation plan and chooses an execution mode. N1 source work must not start until Gate 6.5 is merged and a fresh exact `origin/dev` contains its access-delivery contract.
+Gate 6.5 is merged and the required access-delivery contract is present at refreshed `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`. The next boundary is planning-package review/PR closure, then a fresh N1 worktree from the latest merged `origin/dev`; N1 source remains separately gated and must stop at one Draft PR.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`ĐÃ DUYỆT THIẾT KẾ — ĐÃ VIẾT IMPLEMENTATION PLAN; CHƯA LÀM SOURCE`
+`ĐÃ DUYỆT THIẾT KẾ VÀ IMPLEMENTATION PLAN — ĐÃ ĐẠT PRECONDITION N1; CHƯA LÀM SOURCE`
 
 ### Thẩm quyền
 
 - Owner: DonHV.
-- Baseline thiết kế: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`.
+- Baseline thiết kế ban đầu: `origin/dev` `e355f95d7d0eb61e2bd675a35709270454e62276`; baseline dependency Gate 6.5 đã refresh: `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`.
 - Thiết kế authority: `docs/superpowers/specs/2026-08-26-my-notifications-and-delivery-design.md`.
 - Implementation plan authority: `docs/superpowers/plans/2026-08-26-my-notifications-and-prompt-email-implementation.md`.
 - Roadmap này không cho phép mutation source/schema/runtime/hệ thống ngoài.
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-DonHV review implementation plan chi tiết và chọn cách execute. Chưa được làm source N1 cho tới khi Gate 6.5 merge và `origin/dev` mới có đúng access-delivery contract.
+Gate 6.5 đã merge và access-delivery contract bắt buộc có trong `origin/dev` refresh `308aa847711e969cc770453f375bb5dbcf25a612`. Boundary tiếp theo là review/PR closure planning package, sau đó tạo worktree N1 mới từ `origin/dev` merged mới nhất; source N1 vẫn là gate riêng và phải dừng tại một Draft PR.

@@ -1,6 +1,13 @@
 # Current Project Status
 
-Last updated: 2026-08-26
+Last updated: 2026-08-27
+
+## 2026-08-27 WP8 Gate 6.5 live closure
+
+- Source PR #358 merged into `dev` at `e587aa5b1603d32c89ce01b4bcab9854f07eb157`. The additive HANA migration created only `UserAccessNotificationDeliveries` and its unique source-audit index; existing aggregate counts and the protected Users digest were preserved.
+- CAP and User Administration `1.0.17` were deployed selectively. Final CAP/AppRouter state is `1/1`, health/readiness/web are `200`, anonymous protected API is `401` as expected, and the final check reports `DEMO READY`.
+- DonHV approved one controlled Tester Suspend -> Reactivate acceptance. Suspend produced one persisted `Sent` delivery and one mailbox-confirmed email. Reactivate completed after the broker verified the provider already had the desired role collections, so `NOOP_ALREADY_DESIRED` correctly produced no second delivery/email. Final Tester state is `Active`, identity-linked, and has no pending operation.
+- The rollout evidence branch is documentation/tooling only. Its next boundary is one Draft PR; it does not authorize another deployment, role change, historical replay, merge, or worktree cleanup.
 
 ## Snapshot
 

@@ -227,6 +227,7 @@ function sanitizeTransportError (error) {
 
 module.exports = {
   processEmailDeliveries,
+  formatFrom,
   retryDelayMs,
   sanitizeTransportError,
   skippedDeliveryReason,

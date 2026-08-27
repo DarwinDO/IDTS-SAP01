@@ -208,3 +208,25 @@ Gate 6 tái sử dụng `scheduleImmediateEmailOutbox(req)` tại `srv/email/wor
 - **Khái niệm IDTS**: responsiveness sau commit và polling recovery bền vững dùng chung một boundary email.
 - **Ảnh hưởng nếu sai**: sender riêng cho retry có thể gửi invitation hai lần hoặc đưa provider failure vào transaction user-administration.
 - **Phải kiểm tra cùng**: `srv/user-admin/operations-audit.js:188-286`, `srv/user-admin/delivery.js` và `scripts/qa/test-email-immediate-kick.js`.
+
+## Gate 6.5 one-batch access processor / Processor access trong một batch Gate 6.5
+
+### English
+
+`processEmailOutboxBatch` now invokes `processUserAccessDeliveries` after the existing Bug and invitation processors and adds its `sent`, `failed`, and `skipped` counts to the same result. It creates one sender, closes it once in `finally`, and retains one scheduler/immediate-kick entrypoint.
+
+- **Location**: `srv/email/worker.js:28-61` — `processEmailOutboxBatch`.
+  **IDTS concept**: three domain-owned outboxes share one transport, provider configuration, scheduler, and recovery loop.
+  **Impact if broken**: access rows can remain unprocessed, counts can misreport readiness, or a second worker/provider lifecycle can double-send.
+  **Must check together**: `srv/user-admin/access-delivery.js:110-176`, `srv/user-admin/delivery.js:14-160`, `srv/email/outbox.js`, and `scripts/qa/test-email-immediate-kick.js`.
+
+### Tiếng Việt
+
+`processEmailOutboxBatch` giờ gọi `processUserAccessDeliveries` sau processor Bug và invitation hiện có, rồi cộng `sent`, `failed`, `skipped` vào cùng kết quả. Batch tạo một sender, close đúng một lần trong `finally`, và giữ một entrypoint scheduler/immediate kick.
+
+- **Vị trí**: `srv/email/worker.js:28-61` — `processEmailOutboxBatch`.
+  **Khái niệm IDTS**: ba outbox theo domain dùng chung một transport, cấu hình provider, scheduler và recovery loop.
+  **Ảnh hưởng nếu sai**: row access có thể không được xử lý, count readiness sai hoặc vòng đời worker/provider thứ hai gây gửi trùng.
+  **Phải kiểm tra cùng**: `srv/user-admin/access-delivery.js:110-176`, `srv/user-admin/delivery.js:14-160`, `srv/email/outbox.js` và `scripts/qa/test-email-immediate-kick.js`.
+
+**Safe editing / Sửa an toàn:** Add processors only through dependency injection and aggregate safe counts; never send inside CAP business transactions. / Chỉ thêm processor qua dependency injection và gộp count an toàn; không gửi bên trong transaction nghiệp vụ CAP.
