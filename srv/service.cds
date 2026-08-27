@@ -3,6 +3,11 @@
 using idts.cap as db from '../db/schema';
 
 service BugService @(requires: 'authenticated-user') {
+  type MentionCandidate {
+    ID          : UUID;
+    displayName : String(120);
+    roleCode    : String(20);
+  }
   // Các type sau là response tạm của action AI review-only, không phải table được persist.
   type SimilarBugCandidate {
     suggestionID     : UUID;
@@ -214,7 +219,9 @@ service BugService @(requires: 'authenticated-user') {
     virtual bugOptionalFieldControl : Integer
   } actions {
     // Bound actions chạy trên một Bug cụ thể. Tên/signature phải khớp `srv/service.js` và Fiori action annotation.
-    action addComment(content: LargeString) returns Bugs;
+    // Picker chỉ nhận danh sách user an toàn, đã được server kiểm quyền theo Bug hiện tại.
+    function getMentionCandidates() returns array of MentionCandidate;
+    action addComment(content: LargeString, mentionedUserIDs: array of UUID) returns Bugs;
     action assignToDeveloper(
       @Common.ValueList : {
         Label : 'Assignable Developer',

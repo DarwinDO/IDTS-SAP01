@@ -2,6 +2,12 @@
 
 Last updated: 2026-08-27
 
+## 2026-08-27 My Notifications N3 source execution
+
+- N2 #362 is merged at `c722c355df5ff786d372002e20ab10864b4780ab`; that exact commit is the isolated N3 base. DonHV authorized continuing through N3 source completion. Tasks 7–9 cover lifecycle channels, selected mentions, escalation and final access indexing.
+- N3 Tasks 7–9 are complete and exactly one OPEN/Draft PR [#364](https://github.com/DarwinDO/IDTS-SAP01/pull/364) targets `dev`. Source review is GO with 0 Critical/Major/Important and one safe deferred Minor; final matrix is green. This closure is docs-only. Stop before Ready/merge/deploy/N4; live UI rollback remains unchanged.
+- Tiếng Việt: N3 Tasks 7–9 hoàn tất và đúng một PR [#364](https://github.com/DarwinDO/IDTS-SAP01/pull/364) OPEN/Draft vào `dev`. Review source GO 0 Critical/Major/Important, một Minor an toàn defer; matrix cuối GREEN. Closure chỉ docs. Dừng trước Ready/merge/deploy/N4; live UI rollback giữ nguyên.
+
 ## 2026-08-27 My Notifications N2 source candidate
 
 - N1 PR #361 is merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`. N2 uses that exact base on `feature/wp7-notifications-inbox-ui-donhv`; Tasks 5–6 are locally green for the dedicated OData client, native SAPUI5 inbox, i18n, lifecycle cleanup, responsive/keyboard checks and focused lint/build.

@@ -17,9 +17,16 @@ const ENTITIES = Object.freeze({
 })
 
 async function writeNotificationRecord (tx, entry, config) {
-  // Workflow gọi trong transaction Bug: ghi Notifications và một delivery EMAIL duy nhất.
+  // Workflow gọi trong transaction Bug: ghi Notifications/inbox và email khi policy yêu cầu.
   // Hàm chỉ tạo outbox PENDING/SKIPPED, không gọi Brevo/SMTP nên lỗi provider không rollback Bug.
   if (!entry?.bugID || !entry?.recipientID || !entry?.eventType) return {}
+
+  // Lock the authoritative Bug before source lookup so producers for one Bug serialize before a unique insert.
+  await tx.run(SELECT.one.from(ENTITIES.Bugs).columns('ID').where({ ID: entry.bugID }).forUpdate())
+  const sourceKey = typeof entry.sourceKey === 'string' && entry.sourceKey.trim() ? entry.sourceKey.trim() : null
+  const existing = sourceKey && await tx.run(SELECT.one.from(ENTITIES.Notifications)
+    .columns('ID').where({ sourceKey }))
+  if (existing?.ID) return existingNotificationResult(tx, existing.ID)
 
   const notificationID = cds.utils.uuid()
   const deliveryID = cds.utils.uuid()
@@ -43,8 +50,19 @@ async function writeNotificationRecord (tx, entry, config) {
     channel_code: 'IN_APP',
     deliveryStatus_code: 'SENT',
     message: entry.message,
-    sentAt: createdAt
+    sentAt: createdAt,
+    sourceKey
   }))
+
+  await tx.run(INSERT.into('idts.cap.UserNotificationInboxEntries').entries({
+    ID: cds.utils.uuid(),
+    recipient_ID: entry.recipientID,
+    bugNotification_ID: notificationID,
+    occurredAt: createdAt
+  }))
+
+  // Existing callers did not provide the policy flag before N3, so undefined keeps their prior email behavior.
+  if (entry.emailRequired === false) return { notificationID, deliveryID: null, deliveryStatus: 'IN_APP_ONLY' }
 
   const recipientEmail = config?.testMode && config.defaultTestRecipient
     ? config.defaultTestRecipient
@@ -79,6 +97,16 @@ async function writeNotificationRecord (tx, entry, config) {
     notificationID,
     deliveryID,
     deliveryStatus: skip ? 'SKIPPED' : 'PENDING'
+  }
+}
+
+async function existingNotificationResult (tx, notificationID) {
+  const delivery = await tx.run(SELECT.one.from(ENTITIES.Deliveries)
+    .columns('ID', 'status_code').where({ notification_ID: notificationID }))
+  return {
+    notificationID,
+    deliveryID: delivery?.ID || null,
+    deliveryStatus: delivery?.status_code || 'IN_APP_ONLY'
   }
 }
 

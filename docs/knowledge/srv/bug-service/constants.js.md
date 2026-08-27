@@ -232,3 +232,15 @@ Các label history cho nhóm field người/vai trò đang xử lý hiện dùng
 **English.** Capability dependencies now include `canManageAttachments` and two Bug field-control values. SAP Common.FieldControl numeric values are ReadOnly=1, Optional=3 and Mandatory=7.
 
 **Tiếng Việt.** Dependency capability thêm `canManageAttachments` và hai giá trị field-control của Bug. Giá trị số SAP Common.FieldControl là ReadOnly=1, Optional=3 và Mandatory=7.
+
+## N3 notification event constants
+
+**English.** `EVENT` now holds additive stable lifecycle codes. It is the shared producer vocabulary; its CSV catalog and inbox/UI consumers must be updated together.
+
+**Tiếng Việt.** `EVENT` nay chứa stable code lifecycle theo kiểu additive. Đây là vocabulary chung của producer; phải cập nhật cùng CSV catalog và consumer inbox/UI.
+
+## Task 9 escalation ranks
+
+**English.** `PRIORITY_RANK` and `SEVERITY_RANK` are stable-code comparison maps for upward escalation. Labels are never used for a business decision.
+
+**Tiếng Việt.** `PRIORITY_RANK` và `SEVERITY_RANK` là map so sánh stable code cho escalation tăng mức. Không dùng label để quyết định nghiệp vụ.

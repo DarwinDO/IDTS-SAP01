@@ -5,3 +5,15 @@ UPDATED,Updated,Bug was updated,30,true,0
 REJECTED,Rejected,Bug needs follow-up after rejection,40,true,2
 OVERDUE,Overdue,Bug is overdue,50,true,3
 CLOSED,Closed,Bug was closed,60,true,3
+RESOLVED,Resolved,Bug was resolved and is ready for verification,70,true,1
+RETEST_REQUIRED,Retest Required,Bug requires retest,80,true,2
+REOPENED,Reopened,Bug was reopened and needs follow-up,90,true,2
+RESUBMITTED,Resubmitted,Bug was resubmitted to the assigned developer,100,true,1
+REASSIGNED,Reassigned,Bug was reassigned to a different developer,110,true,1
+RETEST_OWNER_CHANGED,Retest Owner Changed,Tester responsible for retest changed,120,true,1
+COMMENT_MENTIONED,Comment Mentioned,User was mentioned in a bug comment,130,true,1
+PRIORITY_ESCALATED,Priority Escalated,Bug priority increased,140,true,2
+SEVERITY_ESCALATED,Severity Escalated,Bug severity increased,150,true,2
+PENDING_ASSIGNMENT,Pending Assignment,Bug is waiting for PM assignment,160,true,2
+ASSIGNMENT_REMOVED,Assignment Removed,Bug assignment was removed for the previous developer,170,true,1
+OWNER_CHANGED,Current Owner Changed,Bug workflow ownership changed,180,true,1

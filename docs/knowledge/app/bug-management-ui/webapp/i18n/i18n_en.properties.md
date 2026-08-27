@@ -1,5 +1,11 @@
 # Knowledge: `app/bug-management-ui/webapp/i18n/i18n_en.properties`
 
+## N3 selected comment mention copy
+
+**English:** This English bundle mirrors `commentsMentionRecipientsLabel`, `commentsMentionRecipientsPlaceholder`, `commentsMentionRecipientsHelp`, and `notificationEventCOMMENT_MENTIONED`. The copy makes selection explicit and does not imply parsing an `@name` or reveal delivery internals.
+
+**Tiếng Việt:** Bundle English này mirror `commentsMentionRecipientsLabel`, `commentsMentionRecipientsPlaceholder`, `commentsMentionRecipientsHelp` và `notificationEventCOMMENT_MENTIONED`. Copy nêu rõ phải chọn recipient, không ngụ ý parse `@name` và không lộ delivery internals.
+
 ## Smart Assign Note cleanup (2026-08-06)
 
 The English bundle also removes `smartAssignActionNote`, preserving exact key parity with the default bundle after the synthetic assignment note was retired.
@@ -316,3 +322,7 @@ The new Classification Apply, Duplicate Confirmation, and PM AI Activity labels 
 ## N2 My Notifications English copy
 
 English: this bundle mirrors every `notification*` key from the default bundle for bell/count, filters, status, paging and safe failure states. Vietnamese: bundle này mirror đầy đủ key `notification*` của default; mọi text hiển thị không lộ chi tiết server/provider và phải đổi cùng shell, default/VI bundles và UI QA.
+
+N3 adds the same lifecycle labels as the default bundle, keeping `ASSIGNMENT_REMOVED` separate from `PENDING_ASSIGNMENT`.
+
+Task 9 mirrors default priority/severity escalation labels without exposing Bug field values or delivery internals.

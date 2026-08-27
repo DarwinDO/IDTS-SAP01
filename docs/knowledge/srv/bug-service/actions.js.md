@@ -1,5 +1,15 @@
 # Knowledge: `srv/bug-service/actions.js`
 
+## Selected internal comment mentions (N3 Task 8)
+
+**English:** `validateMentionRecipients` deduplicates at most 20 selected UUIDs, excludes the author, and rejects invalid, inactive, unsupported-role, or identity-unready recipients before the comment INSERT. The same request transaction writes comment, history, `MENTION:<commentID>:<recipientID>` notification, inbox row, and email outbox row. The email template escapes the excerpt and uses the existing allowlisted Bug link.
+
+**Tiếng Việt:** `validateMentionRecipients` khử trùng tối đa 20 UUID đã chọn, bỏ tác giả và reject recipient invalid, inactive, sai role hoặc chưa identity-ready trước INSERT comment. Cùng transaction request ghi comment, history, notification `MENTION:<commentID>:<recipientID>`, inbox row và email outbox row. Email template escape excerpt và dùng Bug link allowlist có sẵn.
+
+**Candidate cardinality / Số lượng candidate:** The picker deliberately returns the complete eligible team-visible set in one bounded response, rather than paging and silently dropping later eligible selections. The separate write limit remains 20 selected UUIDs. / Picker chủ ý trả toàn bộ tập team-visible đủ điều kiện trong một response để không phân trang rồi làm mất selection đủ điều kiện ở page sau. Write limit riêng vẫn là 20 UUID đã chọn.
+
+**Rollback test seam / Điểm kiểm thử rollback:** `addComment` accepts an optional test dependency invoked only after the comment, history, selected-recipient notification, inbox entry, and email outbox entry have been written in the request transaction. Production passes no dependency. A throwing test hook is intentionally not swallowed, so real SQLite verification proves all five writes roll back together.
+
 ## 2026-08-08 capacity guard
 
 English: assignment actions request capacity validation only when the Developer owner changes, before assignment side effects are written. Vietnamese: action assignment chỉ yêu cầu capacity validation khi đổi Developer owner và chạy trước khi ghi side effect assignment.
@@ -247,3 +257,9 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
 `transitionBug` passes `enforceIdentityAccess` only when the action supplies a different assignee. Lifecycle transitions that keep an existing assignee do not turn the new-link readiness rule into an ownership migration. The backend remains authoritative even if the UI value help is bypassed.
 
 `transitionBug` chi truyen `enforceIdentityAccess` khi action cung cap assignee khac. Lifecycle transition giu assignee hien tai khong bien rule readiness thanh migration ownership. Backend van la authority ke ca khi bypass value help tren UI.
+
+## N3 lifecycle delivery policy
+
+**English.** Lifecycle actions reuse the history ID as their notification source key. Resubmit and retest-owner reassignment select their stable event codes and require prompt email; assignment removal is planned by history as inbox-only. The action transaction still owns authorization and business updates.
+
+**Tiếng Việt.** Lifecycle action dùng lại history ID làm source key notification. Resubmit và đổi retest owner chọn stable event code và cần email prompt; bỏ assignment do history lập plan inbox-only. Transaction action vẫn sở hữu authorization và business update.

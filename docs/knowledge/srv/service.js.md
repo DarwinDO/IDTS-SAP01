@@ -1,5 +1,11 @@
 # Knowledge: `srv/service.js`
 
+## Selected internal comment mention wiring (N3 Task 8)
+
+**English:** The `getMentionCandidates` handler is wired beside bound Bug actions so the picker is evaluated with the authenticated request and exact Bug context. The UI cannot query `Users` directly or grant recipient access by sending a UUID.
+
+**Tiếng Việt:** Handler `getMentionCandidates` được wire cạnh bound Bug actions để picker chạy cùng request đã xác thực và đúng Bug context. UI không được query `Users` trực tiếp hoặc cấp quyền recipient chỉ bằng UUID gửi lên.
+
 ## Optional Note handler wiring (2026-08-06)
 
 Move to Pending Assignment, Mark In Review, Start Progress, Send to Retest, and Close no longer read `req.data.note` or `req.data.reason`. The shared transition pipeline still enforces authorization and status rules, calculates the next processor, writes history, and creates notifications. The history reason is intentionally null; action type, actor, field changes, and timestamp remain the audit evidence.

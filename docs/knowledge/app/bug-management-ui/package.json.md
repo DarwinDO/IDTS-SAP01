@@ -98,6 +98,12 @@ English: N2 advances the app identity to `0.0.7`, aligned with manifest and lock
 
 Tiếng Việt: N2 tăng identity app lên `0.0.7`, đồng bộ manifest và metadata gốc lockfile. Script `lint` mới kiểm module notification và Component bằng `eslint.notification.config.mjs` tập trung; không thêm dependency. Config Fiori toàn app vẫn thiếu `@babel/eslint-parser` dev-only và được báo riêng, không bị gọi sai là GREEN.
 
+### N3 Task 8
+
+**English:** The same `lint` script additionally targets `webapp/ext/sections/BugCollaboration.js`, the selected-comment-mention controller. This keeps changed-module lint reproducible with the already locked fallback configuration; it does not install or upgrade packages.
+
+**Tiếng Việt:** Script `lint` này thêm target `webapp/ext/sections/BugCollaboration.js`, controller selected-comment-mention. Việc này giữ lint module đã đổi tái lập được bằng fallback configuration đã lock; không install hay upgrade package.
+
 **English.** Version `0.0.6` publishes the Gate 6.4 User Administration header action under a fresh HTML5 cache identity. It changes release metadata only; dependencies and build commands are unchanged. Keep it equal to `webapp/manifest.json`, the top/root versions in `package-lock.json`, the built ZIP, and live HTML5 Repository readback.
 
 **Tiếng Việt.** Version `0.0.6` phát hành action User Administration của Gate 6.4 bằng cache identity HTML5 mới. Chỉ metadata release thay đổi; dependency và build command giữ nguyên. Phải giữ bằng `webapp/manifest.json`, version top/root trong `package-lock.json`, ZIP build và readback HTML5 Repository live.

@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1 MERGED — N2 DRAFT PR #362 OPEN; STOP BEFORE MERGE/DEPLOY/N3`
+`N1/N2 MERGED — N3 IN PROGRESS; SOURCE-ONLY DRAFT PR BOUNDARY`
 
 ### Authority
 
@@ -27,13 +27,13 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-N1 PR #361 merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`; this is the exact N2 base. N2 Tasks 5–6 are locally verified: OData client, native bell/badge/popover, filters, paging, read actions, safe deep link, i18n, lifecycle cleanup, responsive browser and focused lint/build. Existing PASS remains reused by DonHV confirmation. One bounded exact-head review and one Draft N2 PR remain. Migration, backfill execution, deployment, Ready/merge and N3 are unapproved.
+N1 #361 and N2 #362 are merged; N3 froze exact base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 and the final review fix are complete at source head `979a3ef878b0cf58aa55796203845788852030b1`. Exactly one N3 PR [#364](https://github.com/DarwinDO/IDTS-SAP01/pull/364) is OPEN/Draft targeting `dev`. Final review is GO, 0 Critical/Major/Important, with one safe deferred Minor; final verification is green. Existing Knowledge Gate PASS is reused. No Ready, merge, deployment, migration, backfill, live email or N4 is authorized. Live UI remains rolled back; source completion is not runtime acceptance.
 
 ## Tiếng Việt
 
 ### Trạng thái
 
-`N1 ĐÃ MERGE — DRAFT PR N2 #362 ĐÃ MỞ; DỪNG TRƯỚC MERGE/DEPLOY/N3`
+`N1/N2 ĐÃ MERGE — N3 ĐANG LÀM; BOUNDARY CHỈ SOURCE VÀ DRAFT PR`
 
 ### Thẩm quyền
 
@@ -56,4 +56,4 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-N1 PR #361 đã merge tại `e35d09c0deef129f0d986457c847fe7fc28b90d4`, là base N2 chính xác. N2 Tasks 5–6 đã verify local: client OData, chuông/badge/popover native, filter, paging, read action, deep link an toàn, i18n, cleanup lifecycle, browser responsive và lint/build tập trung. Tiếp tục dùng PASS cũ theo xác nhận DonHV. Còn một review exact-head có giới hạn và một Draft N2 PR. Chưa duyệt migration, chạy backfill, deploy, Ready/merge hoặc N3.
+N1 #361 và N2 #362 đã merge; N3 freeze base `c722c355df5ff786d372002e20ab10864b4780ab`. Tasks 7–9 và fix final review hoàn tất tại source head `979a3ef878b0cf58aa55796203845788852030b1`. Đúng một PR N3 [#364](https://github.com/DarwinDO/IDTS-SAP01/pull/364) OPEN/Draft vào `dev`. Review cuối GO 0 Critical/Major/Important, một Minor an toàn defer; full verification GREEN. Dùng lại Knowledge Gate PASS. Không Ready, merge, deploy, migration, backfill, email thật hoặc N4. UI live vẫn rollback; source xong không phải runtime acceptance.

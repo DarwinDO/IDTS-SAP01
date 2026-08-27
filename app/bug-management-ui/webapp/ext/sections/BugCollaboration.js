@@ -1,7 +1,8 @@
 sap.ui.define([
     "sap/m/MessageBox",
-    "sap/m/MessageToast"
-], function (MessageBox, MessageToast) {
+    "sap/m/MessageToast",
+    "sap/ui/model/json/JSONModel"
+], function (MessageBox, MessageToast, JSONModel) {
     "use strict";
 
     function showSafeError(message) {
@@ -106,6 +107,55 @@ sap.ui.define([
         return true;
     }
 
+    function mentionState(picker) {
+        var state = picker.getModel("mentionRecipients");
+        if (!state) {
+            state = new JSONModel({ items: [] });
+            picker.setModel(state, "mentionRecipients");
+        }
+        return state;
+    }
+
+    function normalizeMentionCandidates(result) {
+        return Array.isArray(result) ? result.filter(function (candidate) {
+            return candidate && typeof candidate.ID === "string" && typeof candidate.displayName === "string";
+        }) : [];
+    }
+
+    function readMentionCandidates(picker, context) {
+        var model = picker.getModel();
+        var contextPath = context && context.getPath && context.getPath();
+        if (!model || !contextPath || !isBugContext(context)) {
+            return;
+        }
+        var state = mentionState(picker);
+        picker.data("mentionBugPath", contextPath);
+        picker.setSelectedKeys([]);
+        state.setProperty("/items", []);
+        picker.setBusy(true);
+
+        var operation = model.bindContext(contextPath + "/BugService.getMentionCandidates(...)", undefined, { $$ownRequest: true });
+        // UI5 1.148 deprecates execute in favour of invoke for deferred bound functions.
+        operation.invoke("$direct").then(function (result) {
+            var resultContext = operation.getBoundContext && operation.getBoundContext();
+            return resultContext && typeof resultContext.requestObject === "function" ? resultContext.requestObject() : result;
+        }).then(function (result) {
+            var currentContext = picker.getBindingContext();
+            if (picker.data("mentionBugPath") !== contextPath || !currentContext || currentContext.getPath() !== contextPath) {
+                return;
+            }
+            state.setProperty("/items", normalizeMentionCandidates(result));
+        }).catch(function () {
+            if (picker.data("mentionBugPath") === contextPath) {
+                state.setProperty("/items", []);
+            }
+        }).finally(function () {
+            if (picker.data("mentionBugPath") === contextPath) {
+                picker.setBusy(false);
+            }
+        });
+    }
+
     return {
         onAddComment: function (event) {
             var source = event.getSource();
@@ -117,7 +167,9 @@ sap.ui.define([
             }
 
             var textArea = findControlByLocalId(source, "idtsCommentTextArea");
+            var mentionPicker = findControlByLocalId(source, "idtsMentionRecipients");
             var content = textArea && typeof textArea.getValue === "function" ? textArea.getValue().trim() : "";
+            var mentionedUserIDs = mentionPicker && typeof mentionPicker.getSelectedKeys === "function" ? mentionPicker.getSelectedKeys() : [];
 
             if (!content) {
                 if (textArea) {
@@ -137,11 +189,15 @@ sap.ui.define([
                 bugContext.getPath() + "/BugService.addComment(...)"
             );
             operation.setParameter("content", content);
+            operation.setParameter("mentionedUserIDs", mentionedUserIDs);
 
             operation.invoke("$auto")
                 .then(function () {
                     if (textArea) {
                         textArea.setValue("");
+                    }
+                    if (mentionPicker) {
+                        mentionPicker.setSelectedKeys([]);
                     }
                     return refreshCommentsFeed(source).then(function () {
                         MessageToast.show("Comment posted.");
@@ -154,6 +210,12 @@ sap.ui.define([
                 .finally(function () {
                     source.setEnabled(true);
                 });
+        },
+
+        onMentionContextChanged: function (event) {
+            var picker = event.getSource();
+            var context = picker && picker.getBindingContext && picker.getBindingContext();
+            readMentionCandidates(picker, context);
         },
 
         formatDateTime: function (value) {

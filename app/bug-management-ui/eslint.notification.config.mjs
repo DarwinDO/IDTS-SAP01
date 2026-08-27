@@ -4,7 +4,7 @@ import js from '@eslint/js';
 export default [
     js.configs.recommended,
     {
-        files: ['webapp/ext/notification/**/*.js', 'webapp/ext/actions/SmartAssignDeveloper.js', 'webapp/Component.js'],
+        files: ['webapp/ext/notification/**/*.js', 'webapp/ext/actions/SmartAssignDeveloper.js', 'webapp/ext/sections/BugCollaboration.js', 'webapp/Component.js'],
         linterOptions: { reportUnusedDisableDirectives: false },
         languageOptions: {
             ecmaVersion: 2022,
