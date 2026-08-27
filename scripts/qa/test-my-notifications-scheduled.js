@@ -211,6 +211,64 @@ async function main () {
   assert.match(JSON.stringify(keysetQueries[1].SELECT.where), /ID.*>.*keyset-0500/,
     'second candidate page starts strictly after the last ID')
 
+  // CAP keeps forUpdate() locks until the root transaction commits; each keyset page must therefore
+  // finish its detached CAP transaction before the scheduler starts the next page.
+  const pageCandidates = Array.from({ length: 501 }, (_, index) => ({
+    ID: `page-boundary-${String(index + 1).padStart(4, '0')}`,
+    bugNumber: `PAGE-BOUNDARY-${index + 1}`,
+    status_code: 'PENDING_ASSIGNMENT',
+    priority_code: 'LOW',
+    severity_code: 'MINOR',
+    createdAt: '2026-08-27T00:00:00.000Z',
+    dueDate: null,
+    nextProcessorUser_ID: null,
+    assignee_ID: null
+  }))
+  const pageStarts = []
+  const committedPages = []
+  let fallbackCandidatePage = 0
+  const candidatePage = pageNumber => pageNumber === 1
+    ? pageCandidates.slice(0, 500)
+    : pageNumber === 2
+      ? pageCandidates.slice(500)
+      : []
+  const pageTransactionService = {
+    run: async query => {
+      const from = query.SELECT?.from?.ref?.[0]
+      if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+        return candidatePage(++fallbackCandidatePage)
+      }
+      return db.run(query)
+    },
+    tx: (...args) => {
+      const callback = typeof args[0] === 'function' ? args[0] : args[1]
+      const pageNumber = pageStarts.length + 1
+      pageStarts.push({ pageNumber, committedBefore: committedPages.length })
+      return db.tx(async actualTx => {
+        // Force a real CAP BEGIN so the callback's completion is followed by CAP COMMIT.
+        await actualTx.run(SELECT.one.from('idts.cap.Users').columns('ID').where({ ID: '__page_boundary_probe__' }))
+        return callback({
+          run: async query => {
+            const from = query.SELECT?.from?.ref?.[0]
+            if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+              return candidatePage(pageNumber)
+            }
+            if (from === 'idts.cap.Bugs' && query.SELECT.one) return null
+            return actualTx.run(query)
+          }
+        })
+      }).then(result => {
+        committedPages.push(pageNumber)
+        return result
+      })
+    }
+  }
+  await discoverScheduledNotifications({ tx: pageTransactionService, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.deepEqual(pageStarts.map(page => page.committedBefore), [0, 1],
+    'each bounded scheduler page starts only after the prior CAP page transaction committed')
+  assert.deepEqual(committedPages, [1, 2],
+    'CAP commits each page transaction before moving to the next keyset page')
+
   // A full page must bulk-read bounded history and recipient state; lock-time Bug re-reads remain per candidate.
   const bulkCandidates = Array.from({ length: 500 }, (_, index) => ({
     ID: `bulk-${String(index + 1).padStart(4, '0')}`,

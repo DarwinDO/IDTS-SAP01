@@ -30,12 +30,6 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
   if (!tx || typeof tx.run !== 'function') throw schedulerError(500, 'SCHEDULE_TRANSACTION_REQUIRED', 'A CAP transaction is required.')
   const instant = normalizeNow(now)
   const businessDate = instant.toISOString().slice(0, 10)
-  const pms = await tx.run(
-    SELECT.from(USERS)
-      .columns('ID')
-      .where({ active: true, role_code: 'PM' })
-  )
-  const pmIDs = pms.map(row => row.ID).filter(Boolean)
   const result = {
     candidates: 0,
     pendingAssignment: 0,
@@ -45,83 +39,123 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
     skipped: 0
   }
 
+  const runPage = createPageTransactionRunner(tx)
   let lastID
   for (;;) {
-    const candidates = await readCandidatePage(tx, businessDate, lastID)
-    if (!candidates.length) break
-    result.candidates += candidates.length
+    const page = await runPage(async pageTx => {
+      const candidates = await readCandidatePage(pageTx, businessDate, lastID)
+      if (!candidates.length) return { candidates, pageResult: null }
 
-    // Lock recipient trước profile, rồi profile trước Bug để giữ thứ tự User -> Profile -> Bug.
-    const candidateLocks = await prepareCandidateLocks(tx, candidates)
-    const currentBugs = []
-    for (const candidate of candidates) {
-      // Candidate rows are only a bounded snapshot. Lock and re-read the Bug before deriving any entry.
-      const bug = await readCurrentBug(tx, candidate.ID)
-      if (!bug) {
-        result.skipped += 1
-        continue
+      const pms = await pageTx.run(
+        SELECT.from(USERS)
+          .columns('ID')
+          .where({ active: true, role_code: 'PM' })
+      )
+      const pmIDs = pms.map(row => row.ID).filter(Boolean)
+      const pageResult = {
+        candidates: candidates.length,
+        pendingAssignment: 0,
+        sla: 0,
+        overdue: 0,
+        created: 0,
+        skipped: 0
       }
-      if (!isScheduledCandidate(bug, businessDate)) {
-        result.skipped += 1
-        continue
-      }
-      currentBugs.push(bug)
-    }
 
-    const anchors = await readScheduleAnchors(tx, currentBugs, businessDate)
-    const overdueRecipients = await readOverdueRecipients(tx, currentBugs, candidateLocks)
-    for (const bug of currentBugs) {
-      const anchor = anchors.get(bug.ID) || {}
-      const urgent = isUrgent(bug)
-      if (bug.status_code === STATUS.PENDING_ASSIGNMENT) {
-        for (const recipientID of pmIDs) {
-          await writeScheduledEvent(tx, bug, {
-            eventType: 'PENDING_ASSIGNMENT',
-            message: `${bug.bugNumber || 'Bug'} is waiting for assignment.`,
-            sourceKey: boundedSourceKey(`PENDING_ASSIGNMENT:${bug.ID}:${recipientID}`),
-            recipientID,
-            emailRequired: urgent,
-            requirePM: true
-          }, emailConfig, result, 'pendingAssignment')
+      // Lock recipient trước profile, rồi profile trước Bug để giữ thứ tự User -> Profile -> Bug.
+      const candidateLocks = await prepareCandidateLocks(pageTx, candidates)
+      const currentBugs = []
+      for (const candidate of candidates) {
+        // Candidate rows are only a bounded snapshot. Lock and re-read the Bug before deriving any entry.
+        const bug = await readCurrentBug(pageTx, candidate.ID)
+        if (!bug) {
+          pageResult.skipped += 1
+          continue
         }
+        if (!isScheduledCandidate(bug, businessDate)) {
+          pageResult.skipped += 1
+          continue
+        }
+        currentBugs.push(bug)
+      }
 
-        const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
-        if (isSlaDue({ ...bug, pendingAssignmentAt: anchor.pendingAssignmentAt }, instant, thresholdHours)) {
+      const anchors = await readScheduleAnchors(pageTx, currentBugs, businessDate)
+      const overdueRecipients = await readOverdueRecipients(pageTx, currentBugs, candidateLocks)
+      for (const bug of currentBugs) {
+        const anchor = anchors.get(bug.ID) || {}
+        const urgent = isUrgent(bug)
+        if (bug.status_code === STATUS.PENDING_ASSIGNMENT) {
           for (const recipientID of pmIDs) {
-            await writeScheduledEvent(tx, bug, {
+            await writeScheduledEvent(pageTx, bug, {
               eventType: 'PENDING_ASSIGNMENT',
-              message: `${bug.bugNumber || 'Bug'} has been pending assignment for ${thresholdHours} hours.`,
-              sourceKey: boundedSourceKey(`SLA:${bug.ID}:${thresholdHours}h:${recipientID}`),
+              message: `${bug.bugNumber || 'Bug'} is waiting for assignment.`,
+              sourceKey: boundedSourceKey(`PENDING_ASSIGNMENT:${bug.ID}:${recipientID}`),
               recipientID,
               emailRequired: urgent,
               requirePM: true
-            }, emailConfig, result, 'sla')
+            }, emailConfig, pageResult, 'pendingAssignment')
+          }
+
+          const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
+          if (isSlaDue({ ...bug, pendingAssignmentAt: anchor.pendingAssignmentAt }, instant, thresholdHours)) {
+            for (const recipientID of pmIDs) {
+              await writeScheduledEvent(pageTx, bug, {
+                eventType: 'PENDING_ASSIGNMENT',
+                message: `${bug.bugNumber || 'Bug'} has been pending assignment for ${thresholdHours} hours.`,
+                sourceKey: boundedSourceKey(`SLA:${bug.ID}:${thresholdHours}h:${recipientID}`),
+                recipientID,
+                emailRequired: urgent,
+                requirePM: true
+              }, emailConfig, pageResult, 'sla')
+            }
+          }
+        }
+
+        if (isOverdue(bug, businessDate)) {
+          const dueDate = String(bug.dueDate).slice(0, 10)
+          for (const recipientID of overdueRecipients.get(bug.ID) || []) {
+            await writeScheduledEvent(pageTx, bug, {
+              eventType: 'OVERDUE',
+              message: `${bug.bugNumber || 'Bug'} is overdue.`,
+              sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchor.overdueCycleID}:${recipientID}`),
+              recipientID,
+              emailRequired: false,
+              requirePM: false
+            }, emailConfig, pageResult, 'overdue')
           }
         }
       }
 
-      if (isOverdue(bug, businessDate)) {
-        const dueDate = String(bug.dueDate).slice(0, 10)
-        for (const recipientID of overdueRecipients.get(bug.ID) || []) {
-          await writeScheduledEvent(tx, bug, {
-            eventType: 'OVERDUE',
-            message: `${bug.bugNumber || 'Bug'} is overdue.`,
-            sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchor.overdueCycleID}:${recipientID}`),
-            recipientID,
-            emailRequired: false,
-            requirePM: false
-          }, emailConfig, result, 'overdue')
-        }
+      return {
+        candidates,
+        pageResult,
+        nextID: candidates.at(-1)?.ID
       }
-    }
+    })
 
-    if (candidates.length < CANDIDATE_PAGE_SIZE) break
-    const nextID = candidates.at(-1)?.ID
+    if (!page.pageResult) break
+    for (const key of ['candidates', 'pendingAssignment', 'sla', 'overdue', 'created', 'skipped']) {
+      result[key] += page.pageResult[key]
+    }
+    if (page.candidates.length < CANDIDATE_PAGE_SIZE) break
+    const nextID = page.nextID
     if (!nextID || nextID === lastID) break
     lastID = nextID
   }
 
   return result
+}
+
+function createPageTransactionRunner (tx) {
+  // CAP request tx là nested transaction; dùng service gốc để mỗi page có root tx riêng và nhả lock sau commit.
+  const service = tx?.context ? Object.getPrototypeOf(tx) : tx
+  if (typeof service?.tx !== 'function') {
+    if (tx?.context) throw schedulerError(500, 'SCHEDULE_TRANSACTION_FACTORY_REQUIRED', 'A CAP transaction factory is required for page-bounded discovery.')
+    return fn => fn(tx)
+  }
+  const context = tx?.context
+    ? { tenant: tx.context.tenant, user: tx.context.user }
+    : null
+  return fn => context ? service.tx(context, fn) : service.tx(fn)
 }
 
 async function prepareCandidateLocks (tx, candidates) {
