@@ -2,11 +2,17 @@
 
 Last updated: 2026-08-27
 
-## 2026-08-27 My Notifications N1 Draft handoff
+## 2026-08-27 My Notifications N2 source candidate
 
-- N1 Tasks 1–4 are source-verified in Draft PR [#361](https://github.com/DarwinDO/IDTS-SAP01/pull/361), based on merged planning PR #360 at `8ac9327b93b70633e96d2b6f09bb379a5afb681f`. Fresh caller-only API, persistence/backfill and email regressions pass; exact-source review at `7dad8f18e148568d83380cabf2deba80eb432398` has zero Critical/Major/Important/Minor findings. Later changes are documentation-only.
-- DonHV reaffirmed use of existing Knowledge Gate PASS; the repeated assessment HOLD was corrected without inventing a new assessment. This is not release completion: no N1 merge/deploy/live migration/backfill or N2. See `docs/pm/evidence/my-notifications/n1-source-evidence.md` and PR checks for final head/CI.
-- Tiếng Việt: source N1 Tasks 1–4 đã kiểm định và mở Draft #361; suite liên quan PASS, review source không còn finding. Dùng lại PASS đã có theo DonHV, không tạo bài thi mới. Dừng trước merge/deploy/migration/backfill thật/N2; exact head/CI nằm ở PR và evidence.
+- N1 PR #361 is merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`. N2 uses that exact base on `feature/wp7-notifications-inbox-ui-donhv`; Tasks 5–6 are locally green for the dedicated OData client, native SAPUI5 inbox, i18n, lifecycle cleanup, responsive/keyboard checks and focused lint/build.
+- Final independent exact-head review and one Draft N2 PR remain. No migration/backfill execution, deployment, provider/email/data/user/role change, Ready/merge or N3. Detailed evidence: `docs/pm/evidence/my-notifications/n2-source-evidence.md`.
+- Tiếng Việt: N1 #361 đã merge tại SHA trên; N2 dùng base đó và candidate Tasks 5–6 đã GREEN local. Còn review exact-head cùng một Draft N2 PR; không migration/backfill thật/deploy/email-data-role/N3.
+
+## 2026-08-27 My Notifications N1 merged baseline
+
+- N1 Tasks 1–4 were source-verified in PR [#361](https://github.com/DarwinDO/IDTS-SAP01/pull/361) and merged at `e35d09c0deef129f0d986457c847fe7fc28b90d4`. Fresh caller-only API, persistence/backfill and email regressions passed; exact-source review at `7dad8f18e148568d83380cabf2deba80eb432398` had zero Critical/Major/Important/Minor findings.
+- DonHV reaffirmed existing Knowledge Gate PASS without inventing a new assessment. N1 merge authorizes the N2 source baseline only; no N1 deployment/live migration/backfill was performed. See `docs/pm/evidence/my-notifications/n1-source-evidence.md`.
+- Tiếng Việt: source N1 Tasks 1–4 đã kiểm định và merge qua #361 tại SHA trên. Dùng PASS đã có theo DonHV, không tạo bài thi mới. Merge N1 chỉ tạo baseline source N2; chưa deploy/migration/backfill thật.
 
 ## 2026-08-27 WP8 Gate 6.5 live closure
 
@@ -33,7 +39,7 @@ Last updated: 2026-08-27
 | Active SangVN AI operational metrics | IDTS-97 adds allowlisted best-effort operation status/latency fields and a PM-only bounded aggregate without exposing prompts, responses, raw errors, emails, endpoints or secrets. DonHV approved the same emergency deadline exception for the missing metrics/privacy Knowledge Gate; the exception is not a learner PASS. |
 | Main implementation risk | Shared QA still depends on private Render/Brevo/AWS/PostgreSQL environment variables staying out of repo, Jira, and logs. The Render PostgreSQL free-instance expiry remains the main time-bound infrastructure risk; IDTS-45 now documents a private logical-backup helper and recommends upgrading Render PostgreSQL before expiry if shared QA remains needed. Sprint 04 is tracked both through the real Jira sprint `IDTS Sprint 4` and planning epic `IDTS-51`; `IDTS-40` remains a deferred AWS-native follow-up rather than a blocker for Render QA. |
 | Knowledge readiness | `IDTS-82` is In Progress. From 2026-07-13, every member must pass the ownership Knowledge Gate before nontrivial work and before PR merge/Jira Done. Debug Labs, a progress register, and a PR-body validator are being added; source-comment retrofit is split into IDTS-83 to IDTS-85 and QA validation is IDTS-86. |
-| My Notifications planning | DonHV approved a caller-only federated inbox plus prompt post-commit email for important Bug/access events. Design and the N1-N6 implementation plan are documented. Gate 6.5 is merged and the N1 dependency contract is present at refreshed `origin/dev` `308aa847711e969cc770453f375bb5dbcf25a612`; source remains unstarted pending planning-package PR closure and a fresh N1 branch. Job Scheduler remains recovery/SLA/Overdue/digest/retention, not the normal one-hour prompt-email path. |
+| My Notifications delivery | Planning #360 and N1 #361 are merged. N2 UI source candidate is locally verified from exact N1 merge base `e35d09c0`; independent review and one Draft N2 PR remain. Job Scheduler remains recovery/SLA/Overdue/digest/retention, not normal prompt-email latency. No deployment or migration is implied. |
 | Active audit refactor | `IDTS-89` is complete: Knowledge Gate 90% PASS; PR #163 merged normally and runtime-only deploy `dep-d9gtkhrrjlhs73d4mhqg` is live at merge SHA `97792e8`. Database preservation, 11/11 exact ActionTypes, 11/11 legacy ActionTypes, health, protected-route, error-log, and authenticated reversible exact-action smoke checks pass. Auto-deploy remains off and pre-deploy remains `true`. |
 | Developer demo pool | `IDTS-90` is complete: PR #165 merged, Shared QA was updated by a narrow transaction only, and authenticated OData now exposes 12 Developer profiles with varied availability/workload plus 30 responsibility rows. No runtime deploy or broad seed reload was used. |
 

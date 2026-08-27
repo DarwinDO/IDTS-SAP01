@@ -554,6 +554,12 @@ Do not fix attachment reload by adding a raw request, custom `UploadSet`, hard-c
 Cập nhật ngày 2026-08-04: manifest không override table attachment. Facet `attachments_attachments` và vòng đời bảng do CAP attachment plugin quản lý; IDTS chỉ giữ custom Comments section.
 # IDTS-122 PM dashboard drill-down
 
+## N2 notification model / Model notification N2
+
+**English.** Named model `notifications` targets `/odata/v4/notification/` with OData V4, server mode, direct groups and no preload/early requests. Keep DTO/parameters aligned with `NotificationClient.js` and `srv/notification.cds`. Component initialization still follows authenticated bootstrap. N2 cache identity is `0.0.7`, aligned with app package/lock; no dependency versions change.
+
+**Tiếng Việt.** Model `notifications` trỏ tới `/odata/v4/notification/` bằng OData V4, server mode, direct group, không preload/early request. Giữ DTO/parameter đồng bộ với `NotificationClient.js` và `srv/notification.cds`. Component vẫn khởi tạo sau bootstrap đã xác thực. Cache identity N2 là `0.0.7`, khớp package/lock app; không đổi version dependency.
+
 The List Report uses the supported `sap.fe.templates.ListReport.ListReportController` extension point to consume the dashboard `status_code` navigation parameter. The extension applies the filter with `ExtensionAPI.setFilterValues()` and accepts only the ten canonical workflow status codes. This keeps dashboard navigation inside supported Fiori Elements APIs and prevents arbitrary filter injection.
 
 ## Gate 6.4 header navigation / Điều hướng header Gate 6.4

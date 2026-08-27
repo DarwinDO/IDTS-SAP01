@@ -312,3 +312,7 @@ The new Classification Apply, Duplicate Confirmation, and PM AI Activity labels 
 **English.** `userAdministrationOpenAction` mirrors the default bundle and supplies the visible Fiori header action text. Keep it short, user-facing, and free of domain or authorization implementation details.
 
 **Tiếng Việt.** `userAdministrationOpenAction` mirror bundle mặc định và cung cấp text hiển thị cho action header Fiori. Giữ wording ngắn, hướng tới user và không chứa domain hoặc chi tiết triển khai authorization.
+
+## N2 My Notifications English copy
+
+English: this bundle mirrors every `notification*` key from the default bundle for bell/count, filters, status, paging and safe failure states. Vietnamese: bundle này mirror đầy đủ key `notification*` của default; mọi text hiển thị không lộ chi tiết server/provider và phải đổi cùng shell, default/VI bundles và UI QA.

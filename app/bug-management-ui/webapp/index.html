@@ -7,7 +7,7 @@
     <title>Issue and Defect Tracking System</title>
     <link rel="stylesheet" href="css/idts-shell.css">
     <style>
-        html, body, body > div, #container, #container-uiarea {
+        html, body, body > div:not(#idtsNotificationShellHost):not(#idtsProfileShellHost), #container, #container-uiarea {
             height: 100%;
         }
     </style>
@@ -18,6 +18,7 @@
 </head>
 <body class="sapUiBody sapUiSizeCompact" id="content">
     <div id="idtsAuthError" role="alert" hidden></div>
+    <div id="idtsNotificationShellHost"></div>
     <div id="idtsProfileShellHost"></div>
     <div
         data-sap-ui-component
