@@ -42,7 +42,9 @@ async function buildDigestSnapshot ({
   _pendingAssignmentAnchors,
   _profileIDs,
   _profileRows,
-  _items
+  _items,
+  _itemsRole,
+  _itemCount
 } = {}) {
   if (!tx || typeof tx.run !== 'function') throw digestError(500, 'DIGEST_TRANSACTION_REQUIRED', 'A CAP transaction is required.')
 
@@ -52,39 +54,61 @@ async function buildDigestSnapshot ({
   if (!actor?.ID || !actor.active || !DIGEST_ROLES.has(String(actor.role_code || '').toUpperCase())) return null
 
   const role = String(actor.role_code).toUpperCase()
-  const profileRows = _profileRows || await readDigestUserProfiles(tx, actor.ID)
+  const profileRows = Array.isArray(_items)
+    ? await readDigestUserProfiles(tx, actor.ID)
+    : (_profileRows || await readDigestUserProfiles(tx, actor.ID))
+  const activeProfileIDs = new Set(profileRows.filter(row => row.active).map(row => row.ID))
+  if (Array.isArray(_items) && role === 'DEVELOPER' && _profileIDs instanceof Set && !sameSet(activeProfileIDs, _profileIDs)) return null
   const profileIDs = role === 'DEVELOPER'
-    ? (_profileIDs instanceof Set ? _profileIDs : new Set(profileRows.filter(row => row.active).map(row => row.ID)))
+    ? activeProfileIDs
     : new Set()
-  const bugs = _bugs || await readDigestBugs(tx, instant)
-  const pendingAssignmentAnchors = _pendingAssignmentAnchors || await readPendingAssignmentAnchors(tx, bugs)
-
-  const items = Array.isArray(_items)
-    ? _items.slice().sort(compareDigestItems)
-    : bugs
-      .map(bug => digestItemFor({
-        bug,
+  let items
+  let itemCount
+  if (Array.isArray(_items)) {
+    // Index dùng chung phải bind role; mismatch thì fail-closed, không persist body persona cũ.
+    if (_itemsRole !== role) return null
+    items = _items.slice().sort(compareDigestItems)
+    itemCount = normalizeItemCount(_itemCount, items.length)
+  } else if (Array.isArray(_bugs)) {
+    const pendingAssignmentAnchors = _pendingAssignmentAnchors || await readPendingAssignmentAnchors(tx, _bugs)
+    const accumulator = createDigestAccumulator()
+    addDigestItemsForBugs(accumulator, _bugs, {
+      role,
+      recipientID: actor.ID,
+      profileIDs,
+      businessDate: date,
+      snapshotAt: instant,
+      pendingAssignmentAnchors
+    })
+    items = accumulator.items
+    itemCount = accumulator.count
+  } else {
+    const accumulator = createDigestAccumulator()
+    await streamDigestBugPages(tx, instant, (bugs, pendingAssignmentAnchors) => {
+      addDigestItemsForBugs(accumulator, bugs, {
         role,
         recipientID: actor.ID,
         profileIDs,
         businessDate: date,
         snapshotAt: instant,
-        pendingAssignmentAt: pendingAssignmentAnchors.get(bug.ID)
-      }))
-      .filter(Boolean)
-      .sort(compareDigestItems)
+        pendingAssignmentAnchors
+      })
+    })
+    items = accumulator.items
+    itemCount = accumulator.count
+  }
 
   if (!items.length) return null
 
   const safeLimit = normalizeLimit(limit)
   const renderedItems = items.slice(0, safeLimit)
-  const remainder = Math.max(items.length - renderedItems.length, 0)
+  const remainder = Math.max(itemCount - renderedItems.length, 0)
   const config = getEmailConfig()
   const appBase = allowlistedAppBase(config?.baseUrl)
   const subject = `[IDTS] Daily notification digest - ${date}`
   const textLines = [
     `IDTS daily notification digest for ${date}`,
-    `Items: ${items.length}`,
+    `Items: ${itemCount}`,
     ...renderedItems.map((item, index) => `${index + 1}. ${safeText(item.bugNumber, 'Bug')} - ${safeText(item.title, 'Untitled bug')} [${item.priority}] (${item.reason}) ${buildBugLink(appBase, item.ID)}`)
   ]
   if (remainder) textLines.push(`and ${remainder} more - Open filtered queue: ${buildQueueLink(appBase, role, actor.ID)}`)
@@ -100,7 +124,7 @@ async function buildDigestSnapshot ({
     '<div style="margin:0;padding:24px;background:#f5f6f7;font-family:Arial,Helvetica,sans-serif;color:#223548;">',
     '  <div style="max-width:640px;margin:0 auto;background:#ffffff;border:1px solid #d9e2ec;border-radius:8px;overflow:hidden;">',
     `    <div style="padding:18px 24px;background:#0a6ed1;color:#ffffff;"><h1 style="margin:0;font-size:20px;line-height:28px;">${escapeHtml(subject)}</h1></div>`,
-    `    <div style="padding:22px 24px;"><p style="margin:0 0 16px;font-size:15px;line-height:22px;">${items.length} actionable item${items.length === 1 ? '' : 's'}.</p><ol style="margin:0;padding-left:24px;">${htmlItems}</ol>${moreHtml}</div>`,
+    `    <div style="padding:22px 24px;"><p style="margin:0 0 16px;font-size:15px;line-height:22px;">${itemCount} actionable item${itemCount === 1 ? '' : 's'}.</p><ol style="margin:0;padding-left:24px;">${htmlItems}</ol>${moreHtml}</div>`,
     '    <div style="padding:14px 24px;background:#f7f9fb;color:#6a7d90;font-size:12px;line-height:18px;">This is an automated IDTS digest. Open IDTS for full Bug details.</div>',
     '  </div>',
     '</div>'
@@ -113,7 +137,7 @@ async function buildDigestSnapshot ({
     windowStart: bangkokMidnight(date),
     windowEnd: instant.toISOString(),
     snapshotAt: instant.toISOString(),
-    itemCount: items.length,
+    itemCount,
     items: renderedItems,
     subject,
     textBody: textLines.join('\n'),
@@ -128,71 +152,83 @@ async function scheduleNotificationDigests ({ tx, now = new Date() } = {}) {
 
   const businessDate = bangkokDate(instant)
   const result = { created: 0, reused: 0, skipped: 0 }
+  const runRoot = createDigestTransactionRunner(tx)
+  const runPage = runRoot || (fn => fn(tx))
   let lastID
-  const recipientPages = []
-  const profileRowsByUser = new Map()
   for (;;) {
-    const query = SELECT.from(USERS)
-      .columns('ID', 'displayName', 'email', 'role_code', 'active')
-      .where({ active: true, role_code: { in: [...DIGEST_ROLES] } })
-      .orderBy('ID asc')
-      .limit(DIGEST_RECIPIENT_PAGE_SIZE)
-    if (lastID) query.and`ID > ${lastID}`
-    const users = await tx.run(query)
-    if (!users.length) break
-    recipientPages.push(users)
-    const pageProfiles = await readDigestProfileRows(tx, users)
-    for (const [userID, rows] of pageProfiles) profileRowsByUser.set(userID, rows)
+    const page = await runPage(async pageTx => {
+      const recipients = await readDigestRecipientPage(pageTx, lastID)
+      if (!recipients.length) return { pageResult: null, recipients: [], snapshots: [] }
 
-    const nextID = users.at(-1)?.ID
-    if (users.length < DIGEST_RECIPIENT_PAGE_SIZE || !nextID || nextID === lastID) break
-    lastID = nextID
-  }
+      const profileRowsByUser = await readDigestProfileRows(pageTx, recipients)
+      const accumulators = new Map(recipients.map(recipient => [recipient.ID, createDigestAccumulator()]))
+      await streamDigestBugPages(pageTx, instant, (bugs, pendingAssignmentAnchors) => {
+        accumulateDigestPage({
+          recipients,
+          profileRowsByUser,
+          accumulators,
+          bugs,
+          pendingAssignmentAnchors,
+          businessDate,
+          snapshotAt: instant
+        })
+      })
 
-  if (!recipientPages.length) return result
-  const recipients = recipientPages.flat()
-  const sharedBugs = await readDigestBugs(tx, instant)
-  const sharedPendingAssignmentAnchors = await readPendingAssignmentAnchors(tx, sharedBugs)
-  const itemsByRecipient = indexDigestItems({
-    recipients,
-    bugs: sharedBugs,
-    pendingAssignmentAnchors: sharedPendingAssignmentAnchors,
-    profileRowsByUser,
-    businessDate,
-    snapshotAt: instant
-  })
-  for (const recipient of recipients) {
-    const existing = await tx.run(SELECT.one.from(DIGESTS).columns('ID').where({
-      recipient_ID: recipient.ID,
-      businessDate,
-      digestType: digestTypeForRole(String(recipient.role_code || '').toUpperCase())
-    }))
-    if (existing?.ID) {
-      result.reused += 1
-      continue
-    }
+      const pageResult = { created: 0, reused: 0, skipped: 0 }
+      const snapshots = []
+      for (const recipient of recipients) {
+        const role = String(recipient.role_code || '').toUpperCase()
+        const existing = await pageTx.run(SELECT.one.from(DIGESTS).columns('ID').where({
+          recipient_ID: recipient.ID,
+          businessDate,
+          digestType: digestTypeForRole(role)
+        }))
+        if (existing?.ID) {
+          pageResult.reused += 1
+          continue
+        }
 
-    const profileRows = profileRowsByUser.get(recipient.ID) || []
-    const snapshot = await buildDigestSnapshot({
-      tx,
-      recipient,
-      businessDate,
-      snapshotAt: instant,
-      limit: DEFAULT_LIMIT,
-      _bugs: sharedBugs,
-      _pendingAssignmentAnchors: sharedPendingAssignmentAnchors,
-      _profileIDs: new Set(profileRows.filter(row => row.active).map(row => row.ID)),
-      _profileRows: profileRows,
-      _items: itemsByRecipient.get(recipient.ID) || []
+        const profileRows = profileRowsByUser.get(recipient.ID) || []
+        const accumulator = accumulators.get(recipient.ID) || createDigestAccumulator()
+        const snapshot = await buildDigestSnapshot({
+          tx: pageTx,
+          recipient,
+          businessDate,
+          snapshotAt: instant,
+          limit: DEFAULT_LIMIT,
+          _profileIDs: new Set(profileRows.filter(row => row.active).map(row => row.ID)),
+          _profileRows: profileRows,
+          _items: accumulator.items,
+          _itemsRole: role,
+          _itemCount: accumulator.count
+        })
+        if (!snapshot) {
+          pageResult.skipped += 1
+          continue
+        }
+        snapshots.push(snapshot)
+      }
+
+      return {
+        pageResult,
+        recipients,
+        snapshots,
+        nextID: recipients.at(-1)?.ID
+      }
     })
-    if (!snapshot) {
-      result.skipped += 1
-      continue
-    }
 
-    const delivery = await insertDigestDelivery(tx, snapshot)
-    if (delivery.reused) result.reused += 1
-    else result.created += 1
+    if (!page.pageResult) break
+    for (const snapshot of page.snapshots) {
+      const delivery = await insertDigestDelivery(tx, snapshot, runRoot)
+      if (delivery.skipped) page.pageResult.skipped += 1
+      else if (delivery.reused) page.pageResult.reused += 1
+      else page.pageResult.created += 1
+    }
+    for (const key of ['created', 'reused', 'skipped']) result[key] += page.pageResult[key]
+
+    const nextID = page.nextID
+    if (page.recipients.length < DIGEST_RECIPIENT_PAGE_SIZE || !nextID || nextID === lastID) break
+    lastID = nextID
   }
   return result
 }
@@ -218,19 +254,6 @@ async function processNotificationDigestDeliveries ({ tx, config, sendMail, now 
     .filter(row => !row.nextAttemptAt || new Date(row.nextAttemptAt) <= instant)
     .filter(row => !row.lockedUntil || new Date(row.lockedUntil) <= instant)
     .slice(0, batchSize)
-
-  const recipientIDs = [...new Set(eligible.map(row => row.recipient_ID).filter(Boolean))]
-  const recipients = recipientIDs.length
-    ? await tx.run(SELECT.from(USERS).columns('ID', 'email', 'active', 'role_code').where({ ID: { in: recipientIDs } }).limit(batchSize))
-    : []
-  const recipientByID = new Map(recipients.map(row => [row.ID, row]))
-  const profileRows = recipientIDs.length
-    ? await tx.run(SELECT.from(PROFILES).columns('ID', 'user_ID', 'active').where({ user_ID: { in: recipientIDs }, active: true }).limit(batchSize))
-    : []
-  const profilesByUser = new Map(recipientIDs.map(userID => [userID, []]))
-  for (const row of profileRows) {
-    if (profilesByUser.has(row.user_ID)) profilesByUser.get(row.user_ID).push(row)
-  }
   const result = { sent: 0, failed: 0, skipped: 0 }
 
   for (const delivery of eligible) {
@@ -254,7 +277,7 @@ async function processNotificationDigestDeliveries ({ tx, config, sendMail, now 
       lastAttemptAt: instant.toISOString()
     }).where({ ID: delivery.ID, lockToken }))
 
-    const recipient = recipientByID.get(delivery.recipient_ID)
+    const { recipient, profileRows } = await readDigestSendRecipient(tx, delivery.recipient_ID)
     if (!recipient?.active || !isSafeEmailAddress(recipient.email)) {
       await tx.run(UPDATE(DIGESTS).set({
         status_code: 'SKIPPED',
@@ -266,7 +289,7 @@ async function processNotificationDigestDeliveries ({ tx, config, sendMail, now 
       result.skipped += 1
       continue
     }
-    if (!isSendPersonaValid(recipient, profilesByUser.get(recipient.ID) || [], roleFromDigestType(delivery.digestType))) {
+    if (!isSendPersonaValid(recipient, profileRows, roleFromDigestType(delivery.digestType))) {
       await tx.run(UPDATE(DIGESTS).set({
         status_code: 'SKIPPED',
         lastErrorCode: 'RECIPIENT_PERSONA_INVALID',
@@ -321,51 +344,103 @@ async function processNotificationDigestDeliveries ({ tx, config, sendMail, now 
   return result
 }
 
-async function insertDigestDelivery (tx, snapshot) {
+async function readDigestSendRecipient (tx, recipientID) {
+  const recipient = await tx.run(
+    SELECT.one.from(USERS)
+      .columns('ID', 'email', 'active', 'role_code')
+      .where({ ID: recipientID })
+      .forUpdate()
+  )
+  if (!recipient) return { recipient: null, profileRows: [] }
+  const profileRows = await tx.run(
+    SELECT.from(PROFILES)
+      .columns('ID', 'user_ID', 'active')
+      .where({ user_ID: recipient.ID, active: true })
+      .orderBy('ID asc')
+      .limit(1)
+      .forUpdate()
+  )
+  return { recipient, profileRows }
+}
+
+async function insertDigestDelivery (tx, snapshot, rootRunner) {
   const key = {
     recipient_ID: snapshot.recipientID,
     businessDate: snapshot.businessDate,
     digestType: snapshot.digestType
   }
-  // Khóa recipient trước precheck để race bình thường reuse mà không cần đọc sau unique statement đã abort.
-  await tx.run(SELECT.one.from(USERS).columns('ID').where({ ID: snapshot.recipientID }).forUpdate())
-  const existing = await tx.run(SELECT.one.from(DIGESTS).columns('ID').where(key))
-  if (existing?.ID) return { ID: existing.ID, reused: true }
-
-  const deliveryID = cds.utils.uuid()
-  const entry = {
-    ID: deliveryID,
-    recipient_ID: snapshot.recipientID,
-    businessDate: snapshot.businessDate,
-    digestType: snapshot.digestType,
-    windowStart: snapshot.windowStart,
-    windowEnd: snapshot.windowEnd,
-    snapshotAt: snapshot.snapshotAt,
-    itemCount: snapshot.itemCount,
-    subject: snapshot.subject,
-    textBody: snapshot.textBody,
-    htmlBody: snapshot.htmlBody,
-    status_code: 'PENDING',
-    attemptCount: 0
-  }
+  const runInsert = rootRunner || (fn => fn(tx))
   try {
-    await tx.run(INSERT.into(DIGESTS).entries(entry))
-    return { ID: deliveryID, reused: false }
+    return await runInsert(async insertTx => {
+      // Thứ tự khóa chỉ là User -> digest; delivery cũng dùng User-first.
+      const recipient = await insertTx.run(
+        SELECT.one.from(USERS)
+          .columns('ID', 'active', 'role_code')
+          .where({ ID: snapshot.recipientID })
+          .forUpdate()
+      )
+      const role = String(recipient?.role_code || '').toUpperCase()
+      if (!recipient?.active || digestTypeForRole(role) !== snapshot.digestType) return { skipped: true }
+
+      const existing = await insertTx.run(SELECT.one.from(DIGESTS).columns('ID').where(key))
+      if (existing?.ID) return { ID: existing.ID, reused: true }
+
+      const deliveryID = cds.utils.uuid()
+      const entry = {
+        ID: deliveryID,
+        recipient_ID: snapshot.recipientID,
+        businessDate: snapshot.businessDate,
+        digestType: snapshot.digestType,
+        windowStart: snapshot.windowStart,
+        windowEnd: snapshot.windowEnd,
+        snapshotAt: snapshot.snapshotAt,
+        itemCount: snapshot.itemCount,
+        subject: snapshot.subject,
+        textBody: snapshot.textBody,
+        htmlBody: snapshot.htmlBody,
+        status_code: 'PENDING',
+        attemptCount: 0
+      }
+      try {
+        await insertTx.run(INSERT.into(DIGESTS).entries(entry))
+        return { ID: deliveryID, reused: false }
+      } catch (error) {
+        if (!isDigestUniqueViolation(error)) throw error
+        // PostgreSQL abort root sau 23505; throw để CAP discard root trước khi đọc winner.
+        throw digestUniqueConflict(error)
+      }
+    })
   } catch (error) {
-    if (!isDigestUniqueViolation(error)) throw error
-    const winner = await readDigestAfterUniqueConflict(tx, key)
+    const uniqueConflict = error?.digestUniqueConflict === true || isDigestUniqueViolation(error) || isDigestUniqueViolation(error?.cause)
+    if (!uniqueConflict) throw error
+    if (!rootRunner) throw error
+    const winner = await readDigestAfterUniqueConflict(tx, key, rootRunner)
     if (!winner?.ID) throw error
     return { ID: winner.ID, reused: true }
   }
 }
 
-async function readDigestAfterUniqueConflict (tx, key) {
+async function readDigestAfterUniqueConflict (tx, key, rootRunner) {
+  if (rootRunner) return rootRunner(readDigestWinner)
   const service = tx?.context ? Object.getPrototypeOf(tx) : null
   if (typeof service?.tx === 'function') {
     const context = { tenant: tx.context.tenant, user: tx.context.user }
-    return service.tx(context, isolatedTx => isolatedTx.run(SELECT.one.from(DIGESTS).columns('ID').where(key)))
+    return service.tx(context, isolatedTx => readDigestWinner(isolatedTx))
   }
-  return tx.run(SELECT.one.from(DIGESTS).columns('ID').where(key))
+  return readDigestWinner(tx)
+
+  function readDigestWinner (readTx) {
+    return readTx.run(SELECT.one.from(DIGESTS).columns('ID').where(key))
+  }
+}
+
+function digestUniqueConflict (error) {
+  return Object.assign(new Error('Digest unique-key conflict; discard the insert root.'), {
+    digestUniqueConflict: true,
+    cause: error,
+    code: error?.code,
+    constraint: error?.constraint
+  })
 }
 
 async function readRecipient (tx, recipient) {
@@ -376,26 +451,56 @@ async function readRecipient (tx, recipient) {
   return row
 }
 
-async function readDigestUserProfiles (tx, userID) {
-  return tx.run(SELECT.from(PROFILES)
-    .columns('ID', 'user_ID', 'active')
-    .where({ user_ID: userID })
+async function readDigestRecipientPage (tx, lastID) {
+  const query = SELECT.from(USERS)
+    .columns('ID', 'displayName', 'email', 'role_code', 'active')
+    .where({ active: true, role_code: { in: [...DIGEST_ROLES] } })
     .orderBy('ID asc')
-    .limit(DIGEST_PAGE_SIZE))
+    .limit(DIGEST_RECIPIENT_PAGE_SIZE)
+  if (lastID) query.and`ID > ${lastID}`
+  return tx.run(query)
+}
+
+async function readDigestUserProfiles (tx, userID) {
+  const rows = []
+  let lastID
+  for (;;) {
+    const query = SELECT.from(PROFILES)
+      .columns('ID', 'user_ID', 'active')
+      .where({ user_ID: userID })
+      .orderBy('ID asc')
+      .limit(DIGEST_PAGE_SIZE)
+    if (lastID) query.and`ID > ${lastID}`
+    const page = await tx.run(query)
+    if (!page.length) break
+    rows.push(...page)
+    const nextID = page.at(-1)?.ID
+    if (page.length < DIGEST_PAGE_SIZE || !nextID || nextID === lastID) break
+    lastID = nextID
+  }
+  return rows
 }
 
 async function readDigestProfileRows (tx, users) {
   const userIDs = users.map(user => user.ID).filter(Boolean)
-  const rows = userIDs.length
-    ? await tx.run(SELECT.from(PROFILES)
+  const byUser = new Map(userIDs.map(userID => [userID, []]))
+  let lastID
+  for (;;) {
+    if (!userIDs.length) break
+    const query = SELECT.from(PROFILES)
       .columns('ID', 'user_ID', 'active')
       .where({ user_ID: { in: userIDs } })
       .orderBy('ID asc')
-      .limit(DIGEST_PAGE_SIZE))
-    : []
-  const byUser = new Map(userIDs.map(userID => [userID, []]))
-  for (const row of rows) {
-    if (byUser.has(row.user_ID)) byUser.get(row.user_ID).push(row)
+      .limit(DIGEST_PAGE_SIZE)
+    if (lastID) query.and`ID > ${lastID}`
+    const rows = await tx.run(query)
+    if (!rows.length) break
+    for (const row of rows) {
+      if (byUser.has(row.user_ID)) byUser.get(row.user_ID).push(row)
+    }
+    const nextID = rows.at(-1)?.ID
+    if (rows.length < DIGEST_PAGE_SIZE || !nextID || nextID === lastID) break
+    lastID = nextID
   }
   return byUser
 }
@@ -420,8 +525,7 @@ async function readPendingAssignmentAnchors (tx, bugs) {
   return anchors
 }
 
-async function readDigestBugs (tx, snapshotAt) {
-  const bugs = []
+async function streamDigestBugPages (tx, snapshotAt, onPage) {
   let lastID
   for (;;) {
     const query = SELECT.from(BUGS)
@@ -435,29 +539,58 @@ async function readDigestBugs (tx, snapshotAt) {
     if (lastID) query.and`ID > ${lastID}`
     const page = await tx.run(query)
     if (!page.length) break
-    bugs.push(...page)
+    const pendingAssignmentAnchors = await readPendingAssignmentAnchors(tx, page)
+    await onPage(page, pendingAssignmentAnchors)
     const nextID = page.at(-1)?.ID
     if (page.length < DIGEST_PAGE_SIZE || !nextID || nextID === lastID) break
     lastID = nextID
   }
-  return bugs
 }
 
-function indexDigestItems ({ recipients, bugs, pendingAssignmentAnchors, profileRowsByUser, businessDate, snapshotAt }) {
-  const recipientByID = new Map(recipients.map(recipient => [recipient.ID, recipient]))
-  const itemsByRecipient = new Map(recipients.map(recipient => [recipient.ID, []]))
-  const pmItems = bugs.map(bug => digestItemFor({
-    bug,
-    role: 'PM',
-    recipientID: null,
-    profileIDs: new Set(),
-    businessDate,
-    snapshotAt,
-    pendingAssignmentAt: pendingAssignmentAnchors.get(bug.ID)
-  })).filter(Boolean).sort(compareDigestItems)
-  for (const recipient of recipients) {
-    if (String(recipient.role_code || '').toUpperCase() === 'PM') itemsByRecipient.set(recipient.ID, pmItems)
+function createDigestTransactionRunner (tx) {
+  const service = tx?.context ? Object.getPrototypeOf(tx) : tx
+  if (typeof service?.tx !== 'function') return null
+  const context = tx?.context
+    ? { tenant: tx.context.tenant, user: tx.context.user }
+    : null
+  return fn => context ? service.tx(context, fn) : service.tx(fn)
+}
+
+function createDigestAccumulator () {
+  return { count: 0, items: [] }
+}
+
+function addDigestItem (accumulator, item) {
+  if (!item) return
+  accumulator.count += 1
+  if (accumulator.items.length < DEFAULT_LIMIT) {
+    accumulator.items.push(item)
+    accumulator.items.sort(compareDigestItems)
+    return
   }
+  const last = accumulator.items.at(-1)
+  if (compareDigestItems(item, last) < 0) {
+    accumulator.items[accumulator.items.length - 1] = item
+    accumulator.items.sort(compareDigestItems)
+  }
+}
+
+function addDigestItemsForBugs (accumulator, bugs, { role, recipientID, profileIDs, businessDate, snapshotAt, pendingAssignmentAnchors }) {
+  for (const bug of bugs) {
+    addDigestItem(accumulator, digestItemFor({
+      bug,
+      role,
+      recipientID,
+      profileIDs,
+      businessDate,
+      snapshotAt,
+      pendingAssignmentAt: pendingAssignmentAnchors.get(bug.ID)
+    }))
+  }
+}
+
+function accumulateDigestPage ({ recipients, profileRowsByUser, accumulators, bugs, pendingAssignmentAnchors, businessDate, snapshotAt }) {
+  const recipientByID = new Map(recipients.map(recipient => [recipient.ID, recipient]))
 
   const profileUserByID = new Map()
   const profileIDsByUser = new Map()
@@ -471,6 +604,22 @@ function indexDigestItems ({ recipients, bugs, pendingAssignmentAnchors, profile
   }
 
   for (const bug of bugs) {
+    const pmItem = digestItemFor({
+      bug,
+      role: 'PM',
+      recipientID: null,
+      profileIDs: new Set(),
+      businessDate,
+      snapshotAt,
+      pendingAssignmentAt: pendingAssignmentAnchors.get(bug.ID)
+    })
+    if (pmItem) {
+      for (const recipient of recipients) {
+        if (String(recipient.role_code || '').toUpperCase() === 'PM') {
+          addDigestItem(accumulators.get(recipient.ID), pmItem)
+        }
+      }
+    }
     const targetIDs = new Set()
     const assigneeUserID = profileUserByID.get(bug.assignee_ID)
     if (assigneeUserID && DEVELOPER_STATUSES.has(bug.status_code)) targetIDs.add(assigneeUserID)
@@ -490,10 +639,18 @@ function indexDigestItems ({ recipients, bugs, pendingAssignmentAnchors, profile
         snapshotAt,
         pendingAssignmentAt: pendingAssignmentAnchors.get(bug.ID)
       })
-      if (item) itemsByRecipient.get(recipientID).push(item)
+      addDigestItem(accumulators.get(recipientID), item)
     }
   }
-  return itemsByRecipient
+}
+
+function normalizeItemCount (value, fallback) {
+  const count = Number(value)
+  return Number.isInteger(count) && count >= fallback ? count : fallback
+}
+
+function sameSet (left, right) {
+  return left.size === right.size && [...left].every(value => right.has(value))
 }
 
 function digestItemFor ({ bug, role, recipientID, profileIDs, businessDate, snapshotAt, pendingAssignmentAt }) {

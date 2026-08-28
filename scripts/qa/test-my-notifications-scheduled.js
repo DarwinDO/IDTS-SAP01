@@ -288,11 +288,16 @@ async function main () {
     nextProcessorUser_ID: IDS.owner,
     assignee_ID: IDS.assigneeProfile
   }))
+  bulkCandidates[0].status_code = 'PENDING_ASSIGNMENT'
+  bulkCandidates[0].dueDate = null
+  bulkCandidates[0].nextProcessorUser_ID = null
+  bulkCandidates[0].assignee_ID = null
   const bulkCandidateQueries = []
   const bulkCurrentQueries = []
   const bulkHistoryQueries = []
   const bulkProfileQueries = []
   const bulkUserQueries = []
+  const bulkPMQueries = []
   const bulkFinalUserLocks = []
   const bulkQueryOrder = []
   const bulkTx = {
@@ -323,7 +328,10 @@ async function main () {
         return [{ ID: IDS.assigneeProfile, user_ID: IDS.assigneeUser, active: true }]
       }
       if (from === 'idts.cap.Users' && !query.SELECT.one) {
-        if (JSON.stringify(query.SELECT.where).includes('role_code')) return [{ ID: 'bulk-pm', active: true, role_code: 'PM' }]
+        if (JSON.stringify(query.SELECT.where).includes('role_code')) {
+          bulkPMQueries.push(query)
+          return [{ ID: 'bulk-pm', active: true, role_code: 'PM' }]
+        }
         bulkUserQueries.push(query)
         bulkQueryOrder.push(Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') ? 'user-lock' : 'user-recheck')
         return [
@@ -371,6 +379,8 @@ async function main () {
   'scheduler acquires User -> Profile -> Bug locks')
   assert.ok(bulkFinalUserLocks.length > 0,
     'each written recipient keeps a final locked User revalidation')
+  assert.ok(bulkPMQueries.length > 0 && bulkPMQueries.every(query => query.SELECT.limit?.rows?.val <= 500),
+    'active PM discovery reads bounded keyset pages')
 
   // Re-read and lock the Bug immediately before writing; stale close/assignment/due-date changes must not emit.
   await assertStaleCandidateSkipped(db, IDS.staleClosed,

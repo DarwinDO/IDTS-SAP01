@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2 MERGED — N3 MERGED — N4 TASK 11 FIX ROUND 2 COMMITTED; LOCAL SOURCE BOUNDARY`
+`N1/N2 MERGED — N3 MERGED — N4 FINAL FIX WAVE SOURCE COMMITTED; LOCAL SOURCE BOUNDARY`
 
 ### Authority
 
@@ -33,6 +33,8 @@ Fix round 1 addresses the exact-head review's nine Important findings: installed
 
 Fix round 2 removes the scoped re-review's query-amplification finding: after lock-time candidate revalidation, latest status/due-date anchors and Overdue recipient eligibility are bulk-resolved with bounded per-page CQN reads, while each recipient retains a final locked revalidation before writing. Full-page query-count QA covers 500 candidates, multiple recipients and a preloaded recipient becoming inactive. Scoped re-review remains required before any PR, Ready, merge or rollout boundary.
 
+The final whole-branch review at `7e00b3ed2bed88e83a8800b59feea94347e0989a` found four Important findings. The single authorized final fix wave now binds schedule indexes to the authoritative role, revalidates User/Profile under User-first locks through digest send/finalization, isolates exact unique conflicts in discardable roots, streams Bug pages into bounded current-recipient-page accumulators, commits restartable recipient pages, and pages active-PM discovery. The final local source commit and one fresh bounded independent re-review remain coordinator boundaries; no Draft PR/Ready/merge/deploy/live action is implied.
+
 Fix round 3 removes the lock-order deadlock risk identified in the next scoped review: page-level profile/user eligibility reads are bounded but lock-free, preserving the existing assignment `DeveloperProfile -> Bug` order; final recipient User validation remains locked immediately before the writer. Focused QA asserts this order and the stale-recipient rejection. Scoped re-review remains required before any PR, Ready, merge or rollout boundary.
 
 ## Addendum — N4 Task 11 fix round 1
@@ -47,7 +49,7 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 TASK 11 FIX ROUND 2 ĐÃ COMMIT; BOUNDARY SOURCE LOCAL`
+`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 ĐÃ COMMIT FINAL FIX WAVE; BOUNDARY SOURCE LOCAL`
 
 ### Thẩm quyền
 
@@ -77,6 +79,8 @@ Fix round 1 xử lý chín finding Important của review exact-head: evidence c
 Fix round 2 xử lý finding query amplification của scoped re-review: sau khi revalidate candidate tại lock-time, anchor status/due-date mới nhất và eligibility recipient Overdue được bulk-resolve bằng CQN bounded theo page, đồng thời từng recipient vẫn được lock/revalidate cuối trước write. QA query-count page đủ cover 500 candidate, nhiều recipient và recipient preload chuyển inactive. Vẫn cần scoped re-review trước boundary PR, Ready, merge hoặc rollout.
 
 Fix round 3 xử lý rủi ro deadlock lock-order của scoped review tiếp theo: read eligibility profile/user theo page vẫn bounded nhưng lock-free, giữ thứ tự assignment hiện có `DeveloperProfile -> Bug`; validation User cuối cho từng recipient vẫn lock ngay trước writer. QA focused assert thứ tự này và reject recipient stale. Vẫn cần scoped re-review trước boundary PR, Ready, merge hoặc rollout.
+
+Review whole-branch tại `7e00b3ed2bed88e83a8800b59feea94347e0989a` phát hiện bốn Important. Final fix wave duy nhất được phép giờ bind index schedule với role authoritative, revalidate User/Profile dưới lock User-first xuyên suốt send/finalize digest, isolate unique conflict exact trong root discardable, stream Bug page vào accumulator bounded của recipient page hiện tại, commit recipient page restartable và page discovery PM active. Commit source local cuối cùng và một independent re-review bounded mới vẫn thuộc coordinator; không suy ra quyền Draft PR/Ready/merge/deploy/live.
 
 ## Phụ lục — N4 Task 11 fix round 1
 

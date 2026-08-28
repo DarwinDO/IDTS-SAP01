@@ -281,17 +281,17 @@ async function main () {
   }))
   let digestLookupCount = 0
   let independentReads = 0
+  let winnerReads = 0
   const uniqueService = {
     tx: (context, callback) => {
       independentReads += 1
       return callback({
         run: async query => {
           const where = JSON.stringify(query.SELECT?.where || '')
-          if (query.SELECT?.from?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries' &&
-            query.SELECT.one && where.includes(IDS.unique) && where.includes('2026-08-31')) {
-            return { ID: uniqueDeliveryID }
-          }
-          return db.run(query)
+          const winnerRead = query.SELECT?.from?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries' &&
+            query.SELECT.one && where.includes(IDS.unique) && where.includes('2026-08-31') && digestLookupCount >= 2
+          if (winnerRead) winnerReads += 1
+          return uniqueTx.run(query)
         }
       })
     }
@@ -320,7 +320,7 @@ async function main () {
   const reused = await scheduleNotificationDigests({ tx: uniqueTx, now: new Date('2026-08-31T01:00:00.000Z') })
   assert.ok(reused.reused >= 1,
     `exact digest unique conflict re-reads and reuses the existing row: ${JSON.stringify(reused)} lookups=${digestLookupCount} independent=${independentReads}`)
-  assert.equal(independentReads, 1, `unique conflict is re-read through an independent CAP transaction boundary: ${independentReads}`)
+  assert.equal(winnerReads, 1, `unique conflict is re-read exactly once through an independent CAP transaction boundary: ${winnerReads}`)
   const errorTx = {
     run: async query => {
       if (query.INSERT?.into === 'idts.cap.NotificationDigestDeliveries' || query.INSERT?.into?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries') {
@@ -564,8 +564,8 @@ async function main () {
   const recipientScaleRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns('recipient_ID').where({ businessDate: '2026-09-02' }))
   assert.equal(recipientScaleRows.filter(row => recipientScaleIDs.has(row.recipient_ID)).length, 1001,
     'digest scheduling continues through every eligible recipient page')
-  assert.equal(recipientBugPageReads, 1,
-    'recipient pages reuse one shared bounded Bug read instead of scanning globally per recipient')
+  assert.ok(recipientBugPageReads >= Math.ceil(recipientScaleUsers.length / 100),
+    'recipient pages stream bounded Bug pages without an all-recipient aggregate scan')
 
   const longScanBaseline = await buildDigestSnapshot({
     tx: db,
@@ -623,9 +623,10 @@ async function main () {
   const recipientQuerySizes = []
   const deliveryTx = {
     run: async query => {
-      if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Users' && !query.SELECT.one) {
+      if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Users') {
         const where = JSON.stringify(query.SELECT.where)
-        recipientQuerySizes.push(deliveryUsers.filter(recipient => where.includes(recipient.ID)).length)
+        const matched = deliveryUsers.filter(recipient => where.includes(recipient.ID)).length
+        if (matched) recipientQuerySizes.push(matched)
       }
       return deliveryDb.run(query)
     }
@@ -683,6 +684,23 @@ async function main () {
   assert.equal(senderCloses, 1, 'worker closes the shared sender once after the batch')
   assert.equal(new Set(senderRefs).size, 1, 'notifications/access/digests receive the same sender-backed sendMail')
 
+  const finalFixFailures = []
+  for (const [name, fixture] of [
+    ['snapshot role binding race', assertSnapshotRoleBindingRace],
+    ['send-time authorization race', assertSendTimeAuthorizationRace],
+    ['unique conflict transaction isolation', assertUniqueConflictIsolation],
+    ['bounded digest pages and restart', assertBoundedDigestPagesAndRestart]
+  ]) {
+    try {
+      await fixture()
+    } catch (error) {
+      finalFixFailures.push(`${name}: ${error.stack || error.message}`)
+    }
+  }
+  if (finalFixFailures.length) {
+    throw new Error(`N4 final fix RED fixtures failed:\n${finalFixFailures.join('\n')}`)
+  }
+
   console.log('IDTS My Notifications digest contract: PASS')
 }
 
@@ -710,6 +728,329 @@ async function insertStoredDigestSnapshot (db, snapshot) {
     status_code: 'PENDING',
     attemptCount: 0
   }))
+}
+
+async function assertSnapshotRoleBindingRace () {
+  await assertSnapshotRoleChange('PM', 'TESTER', 'Pending Assignment', 'PM to Tester')
+  await assertSnapshotRoleChange('DEVELOPER', 'PM', 'Technical assignment', 'Developer to PM')
+}
+
+async function assertSnapshotRoleChange (initialRole, nextRole, bugTitle, label) {
+  const db = await isolatedDigestDatabase()
+  const recipientID = `e1000000-0000-4000-8000-${initialRole === 'PM' ? '000000000001' : '000000000002'}`
+  const bugID = `e2000000-0000-4000-8000-${initialRole === 'PM' ? '000000000001' : '000000000002'}`
+  const profileID = `e3000000-0000-4000-8000-${initialRole === 'PM' ? '000000000001' : '000000000002'}`
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.tester, `${label} reporter`, `${label.toLowerCase().replaceAll(' ', '-')}@reporter.example.test`, 'TESTER'),
+    user(recipientID, `${label} recipient`, `${label.toLowerCase().replaceAll(' ', '-')}@example.test`, initialRole)
+  ]))
+  if (initialRole === 'DEVELOPER') {
+    await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+      ID: profileID,
+      user_ID: recipientID,
+      availabilityStatus_code: 'AVAILABLE',
+      workloadLimit: 5,
+      active: true
+    }))
+  }
+  await db.run(INSERT.into('idts.cap.Bugs').entries(
+    initialRole === 'PM'
+      ? bug(bugID, `BUG-DIGEST-RACE-${initialRole}-${nextRole}`, 'LOW', 'MINOR', '2026-09-02T00:00:00.000Z', null, recipientID, null, 'PENDING_ASSIGNMENT', bugTitle, 'PM')
+      : bug(bugID, `BUG-DIGEST-RACE-${initialRole}-${nextRole}`, 'HIGH', 'MAJOR', '2026-09-02T00:00:00.000Z', '2026-09-02', null, profileID, 'ASSIGNED', bugTitle)
+  ))
+
+  let injected = false
+  const tx = {
+    run: async query => {
+      const from = query.SELECT?.from?.ref?.[0]
+      const columns = JSON.stringify(query.SELECT?.columns || [])
+      if (!injected && from === 'idts.cap.Users' && query.SELECT.one && columns.includes('role_code')) {
+        injected = true
+        await db.run(UPDATE('idts.cap.Users').set({ role_code: nextRole }).where({ ID: recipientID }))
+      }
+      return db.run(query)
+    }
+  }
+  await scheduleNotificationDigests({ tx, now: new Date('2026-09-03T01:00:00.000Z') })
+  const rows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').where({ recipient_ID: recipientID }))
+  assert.equal(rows.length, 0,
+    `${label} shared-index items are never persisted under a newly derived ${nextRole} digest persona`)
+}
+
+async function assertSendTimeAuthorizationRace () {
+  const db = await isolatedDigestDatabase()
+  const inactiveUserID = 'e4000000-0000-4000-8000-000000000001'
+  const changedRoleUserID = 'e4000000-0000-4000-8000-000000000002'
+  const changedProfileUserID = 'e4000000-0000-4000-8000-000000000003'
+  const changedProfileID = 'e5000000-0000-4000-8000-000000000001'
+  const deliveryIDs = {
+    inactive: 'e6000000-0000-4000-8000-000000000001',
+    role: 'e6000000-0000-4000-8000-000000000002',
+    profile: 'e6000000-0000-4000-8000-000000000003'
+  }
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.tester, 'Send race reporter', 'send-race-reporter@example.test', 'TESTER'),
+    user(inactiveUserID, 'Send race inactive', 'send-race-inactive@example.test', 'PM'),
+    user(changedRoleUserID, 'Send race role', 'send-race-role@example.test', 'DEVELOPER'),
+    user(changedProfileUserID, 'Send race profile', 'send-race-profile@example.test', 'DEVELOPER')
+  ]))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: changedProfileID,
+    user_ID: changedProfileUserID,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 5,
+    active: true
+  }))
+  const delivery = (ID, recipient_ID, digestType) => ({
+    ID,
+    recipient_ID,
+    businessDate: '2026-09-03',
+    digestType,
+    windowStart: '2026-09-02T17:00:00.000Z',
+    windowEnd: '2026-09-03T01:00:00.000Z',
+    snapshotAt: '2026-09-03T01:00:00.000Z',
+    itemCount: 1,
+    subject: 'Send race snapshot',
+    textBody: 'Send race body',
+    htmlBody: '<p>Send race body</p>',
+    status_code: 'PENDING',
+    attemptCount: 0
+  })
+  await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries([
+    delivery(deliveryIDs.inactive, inactiveUserID, digestTypeFor('PM')),
+    delivery(deliveryIDs.role, changedRoleUserID, digestTypeFor('DEVELOPER')),
+    delivery(deliveryIDs.profile, changedProfileUserID, digestTypeFor('DEVELOPER'))
+  ]))
+
+  const claimChanges = new Set()
+  const boundaryUserLocks = []
+  const boundaryProfileLocks = []
+  const tx = {
+    run: async query => {
+      const updateData = JSON.stringify(query.UPDATE?.data || query.UPDATE?.with || {})
+      const isClaim = updateData.includes('lockToken') && updateData.includes('lockedUntil') && !updateData.includes('status_code')
+      const whereText = isClaim ? JSON.stringify(query.UPDATE.where || query.UPDATE.where) : ''
+      const result = await db.run(query)
+      if (isClaim) {
+        if (whereText.includes(deliveryIDs.inactive) && !claimChanges.has(deliveryIDs.inactive)) {
+          claimChanges.add(deliveryIDs.inactive)
+          await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: inactiveUserID }))
+        } else if (whereText.includes(deliveryIDs.role) && !claimChanges.has(deliveryIDs.role)) {
+          claimChanges.add(deliveryIDs.role)
+          await db.run(UPDATE('idts.cap.Users').set({ role_code: 'TESTER' }).where({ ID: changedRoleUserID }))
+        } else if (whereText.includes(deliveryIDs.profile) && !claimChanges.has(deliveryIDs.profile)) {
+          claimChanges.add(deliveryIDs.profile)
+          await db.run(UPDATE('idts.cap.DeveloperProfiles').set({ active: false }).where({ ID: changedProfileID }))
+        }
+      }
+      const from = query.SELECT?.from?.ref?.[0]
+      if (from === 'idts.cap.Users' && query.SELECT.one && Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')) boundaryUserLocks.push(query)
+      if (from === 'idts.cap.DeveloperProfiles' && Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')) boundaryProfileLocks.push(query)
+      return result
+    }
+  }
+  const sent = []
+  const result = await processNotificationDigestDeliveries({
+    tx,
+    config: enabledConfig({ batchSize: 10 }),
+    sendMail: async message => {
+      sent.push(message.to)
+      return { messageId: 'unexpected-send-race-message' }
+    },
+    now: new Date('2026-09-03T01:01:00.000Z'),
+    workerID: 'send-race-worker'
+  })
+  assert.equal(result.sent, 0, `deactivation, role change and profile deactivation before send prevent provider calls: sent=${result.sent} claimChanges=${JSON.stringify([...claimChanges])} sentTo=${JSON.stringify(sent)}`)
+  assert.equal(sent.length, 0, `send-time authorization race never sends stale prefetched eligibility: ${JSON.stringify(sent)}`)
+  assert.equal(result.skipped, 3, 'all three send-time authorization changes fail closed')
+  assert.equal(boundaryUserLocks.length, 3, 'each claimed delivery locks the authoritative User at send time')
+  assert.ok(boundaryProfileLocks.length >= 2, 'active-profile eligibility is re-read and locked at send time')
+}
+
+async function assertUniqueConflictIsolation () {
+  const db = await isolatedDigestDatabase()
+  const conflictUserID = 'e7000000-0000-4000-8000-000000000001'
+  const laterUserID = 'e7000000-0000-4000-8000-000000000002'
+  const winnerID = 'e8000000-0000-4000-8000-000000000001'
+  const conflictBugID = 'e9000000-0000-4000-8000-000000000001'
+  const laterBugID = 'e9000000-0000-4000-8000-000000000002'
+  const date = '2026-09-04'
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.tester, 'Unique isolation reporter', 'unique-isolation-reporter@example.test', 'TESTER'),
+    user(conflictUserID, 'Unique conflict PM', 'unique-conflict@example.test', 'PM'),
+    user(laterUserID, 'Unique later PM', 'unique-later@example.test', 'PM')
+  ]))
+  await db.run(INSERT.into('idts.cap.Bugs').entries([
+    bug(conflictBugID, 'BUG-DIGEST-UNIQUE-CONFLICT', 'LOW', 'MINOR', '2026-09-03T00:00:00.000Z', null, conflictUserID, null, 'PENDING_ASSIGNMENT', 'Unique conflict pending', 'PM'),
+    bug(laterBugID, 'BUG-DIGEST-UNIQUE-LATER', 'LOW', 'MINOR', '2026-09-03T00:00:00.000Z', null, laterUserID, null, 'PENDING_ASSIGNMENT', 'Later recipient pending', 'PM')
+  ]))
+  await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries({
+    ID: winnerID,
+    recipient_ID: conflictUserID,
+    businessDate: date,
+    digestType: digestTypeFor('PM'),
+    windowStart: '2026-09-03T17:00:00.000Z',
+    windowEnd: '2026-09-04T01:00:00.000Z',
+    snapshotAt: '2026-09-04T01:00:00.000Z',
+    itemCount: 1,
+    subject: 'Existing winner',
+    textBody: 'Existing winner',
+    htmlBody: '<p>Existing winner</p>',
+    status_code: 'PENDING',
+    attemptCount: 0
+  }))
+
+  const state = { conflictOccurred: false, winnerReads: 0, queriesAfterAbort: 0, rootCount: 0 }
+  const uniqueError = () => Object.assign(new Error('duplicate digest key'), {
+    code: '23505',
+    constraint: 'idts_cap_NotificationDigestDeliveries_digestRecipientDateType'
+  })
+  const isConflictKey = query => {
+    const text = JSON.stringify(query)
+    return text.includes(conflictUserID) && text.includes(date) && text.includes(digestTypeFor('PM'))
+  }
+  const rootService = {
+    tx: (...args) => {
+      const callback = typeof args[0] === 'function' ? args[0] : args[1]
+      const context = typeof args[0] === 'function' ? { tenant: 'unique-isolation-tenant', user: new cds.User({ id: 'unique-worker' }) } : args[0]
+      const root = { context, aborted: false, exactReads: 0 }
+      root.run = async query => {
+        if (root.aborted) {
+          state.queriesAfterAbort += 1
+          throw new Error('query after simulated 23505')
+        }
+        const from = query.SELECT?.from?.ref?.[0]
+        if (from === 'idts.cap.NotificationDigestDeliveries' && query.SELECT.one && isConflictKey(query)) {
+          root.exactReads += 1
+          if (!state.conflictOccurred) return undefined
+          state.winnerReads += 1
+          return { ID: winnerID }
+        }
+        const insertInto = query.INSERT?.into === 'idts.cap.NotificationDigestDeliveries' || query.INSERT?.into?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries'
+        if (insertInto && isConflictKey(query) && !state.conflictOccurred) {
+          state.conflictOccurred = true
+          root.aborted = true
+          throw uniqueError()
+        }
+        return db.run(query)
+      }
+      Object.setPrototypeOf(root, rootService)
+      state.rootCount += 1
+      return Promise.resolve(callback(root))
+    }
+  }
+  const outer = Object.create(rootService)
+  outer.context = { tenant: 'unique-isolation-tenant', user: new cds.User({ id: 'unique-worker' }) }
+  outer.aborted = false
+  outer.run = async query => {
+    if (outer.aborted) {
+      state.queriesAfterAbort += 1
+      throw new Error('query after simulated 23505')
+    }
+    const from = query.SELECT?.from?.ref?.[0]
+    if (from === 'idts.cap.NotificationDigestDeliveries' && query.SELECT.one && isConflictKey(query)) return undefined
+    const insertInto = query.INSERT?.into === 'idts.cap.NotificationDigestDeliveries' || query.INSERT?.into?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries'
+    if (insertInto && isConflictKey(query) && !state.conflictOccurred) {
+      state.conflictOccurred = true
+      outer.aborted = true
+      throw uniqueError()
+    }
+    return db.run(query)
+  }
+  const result = await scheduleNotificationDigests({ tx: outer, now: new Date('2026-09-04T01:00:00.000Z') })
+  assert.ok(result.reused >= 1, 'exact unique conflict reuses the winner in a healthy transaction')
+  assert.ok(result.created >= 1, 'a later recipient continues after the isolated unique conflict')
+  assert.equal(state.queriesAfterAbort, 0, 'no query is issued after the simulated 23505 root abort')
+  assert.ok(state.winnerReads >= 1, 'the exact winner is read through an independent healthy root')
+  assert.equal(await count(db, 'idts.cap.NotificationDigestDeliveries', { recipient_ID: laterUserID, businessDate: date }), 1,
+    'later recipient snapshot persists after an earlier exact-key conflict')
+}
+
+async function assertBoundedDigestPagesAndRestart () {
+  const db = await isolatedDigestDatabase()
+  const users = Array.from({ length: 201 }, (_, index) => user(
+    `ea000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    `Bounded PM ${index + 1}`,
+    `bounded-pm-${index + 1}@example.test`,
+    'PM'
+  ))
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.tester, 'Bounded digest reporter', 'bounded-reporter@example.test', 'TESTER'),
+    ...users
+  ]))
+  await db.run(INSERT.into('idts.cap.Bugs').entries(bug(
+    'eb000000-0000-4000-8000-000000000001',
+    'BUG-DIGEST-BOUNDED-PAGES',
+    'HIGH',
+    'MAJOR',
+    '2026-09-06T00:00:00.000Z',
+    null,
+    null,
+    null,
+    'PENDING_ASSIGNMENT',
+    'Bounded page pending',
+    'PM'
+  )))
+  const state = { recipientPageQueries: 0, recipientPageSizes: [], bugPageSizes: [], rootRecipientSizes: [], failSecondPage: true }
+  const service = makeDigestPageService(db, state)
+  await assert.rejects(
+    () => scheduleNotificationDigests({ tx: service, now: new Date('2026-09-07T01:00:00.000Z') }),
+    /late recipient page failure/,
+    'late recipient page failure is observable'
+  )
+  const boundedRecipientIDs = new Set(users.map(row => row.ID))
+  const firstPageRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns('recipient_ID').where({ businessDate: '2026-09-07' }))
+  const firstPageCount = firstPageRows.filter(row => boundedRecipientIDs.has(row.recipient_ID)).length
+  assert.ok(firstPageCount > 0 && firstPageCount < users.length,
+    `the first recipient page remains committed after a late-page failure: ${firstPageCount}`)
+  assert.ok(state.recipientPageSizes.every(size => size <= 100), 'recipient pages never exceed the bounded page size')
+  assert.ok(state.bugPageSizes.length > 0 && state.bugPageSizes.every(size => size <= 500), 'Bug stream pages stay bounded')
+
+  state.failSecondPage = false
+  state.recipientPageQueries = 0
+  const rerun = await scheduleNotificationDigests({ tx: service, now: new Date('2026-09-07T01:30:00.000Z') })
+  assert.ok(rerun.reused >= firstPageCount && rerun.created >= users.length - firstPageCount, `restart reuses earlier page and creates all remaining snapshots: ${JSON.stringify(rerun)} firstPage=${firstPageCount} sizes=${JSON.stringify(state.recipientPageSizes)}`)
+  const completeRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns('recipient_ID').where({ businessDate: '2026-09-07' }))
+  assert.equal(completeRows.filter(row => boundedRecipientIDs.has(row.recipient_ID)).length, users.length,
+    'all recipients process without a silent aggregate cap')
+  assert.ok(state.rootRecipientSizes.filter(Boolean).every(size => size <= 100), 'each committed root handles at most one recipient page')
+}
+
+function makeDigestPageService (db, state) {
+  const service = {
+    run: query => runDigestPageQuery(db, state, query, null, null),
+    tx: (...args) => {
+      const callback = typeof args[0] === 'function' ? args[0] : args[1]
+      const context = typeof args[0] === 'function' ? { tenant: 'bounded-digest-tenant', user: new cds.User({ id: 'bounded-worker' }) } : args[0]
+      return db.tx(async actualTx => {
+        const root = { context, recipientPageSize: 0, run: query => runDigestPageQuery(db, state, query, actualTx, root) }
+        Object.setPrototypeOf(root, service)
+        const result = await callback(root)
+        state.rootRecipientSizes.push(root.recipientPageSize || 0)
+        return result
+      })
+    }
+  }
+  return service
+}
+
+async function runDigestPageQuery (db, state, query, actualTx, root) {
+  const from = query.SELECT?.from?.ref?.[0]
+  const run = actualTx ? actualTx.run.bind(actualTx) : db.run.bind(db)
+  if (from === 'idts.cap.Users' && !query.SELECT.one && JSON.stringify(query.SELECT.where).includes('role_code')) {
+    state.recipientPageQueries += 1
+    const rows = await run(query)
+    state.recipientPageSizes.push(rows.length)
+    if (state.failSecondPage && state.recipientPageQueries === 2) throw new Error('late recipient page failure')
+    if (root) root.recipientPageSize = rows.length
+    return rows
+  }
+  if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+    const rows = await run(query)
+    state.bugPageSizes.push(rows.length)
+    return rows
+  }
+  return run(query)
 }
 
 function bug (ID, bugNumber, priority_code, severity_code, createdAt, dueDate, nextProcessorUser_ID, assignee_ID, status_code, title = `${bugNumber} digest fixture`, nextProcessorRole_code = nextProcessorUser_ID ? 'DEVELOPER' : null, retestOwner_ID = null) {

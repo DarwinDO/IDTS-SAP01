@@ -27,7 +27,7 @@ async function processNotificationSchedules (req) {
   const requestTx = cds.tx(req)
   const result = await discoverScheduledNotifications({ tx: requestTx, now })
   if (isDigestScheduleDue(now)) {
-    await createPageTransactionRunner(requestTx)(tx => scheduleNotificationDigests({ tx, now }))
+    await scheduleNotificationDigests({ tx: requestTx, now })
   }
   return result
 }
@@ -52,12 +52,6 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
       const candidates = await readCandidatePage(pageTx, businessDate, lastID)
       if (!candidates.length) return { candidates, pageResult: null }
 
-      const pms = await pageTx.run(
-        SELECT.from(USERS)
-          .columns('ID')
-          .where({ active: true, role_code: 'PM' })
-      )
-      const pmIDs = pms.map(row => row.ID).filter(Boolean)
       const pageResult = {
         candidates: candidates.length,
         pendingAssignment: 0,
@@ -86,48 +80,50 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
 
       const anchors = await readScheduleAnchors(pageTx, currentBugs, businessDate)
       const overdueRecipients = await readOverdueRecipients(pageTx, currentBugs, candidateLocks)
-      for (const bug of currentBugs) {
-        const anchor = anchors.get(bug.ID) || {}
-        const urgent = isUrgent(bug)
-        if (bug.status_code === STATUS.PENDING_ASSIGNMENT) {
-          for (const recipientID of pmIDs) {
-            await writeScheduledEvent(pageTx, bug, {
-              eventType: 'PENDING_ASSIGNMENT',
-              message: `${bug.bugNumber || 'Bug'} is waiting for assignment.`,
-              sourceKey: boundedSourceKey(`PENDING_ASSIGNMENT:${bug.ID}:${recipientID}`),
-              recipientID,
-              emailRequired: urgent,
-              requirePM: true
-            }, emailConfig, pageResult, 'pendingAssignment')
-          }
-
-          const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
-          if (isSlaDue({ ...bug, pendingAssignmentAt: anchor.pendingAssignmentAt }, instant, thresholdHours)) {
-            for (const recipientID of pmIDs) {
+      const pendingBugs = currentBugs.filter(bug => bug.status_code === STATUS.PENDING_ASSIGNMENT)
+      if (pendingBugs.length) {
+        await forEachActivePMPage(pageTx, async pms => {
+          for (const bug of pendingBugs) {
+            const anchor = anchors.get(bug.ID) || {}
+            const urgent = isUrgent(bug)
+            const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
+            for (const recipient of pms) {
               await writeScheduledEvent(pageTx, bug, {
                 eventType: 'PENDING_ASSIGNMENT',
-                message: `${bug.bugNumber || 'Bug'} has been pending assignment for ${thresholdHours} hours.`,
-                sourceKey: boundedSourceKey(`SLA:${bug.ID}:${thresholdHours}h:${recipientID}`),
-                recipientID,
+                message: `${bug.bugNumber || 'Bug'} is waiting for assignment.`,
+                sourceKey: boundedSourceKey(`PENDING_ASSIGNMENT:${bug.ID}:${recipient.ID}`),
+                recipientID: recipient.ID,
                 emailRequired: urgent,
                 requirePM: true
-              }, emailConfig, pageResult, 'sla')
+              }, emailConfig, pageResult, 'pendingAssignment')
+              if (isSlaDue({ ...bug, pendingAssignmentAt: anchor.pendingAssignmentAt }, instant, thresholdHours)) {
+                await writeScheduledEvent(pageTx, bug, {
+                  eventType: 'PENDING_ASSIGNMENT',
+                  message: `${bug.bugNumber || 'Bug'} has been pending assignment for ${thresholdHours} hours.`,
+                  sourceKey: boundedSourceKey(`SLA:${bug.ID}:${thresholdHours}h:${recipient.ID}`),
+                  recipientID: recipient.ID,
+                  emailRequired: urgent,
+                  requirePM: true
+                }, emailConfig, pageResult, 'sla')
+              }
             }
           }
-        }
+        })
+      }
 
-        if (isOverdue(bug, businessDate)) {
-          const dueDate = String(bug.dueDate).slice(0, 10)
-          for (const recipientID of overdueRecipients.get(bug.ID) || []) {
-            await writeScheduledEvent(pageTx, bug, {
-              eventType: 'OVERDUE',
-              message: `${bug.bugNumber || 'Bug'} is overdue.`,
-              sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchor.overdueCycleID}:${recipientID}`),
-              recipientID,
-              emailRequired: false,
-              requirePM: false
-            }, emailConfig, pageResult, 'overdue')
-          }
+      for (const bug of currentBugs) {
+        const anchor = anchors.get(bug.ID) || {}
+        if (!isOverdue(bug, businessDate)) continue
+        const dueDate = String(bug.dueDate).slice(0, 10)
+        for (const recipientID of overdueRecipients.get(bug.ID) || []) {
+          await writeScheduledEvent(pageTx, bug, {
+            eventType: 'OVERDUE',
+            message: `${bug.bugNumber || 'Bug'} is overdue.`,
+            sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchor.overdueCycleID}:${recipientID}`),
+            recipientID,
+            emailRequired: false,
+            requirePM: false
+          }, emailConfig, pageResult, 'overdue')
         }
       }
 
@@ -149,6 +145,24 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
   }
 
   return result
+}
+
+async function forEachActivePMPage (tx, onPage) {
+  let lastID
+  for (;;) {
+    const query = SELECT.from(USERS)
+      .columns('ID')
+      .where({ active: true, role_code: 'PM' })
+      .orderBy('ID asc')
+      .limit(CANDIDATE_PAGE_SIZE)
+    if (lastID) query.and`ID > ${lastID}`
+    const pms = await tx.run(query)
+    if (!pms.length) break
+    await onPage(pms)
+    const nextID = pms.at(-1)?.ID
+    if (pms.length < CANDIDATE_PAGE_SIZE || !nextID || nextID === lastID) break
+    lastID = nextID
+  }
 }
 
 function createPageTransactionRunner (tx) {

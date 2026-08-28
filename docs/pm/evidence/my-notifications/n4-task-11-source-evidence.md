@@ -183,3 +183,71 @@ The scoped re-review of fix round 1 left one Important. The real-CAP transition 
 ### Evidence Fix round 2 (Tiếng Việt)
 
 Scoped re-review của fix round 1 còn một Important. Ma trận transition CAP thật thêm PM→Tester, PM→Developer, Developer→Tester/PM, Tester→Developer/PM và PM hiện tại hợp lệ chỉ có DeveloperProfile lịch sử inactive. Trước khi sửa production, row PM→Tester và Tester→PM bị gửi còn PM hợp lệ có profile inactive bị skip. Fix round 2 persist `DAILY_PM`, `DAILY_DEVELOPER` hoặc `DAILY_TESTER` trong field `digestType` hiện có, yêu cầu persona đã lưu khớp role hiện tại lúc send, và lọc authorization profile chỉ theo profile active link đúng user. Focused suite đã GREEN; retry vẫn chỉ gửi text/HTML đã lưu khi persona còn được phép.
+
+### Final fix wave — four Important findings (English)
+
+The final whole-branch review at exact head `7e00b3ed2bed88e83a8800b59feea94347e0989a` found four Important findings. One and only one final fix wave was executed in the preserved `donhv` worktree; the coordinator's status-only NO-GO entry remains intact.
+
+TDD RED fixtures were added before the production changes and run against the reviewed source.
+
+- shared PM and personal ownership indexes changed from PM→Tester and Developer→PM between index construction and `buildDigestSnapshot()`; the old code persisted one row under the new persona (`1 !== 0` at `scripts/qa/test-my-notifications-digest.js:775`);
+- three real stored deliveries were changed after claim (User deactivation, role change and active DeveloperProfile deactivation); the old code sent two stale rows (`2 !== 0` at `:862`);
+- a target-style `23505` unique error aborted an outer transaction and rejected a later query (`query after simulated 23505` at `:947`); and
+- a 201-recipient run failed at a late page and produced zero earlier committed snapshots (`0 !== 100` at `:1000`).
+
+The scheduled PM bound RED was `node scripts/qa/test-my-notifications-scheduled.js` failing `active PM discovery reads bounded keyset pages` at the focused assertion. Harness-only corrections were logged immediately when the new page-root and point-read design changed legacy assumptions; no deferred Minor was changed.
+
+The GREEN implementation is deliberately bounded and source-only:
+
+- `scheduleNotificationDigests()` processes stable 100-user pages, retains only current-page profile rows and count/top-20 accumulators, streams Bugs/HistoryLogs in 500-row keyset pages, returns page snapshots, commits the page read root, then inserts each snapshot through a discardable root. The same fixed `snapshotAt` and Bangkok `businessDate` flow through every page. `_itemsRole` and the locked User role check fail closed on a transition.
+- `processNotificationDigestDeliveries()` removes stale recipient/profile batch maps. After each CAS claim it locks and re-reads the authoritative User and active linked Profile in `User -> Profile` order; these locks stay in the worker transaction through provider send and `SENT`/`FAILED`/`SKIPPED` finalization.
+- `insertDigestDelivery()` performs the exact key insert in an isolated root. A recognized SQLite/PostgreSQL/HANA exact unique error is thrown out so CAP discards the aborted root; the exact winner is read through a healthy root. Unrelated errors propagate. The first page remains committed after a later page failure, and rerun reuses it.
+- `discoverScheduledNotifications()` resolves PM recipients through 500-row `ID > lastID` pages without retaining an unbounded active-PM array.
+
+Fresh focused evidence from the exact worktree:
+
+```text
+node scripts/qa/test-my-notifications-scheduled.js
+IDTS My Notifications scheduled discovery contract: PASS
+exit_code=0
+
+node scripts/qa/test-my-notifications-digest.js
+IDTS My Notifications digest contract: PASS
+exit_code=0
+```
+
+The final wave changed only `srv/notification/digest.js`, `srv/notification/scheduled.js`, the two focused QA scripts, the matching bilingual knowledge mirrors, this evidence, the roadmap, the preserved member status log, and the Task 11 report. `officecli --version` returned `1.0.145`; OfficeCLI does not edit Markdown, so Markdown remained repo-native `apply_patch` with `git diff --check` verification. No schema, dependency, lockfile, MTA/XSUAA, live provider/schedule, data, user/role, deployment, N5, push, PR, Ready or merge action occurred.
+
+### Đợt final fix — bốn finding Important (Tiếng Việt)
+
+Review whole-branch tại exact head `7e00b3ed2bed88e83a8800b59feea94347e0989a` phát hiện bốn Important. Chỉ một final fix wave duy nhất được chạy trong worktree `donhv` đã bảo toàn; entry NO-GO status-only của coordinator vẫn giữ nguyên.
+
+Fixture TDD RED được thêm và chạy trước production fix trên source đã review:
+
+- ownership index PM và personal đổi PM→Tester và Developer→PM giữa lúc dựng index và `buildDigestSnapshot()`; code cũ persist một row dưới persona mới (`1 !== 0` tại `scripts/qa/test-my-notifications-digest.js:775`);
+- ba delivery đã lưu bị đổi sau claim (deactivate User, đổi role và deactivate DeveloperProfile active); code cũ gửi hai row stale (`2 !== 0` tại `:862`);
+- lỗi unique `23505` kiểu target làm outer transaction abort rồi query sau đó bị reject (`query after simulated 23505` tại `:947`); và
+- run 201 recipient fail tại page muộn nhưng không có snapshot page trước đã commit (`0 !== 100` tại `:1000`).
+
+RED bound PM scheduler là `node scripts/qa/test-my-notifications-scheduled.js` fail ở assertion `active PM discovery reads bounded keyset pages`. Các correction chỉ cho harness được log ngay khi page-root và point-read design thay đổi assumption cũ; không thay đổi Minor defer.
+
+GREEN bounded/source-only:
+
+- `scheduleNotificationDigests()` xử lý page ổn định 100 user, chỉ giữ profile và accumulator count/top-20 của page hiện tại, stream Bug/HistoryLog bằng keyset page 500, trả snapshot của page, commit read root rồi insert từng snapshot qua root discardable. Mọi page dùng cùng `snapshotAt` và Bangkok `businessDate`; `_itemsRole` và User lock fail-closed khi role đổi.
+- `processNotificationDigestDeliveries()` bỏ batch map recipient/profile stale. Sau mỗi CAS claim, lock và re-read User authoritative cùng Profile active link theo thứ tự `User -> Profile`; lock giữ trong worker transaction qua provider send và finalize `SENT`/`FAILED`/`SKIPPED`.
+- `insertDigestDelivery()` insert exact key trong root isolated. Unique error exact kiểu SQLite/PostgreSQL/HANA được throw ra để CAP discard root aborted; winner exact được đọc qua root healthy. Error khác vẫn propagate. Page đầu vẫn commit khi page muộn fail, rerun reuse page đó.
+- `discoverScheduledNotifications()` resolve PM qua page 500 `ID > lastID`, không giữ array PM active unbounded.
+
+Evidence focused mới tại exact worktree:
+
+```text
+node scripts/qa/test-my-notifications-scheduled.js
+IDTS My Notifications scheduled discovery contract: PASS
+exit_code=0
+
+node scripts/qa/test-my-notifications-digest.js
+IDTS My Notifications digest contract: PASS
+exit_code=0
+```
+
+Final wave chỉ đổi `srv/notification/digest.js`, `srv/notification/scheduled.js`, hai QA script focused, hai knowledge mirror song ngữ tương ứng, evidence này, roadmap, status thành viên đã preserve và Task 11 report. `officecli --version` trả `1.0.145`; OfficeCLI không edit Markdown nên Markdown dùng `apply_patch` repo-native và verify `git diff --check`. Không mutation schema, dependency, lockfile, MTA/XSUAA, live provider/schedule, data, user/role, deploy, N5, push, PR, Ready hoặc merge.
