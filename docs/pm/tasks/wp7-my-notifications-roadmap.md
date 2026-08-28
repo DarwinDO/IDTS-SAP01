@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2 MERGED — N3 MERGED — N4 ADDITIONAL F4 REMEDIATION SOURCE COMMITTED; SCOPED RE-REVIEW PENDING`
+`N1/N2/N3/N4 SOURCE MERGED — N4 ROLLOUT HOLD: LIVE N1/N3 SCHEMA PREREQUISITES MISSING`
 
 ### Authority
 
@@ -26,6 +26,8 @@
 Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact scope guards, one bounded independent review and one Draft PR, then stops before Ready/merge/deploy unless separately approved.
 
 ### Next boundary
+
+Current 2026-08-28 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. Read-only live inspection found missing inbox/digest tables, Notifications sourceKey and its service-view column, and 12 notification event codes. Existing runtime is DEMO READY; no N4 artifact was uploaded. A separately authorized additive migration prerequisite is required before code rollout. N5 remains pending. See `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
 
 N1 #361 and N2 #362 are merged; N3 is the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 are locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. The requested local commit is the only mutation; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action is claimed. Live UI remains rolled back; source completion is not runtime acceptance.
 
@@ -49,7 +51,9 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 ĐÃ COMMIT REMEDIATION F4 BỔ SUNG; CHỜ SCOPED RE-REVIEW`
+`N1/N2/N3/N4 SOURCE ĐÃ MERGE — N4 ROLLOUT HOLD: THIẾU PREREQUISITE SCHEMA N1/N3 TRÊN LIVE`
+
+Cập nhật 2026-08-28 thay thế trạng thái lịch sử bên dưới: PR #365 merge tại `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. Kiểm tra live chỉ-đọc xác nhận thiếu bảng inbox/digest, Notifications.sourceKey và cột service view tương ứng, cùng 12 event code. Runtime cũ DEMO READY; chưa upload artifact N4. Cần duyệt riêng prerequisite migration additive trước deploy code; N5 vẫn pending. Evidence: `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
 
 ### Thẩm quyền
 
