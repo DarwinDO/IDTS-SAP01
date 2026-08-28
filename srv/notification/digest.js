@@ -109,7 +109,7 @@ async function buildDigestSnapshot ({
   return {
     recipientID: actor.ID,
     businessDate: date,
-    digestType: DIGEST_TYPE,
+    digestType: digestTypeForRole(role),
     windowStart: bangkokMidnight(date),
     windowEnd: instant.toISOString(),
     snapshotAt: instant.toISOString(),
@@ -165,7 +165,7 @@ async function scheduleNotificationDigests ({ tx, now = new Date() } = {}) {
     const existing = await tx.run(SELECT.one.from(DIGESTS).columns('ID').where({
       recipient_ID: recipient.ID,
       businessDate,
-      digestType: DIGEST_TYPE
+      digestType: digestTypeForRole(String(recipient.role_code || '').toUpperCase())
     }))
     if (existing?.ID) {
       result.reused += 1
@@ -225,7 +225,7 @@ async function processNotificationDigestDeliveries ({ tx, config, sendMail, now 
     : []
   const recipientByID = new Map(recipients.map(row => [row.ID, row]))
   const profileRows = recipientIDs.length
-    ? await tx.run(SELECT.from(PROFILES).columns('ID', 'user_ID', 'active').where({ user_ID: { in: recipientIDs } }).limit(batchSize))
+    ? await tx.run(SELECT.from(PROFILES).columns('ID', 'user_ID', 'active').where({ user_ID: { in: recipientIDs }, active: true }).limit(batchSize))
     : []
   const profilesByUser = new Map(recipientIDs.map(userID => [userID, []]))
   for (const row of profileRows) {
@@ -266,7 +266,7 @@ async function processNotificationDigestDeliveries ({ tx, config, sendMail, now 
       result.skipped += 1
       continue
     }
-    if (!isSendPersonaValid(recipient, profilesByUser.get(recipient.ID) || [])) {
+    if (!isSendPersonaValid(recipient, profilesByUser.get(recipient.ID) || [], roleFromDigestType(delivery.digestType))) {
       await tx.run(UPDATE(DIGESTS).set({
         status_code: 'SKIPPED',
         lastErrorCode: 'RECIPIENT_PERSONA_INVALID',
@@ -545,11 +545,12 @@ function isAlignedActionOwner (bug, role, recipientID) {
   return false
 }
 
-function isSendPersonaValid (recipient, profileRows) {
+function isSendPersonaValid (recipient, profileRows, snapshotRole) {
   const role = String(recipient?.role_code || '').toUpperCase()
-  if (!DIGEST_ROLES.has(role)) return false
-  if (role === 'DEVELOPER') return profileRows.some(row => row.active)
-  return profileRows.length === 0
+  if (!DIGEST_ROLES.has(role) || snapshotRole !== role) return false
+  const activeProfiles = profileRows.filter(row => row.active && row.user_ID === recipient.ID)
+  if (role === 'DEVELOPER') return activeProfiles.length > 0
+  return activeProfiles.length === 0
 }
 
 function compareDigestItems (left, right) {
@@ -579,6 +580,15 @@ function isDigestScheduleDue (value) {
     .formatToParts(normalizeInstant(value))
   const values = Object.fromEntries(parts.filter(part => part.type !== 'literal').map(part => [part.type, part.value]))
   return !['Sat', 'Sun'].includes(values.weekday) && values.hour === '08'
+}
+
+function digestTypeForRole (role) {
+  return `${DIGEST_TYPE}_${String(role || '').toUpperCase()}`
+}
+
+function roleFromDigestType (value) {
+  const match = new RegExp(`^${DIGEST_TYPE}_(PM|DEVELOPER|TESTER)$`).exec(String(value || '').toUpperCase())
+  return match?.[1] || null
 }
 
 function bangkokDate (value) {

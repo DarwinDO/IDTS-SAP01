@@ -46,7 +46,17 @@ const IDS = Object.freeze({
   strayProfile: 'b3000000-0000-4000-8000-000000000012',
   strayTesterProfile: 'b2000000-0000-4000-8000-000000000002',
   unique: 'b1000000-0000-4000-8000-000000000005',
-  uniqueBug: 'b3000000-0000-4000-8000-000000000008'
+  uniqueBug: 'b3000000-0000-4000-8000-000000000008',
+  personaPmTester: 'b6000000-0000-4000-8000-000000000001',
+  personaPmDeveloper: 'b6000000-0000-4000-8000-000000000002',
+  personaDeveloperTester: 'b6000000-0000-4000-8000-000000000003',
+  personaDeveloperPm: 'b6000000-0000-4000-8000-000000000004',
+  personaTesterDeveloper: 'b6000000-0000-4000-8000-000000000005',
+  personaTesterPm: 'b6000000-0000-4000-8000-000000000006',
+  personaInactivePm: 'b6000000-0000-4000-8000-000000000007',
+  personaDeveloperTesterProfile: 'b7000000-0000-4000-8000-000000000001',
+  personaDeveloperPmProfile: 'b7000000-0000-4000-8000-000000000002',
+  personaInactivePmProfile: 'b7000000-0000-4000-8000-000000000003'
 })
 
 const SNAPSHOT_AT = new Date('2026-08-28T01:00:00.000Z')
@@ -248,18 +258,18 @@ async function main () {
   // The unique-key path must reuse only the exact digest conflict and propagate another insert error.
   const existingDelivery = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({
     recipient_ID: IDS.pm,
-    businessDate: BUSINESS_DATE,
-    digestType: 'DAILY'
+    businessDate: BUSINESS_DATE
   }))
   await db.run(INSERT.into('idts.cap.Users').entries(user(IDS.unique, 'Digest Unique', 'digest-unique@example.test', 'TESTER')))
   await db.run(INSERT.into('idts.cap.Bugs').entries(
     bug(IDS.uniqueBug, 'BUG-DIGEST-UNIQUE', 'LOW', 'MINOR', '2026-08-30T00:00:00.000Z', '2026-08-30', IDS.unique, null, 'RETEST_REQUIRED', 'BUG-DIGEST-UNIQUE digest fixture', 'TESTER', IDS.unique)
   ))
+  const uniqueDeliveryID = cds.utils.uuid()
   await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries({
-    ID: cds.utils.uuid(),
+    ID: uniqueDeliveryID,
     recipient_ID: IDS.unique,
     businessDate: '2026-08-31',
-    digestType: 'DAILY',
+    digestType: digestTypeFor('TESTER'),
     windowStart: '2026-08-30T17:00:00.000Z',
     windowEnd: '2026-08-31T01:00:00.000Z',
     snapshotAt: '2026-08-31T01:00:00.000Z',
@@ -274,7 +284,16 @@ async function main () {
   const uniqueService = {
     tx: (context, callback) => {
       independentReads += 1
-      return callback({ run: query => db.run(query) })
+      return callback({
+        run: async query => {
+          const where = JSON.stringify(query.SELECT?.where || '')
+          if (query.SELECT?.from?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries' &&
+            query.SELECT.one && where.includes(IDS.unique) && where.includes('2026-08-31')) {
+            return { ID: uniqueDeliveryID }
+          }
+          return db.run(query)
+        }
+      })
     }
   }
   const uniqueTx = Object.create(uniqueService)
@@ -322,8 +341,7 @@ async function main () {
 
   const retryDelivery = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({
     recipient_ID: IDS.developer,
-    businessDate: BUSINESS_DATE,
-    digestType: 'DAILY'
+    businessDate: BUSINESS_DATE
   }))
   const storedText = retryDelivery.textBody
   const storedHtml = retryDelivery.htmlBody
@@ -394,7 +412,7 @@ async function main () {
     ID: sendTimeDeliveryID,
     recipient_ID: IDS.developer,
     businessDate: '2026-09-03',
-    digestType: 'DAILY',
+    digestType: digestTypeFor('DEVELOPER'),
     windowStart: '2026-09-02T17:00:00.000Z',
     windowEnd: '2026-09-03T01:00:00.000Z',
     snapshotAt: '2026-09-03T01:00:00.000Z',
@@ -422,6 +440,92 @@ async function main () {
   assert.equal(sendTimeDelivery.lastErrorCode, 'RECIPIENT_PERSONA_INVALID')
   assert.equal(sendTimeMessages.length, 0, 'send-time persona revalidation prevents provider delivery')
   await db.run(UPDATE('idts.cap.Users').set({ role_code: 'DEVELOPER' }).where({ ID: IDS.developer }))
+
+  // Stored digest persona transitions must fail closed, while an inactive historical profile
+  // must not invalidate a currently valid PM persona.
+  const personaDb = await isolatedDigestDatabase()
+  await personaDb.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.tester, 'Persona Fixture Reporter', 'persona-reporter@example.test', 'TESTER'),
+    user(IDS.personaPmTester, 'Persona PM to Tester', 'persona-pm-tester@example.test', 'PM'),
+    user(IDS.personaPmDeveloper, 'Persona PM to Developer', 'persona-pm-developer@example.test', 'PM'),
+    user(IDS.personaDeveloperTester, 'Persona Developer to Tester', 'persona-developer-tester@example.test', 'DEVELOPER'),
+    user(IDS.personaDeveloperPm, 'Persona Developer to PM', 'persona-developer-pm@example.test', 'DEVELOPER'),
+    user(IDS.personaTesterDeveloper, 'Persona Tester to Developer', 'persona-tester-developer@example.test', 'TESTER'),
+    user(IDS.personaTesterPm, 'Persona Tester to PM', 'persona-tester-pm@example.test', 'TESTER'),
+    user(IDS.personaInactivePm, 'Persona PM with Inactive Profile', 'persona-inactive-pm@example.test', 'PM')
+  ]))
+  await personaDb.run(INSERT.into('idts.cap.DeveloperProfiles').entries([
+    { ID: IDS.personaDeveloperTesterProfile, user_ID: IDS.personaDeveloperTester, availabilityStatus_code: 'AVAILABLE', workloadLimit: 5, active: true },
+    { ID: IDS.personaDeveloperPmProfile, user_ID: IDS.personaDeveloperPm, availabilityStatus_code: 'AVAILABLE', workloadLimit: 5, active: true },
+    { ID: IDS.personaInactivePmProfile, user_ID: IDS.personaInactivePm, availabilityStatus_code: 'AVAILABLE', workloadLimit: 5, active: false }
+  ]))
+  await personaDb.run(INSERT.into('idts.cap.Bugs').entries([
+    bug('b8000000-0000-4000-8000-000000000001', 'BUG-PERSONA-DEVELOPER-TESTER', 'HIGH', 'MAJOR', '2026-09-03T00:00:00.000Z', '2026-09-03', null, IDS.personaDeveloperTesterProfile, 'ASSIGNED'),
+    bug('b8000000-0000-4000-8000-000000000002', 'BUG-PERSONA-DEVELOPER-PM', 'HIGH', 'MAJOR', '2026-09-03T00:00:00.000Z', '2026-09-03', null, IDS.personaDeveloperPmProfile, 'ASSIGNED'),
+    bug('b8000000-0000-4000-8000-000000000003', 'BUG-PERSONA-TESTER-DEVELOPER', 'HIGH', 'MAJOR', '2026-09-03T00:00:00.000Z', '2026-09-04', IDS.personaTesterDeveloper, null, 'RETEST_REQUIRED', 'Tester to Developer transition', 'TESTER', IDS.personaTesterDeveloper),
+    bug('b8000000-0000-4000-8000-000000000004', 'BUG-PERSONA-TESTER-PM', 'HIGH', 'MAJOR', '2026-09-03T00:00:00.000Z', '2026-09-04', IDS.personaTesterPm, null, 'RETEST_REQUIRED', 'Tester to PM transition', 'TESTER', IDS.personaTesterPm)
+  ]))
+  const personaDate = '2026-09-04'
+  const personaSnapshotAt = new Date('2026-09-04T01:00:00.000Z')
+  const personaDefinitions = [
+    [IDS.personaPmTester, 'PM'],
+    [IDS.personaPmDeveloper, 'PM'],
+    [IDS.personaDeveloperTester, 'DEVELOPER'],
+    [IDS.personaDeveloperPm, 'DEVELOPER'],
+    [IDS.personaTesterDeveloper, 'TESTER'],
+    [IDS.personaTesterPm, 'TESTER'],
+    [IDS.personaInactivePm, 'PM']
+  ]
+  const personaSnapshots = new Map()
+  for (const [recipientID, role] of personaDefinitions) {
+    const snapshot = await buildDigestSnapshot({
+      tx: personaDb,
+      recipient: { ID: recipientID, role_code: role },
+      businessDate: personaDate,
+      snapshotAt: personaSnapshotAt,
+      limit: 20
+    })
+    assert.ok(snapshot?.itemCount > 0, `stored ${role} persona fixture has actionable snapshot items for ${recipientID}`)
+    personaSnapshots.set(recipientID, snapshot)
+    await insertStoredDigestSnapshot(personaDb, snapshot)
+  }
+
+  await personaDb.run(UPDATE('idts.cap.Users').set({ role_code: 'TESTER' }).where({ ID: IDS.personaPmTester }))
+  await personaDb.run(UPDATE('idts.cap.Users').set({ role_code: 'DEVELOPER' }).where({ ID: IDS.personaPmDeveloper }))
+  await personaDb.run(UPDATE('idts.cap.Users').set({ role_code: 'TESTER' }).where({ ID: IDS.personaDeveloperTester }))
+  await personaDb.run(UPDATE('idts.cap.Users').set({ role_code: 'PM' }).where({ ID: IDS.personaDeveloperPm }))
+  await personaDb.run(UPDATE('idts.cap.DeveloperProfiles').set({ active: false }).where({ ID: IDS.personaDeveloperPmProfile }))
+  await personaDb.run(UPDATE('idts.cap.Users').set({ role_code: 'DEVELOPER' }).where({ ID: IDS.personaTesterDeveloper }))
+  await personaDb.run(UPDATE('idts.cap.Users').set({ role_code: 'PM' }).where({ ID: IDS.personaTesterPm }))
+
+  const personaSentRecipients = []
+  const personaResult = await processNotificationDigestDeliveries({
+    tx: personaDb,
+    config: enabledConfig({ batchSize: 100 }),
+    sendMail: async message => {
+      personaSentRecipients.push(message.to)
+      return { messageId: 'persona-transition-message' }
+    },
+    now: new Date('2026-09-04T01:01:00.000Z'),
+    workerID: 'persona-transition-worker'
+  })
+  assert.equal(personaResult.failed, 0, 'persona transition fixture has no provider failures')
+  const personaRows = await personaDb.run(SELECT.from('idts.cap.NotificationDigestDeliveries').orderBy('recipient_ID asc'))
+  const transitionedIDs = personaDefinitions.slice(0, 6).map(([recipientID]) => recipientID)
+  assert.deepEqual(personaSentRecipients.sort(), ['persona-inactive-pm@example.test'],
+    'an old PM-wide/Developer/Tester snapshot never reaches a changed current persona')
+  for (const recipientID of transitionedIDs) {
+    const row = personaRows.find(candidate => candidate.recipient_ID === recipientID)
+    assert.equal(row?.status_code, 'SKIPPED', `changed persona row fails closed for ${recipientID}`)
+    assert.equal(row?.lastErrorCode, 'RECIPIENT_PERSONA_INVALID', `changed persona reason is safe for ${recipientID}`)
+  }
+  const inactiveProfilePmRow = personaRows.find(row => row.recipient_ID === IDS.personaInactivePm)
+  assert.equal(inactiveProfilePmRow?.status_code, 'SENT',
+    'a valid current PM with only an inactive historical DeveloperProfile remains eligible')
+  for (const [recipientID, role] of personaDefinitions) {
+    assert.equal(personaSnapshots.get(recipientID).digestType, digestTypeFor(role),
+      `stored digest type binds the snapshot persona for ${role}`)
+  }
 
   // The protected scheduler action owns the schedule hook; it still uses the same persisted digest contract.
   const schedulerRequest = new cds.Request({
@@ -504,7 +608,7 @@ async function main () {
     ID: `d2000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
     recipient_ID: recipient.ID,
     businessDate: BUSINESS_DATE,
-    digestType: 'DAILY',
+    digestType: digestTypeFor('PM'),
     windowStart: '2026-08-27T17:00:00.000Z',
     windowEnd: SNAPSHOT_AT.toISOString(),
     snapshotAt: SNAPSHOT_AT.toISOString(),
@@ -584,6 +688,28 @@ async function main () {
 
 function user (ID, displayName, email, role_code) {
   return { ID, displayName, email, role_code, active: true }
+}
+
+function digestTypeFor (role) {
+  return `DAILY_${String(role).toUpperCase()}`
+}
+
+async function insertStoredDigestSnapshot (db, snapshot) {
+  await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries({
+    ID: cds.utils.uuid(),
+    recipient_ID: snapshot.recipientID,
+    businessDate: snapshot.businessDate,
+    digestType: snapshot.digestType,
+    windowStart: snapshot.windowStart,
+    windowEnd: snapshot.windowEnd,
+    snapshotAt: snapshot.snapshotAt,
+    itemCount: snapshot.itemCount,
+    subject: snapshot.subject,
+    textBody: snapshot.textBody,
+    htmlBody: snapshot.htmlBody,
+    status_code: 'PENDING',
+    attemptCount: 0
+  }))
 }
 
 function bug (ID, bugNumber, priority_code, severity_code, createdAt, dueDate, nextProcessorUser_ID, assignee_ID, status_code, title = `${bugNumber} digest fixture`, nextProcessorRole_code = nextProcessorUser_ID ? 'DEVELOPER' : null, retestOwner_ID = null) {

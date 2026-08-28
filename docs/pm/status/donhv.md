@@ -9962,6 +9962,12 @@ Vietnamese:
 - Important findings: production CAP page transaction semantics remain simulated; digest recovery misses 08:01–08:59; PM SLA uses Bug creation instead of Pending Assignment history; the first 5,000 global Bugs can truncate top/count; per-recipient global scans and 1,000-recipient cap amplify/drop work; configured digest batch can create oversized HANA `IN`; exact unique reuse is not portable/transaction-safe; persona/ownership/send-time role alignment is incomplete; the emitted queue `filter=` token is not consumed and opens an unfiltered list.
 - Status/owner: open; original Luna/max Task 11 implementer owns RED-first fix round 1. N4 final review, push, Draft PR, Ready and deploy remain blocked. The two Minor findings are deferred to final review per SDD policy.
 
+### 2026-08-28 — N4 Task 11 fix round 1 scoped re-review
+
+- Classification: authorization/persona transition defect; exact reviewed fix head `ed692dce736144898036c6cc5ed6acfc08d96a97`.
+- Result: eight of nine prior Important findings are addressed. One Important remains: send-time validation does not bind the stored snapshot persona to the recipient's current role, so a PM-wide snapshot can reach a user after PM→Tester/Developer change; inactive historical DeveloperProfiles also cause false skips for otherwise valid personas.
+- Status/owner: open; original Luna/max implementer owns RED-first fix round 2. It must use the existing stored digest type/persona contract or conservatively reject role-changed rows, count only active profiles for current Developer eligibility, and cover both transition directions. N4 later boundaries remain blocked.
+
 ### 2026-08-28 — N4 Task 11 fix round 1 real-CAP harness RED
 
 - English — The first grouped fix-round test adds a source guard proving the request-path fixture must not hand-write CAP `_txed_before` compatibility markers. Against exact head `22edfa1d7b84b512ac42178e3daf237b325de786`, `npm run qa:my-notifications:scheduled` exits `1` at `scripts/qa/test-my-notifications-scheduled.js:509` with `AssertionError: request-path fixture must not hand-write CAP compatibility markers`. This is the expected evidence-gap RED before replacing the simulation; no production/runtime/external state changed.
@@ -10103,3 +10109,8 @@ Vietnamese:
 
 - English — A compact PowerShell compile wrapper passed `cds compile srv -s all --to edmx` to `npx` as one package-tag argument and returned `EINVALIDTAGNAME`; this was a harness/tooling failure before CAP compilation, with no source or external mutation. Rerun the exact documented `npx cds compile ...` commands directly and accept only their direct exit codes.
 - Vietnamese — Một compile wrapper PowerShell gọn đã truyền `cds compile srv -s all --to edmx` vào `npx` như một package-tag duy nhất và trả `EINVALIDTAGNAME`; đây là lỗi harness/tooling trước khi CAP compile chạy, không có mutation source hoặc external. Chạy lại trực tiếp đúng lệnh `npx cds compile ...` trong brief và chỉ nhận exit code trực tiếp.
+
+### 2026-08-28 — N4 Task 11 fix round 2 finding 8 RED
+
+- English — Added isolated real-CAP SQLite fixtures for PM→Tester, PM→Developer, Developer→Tester/PM, Tester→Developer/PM and a valid current PM with an inactive historical DeveloperProfile. Before production changes, `npm run qa:my-notifications:digest` exited `1` at `scripts/qa/test-my-notifications-digest.js:515`: PM→Tester and Tester→PM stored snapshots were sent (`persona-pm-tester@example.test`, `persona-tester-pm@example.test`) while the valid inactive-profile PM was skipped. This reproduces missing persisted snapshot-persona binding and inactive-profile false rejection; no production/runtime/external state changed.
+- Vietnamese — Đã thêm fixture SQLite CAP thật tách biệt cho PM→Tester, PM→Developer, Developer→Tester/PM, Tester→Developer/PM và PM hiện tại hợp lệ với DeveloperProfile lịch sử inactive. Trước khi sửa production, `npm run qa:my-notifications:digest` exit `1` tại `scripts/qa/test-my-notifications-digest.js:515`: snapshot PM→Tester và Tester→PM bị gửi (`persona-pm-tester@example.test`, `persona-tester-pm@example.test`) trong khi PM hợp lệ có profile inactive bị skip. Đây là RED cho thiếu binding persona persisted và false reject profile inactive; không có mutation production/runtime/external.
