@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2 MERGED — N3 MERGED — N4 TASK 10 SOURCE COMPLETE; LOCAL COMMIT BOUNDARY`
+`N1/N2 MERGED — N3 MERGED — N4 TASKS 10/11 SOURCE COMPLETE; LOCAL COMMIT BOUNDARY`
 
 ### Authority
 
@@ -27,7 +27,7 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-N1 #361 and N2 #362 are merged; N3 is the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Task 10 is locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, source-key idempotency, protected `NotificationService.processNotificationSchedules`, focused fixed-clock QA, and bilingual mirrors. The local commit is the only requested mutation; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action is claimed. Task 11 digest remains pending. Live UI remains rolled back; source completion is not runtime acceptance.
+N1 #361 and N2 #362 are merged; N3 is the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 are locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. The requested local commit is the only mutation; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action is claimed. Live UI remains rolled back; source completion is not runtime acceptance.
 
 Fix round 1 addresses the exact-head review's four Important scheduler findings: immutable HistoryLogs SLA anchoring, lock/re-read state and recipient revalidation before writes, stable keyset paging, and immutable due-date cycle identity. Focused QA covers close/assignment/due-date candidate races and due-date reuse. Scoped re-review is still required before any PR, Ready, merge or rollout boundary.
 
@@ -39,7 +39,7 @@ Fix round 3 removes the lock-order deadlock risk identified in the next scoped r
 
 ### Trạng thái
 
-`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 TASK 10 HOÀN TẤT SOURCE; BOUNDARY COMMIT LOCAL`
+`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 TASK 10/11 HOÀN TẤT SOURCE; BOUNDARY COMMIT LOCAL`
 
 ### Thẩm quyền
 
@@ -62,7 +62,7 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-N1 #361 và N2 #362 đã merge; N3 là predecessor đã merge tại frozen base Task 10 `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Task 10 đã hoàn tất source cục bộ trên `feature/wp7-notifications-sla-digest-donhv`: discovery Pending Assignment/SLA/Overdue bounded, idempotency source key, protected `NotificationService.processNotificationSchedules`, QA clock cố định và mirror song ngữ. Chỉ mutation commit local được yêu cầu; không claim PR, Ready, merge, deploy, migration, backfill, email thật, provider, user/role/data hay N5. Digest Task 11 vẫn pending. UI live vẫn rollback; source xong không phải runtime acceptance.
+N1 #361 và N2 #362 đã merge; N3 là predecessor đã merge tại frozen base Task 10 `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 và 11 đã hoàn tất source cục bộ trên `feature/wp7-notifications-sla-digest-donhv`: discovery Pending Assignment/SLA/Overdue bounded, context request mới cho từng page, idempotency source key, protected `NotificationService.processNotificationSchedules`, digest snapshot 08:00 weekday Bangkok, reuse unique exact, retry snapshot đã lưu và một sender worker dùng chung. Chỉ mutation commit local được yêu cầu; không claim PR, Ready, merge, deploy, migration, backfill, email thật, provider, user/role/data hay N5. UI live vẫn rollback; source xong không phải runtime acceptance.
 
 Fix round 1 xử lý bốn finding Important của review exact-head: anchor SLA bằng HistoryLogs bất biến, lock/đọc lại state và recipient trước khi write, paging keyset ổn định và identity cycle due date bất biến. QA focused cover race candidate khi close/assign/đổi due date và reuse due date. Vẫn cần scoped re-review trước boundary PR, Ready, merge hoặc rollout.
 

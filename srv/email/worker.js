@@ -5,6 +5,7 @@ const cds = require('@sap/cds')
 const { getEmailConfig } = require('./config')
 const { processEmailDeliveries, writeNotificationRecord } = require('./outbox')
 const { createEmailSender } = require('./sender')
+const { processNotificationDigestDeliveries } = require('../notification/digest')
 const { getUserAdminConfig } = require('../user-admin/config')
 const { processUserOnboardingDeliveries } = require('../user-admin/delivery')
 const { processUserAccessDeliveries } = require('../user-admin/access-delivery')
@@ -31,6 +32,9 @@ async function processEmailOutboxBatch ({ tx, dependencies = {} }) {
   const processNotifications = dependencies.processNotifications || processEmailDeliveries
   const processInvitations = dependencies.processInvitations || processUserOnboardingDeliveries
   const processAccess = dependencies.processAccess || processUserAccessDeliveries
+  const processDigests = dependencies.processDigests || processNotificationDigestDeliveries
+  const now = dependencies.now || new Date()
+  const workerID = dependencies.workerID || cds.utils.uuid()
   const sendMail = message => batchSender.sendMail(message)
   try {
     const notifications = await processNotifications({
@@ -51,10 +55,17 @@ async function processEmailOutboxBatch ({ tx, dependencies = {} }) {
       config,
       sendMail
     })
+    const digests = await processDigests({
+      tx,
+      config,
+      sendMail,
+      now,
+      workerID
+    })
     return {
-      sent: notifications.sent + invitations.sent + access.sent,
-      failed: notifications.failed + invitations.failed + access.failed,
-      skipped: notifications.skipped + invitations.skipped + access.skipped
+      sent: notifications.sent + invitations.sent + access.sent + digests.sent,
+      failed: notifications.failed + invitations.failed + access.failed + digests.failed,
+      skipped: notifications.skipped + invitations.skipped + access.skipped + digests.skipped
     }
   } finally {
     batchSender.close()

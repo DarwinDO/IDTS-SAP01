@@ -230,3 +230,25 @@ Gate 6 tái sử dụng `scheduleImmediateEmailOutbox(req)` tại `srv/email/wor
   **Phải kiểm tra cùng**: `srv/user-admin/access-delivery.js:110-176`, `srv/user-admin/delivery.js:14-160`, `srv/email/outbox.js` và `scripts/qa/test-email-immediate-kick.js`.
 
 **Safe editing / Sửa an toàn:** Add processors only through dependency injection and aggregate safe counts; never send inside CAP business transactions. / Chỉ thêm processor qua dependency injection và gộp count an toàn; không gửi bên trong transaction nghiệp vụ CAP.
+
+## N4 weekday digest processor / Processor digest ngày thường N4
+
+### English
+
+`processEmailOutboxBatch()` now invokes `processNotificationDigestDeliveries()` after the Bug, invitation, and access processors. The digest processor receives the same `sendMail` closure backed by the one batch sender, plus the batch `now` and `workerID`. It claims and sends only stored `NotificationDigestDeliveries` snapshots; it does not call `buildDigestSnapshot()` during retry. The batch still creates one sender and closes it once in `finally`, so digest delivery cannot introduce a second provider connection, timer, or worker.
+
+- **Location**: `srv/email/worker.js:31-69` — `processDigests` injection and count aggregation.
+  **IDTS concept**: Bug, onboarding, access, and digest outboxes share one provider lifecycle and at-least-once worker boundary.
+  **Impact if broken**: digest rows can remain pending, counts can misreport the worker result, or a separate sender can create inconsistent retry/connection behavior.
+  **Must check together**: `srv/notification/digest.js:148-250`, `srv/email/outbox.js:148-263`, `srv/user-admin/delivery.js`, `srv/user-admin/access-delivery.js`, and the shared-sender QA.
+
+### Tiếng Việt
+
+`processEmailOutboxBatch()` giờ gọi `processNotificationDigestDeliveries()` sau processor Bug, invitation và access. Digest processor nhận cùng closure `sendMail` gắn với một sender của batch, cùng `now` và `workerID` của batch. Processor chỉ claim và gửi snapshot `NotificationDigestDeliveries` đã lưu; retry không gọi lại `buildDigestSnapshot()`. Batch vẫn tạo một sender và close một lần trong `finally`, nên digest không thêm connection provider, timer hoặc worker thứ hai.
+
+- **Vị trí**: `srv/email/worker.js:31-69` — inject `processDigests` và cộng count.
+  **Khái niệm IDTS**: Outbox Bug, onboarding, access và digest dùng chung vòng đời provider và boundary worker at-least-once.
+  **Ảnh hưởng nếu sai**: digest row có thể kẹt Pending, count worker báo sai hoặc sender riêng tạo behavior retry/connection không nhất quán.
+  **Phải kiểm tra cùng**: `srv/notification/digest.js:148-250`, `srv/email/outbox.js:148-263`, `srv/user-admin/delivery.js`, `srv/user-admin/access-delivery.js` và QA shared-sender.
+
+**Safe editing / Sửa an toàn:** Keep `processDigests` injected beside the existing processors and pass the shared `sendMail`; do not create a timer, provider, or sender in digest code. / Giữ `processDigests` inject cạnh các processor hiện có và truyền `sendMail` dùng chung; không tạo timer, provider hoặc sender trong digest code.

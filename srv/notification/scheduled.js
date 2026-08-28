@@ -8,6 +8,7 @@ const { SELECT } = cds.ql
 const { STATUS } = require('../bug-service/constants')
 const { getEmailConfig } = require('../email/config')
 const { writeNotificationRecord } = require('../email/outbox')
+const { isDigestScheduleDue, scheduleNotificationDigests } = require('./digest')
 
 const BUGS = 'idts.cap.Bugs'
 const NOTIFICATIONS = 'idts.cap.Notifications'
@@ -23,7 +24,12 @@ const URGENT_SEVERITIES = new Set(['CRITICAL', 'BLOCKER'])
 async function processNotificationSchedules (req) {
   assertOutboxProcessor(req)
   const now = normalizeNow(req?.data?.now)
-  return discoverScheduledNotifications({ tx: cds.tx(req), now })
+  const requestTx = cds.tx(req)
+  const result = await discoverScheduledNotifications({ tx: requestTx, now })
+  if (isDigestScheduleDue(now)) {
+    await createPageTransactionRunner(requestTx)(tx => scheduleNotificationDigests({ tx, now }))
+  }
+  return result
 }
 
 async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmailConfig() } = {}) {
@@ -152,10 +158,9 @@ function createPageTransactionRunner (tx) {
     if (tx?.context) throw schedulerError(500, 'SCHEDULE_TRANSACTION_FACTORY_REQUIRED', 'A CAP transaction factory is required for page-bounded discovery.')
     return fn => fn(tx)
   }
-  const context = tx?.context
-    ? { tenant: tx.context.tenant, user: tx.context.user }
-    : null
-  return fn => context ? service.tx(context, fn) : service.tx(fn)
+  return fn => tx?.context
+    ? service.tx({ tenant: tx.context.tenant, user: tx.context.user }, fn)
+    : service.tx(fn)
 }
 
 async function prepareCandidateLocks (tx, candidates) {

@@ -269,6 +269,12 @@ async function main () {
   assert.deepEqual(committedPages, [1, 2],
     'CAP commits each page transaction before moving to the next keyset page')
 
+  // The protected action path supplies a context-bearing CAP request transaction. CAP's
+  // compatibility layer marks a reused plain context after the first root invocation;
+  // each page must therefore receive a fresh tenant/user context and invoke its callback.
+  await assertContextBearingRequestPath(db, emailConfig())
+  await assertContextPageRollback(db, emailConfig())
+
   // A full page must bulk-read bounded history and recipient state; lock-time Bug re-reads remain per candidate.
   const bulkCandidates = Array.from({ length: 500 }, (_, index) => ({
     ID: `bulk-${String(index + 1).padStart(4, '0')}`,
@@ -496,6 +502,139 @@ async function assertStaleProfileSkipped (db, bugID, profileID, recipientID, mes
   const profile = await db.run(SELECT.one.from('idts.cap.DeveloperProfiles').columns('active').where({ ID: profileID }))
   assert.equal(profile?.active, false, 'race fixture commits the profile deactivation before notification readback')
   assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID, recipient_ID: recipientID }), 0, message)
+}
+
+async function assertContextBearingRequestPath (db, config) {
+  const pageCandidates = Array.from({ length: 501 }, (_, index) => ({
+    ID: `context-page-${String(index + 1).padStart(4, '0')}`,
+    bugNumber: `CONTEXT-PAGE-${index + 1}`,
+    status_code: 'PENDING_ASSIGNMENT',
+    priority_code: 'LOW',
+    severity_code: 'MINOR',
+    createdAt: '2026-08-27T00:00:00.000Z',
+    dueDate: null,
+    nextProcessorUser_ID: null,
+    assignee_ID: null
+  }))
+  const pageContexts = []
+  const callbackPages = []
+  const committedPages = []
+  const requestUser = new cds.User({ id: 'context-scheduler', roles: ['OutboxProcessor'] })
+  const request = new cds.Request({
+    tenant: 'tenant-context-test',
+    user: requestUser,
+    data: { now: BASE_NOW.toISOString() }
+  })
+  const pageTransactionService = {
+    run: query => db.run(query),
+    tx: (context, callback) => {
+      pageContexts.push(context)
+      const pageNumber = pageContexts.length
+      // Mirror CAP's context-reuse compatibility behavior under test: a reused context
+      // has already been converted to a nested transaction and cannot run the callback.
+      if (Object.prototype.hasOwnProperty.call(context, '_txed_before')) return Promise.resolve({})
+      Object.defineProperty(context, '_txed_before', { value: { tenant: context.tenant, user: context.user } })
+      return db.tx(async actualTx => {
+        const pageTx = {
+          run: async query => {
+            const from = query.SELECT?.from?.ref?.[0]
+            if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+              return pageNumber === 1 ? pageCandidates.slice(0, 500) : pageCandidates.slice(500)
+            }
+            if (from === 'idts.cap.Bugs' && query.SELECT.one) return null
+            return actualTx.run(query)
+          }
+        }
+        callbackPages.push(pageNumber)
+        const result = await callback(pageTx)
+        return result
+      }).then(result => {
+        committedPages.push(pageNumber)
+        return result
+      })
+    }
+  }
+  const requestTx = Object.create(pageTransactionService)
+  requestTx.context = { tenant: request.tenant, user: request.user }
+  const originalCdsTx = cds.tx
+  cds.tx = () => requestTx
+  try {
+    await processNotificationSchedules(request)
+  } finally {
+    cds.tx = originalCdsTx
+  }
+
+  assert.deepEqual(callbackPages, [1, 2],
+    'protected CAP request path invokes both bounded page callbacks')
+  assert.deepEqual(committedPages, [1, 2],
+    'protected CAP request path commits page one before page two')
+  assert.equal(new Set(pageContexts).size, 2,
+    'each page receives a fresh CAP transaction context object')
+  assert.ok(pageContexts.every(context => context.tenant === 'tenant-context-test' && context.user === requestUser),
+    'tenant and user context propagate to every detached page root')
+  assert.ok(pageContexts.every(context => context._txed_before),
+    'each page root owns its CAP compatibility marker independently')
+  assert.equal(config.enabled, true, 'context-path fixture keeps the existing email policy')
+}
+
+async function assertContextPageRollback (db, config) {
+  const pageBugs = Array.from({ length: 501 }, (_, index) =>
+    bug(`00100000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-ROLLBACK-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
+  await db.run(INSERT.into('idts.cap.Bugs').entries(pageBugs))
+
+  const pageContexts = []
+  const callbackPages = []
+  const committedPages = []
+  const requestUser = new cds.User({ id: 'context-rollback-scheduler', roles: ['OutboxProcessor'] })
+  const request = new cds.Request({
+    tenant: 'tenant-context-rollback',
+    user: requestUser,
+    data: { now: BASE_NOW.toISOString() }
+  })
+  const pageTransactionService = {
+    run: query => db.run(query),
+    tx: (context, callback) => {
+      pageContexts.push(context)
+      const pageNumber = pageContexts.length
+      if (Object.prototype.hasOwnProperty.call(context, '_txed_before')) return Promise.resolve({})
+      Object.defineProperty(context, '_txed_before', { value: { tenant: context.tenant, user: context.user } })
+      return db.tx(async actualTx => {
+        callbackPages.push(pageNumber)
+        const result = await callback(actualTx)
+        if (pageNumber === 2) throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
+        return result
+      }).then(result => {
+        committedPages.push(pageNumber)
+        return result
+      })
+    }
+  }
+  const requestTx = Object.create(pageTransactionService)
+  requestTx.context = { tenant: request.tenant, user: request.user }
+  const originalCdsTx = cds.tx
+  cds.tx = () => requestTx
+  try {
+    await assert.rejects(() => processNotificationSchedules(request), /scheduled page failure fixture/)
+  } finally {
+    cds.tx = originalCdsTx
+  }
+
+  const firstSource = `PENDING_ASSIGNMENT:${pageBugs[0].ID}:${IDS.pm}`
+  const secondSource = `PENDING_ASSIGNMENT:${pageBugs[500].ID}:${IDS.pm}`
+  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: firstSource }), 1,
+    'page one source/inbox write survives a later page failure')
+  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
+    'failed page source/inbox write rolls back as one CAP unit')
+  assert.deepEqual(callbackPages, [1, 2],
+    'the failing page callback still runs before its root transaction rolls back')
+  assert.deepEqual(committedPages, [1],
+    'only the successful first page commits')
+  assert.equal(new Set(pageContexts).size, 2,
+    'rollback path also receives a fresh context per root page')
+  assert.ok(pageContexts.every(context => context.tenant === request.tenant && context.user === request.user),
+    'rollback path preserves tenant and user context')
+  assert.equal(config.enabled, true, 'rollback fixture keeps the existing email policy')
+  await db.run(UPDATE('idts.cap.Bugs').set({ status_code: 'CLOSED' }).where({ ID: { in: pageBugs.map(row => row.ID) } }))
 }
 
 async function addDueDateHistory (db, bugID, oldValue, newValue, eventID) {

@@ -9798,6 +9798,91 @@ Vietnamese:
 - Result: the profile-deactivation eligibility race is addressed. Scoped reviewer found one new Important: page-level User→Profile→Bug locks persist for the full scheduler transaction, so a later-page Profile lock can deadlock an assignment already holding that Profile while waiting for an earlier-page Bug (`srv/notification/scheduled.js:48-55,118-165`).
 - Status/owner: open; fix-loop round 5/5 moves to a second fresh Luna/max implementer. It must correct page/transaction lock lifetime or establish a globally consistent bounded ordering. Task 11 and later boundaries remain blocked.
 
+### 2026-08-28 — N4 Task 10 breaker ruling after fix round 5
+
+- Classification: production paging/transaction correctness defect; exact reviewed fix commit `9018873998d6d223576a458cd6e5364b14037b51`.
+- Result: round-5 re-review remains NO-GO with 0 Critical, 1 Important. `createPageTransactionRunner()` caches one context object; CAP 9.9.2 marks it `_txed_before`, so the second `service.tx(context, fn)` returns a nested transaction and skips the callback, silently truncating discovery after page 1.
+- Root-cause evidence: installed `@sap/cds/lib/srv/srv-tx.js:36-39` explicitly mutates/reuses `_txed_before`; the reviewer reproduced the source path. Existing page fixture lacked `.context` and did not cover production behavior.
+- Ruling/status: fix-loop breaker reached 5/5. Because Task 11 also owns `scheduled.js`, its implementer must first add a context-bearing multi-page RED and create a fresh `{ tenant, user }` object per page before any digest code. Task 10 is parked with this load-bearing carry; N4 push/PR/Ready/deploy remain blocked until Task 11 review verifies it. Cost if the ruling is wrong: Task 11 review fails and N4 remains local/unpublished.
+
+### 2026-08-28 — N4 Task 11 prerequisite RED harness correction
+
+- Classification: test-harness issue observed while adding the context-bearing protected-action regression.
+- Symptom/location: `npm run qa:my-notifications:scheduled` stopped at `A CAP transaction is required` in `processNotificationSchedules()` because assigning `cds.tx = ...` did not override the inherited CAP facade method; the test never reached the scheduler assertions.
+- Root cause/status: the attempted monkey-patch targeted a non-own inherited method and was ineffective. No product, database, provider, user/role, deployment or external state changed. Correct the fixture by injecting the request-path CAP facade through an own test object before rerunning the expected RED.
+- Resolution/evidence: the fixture now exposes the required CAP-shaped `.run` through its prototype and invokes the real `processNotificationSchedules(req)` path with a context-bearing request. Against `9018873998d6d223576a458cd6e5364b14037b51`, `npm run qa:my-notifications:scheduled` reaches the intended RED: callback pages actual `[1]`, expected `[1,2]`; no production or external state changed. The context-reuse fix is next.
+- Follow-up harness issue: after the fresh-context fix, the real page-rollback fixture left 501 synthetic open Bugs in the shared in-memory database; the later stale-profile fixture then selected those rows first and failed at `profileBulkRead === true`. No production behavior or external state changed. The rollback fixture is being isolated by closing its synthetic Bugs after its commit/rollback assertions.
+
+### 2026-08-28 — SDD Task 11 brief extraction tooling issue
+
+- Classification: tooling/documentation issue.
+- Symptom/location: the canonical `task-brief` helper extracted Task 11 English correctly but also included the following N5 heading and mislabeled Vietnamese block because the bilingual plan repeats task numbering after a section boundary.
+- Root cause/status: the generic extractor stops at the next same-level task heading and did not recognize the intervening localized section structure. No tracked source changed from extraction.
+- Resolution/evidence: the ignored Task 11 brief was trimmed to its exact English requirements before dispatch; the binding design spec remains authoritative. Owner: DonHV coordinator; no product fix required.
+
+### 2026-08-28 — N4 Task 11 digest RED boundary
+
+- Classification: test-harness/process issue (expected TDD RED).
+- English — Symptom/location: the new digest contract command `npm run qa:my-notifications:digest` exits `1` with `MODULE_NOT_FOUND` for `../../srv/notification/digest` from `scripts/qa/test-my-notifications-digest.js`. The digest tests intentionally require the not-yet-created production module, so no digest assertion ran.
+- English — Status/evidence: no product/runtime/database/provider/user/role/deployment/external state changed. This is the required RED witness before adding digest production code. Next step is the minimal `srv/notification/digest.js` implementation and a fresh GREEN run.
+- Tiếng Việt — Phân loại: lỗi process/test-harness (RED TDD dự kiến).
+- Tiếng Việt — Triệu chứng/vị trí: command QA digest mới `npm run qa:my-notifications:digest` exit `1` với `MODULE_NOT_FOUND` cho `../../srv/notification/digest` từ `scripts/qa/test-my-notifications-digest.js`. Test digest cố ý require module production chưa tạo nên chưa chạy assertion digest nào.
+- Tiếng Việt — Trạng thái/evidence: không có state product/runtime/database/provider/user/role/deployment/external nào đổi. Đây là witness RED bắt buộc trước khi thêm production digest. Bước tiếp theo là implementation tối thiểu `srv/notification/digest.js` rồi chạy GREEN mới.
+
+### 2026-08-28 — N4 Task 11 digest fixture seed-count correction
+
+- Classification: test-harness issue observed during first GREEN run.
+- English — Symptom/location: `npm run qa:my-notifications:digest` reached production assertions but the schedule-count assertion at `scripts/qa/test-my-notifications-digest.js:122` expected `3` and observed `7` digest rows.
+- English — Root cause/status: `cds.deploy()` loads repository seed Users/Bugs in addition to the controlled fixture, so other active personas also have actionable rows. No product/runtime/external state changed. Replace the brittle exact total with assertions on the controlled recipient rows and no empty controlled idle row; retain the seed rows as legitimate schedule input.
+- Tiếng Việt — Phân loại: lỗi test-harness quan sát được ở lần GREEN đầu.
+- Tiếng Việt — Triệu chứng/vị trí: `npm run qa:my-notifications:digest` đã chạy tới production assertion nhưng assertion count tại `scripts/qa/test-my-notifications-digest.js:122` chờ `3` và thực tế có `7` digest row.
+- Tiếng Việt — Nguyên nhân/trạng thái: `cds.deploy()` nạp Users/Bugs seed của repository cùng fixture controlled nên persona active khác cũng có row actionable. Không có state product/runtime/external nào đổi. Sửa assertion exact total thành kiểm tra recipient controlled và không tạo row rỗng cho idle controlled; giữ seed row vì đó là input schedule hợp lệ.
+
+### 2026-08-28 — N4 Task 11 digest fixture actionable-count correction
+
+- Classification: test-harness issue observed during the next GREEN attempt.
+- English — Symptom/location: `scripts/qa/test-my-notifications-digest.js:198` expected 23 Developer items after adding 21 rows but observed 24. The controlled Developer baseline also includes the unresolved Critical/Blocker row and the unsafe-title overdue row, so the correct total is 24 and remainder 4.
+- English — Status/evidence: no product/runtime/external state changed. Correct only the fixture expectation; keep the production max-20/remainder behavior unchanged.
+- Tiếng Việt — Phân loại: lỗi test-harness quan sát được ở lần GREEN kế tiếp.
+- Tiếng Việt — Triệu chứng/vị trí: `scripts/qa/test-my-notifications-digest.js:198` chờ 23 item Developer sau khi thêm 21 row nhưng thực tế 24. Baseline Developer controlled còn có Critical/Blocker chưa xử lý và row overdue có title unsafe, nên total đúng là 24, remainder 4.
+- Tiếng Việt — Trạng thái/evidence: không có state product/runtime/external đổi. Chỉ sửa expectation của fixture; giữ nguyên behavior max-20/remainder production.
+
+### 2026-08-28 — N4 Task 11 digest unique-error fixture date correction
+
+- Classification: test-harness issue observed during focused GREEN verification.
+- English — Symptom/location: the non-unique insert-error assertion at `scripts/qa/test-my-notifications-digest.js:260` reported “Missing expected rejection” because it reused Monday after the exact-unique fixture had already populated that business date; the scheduler correctly reused existing rows and did not reach INSERT.
+- English — Status/evidence: no product/runtime/external state changed. Move only the injected non-unique error case to a fresh Tuesday business date so it reaches the INSERT path; keep exact unique reuse on Monday.
+- Tiếng Việt — Phân loại: lỗi test-harness quan sát được khi verify focused GREEN.
+- Tiếng Việt — Triệu chứng/vị trí: assertion lỗi insert non-unique tại `scripts/qa/test-my-notifications-digest.js:260` báo “Missing expected rejection” vì dùng lại Monday sau khi fixture unique exact đã tạo row ngày đó; scheduler đúng nên reuse row và không đi vào INSERT.
+- Tiếng Việt — Trạng thái/evidence: không có state product/runtime/external đổi. Chỉ chuyển case injected non-unique sang business date Tuesday mới để đi qua INSERT; giữ exact unique reuse ở Monday.
+
+### 2026-08-28 — N4 Task 11 digest source GREEN
+
+- English — Implementation: added `srv/notification/digest.js` with exact `buildDigestSnapshot({tx,recipient,businessDate,snapshotAt,limit:20})` and `processNotificationDigestDeliveries({tx,config,sendMail,now,workerID})` contracts. Snapshot policy is PM Pending Assignment/Overdue/SLA/unresolved Critical-Blocker and Developer/Tester assigned/action-owned overdue/awaiting work; it renders top 20 plus safe remainder link, stores one unique recipient/date/type row, and retries the stored body. Scheduler invokes generation only at weekday 08:00 `Asia/Bangkok`; the existing worker injects `processDigests` while retaining the one sender/claim/backoff/sanitizer path.
+- English — Verification: `npm run qa:my-notifications:digest` PASS; `npm run qa:my-notifications:scheduled` PASS (scheduled prerequisite plus digest); `npm run qa:email-immediate:programmatic` PASS; `npm run qa:email-outbox:programmatic` PASS; new/changed JS syntax checks PASS. Digest fixture covers role isolation, closed/future exclusion, priority order, top20/remainder, exact unique conflict versus unrelated insert failure, stored-snapshot retry, escaped HTML, and one shared sender lifetime.
+- English — Scope/status: mirrors `docs/knowledge/srv/notification/{digest.js,scheduled.js}.md` and `docs/knowledge/srv/email/worker.js.md`, PM evidence and roadmap are updated. Full N4 matrix, CAP EDMX/HANA, secret/rules/depth and exact local commit remain pending. CAP/UI5/Fiori MCP unavailable; no MCP/live acceptance claim. No schema/dependency/lockfile/MTA/XSUAA/live schedule/provider/data/user/role/email/deployment/N5/PR/Ready/merge mutation.
+- Tiếng Việt — Implementation: đã thêm `srv/notification/digest.js` với đúng contract `buildDigestSnapshot({tx,recipient,businessDate,snapshotAt,limit:20})` và `processNotificationDigestDeliveries({tx,config,sendMail,now,workerID})`. Policy snapshot gồm PM Pending Assignment/Overdue/SLA/Critical-Blocker chưa xử lý và Developer/Tester overdue được assign/action-owned/item đang chờ; render top 20 cộng link remainder an toàn, lưu một row unique recipient/date/type và retry body đã lưu. Scheduler chỉ generation lúc 08:00 ngày thường `Asia/Bangkok`; worker hiện có inject `processDigests` nhưng vẫn dùng chung sender/claim/backoff/sanitize.
+- Tiếng Việt — Verification: `npm run qa:my-notifications:digest` PASS; `npm run qa:my-notifications:scheduled` PASS (scheduled prerequisite cộng digest); `npm run qa:email-immediate:programmatic` PASS; `npm run qa:email-outbox:programmatic` PASS; syntax JS mới/đổi PASS. Fixture digest cover isolation role, loại closed/future, priority order, top20/remainder, phân biệt exact unique conflict với insert error khác, retry snapshot đã lưu, HTML escaped và một sender dùng chung.
+- Tiếng Việt — Scope/trạng thái: mirror `docs/knowledge/srv/notification/{digest.js,scheduled.js}.md` và `docs/knowledge/srv/email/worker.js.md`, PM evidence và roadmap đã cập nhật. Matrix N4 đầy đủ, CAP EDMX/HANA, secret/rules/depth và commit local chính xác còn pending. CAP/UI5/Fiori MCP không khả dụng; không claim MCP/live acceptance. Không mutation schema/dependency/lockfile/MTA/XSUAA/live schedule/provider/data/user/role/email/deployment/N5/PR/Ready/merge.
+
+### 2026-08-28 — N4 Task 11 retry fixture target correction
+
+- Classification: test-harness issue found during self-review.
+- English — Symptom/location: the digest retry fixture intended to mutate `Bugs.title` after snapshot accidentally issued `UPDATE('idts.cap.NotificationDigestDeliveries')` with a Bug ID at `scripts/qa/test-my-notifications-digest.js` before the retry assertion; the update was a no-op, so the snapshot immutability proof was incomplete.
+- English — Status/evidence: no production/runtime/external state changed. Corrected the target to `idts.cap.Bugs`, added a provider-failure sanitizer assertion, and reran the focused digest suite before treating stored-snapshot retry as verified.
+- Tiếng Việt — Phân loại: lỗi test-harness phát hiện trong self-review.
+- Tiếng Việt — Triệu chứng/vị trí: fixture retry digest định đổi `Bugs.title` sau snapshot nhưng ghi nhầm `UPDATE('idts.cap.NotificationDigestDeliveries')` với Bug ID tại `scripts/qa/test-my-notifications-digest.js`; update no-op nên proof snapshot immutable chưa đủ.
+- Tiếng Việt — Trạng thái/evidence: không có state production/runtime/external đổi. Đã sửa target thành `idts.cap.Bugs`, thêm assertion sanitize provider failure và chạy lại focused digest trước khi coi retry snapshot đã verify.
+
+### 2026-08-28 — N4 Task 11 regression blocker: IDTS-122 closed attachment fixture
+
+- Classification: pre-existing authorization/test-harness issue observed during the requested regression matrix; unrelated to Task 11 digest source.
+- English — Symptom/location: `npm run qa:idts122:closed` deployed `.tmp\\qa-idts122-closed.sqlite`, passed the closed Bug/comment checks, then `scripts/qa/test-idts122-closed-bug-immutability.js:168` expected HTTP `409` for closed-Bug attachment delete but received HTTP `403` (`An active IDTS user is required for this operation`). The command exits `1` before the remaining checks.
+- English — Status/evidence: no digest code, production/runtime, provider, user/role, deployment or external state changed. Keep the regression as a truthful blocker/concern; do not weaken the expected 409 assertion or broaden Task 11 to fix the unrelated auth fixture. Owner: coordinator/IDTS-122 lane.
+- Tiếng Việt — Phân loại: lỗi authorization/test-harness có sẵn được phát hiện trong regression matrix; không liên quan source digest Task 11.
+- Tiếng Việt — Triệu chứng/vị trí: `npm run qa:idts122:closed` deploy `.tmp\\qa-idts122-closed.sqlite`, pass check closed Bug/comment, sau đó tại `scripts/qa/test-idts122-closed-bug-immutability.js:168` chờ HTTP `409` cho delete attachment của Bug closed nhưng nhận HTTP `403` (`An active IDTS user is required for this operation`). Command exit `1` trước các check còn lại.
+- Tiếng Việt — Trạng thái/evidence: không có digest code, state production/runtime, provider, user/role, deployment hoặc external nào đổi. Giữ regression là blocker/concern trung thực; không hạ assertion 409 hoặc mở rộng Task 11 để sửa auth fixture không liên quan. Owner: coordinator/lane IDTS-122.
+
 ### 2026-08-27 — N4 Task 10 fix round 4 TDD RED
 
 - English — Classification: product concurrency/eligibility regression. The new SQLite-backed fixture preloads an active `DeveloperProfiles` row, deactivates that row immediately after the real bulk profile read and before the notification writer, then observes one persisted overdue notification for the now-inactive technical assignee. This reproduces the open Important against exact head `b11649896235f604aebaee5a4963a35becc9d728`; active `Users` revalidation alone is insufficient.
@@ -9857,3 +9942,10 @@ Vietnamese:
 - English — No production/runtime/external mutation occurred; the focused suite was rerun after removal and passed. Owner: this fix-loop implementer; no follow-up beyond retaining the isolated page-boundary fixture.
 - Vietnamese — Phân loại: lỗi test harness, không phải product defect. Assertion nested-caller tạm thời chạy scheduler thật sau khi đã insert fixture stale-candidate, nên đúng ra tạo sáu notification cho row vẫn eligible; assertion stale-close sau đó fail tại `scripts/qa/test-my-notifications-scheduled.js:455` với `6 !== 0`. Assertion này không cần thiết vì smoke CAP thật đã sửa đã cover request path, nên đã remove trước verification cuối.
 - Vietnamese — Không có mutation production/runtime/external; focused suite được chạy lại sau khi remove và PASS. Owner: implementer fix-loop này; không còn follow-up ngoài việc giữ fixture page-boundary tách biệt.
+
+### 2026-08-28 — N4 Task 11 final local verification before commit
+
+- English — PASS: reran `npm run qa:my-notifications:digest`, `npm run qa:my-notifications:scheduled`, `npm run qa:email-immediate:programmatic`, `npm run qa:email-outbox:programmatic`, `npm run qa:user-access-notifications:programmatic`, `npm run qa:idts113:outbox-scheduler`, `npm run qa:my-notifications:events`, `npm run qa:my-notifications:service`, `npm run qa:my-notifications:model`, `npm run qa:my-notifications:backfill`, `npm run qa:pm-monitoring:programmatic`, `npm run qa:auth:programmatic`, `npm run qa:idts122:programmatic`, `npm run qa:idts125:programmatic`, `npm run qa:developer-workload:programmatic`, `npm run qa:history-events:programmatic`, `npm run qa:existing-user-identity-link:programmatic`, and `npm run qa:user-access:programmatic`. Secret scan, agent rules, depth self-test, changed-JS syntax, `git diff --check`, prohibited-diff guard and CAP EDMX/HANA compile also passed.
+- English — Scope/concern: CAP EDMX retains only the pre-existing attachment vocabulary warning. `npm run qa:idts122:closed` remains the already logged unrelated authorization/test-harness failure (403 active-user guard before intended 409 closed-attachment assertion); no Task 11 fix was broadened to that lane. CAP/UI5/Fiori MCP is unavailable in this host, so no live/MCP acceptance is claimed. No schema/dependency/lockfile/MTA/XSUAA/provider/runtime/data/user/role/email/deployment/N5/PR/Ready/merge mutation occurred; exact commit is the remaining local boundary.
+- Vietnamese — PASS: đã chạy lại digest/scheduled, email immediate/outbox, notification lifecycle/service/model/backfill, user-access notification/provisioning, IDTS-113, PM monitoring, auth, assignment/workload/history/identity-link, IDTS-122 retest-owner và IDTS-125; secret scan, agent rules, depth, syntax JS, `git diff --check`, prohibited-diff guard và compile CAP EDMX/HANA đều PASS.
+- Vietnamese — Scope/concern: CAP EDMX chỉ còn warning vocabulary attachment có sẵn. `npm run qa:idts122:closed` vẫn là failure authorization/test-harness không liên quan đã log (403 active-user guard trước assertion 409 closed attachment); không mở rộng Task 11 để sửa lane đó. CAP/UI5/Fiori MCP không khả dụng nên không claim live/MCP acceptance. Không mutation schema/dependency/lockfile/MTA/XSUAA/provider/runtime/data/user/role/email/deploy/N5/PR/Ready/merge; commit exact là boundary local còn lại.
