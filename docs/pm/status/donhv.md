@@ -9962,6 +9962,12 @@ Vietnamese:
 - Important findings: production CAP page transaction semantics remain simulated; digest recovery misses 08:01–08:59; PM SLA uses Bug creation instead of Pending Assignment history; the first 5,000 global Bugs can truncate top/count; per-recipient global scans and 1,000-recipient cap amplify/drop work; configured digest batch can create oversized HANA `IN`; exact unique reuse is not portable/transaction-safe; persona/ownership/send-time role alignment is incomplete; the emitted queue `filter=` token is not consumed and opens an unfiltered list.
 - Status/owner: open; original Luna/max Task 11 implementer owns RED-first fix round 1. N4 final review, push, Draft PR, Ready and deploy remain blocked. The two Minor findings are deferred to final review per SDD policy.
 
+### 2026-08-28 — N4 Task 11 scoped re-review GO
+
+- Exact head: `546fb9442bb39eb3193bff8d271275af282a15cc`.
+- Result: the remaining send-time persona Important is addressed; scoped re-review returned 0 Critical, 0 Major, 0 Important and quality Approved. PM↔Tester/Developer transitions, active/inactive profile behavior, persisted persona types and stored-snapshot retry are covered by real CAP SQLite fixtures.
+- Boundary/concerns: legacy unbound `DAILY` rows fail closed; live HANA/provider/concurrency remain unverified; two Minor findings remain deferred for the final whole-branch review. N4 still has no push/PR/Ready/merge/deploy/live schedule mutation.
+
 ### 2026-08-28 — N4 Task 11 fix round 1 scoped re-review
 
 - Classification: authorization/persona transition defect; exact reviewed fix head `ed692dce736144898036c6cc5ed6acfc08d96a97`.
