@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2 MERGED — N3 MERGED — N4 TASK 11 FIX ROUND 1 COMMITTED; LOCAL SOURCE BOUNDARY`
+`N1/N2 MERGED — N3 MERGED — N4 TASK 11 FIX ROUND 2 COMMITTED; LOCAL SOURCE BOUNDARY`
 
 ### Authority
 
@@ -39,11 +39,15 @@ Fix round 3 removes the lock-order deadlock risk identified in the next scoped r
 
 The bounded review of local Task 11 head `22edfa1d7b84b512ac42178e3daf237b325de786` found nine Important findings. Fix round 1 is committed locally at `3c11fd0172fd1c488013e74e84f1b7147f327975` (`fix: harden weekday notification digest`) in the same protected worktree: real installed-CAP request/page commit/rollback evidence; full Bangkok 08:00–08:59 recovery-hour handling; immutable Pending Assignment HistoryLog anchors; keyset digest Bug pages beyond 5,000 IDs; shared role/ownership indexing across all recipient pages; HANA-safe digest delivery batches; target-aware unique-race reuse; role/status/profile and send-time persona fail-closed checks; and ListReport-compatible queue filters. The two review Minors remain deferred. No PR/Ready/merge/deploy/live schedule/provider/data/user/role/email/schema/dependency/lockfile/N5 action is claimed.
 
+## Addendum — N4 Task 11 fix round 2
+
+Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester snapshot was not bound to the current send-time role, and inactive historical DeveloperProfiles could falsely skip a valid PM/Tester. Fix round 2 is committed locally at `6894cb42660a6375aa76731781b2171d0d6d17a7` (`fix: bind digest snapshot persona`): `digestType` now carries one fixed allowlisted persona value, send-time authorization requires that value to match the current role, Developer requires an active linked profile, and PM/Tester count only active profiles. Real CAP SQLite fixtures cover PM→Tester, PM→Developer, Developer→Tester/PM, Tester→Developer/PM and a valid PM with an inactive historical profile. The two review Minors remain deferred. No PR/Ready/merge/deploy/live schedule/provider/data/user/role/email/schema/dependency/lockfile/N5 action is claimed.
+
 ## Tiếng Việt
 
 ### Trạng thái
 
-`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 TASK 11 FIX ROUND 1 ĐÃ COMMIT; BOUNDARY SOURCE LOCAL`
+`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 TASK 11 FIX ROUND 2 ĐÃ COMMIT; BOUNDARY SOURCE LOCAL`
 
 ### Thẩm quyền
 
@@ -77,6 +81,10 @@ Fix round 3 xử lý rủi ro deadlock lock-order của scoped review tiếp the
 ## Phụ lục — N4 Task 11 fix round 1
 
 Review bounded của head Task 11 local `22edfa1d7b84b512ac42178e3daf237b325de786` phát hiện chín Important. Fix round 1 đã commit local tại `3c11fd0172fd1c488013e74e84f1b7147f327975` (`fix: harden weekday notification digest`) trong worktree được bảo vệ: evidence CAP installed thật cho request/page commit/rollback; recovery hour Bangkok đầy đủ 08:00–08:59; anchor HistoryLog Pending Assignment bất biến; page keyset Bug qua mốc 5.000; ownership index dùng chung qua mọi recipient page; digest delivery batch HANA-safe; unique-race reuse target-aware; guard role/status/profile và persona fail-closed lúc send; queue filter tương thích ListReport. Hai Minor của review vẫn defer. Chưa claim PR/Ready/merge/deploy/live schedule/provider/data/user/role/email/schema/dependency/lockfile/N5.
+
+## Phụ lục — N4 Task 11 fix round 2
+
+Scoped re-review của fix round 1 còn một Important: snapshot PM/Developer/Tester đã lưu chưa bind với role hiện tại lúc send, và DeveloperProfile lịch sử inactive có thể làm skip nhầm PM/Tester hợp lệ. Fix round 2 đã commit local tại `6894cb42660a6375aa76731781b2171d0d6d17a7` (`fix: bind digest snapshot persona`): `digestType` mang persona allowlist cố định, authorization lúc send yêu cầu giá trị khớp role hiện tại, Developer cần profile active link đúng user, còn PM/Tester chỉ đếm profile active. Fixture CAP SQLite thật cover PM→Tester, PM→Developer, Developer→Tester/PM, Tester→Developer/PM và PM hiện tại hợp lệ với profile lịch sử inactive. Hai Minor review vẫn defer. Chưa claim PR/Ready/merge/deploy/live schedule/provider/data/user/role/email/schema/dependency/lockfile/N5.
 
 ## Addendum / Phụ lục — fix round 4
 
