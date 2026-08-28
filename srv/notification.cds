@@ -22,6 +22,15 @@ service NotificationService @(requires: 'authenticated-user') {
     count : Integer;
   }
 
+  type NotificationMaintenanceResult {
+    candidates        : Integer;
+    pendingAssignment : Integer;
+    sla               : Integer;
+    overdue           : Integer;
+    created           : Integer;
+    skipped           : Integer;
+  }
+
   function searchMyNotifications(
     category  : String(10),
     readState : String(10),
@@ -30,6 +39,9 @@ service NotificationService @(requires: 'authenticated-user') {
   ) returns many NotificationSummary;
 
   function getMyUnreadNotificationCount() returns UnreadNotificationCount;
+
+  @(requires: 'OutboxProcessor')
+  action processNotificationSchedules(now:Timestamp) returns NotificationMaintenanceResult;
 
   action markMyNotificationRead(
     notificationID    : UUID,

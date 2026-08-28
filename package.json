@@ -89,6 +89,8 @@
     "qa:my-notifications:model": "node scripts/qa/test-my-notifications-model.js",
     "qa:my-notifications:service": "node scripts/qa/test-my-notifications-service.js",
     "qa:my-notifications:backfill": "node scripts/qa/test-my-notifications-backfill.js",
+    "qa:my-notifications:scheduled": "node scripts/qa/test-my-notifications-scheduled.js && node scripts/qa/test-my-notifications-digest.js",
+    "qa:my-notifications:digest": "node scripts/qa/test-my-notifications-digest.js",
     "qa:my-notifications:ui": "node scripts/qa/test-my-notifications-ui.js && node scripts/qa/test-my-notifications-shell.js",
     "qa:my-notifications:events": "node scripts/qa/test-my-notifications-events.js",
     "qa:existing-user-identity-link:programmatic": "node scripts/qa/test-existing-user-identity-link.js",

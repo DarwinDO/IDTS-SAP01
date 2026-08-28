@@ -182,13 +182,17 @@ async function main () {
       async processAccess (input) {
         sharedCalls.push(input)
         return { sent: 4, failed: 2, skipped: 3 }
+      },
+      async processDigests (input) {
+        sharedCalls.push(input)
+        return { sent: 0, failed: 0, skipped: 0 }
       }
     }
   })
   assert.deepEqual(combined, { sent: 7, failed: 3, skipped: 4 })
   assert.equal(senderCreates, 1, 'one batch creates one sender')
   assert.equal(senderCloses, 1, 'one successful batch closes its sender once')
-  assert.equal(sharedCalls.length, 3, 'one batch processes Bug, invitation, and access deliveries once')
+  assert.equal(sharedCalls.length, 4, 'one batch processes Bug, invitation, access, and digest deliveries once')
   for (const input of sharedCalls) {
     assert.equal(input.tx, tx, 'all processors share the batch transaction')
     assert.equal(input.sendMail, sharedCalls[0].sendMail, 'all processors share one sender')
@@ -216,11 +220,15 @@ async function main () {
       async processAccess () {
         missingInvitationCalls.push('access')
         return { sent: 0, failed: 1, skipped: 0 }
+      },
+      async processDigests () {
+        missingInvitationCalls.push('digest')
+        return { sent: 0, failed: 0, skipped: 0 }
       }
     }
   })
   assert.deepEqual(missingInvitation, { sent: 1, failed: 1, skipped: 0 })
-  assert.deepEqual(missingInvitationCalls, ['bug', 'access'], 'missing invitation config never skips Bug or access processing')
+  assert.deepEqual(missingInvitationCalls, ['bug', 'access', 'digest'], 'missing invitation config never skips Bug, access, or digest processing')
 
   let failureCloses = 0
   await assert.rejects(processEmailOutboxBatch({
