@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2/N3/N4 SOURCE MERGED — N4 ROLLOUT HOLD: LIVE N1/N3 SCHEMA PREREQUISITES MISSING`
+`N1/N2/N3/N4 LIVE — N4 ADDITIVE SCHEMA/CAP/UI ROLLOUT COMPLETE; CONTROLLED SCHEDULE/PROVIDER ACCEPTANCE DEFERRED`
 
 ### Authority
 
@@ -27,9 +27,9 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-Current 2026-08-28 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. Read-only live inspection found missing inbox/digest tables, Notifications sourceKey and its service-view column, and 12 notification event codes. Existing runtime is DEMO READY; no N4 artifact was uploaded. A separately authorized additive migration prerequisite is required before code rollout. N5 remains pending. See `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
+Current 2026-08-28 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. DonHV authorized and completed the narrow additive prerequisite: exact-seven HDI simulation/make, encrypted before/after preservation proof, insert-only 12-code catalog initialization, CAP/UI rollout and incident recovery. Final CAP/AppRouter topology is healthy and Edge shows the live empty My Notifications popover. The public service view still intentionally excludes sourceKey. Controlled scheduler/provider delivery and HANA concurrency stress remain deferred operational acceptance; N5 remains pending. See `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
 
-N1 #361 and N2 #362 are merged; N3 is the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 are locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. The requested local commit is the only mutation; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action is claimed. Live UI remains rolled back; source completion is not runtime acceptance.
+Historical source-only record (superseded by the current override above): N1 #361 and N2 #362 were merged; N3 was the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 were locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. At that historical boundary only the local commit was claimed; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action was claimed, and live UI remained rolled back.
 
 Fix round 1 addresses the exact-head review's nine Important findings: installed-CAP context-bearing page commit/rollback evidence; the full Bangkok 08:00–08:59 recovery hour; immutable HistoryLogs SLA anchoring; keyset Bug paging beyond 5,000 IDs; shared role/ownership indexing across all recipient pages; HANA-safe delivery batches; target-aware unique-race reuse; role/status/profile and send-time persona fail-closed checks; and ListReport-compatible queue filters. Fix round 2 closes the remaining persona-transition finding. Scoped re-review is clean at `546fb9442bb39eb3193bff8d271275af282a15cc`; final whole-branch review remains required before Draft PR.
 
@@ -51,9 +51,9 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2/N3/N4 SOURCE ĐÃ MERGE — N4 ROLLOUT HOLD: THIẾU PREREQUISITE SCHEMA N1/N3 TRÊN LIVE`
+`N1/N2/N3/N4 LIVE — ĐÃ XONG ROLLOUT SCHEMA ADDITIVE/CAP/UI N4; DEFER ACCEPTANCE SCHEDULE/PROVIDER CÓ KIỂM SOÁT`
 
-Cập nhật 2026-08-28 thay thế trạng thái lịch sử bên dưới: PR #365 merge tại `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. Kiểm tra live chỉ-đọc xác nhận thiếu bảng inbox/digest, Notifications.sourceKey và cột service view tương ứng, cùng 12 event code. Runtime cũ DEMO READY; chưa upload artifact N4. Cần duyệt riêng prerequisite migration additive trước deploy code; N5 vẫn pending. Evidence: `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
+Cập nhật 2026-08-28 thay thế trạng thái lịch sử bên dưới: PR #365 merge tại `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. DonHV đã duyệt và hoàn tất prerequisite additive hẹp: HDI simulation/make đúng bảy artifact, chứng minh bảo toàn trước/sau bằng backup mã hóa, init insert-only 12 code, rollout CAP/UI và recovery incident. Topology CAP/AppRouter cuối khỏe và Edge hiện popover My Notifications live rỗng. Public service view vẫn cố ý exclude sourceKey. Acceptance schedule/provider có kiểm soát và stress concurrency HANA được defer; N5 vẫn pending. Evidence: `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
 
 ### Thẩm quyền
 
@@ -76,7 +76,7 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-N1 #361 và N2 #362 đã merge; N3 là predecessor đã merge tại frozen base Task 10 `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 và 11 đã hoàn tất source cục bộ trên `feature/wp7-notifications-sla-digest-donhv`: discovery Pending Assignment/SLA/Overdue bounded, context request mới cho từng page, idempotency source key, protected `NotificationService.processNotificationSchedules`, digest snapshot 08:00 weekday Bangkok, reuse unique exact, retry snapshot đã lưu và một sender worker dùng chung. Chỉ mutation commit local được yêu cầu; không claim PR, Ready, merge, deploy, migration, backfill, email thật, provider, user/role/data hay N5. UI live vẫn rollback; source xong không phải runtime acceptance.
+Ghi nhận source-only lịch sử (đã được current override bên trên thay thế): N1 #361 và N2 #362 đã merge; N3 là predecessor đã merge tại frozen base Task 10 `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 và 11 khi đó hoàn tất source cục bộ trên `feature/wp7-notifications-sla-digest-donhv`: discovery Pending Assignment/SLA/Overdue bounded, context request mới cho từng page, idempotency source key, protected `NotificationService.processNotificationSchedules`, digest snapshot 08:00 weekday Bangkok, reuse unique exact, retry snapshot đã lưu và một sender worker dùng chung. Tại boundary lịch sử đó chỉ claim commit local; không claim PR, Ready, merge, deploy, migration, backfill, email thật, provider, user/role/data hay N5 và UI live vẫn rollback.
 
 Fix round 1 xử lý chín finding Important của review exact-head: evidence commit/rollback page có context từ CAP installed thật; recovery hour Bangkok đầy đủ 08:00–08:59; anchor SLA bằng HistoryLogs bất biến; paging Bug keyset qua 5.000 ID; ownership index role dùng chung qua mọi recipient page; delivery batch HANA-safe; reuse unique-race target-aware; guard role/status/profile và persona fail-closed lúc send; và queue filter tương thích ListReport. Fix round 2 đóng finding persona-transition còn lại. Scoped re-review sạch tại `546fb9442bb39eb3193bff8d271275af282a15cc`; vẫn cần final whole-branch review trước Draft PR.
 
