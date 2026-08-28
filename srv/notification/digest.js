@@ -2,6 +2,7 @@
 
 // Học nhanh (DonHV): snapshot digest đọc Bug hiện tại; email worker hiện có mới claim và gửi payload đã lưu.
 
+const crypto = require('node:crypto')
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
 
@@ -54,9 +55,7 @@ async function buildDigestSnapshot ({
   if (!actor?.ID || !actor.active || !DIGEST_ROLES.has(String(actor.role_code || '').toUpperCase())) return null
 
   const role = String(actor.role_code).toUpperCase()
-  const profileRows = Array.isArray(_items)
-    ? await readDigestUserProfiles(tx, actor.ID)
-    : (_profileRows || await readDigestUserProfiles(tx, actor.ID))
+  const profileRows = _profileRows || await readDigestUserProfiles(tx, actor.ID)
   const activeProfileIDs = new Set(profileRows.filter(row => row.active).map(row => row.ID))
   if (Array.isArray(_items) && role === 'DEVELOPER' && _profileIDs instanceof Set && !sameSet(activeProfileIDs, _profileIDs)) return null
   const profileIDs = role === 'DEVELOPER'
@@ -160,9 +159,10 @@ async function scheduleNotificationDigests ({ tx, now = new Date() } = {}) {
       const recipients = await readDigestRecipientPage(pageTx, lastID)
       if (!recipients.length) return { pageResult: null, recipients: [], snapshots: [] }
 
-      const profileRowsByUser = await readDigestProfileRows(pageTx, recipients)
+      const profileFingerprints = await readDigestProfileFingerprints(pageTx, recipients)
       const accumulators = new Map(recipients.map(recipient => [recipient.ID, createDigestAccumulator()]))
-      await streamDigestBugPages(pageTx, instant, (bugs, pendingAssignmentAnchors) => {
+      await streamDigestBugPages(pageTx, instant, async (bugs, pendingAssignmentAnchors) => {
+        const profileRowsByUser = await readDigestActiveProfileRowsForBugPage(pageTx, recipients, bugs)
         accumulateDigestPage({
           recipients,
           profileRowsByUser,
@@ -173,6 +173,7 @@ async function scheduleNotificationDigests ({ tx, now = new Date() } = {}) {
           snapshotAt: instant
         })
       })
+      const currentProfileFingerprints = await readDigestProfileFingerprints(pageTx, recipients)
 
       const pageResult = { created: 0, reused: 0, skipped: 0 }
       const snapshots = []
@@ -188,7 +189,13 @@ async function scheduleNotificationDigests ({ tx, now = new Date() } = {}) {
           continue
         }
 
-        const profileRows = profileRowsByUser.get(recipient.ID) || []
+        if (role === 'DEVELOPER' && !sameProfileFingerprint(
+          profileFingerprints.get(recipient.ID),
+          currentProfileFingerprints.get(recipient.ID)
+        )) {
+          pageResult.skipped += 1
+          continue
+        }
         const accumulator = accumulators.get(recipient.ID) || createDigestAccumulator()
         const snapshot = await buildDigestSnapshot({
           tx: pageTx,
@@ -196,8 +203,7 @@ async function scheduleNotificationDigests ({ tx, now = new Date() } = {}) {
           businessDate,
           snapshotAt: instant,
           limit: DEFAULT_LIMIT,
-          _profileIDs: new Set(profileRows.filter(row => row.active).map(row => row.ID)),
-          _profileRows: profileRows,
+          _profileRows: [],
           _items: accumulator.items,
           _itemsRole: role,
           _itemCount: accumulator.count
@@ -481,26 +487,61 @@ async function readDigestUserProfiles (tx, userID) {
   return rows
 }
 
-async function readDigestProfileRows (tx, users) {
-  const userIDs = users.map(user => user.ID).filter(Boolean)
-  const byUser = new Map(userIDs.map(userID => [userID, []]))
+async function readDigestProfileFingerprints (tx, users) {
+  // Chỉ giữ count/hash theo Developer của recipient page; profile rows được stream rồi bỏ ngay.
+  const userIDs = users
+    .filter(user => String(user.role_code || '').toUpperCase() === 'DEVELOPER')
+    .map(user => user.ID)
+    .filter(Boolean)
+  const byUser = new Map(userIDs.map(userID => [userID, {
+    count: 0,
+    hash: crypto.createHash('sha256')
+  }]))
   let lastID
   for (;;) {
     if (!userIDs.length) break
     const query = SELECT.from(PROFILES)
-      .columns('ID', 'user_ID', 'active')
-      .where({ user_ID: { in: userIDs } })
+      .columns('ID', 'user_ID')
+      .where({ user_ID: { in: userIDs }, active: true })
       .orderBy('ID asc')
       .limit(DIGEST_PAGE_SIZE)
     if (lastID) query.and`ID > ${lastID}`
     const rows = await tx.run(query)
     if (!rows.length) break
     for (const row of rows) {
-      if (byUser.has(row.user_ID)) byUser.get(row.user_ID).push(row)
+      const state = byUser.get(row.user_ID)
+      if (!state || !row.ID) continue
+      state.count += 1
+      state.hash.update(`${row.ID}\u0000`)
     }
     const nextID = rows.at(-1)?.ID
     if (rows.length < DIGEST_PAGE_SIZE || !nextID || nextID === lastID) break
     lastID = nextID
+  }
+  return new Map([...byUser].map(([userID, state]) => [userID, {
+    count: state.count,
+    hash: state.hash.digest('hex')
+  }]))
+}
+
+async function readDigestActiveProfileRowsForBugPage (tx, users, bugs) {
+  // Ownership cần profile ID đầy đủ của Bug page hiện tại, không cần giữ profile lịch sử qua page sau.
+  const developerUserIDs = new Set(users
+    .filter(user => String(user.role_code || '').toUpperCase() === 'DEVELOPER')
+    .map(user => user.ID)
+    .filter(Boolean))
+  const profileIDs = [...new Set(bugs.map(bug => bug.assignee_ID).filter(Boolean))]
+  const byUser = new Map([...developerUserIDs].map(userID => [userID, []]))
+  if (!profileIDs.length || !developerUserIDs.size) return byUser
+  const rows = await tx.run(
+    SELECT.from(PROFILES)
+      .columns('ID', 'user_ID', 'active')
+      .where({ ID: { in: profileIDs }, active: true })
+      .orderBy('ID asc')
+      .limit(DIGEST_PAGE_SIZE)
+  )
+  for (const row of rows) {
+    if (byUser.has(row.user_ID)) byUser.get(row.user_ID).push(row)
   }
   return byUser
 }
@@ -651,6 +692,10 @@ function normalizeItemCount (value, fallback) {
 
 function sameSet (left, right) {
   return left.size === right.size && [...left].every(value => right.has(value))
+}
+
+function sameProfileFingerprint (left, right) {
+  return left?.count === right?.count && left?.hash === right?.hash
 }
 
 function digestItemFor ({ bug, role, recipientID, profileIDs, businessDate, snapshotAt, pendingAssignmentAt }) {

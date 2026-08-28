@@ -689,7 +689,8 @@ async function main () {
     ['snapshot role binding race', assertSnapshotRoleBindingRace],
     ['send-time authorization race', assertSendTimeAuthorizationRace],
     ['unique conflict transaction isolation', assertUniqueConflictIsolation],
-    ['bounded digest pages and restart', assertBoundedDigestPagesAndRestart]
+    ['bounded digest pages and restart', assertBoundedDigestPagesAndRestart],
+    ['bounded profile ownership state', assertProfileStateBoundedAndComplete]
   ]) {
     try {
       await fixture()
@@ -1014,6 +1015,92 @@ async function assertBoundedDigestPagesAndRestart () {
   assert.equal(completeRows.filter(row => boundedRecipientIDs.has(row.recipient_ID)).length, users.length,
     'all recipients process without a silent aggregate cap')
   assert.ok(state.rootRecipientSizes.filter(Boolean).every(size => size <= 100), 'each committed root handles at most one recipient page')
+}
+
+async function assertProfileStateBoundedAndComplete () {
+  const db = await isolatedDigestDatabase()
+  const developerUsers = Array.from({ length: 3 }, (_, index) => user(
+    `f1000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    `Profile scale developer ${index + 1}`,
+    `profile-scale-${index + 1}@example.test`,
+    'DEVELOPER'
+  ))
+  const activeProfiles = []
+  const allProfiles = []
+  for (let developerIndex = 0; developerIndex < developerUsers.length; developerIndex += 1) {
+    for (let historicalIndex = 0; historicalIndex < 700; historicalIndex += 1) {
+      allProfiles.push({
+        ID: `f2000000-0000-4000-8000-${String(developerIndex * 700 + historicalIndex + 1).padStart(12, '0')}`,
+        user_ID: developerUsers[developerIndex].ID,
+        availabilityStatus_code: 'AVAILABLE',
+        workloadLimit: 5,
+        active: false
+      })
+    }
+    for (let activeIndex = 0; activeIndex < 2; activeIndex += 1) {
+      const profile = {
+        ID: `f3000000-0000-4000-8000-${String(developerIndex * 2 + activeIndex + 1).padStart(12, '0')}`,
+        user_ID: developerUsers[developerIndex].ID,
+        availabilityStatus_code: 'AVAILABLE',
+        workloadLimit: 5,
+        active: true
+      }
+      activeProfiles.push(profile)
+      allProfiles.push(profile)
+    }
+  }
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.tester, 'Profile scale reporter', 'profile-scale-reporter@example.test', 'TESTER'),
+    ...developerUsers
+  ]))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries(allProfiles))
+  const profileBugs = activeProfiles.map((profile, index) => bug(
+    `f4000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    `BUG-PROFILE-SCALE-${index + 1}`,
+    'HIGH',
+    'MAJOR',
+    '2026-09-09T00:00:00.000Z',
+    '2026-09-09',
+    null,
+    profile.ID,
+    'ASSIGNED'
+  ))
+  await db.run(INSERT.into('idts.cap.Bugs').entries(profileBugs))
+
+  const profileQueries = []
+  const tx = {
+    run: async query => {
+      if (query.SELECT?.from?.ref?.[0] === 'idts.cap.DeveloperProfiles') {
+        const rows = await db.run(query)
+        profileQueries.push({ query, rows })
+        return rows
+      }
+      return db.run(query)
+    }
+  }
+  await scheduleNotificationDigests({
+    tx,
+    now: new Date('2026-09-10T01:00:00.000Z')
+  })
+
+  const deliveries = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').where({ businessDate: '2026-09-10' }))
+  for (const developer of developerUsers) {
+    const owned = profileBugs.filter(bugRow => activeProfiles.some(profile => profile.ID === bugRow.assignee_ID && profile.user_ID === developer.ID))
+    const delivery = deliveries.find(row => row.recipient_ID === developer.ID)
+    assert.equal(delivery?.itemCount, owned.length, `all active profile ownership remains complete for ${developer.ID}`)
+    for (const ownedBug of owned) assert.match(delivery?.textBody || '', new RegExp(ownedBug.bugNumber), `active profile assignment remains visible for ${ownedBug.bugNumber}`)
+  }
+
+  assert.ok(profileQueries.length > 0, 'profile state is read through bounded CAP queries')
+  assert.ok(profileQueries.every(({ query }) => query.SELECT.limit?.rows?.val <= 500), 'profile queries stay within one digest page')
+  assert.ok(profileQueries.every(({ query }) => JSON.stringify(query.SELECT.where).includes('active')), 'profile eligibility queries exclude inactive history')
+  const historicalProfileIDs = new Set(allProfiles.filter(profile => !profile.active).map(profile => profile.ID))
+  assert.ok(profileQueries.every(({ rows }) => rows.every(row => !historicalProfileIDs.has(row.ID))),
+    'high-cardinality historical profiles are not retained or read into the digest state')
+  assert.ok(profileQueries.every(({ rows }) => rows.length <= activeProfiles.length + developerUsers.length * 4),
+    `active profile reads stay fixed-bounded for the recipient page: ${JSON.stringify(profileQueries.map(entry => entry.rows.length))}`)
+  assert.ok(profileQueries.some(({ query }) => JSON.stringify(query.SELECT.where).includes(activeProfiles.at(-1).ID)),
+    'active profile ownership after the historical rows remains discoverable')
 }
 
 function makeDigestPageService (db, state) {

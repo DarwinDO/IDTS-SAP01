@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2 MERGED — N3 MERGED — N4 FINAL FIX WAVE SOURCE COMMITTED; LOCAL SOURCE BOUNDARY`
+`N1/N2 MERGED — N3 MERGED — N4 ADDITIONAL F4 REMEDIATION SOURCE COMMITTED; SCOPED RE-REVIEW PENDING`
 
 ### Authority
 
@@ -49,7 +49,7 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 ĐÃ COMMIT FINAL FIX WAVE; BOUNDARY SOURCE LOCAL`
+`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 ĐÃ COMMIT REMEDIATION F4 BỔ SUNG; CHỜ SCOPED RE-REVIEW`
 
 ### Thẩm quyền
 
@@ -99,3 +99,9 @@ The next scoped re-review found that an unlocked DeveloperProfile eligibility sn
 ### Fix round 4 — remediation race eligibility profile (Tiếng Việt)
 
 Scoped re-review tiếp theo phát hiện snapshot eligibility DeveloperProfile lock-free có thể race với deactivation profile. Fix round 4 thêm regression stale-profile SQLite thật: sau khi profile persisted được trả về từ page preload, fixture deactivate profile trước notification write và assert không persist event cho technical assignee. Scheduler preload cặp profile-user, lock User recipient rồi lock DeveloperProfile candidate một lần mỗi page trước Bug lock, giữ thứ tự `User -> DeveloperProfile -> Bug` cùng suffix assignment/deactivation `DeveloperProfile -> Bug`; sau Bug revalidation, đọc lại profile/User active một lần bounded và chỉ nhận ID đã prelock. User lock cuối theo recipient vẫn ngay trước write. SQLite không chứng minh lock/isolation HANA; cardinality `IN` tối đa HANA vẫn chưa verify và được giữ như review concern rõ ràng.
+
+## Addendum / Phụ lục — Additional narrow F4 remediation
+
+DonHV approved one additional narrow Luna/max remediation after the exhausted final-wave cap. RED real-CAP SQLite witnesses covered inactive historical DeveloperProfile retention (`scripts/qa/test-my-notifications-digest.js:1096`), a >500 active-PM late-page rollback (`scripts/qa/test-my-notifications-scheduled.js:545`/`:551`) and a late HistoryLog changing PM page-two SLA eligibility (`scripts/qa/test-my-notifications-scheduled.js:645`). GREEN now uses fixed count/hash profile fingerprints plus current-Bug-page active profile mapping, captures immutable Pending Assignment anchors once per candidate page, and commits active-PM source/inbox/prompt writes in one detached CAP root per 500-PM page after User-first/current-Bug revalidation. A closed or non-PM-role Bug between PM units is skipped without a stale event; keyset advance waits for commit, so rerun reuses source keys. Focused digest/scheduled QA is PASS. This remains source-only: no schema/dependency/lockfile/provider/live schedule/data/user/role/deploy/N5/push/PR/Ready/merge/cleanup; one fresh scoped F4 review is still required.
+
+DonHV duyệt đúng một remediation hẹp thêm bằng Luna/max sau khi hết cap final wave. RED real-CAP SQLite cover retained profile lịch sử inactive (`scripts/qa/test-my-notifications-digest.js:1096`), rollback page muộn >500 PM active (`scripts/qa/test-my-notifications-scheduled.js:545`/`:551`) và HistoryLog muộn làm đổi eligibility SLA PM page 2 (`scripts/qa/test-my-notifications-scheduled.js:645`). GREEN dùng fingerprint count/hash cố định cộng mapping profile active của Bug page hiện tại, capture một lần anchor Pending Assignment bất biến theo candidate page, và commit source/inbox/prompt PM active trong một CAP root detached cho mỗi page 500 PM sau khi lock User và revalidate Bug hiện tại. Bug đóng hoặc đổi role không còn PM giữa các PM unit bị skip, không event stale; chỉ advance keyset sau commit nên rerun reuse source key. Focused digest/scheduled QA PASS. Đây vẫn là source-only: không schema/dependency/lockfile/provider/live schedule/data/user/role/deploy/N5/push/PR/Ready/merge/cleanup; vẫn cần một scoped F4 review mới.

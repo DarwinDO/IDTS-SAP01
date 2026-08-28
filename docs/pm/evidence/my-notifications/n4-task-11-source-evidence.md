@@ -251,3 +251,48 @@ exit_code=0
 ```
 
 Final wave chỉ đổi `srv/notification/digest.js`, `srv/notification/scheduled.js`, hai QA script focused, hai knowledge mirror song ngữ tương ứng, evidence này, roadmap, status thành viên đã preserve và Task 11 report. `officecli --version` trả `1.0.145`; OfficeCLI không edit Markdown nên Markdown dùng `apply_patch` repo-native và verify `git diff --check`. Không mutation schema, dependency, lockfile, MTA/XSUAA, live provider/schedule, data, user/role, deploy, N5, push, PR, Ready hoặc merge.
+
+## Additional narrow F4 remediation / Remediation F4 hẹp bổ sung
+
+DonHV explicitly authorized one additional narrow Luna/max remediation after the exhausted final-wave cap. The scope is only the two residual parts of F4: remove unbounded aggregate DeveloperProfile retention while preserving complete active ownership/persona validation, and bound active-PM User/Bug write locks plus rollback/restart per PM page. No schema, dependency, lockfile, config, provider, live schedule, data, user/role, deployment, N5, push, PR, Ready, merge or cleanup action is included.
+
+TDD RED was witnessed before the production edits with real installed-CAP SQLite behavior:
+
+- `npm run qa:my-notifications:digest` failed the high-cardinality profile fixture because the old profile query returned inactive historical rows (`scripts/qa/test-my-notifications-digest.js:1096`); the fixture had 700 inactive historical profiles per Developer and active profiles referenced by Bugs.
+- `npm run qa:my-notifications:scheduled` failed the >500 active-PM late-page fixture because page-one PM writes disappeared with the later failing page (`scripts/qa/test-my-notifications-scheduled.js:545`, then `:551`, `0 !== 1`).
+
+GREEN is the minimal bounded correction:
+
+- `scheduleNotificationDigests()` keeps only fixed per-Developer count/hash profile fingerprints across bounded keyset reads and resolves active profile IDs only for the current 500-row Bug page. The current Bug-page mapping is discarded after each callback; before/after fingerprints preserve active Developer profile validation without relying on a profile-per-user schema bound. All active ownership remains complete beyond historical/inactive rows and beyond 5,000 Bugs.
+- `discoverScheduledNotifications()` captures each candidate page's immutable Pending Assignment anchors before opening PM work, then commits the candidate read root. Each active-PM page is processed in a fresh CAP root: at most 500 PM IDs are locked first, current pending Bugs are then locked/re-read, the captured anchors and role/status eligibility are reused/evaluated, and source/inbox/prompt writes commit as one PM-page unit. The keyset advances only after commit; a late page rolls back alone and a rerun reuses earlier source keys. A Bug closed or moved to a non-PM `nextProcessorRole` between PM units emits no stale PM event. Overdue processing remains a separate bounded `User -> DeveloperProfile -> Bug` root.
+
+Fresh focused GREEN from the exact worktree:
+
+```text
+npm run qa:my-notifications:digest
+IDTS My Notifications digest contract: PASS
+exit_code=0
+
+npm run qa:my-notifications:scheduled
+IDTS My Notifications scheduled discovery contract: PASS
+IDTS My Notifications digest contract: PASS
+exit_code=0
+```
+
+The new fixtures assert actual persisted outcomes, bounded query/page shapes, independent CAP commit/rollback roots, source-key restart completeness, per-root User/Bug lock bounds, closure/role revalidation, and all active profile ownership. HANA/PostgreSQL live lock/isolation/cardinality and live scheduler/provider acceptance remain unverified. The pre-existing CAP attachment vocabulary warning and unrelated `qa:idts122:closed` authorization/test-harness concern remain unchanged. The Draft PR boundary remains NO-GO until one fresh scoped F4 review returns zero Critical/Major/Important.
+
+DonHV đã duyệt đúng một remediation hẹp thêm bằng Luna/max sau khi hết cap final wave. Scope chỉ gồm hai phần F4 còn lại: bỏ retained DeveloperProfile aggregate unbounded nhưng giữ complete active ownership/persona validation, và giới hạn User/Bug lock cùng rollback/restart của active-PM theo từng page. Không gồm schema, dependency, lockfile, config, provider, live schedule, data, user/role, deploy, N5, push, PR, Ready, merge hoặc cleanup.
+
+RED TDD được witness trước production edit bằng behavior real-CAP SQLite:
+
+- `npm run qa:my-notifications:digest` fail fixture profile cardinality cao vì query cũ trả cả profile lịch sử inactive (`scripts/qa/test-my-notifications-digest.js:1096`); fixture có 700 profile lịch sử inactive cho mỗi Developer và profile active được Bug tham chiếu.
+- `npm run qa:my-notifications:scheduled` fail fixture >500 PM active khi page muộn fail vì write PM page đầu biến mất cùng page sau (`scripts/qa/test-my-notifications-scheduled.js:545`, rồi `:551`, `0 !== 1`).
+
+GREEN bounded tối thiểu:
+
+- `scheduleNotificationDigests()` chỉ giữ fingerprint count/hash cố định theo từng Developer qua keyset read bounded và resolve profile ID active chỉ trong Bug page 500 hiện tại. Mapping Bug page được bỏ sau callback; fingerprint trước/sau giữ validation profile active mà không dựa vào schema unique profile/user. Mọi ownership active vẫn đầy đủ qua profile lịch sử/inactive bất kỳ và hơn 5.000 Bug.
+- `discoverScheduledNotifications()` capture một lần anchor Pending Assignment bất biến của mỗi candidate page trước khi mở PM work rồi commit root candidate chỉ đọc. Mỗi page PM active chạy trong CAP root mới: lock tối đa 500 PM ID trước, lock/đọc lại Bug pending hiện tại, reuse anchor đã capture và kiểm role/status rồi commit source/inbox/prompt của page như một unit. Chỉ advance keyset sau commit; page lỗi muộn rollback riêng và rerun reuse source key cũ. Bug đóng hoặc đổi `nextProcessorRole` không còn là PM giữa các PM unit sẽ không sinh event PM stale. Overdue vẫn ở root bounded riêng theo `User -> DeveloperProfile -> Bug`.
+
+Các fixture mới assert outcome persisted thật, query/page shape bounded, CAP root commit/rollback độc lập, restart đầy đủ qua source key, giới hạn User/Bug lock theo root, revalidation close/role, immutable anchor reuse across PM roots và complete active profile ownership. Lock/isolation/cardinality HANA/PostgreSQL live và acceptance scheduler/provider live vẫn chưa verify. Warning vocabulary attachment CAP và concern `qa:idts122:closed` 403 authorization/test-harness có trước giữ nguyên. Boundary Draft PR vẫn NO-GO tới khi một scoped F4 review mới trả zero Critical/Major/Important.
+
+The additional anchor witness was intentionally RED before this final correction: a late HistoryLog inserted before PM page 2 made the prior per-page anchor read omit page-two SLA. After capturing Pending Assignment anchors in the bounded candidate root, `node scripts/qa/test-my-notifications-scheduled.js` is GREEN and both PM pages use the same immutable SLA clock. / Witness anchor bổ sung đã RED có chủ đích trước correction cuối: HistoryLog muộn trước PM page 2 làm cách đọc anchor theo từng page cũ bỏ SLA page 2. Sau khi capture anchor Pending Assignment trong root candidate bounded, `node scripts/qa/test-my-notifications-scheduled.js` GREEN và mọi PM page dùng cùng clock SLA bất biến.

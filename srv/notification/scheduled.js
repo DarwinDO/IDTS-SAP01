@@ -51,92 +51,31 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
     const page = await runPage(async pageTx => {
       const candidates = await readCandidatePage(pageTx, businessDate, lastID)
       if (!candidates.length) return { candidates, pageResult: null }
-
-      const pageResult = {
-        candidates: candidates.length,
-        pendingAssignment: 0,
-        sla: 0,
-        overdue: 0,
-        created: 0,
-        skipped: 0
-      }
-
-      // Lock recipient trước profile, rồi profile trước Bug để giữ thứ tự User -> Profile -> Bug.
-      const candidateLocks = await prepareCandidateLocks(pageTx, candidates)
-      const currentBugs = []
-      for (const candidate of candidates) {
-        // Candidate rows are only a bounded snapshot. Lock and re-read the Bug before deriving any entry.
-        const bug = await readCurrentBug(pageTx, candidate.ID)
-        if (!bug) {
-          pageResult.skipped += 1
-          continue
-        }
-        if (!isScheduledCandidate(bug, businessDate)) {
-          pageResult.skipped += 1
-          continue
-        }
-        currentBugs.push(bug)
-      }
-
-      const anchors = await readScheduleAnchors(pageTx, currentBugs, businessDate)
-      const overdueRecipients = await readOverdueRecipients(pageTx, currentBugs, candidateLocks)
-      const pendingBugs = currentBugs.filter(bug => bug.status_code === STATUS.PENDING_ASSIGNMENT)
-      if (pendingBugs.length) {
-        await forEachActivePMPage(pageTx, async pms => {
-          for (const bug of pendingBugs) {
-            const anchor = anchors.get(bug.ID) || {}
-            const urgent = isUrgent(bug)
-            const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
-            for (const recipient of pms) {
-              await writeScheduledEvent(pageTx, bug, {
-                eventType: 'PENDING_ASSIGNMENT',
-                message: `${bug.bugNumber || 'Bug'} is waiting for assignment.`,
-                sourceKey: boundedSourceKey(`PENDING_ASSIGNMENT:${bug.ID}:${recipient.ID}`),
-                recipientID: recipient.ID,
-                emailRequired: urgent,
-                requirePM: true
-              }, emailConfig, pageResult, 'pendingAssignment')
-              if (isSlaDue({ ...bug, pendingAssignmentAt: anchor.pendingAssignmentAt }, instant, thresholdHours)) {
-                await writeScheduledEvent(pageTx, bug, {
-                  eventType: 'PENDING_ASSIGNMENT',
-                  message: `${bug.bugNumber || 'Bug'} has been pending assignment for ${thresholdHours} hours.`,
-                  sourceKey: boundedSourceKey(`SLA:${bug.ID}:${thresholdHours}h:${recipient.ID}`),
-                  recipientID: recipient.ID,
-                  emailRequired: urgent,
-                  requirePM: true
-                }, emailConfig, pageResult, 'sla')
-              }
-            }
-          }
-        })
-      }
-
-      for (const bug of currentBugs) {
-        const anchor = anchors.get(bug.ID) || {}
-        if (!isOverdue(bug, businessDate)) continue
-        const dueDate = String(bug.dueDate).slice(0, 10)
-        for (const recipientID of overdueRecipients.get(bug.ID) || []) {
-          await writeScheduledEvent(pageTx, bug, {
-            eventType: 'OVERDUE',
-            message: `${bug.bugNumber || 'Bug'} is overdue.`,
-            sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchor.overdueCycleID}:${recipientID}`),
-            recipientID,
-            emailRequired: false,
-            requirePM: false
-          }, emailConfig, pageResult, 'overdue')
-        }
-      }
-
+      // Capture immutable Pending Assignment anchors before opening any PM root; the bounded PM pages
+      // must share one SLA clock even if a later page observes another HistoryLog row.
+      const pendingAssignmentAnchors = await readPendingAssignmentAnchors(
+        pageTx,
+        candidates.filter(candidate => candidate.status_code === STATUS.PENDING_ASSIGNMENT)
+      )
       return {
         candidates,
-        pageResult,
+        pendingAssignmentAnchors,
         nextID: candidates.at(-1)?.ID
       }
     })
 
-    if (!page.pageResult) break
+    if (!page.candidates.length) break
+    const pageResult = await processScheduledCandidatePage({
+      tx,
+      runPage,
+      candidates: page.candidates,
+      pendingAssignmentAnchors: page.pendingAssignmentAnchors,
+      businessDate,
+      instant,
+      emailConfig
+    })
     for (const key of ['candidates', 'pendingAssignment', 'sla', 'overdue', 'created', 'skipped']) {
-      result[key] += page.pageResult[key]
+      result[key] += pageResult[key]
     }
     if (page.candidates.length < CANDIDATE_PAGE_SIZE) break
     const nextID = page.nextID
@@ -147,22 +86,132 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
   return result
 }
 
-async function forEachActivePMPage (tx, onPage) {
+async function processScheduledCandidatePage ({ tx, runPage, candidates, pendingAssignmentAnchors, businessDate, instant, emailConfig }) {
+  const pageResult = {
+    candidates: candidates.length,
+    pendingAssignment: 0,
+    sla: 0,
+    overdue: 0,
+    created: 0,
+    skipped: 0
+  }
+  const fixedPendingAssignmentAnchors = pendingAssignmentAnchors || new Map()
+  // Candidate rows marked pending are re-read in every PM page root so a status/role change
+  // after discovery cannot emit the old pending-assignment event.
+  const pendingCandidates = candidates.filter(candidate => candidate.status_code === STATUS.PENDING_ASSIGNMENT)
+  if (pendingCandidates.length) {
+    // Mỗi PM page root lock User trước rồi mới re-read/lock Bug; không giữ candidate Bug lock qua PM page.
+    await forEachActivePMPage(tx, async (pageTx, pms) => {
+      const pageResult = { pendingAssignment: 0, sla: 0, overdue: 0, created: 0, skipped: 0 }
+      const recipients = await lockActivePMPage(pageTx, pms)
+      const currentBugs = []
+      for (const candidate of pendingCandidates) {
+        const bug = await readCurrentBug(pageTx, candidate.ID)
+        if (isPendingAssignmentCandidate(bug)) currentBugs.push(bug)
+      }
+      for (const bug of currentBugs) {
+        const anchor = fixedPendingAssignmentAnchors.get(bug.ID) || { pendingAssignmentAt: bug.createdAt }
+        const urgent = isUrgent(bug)
+        const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
+        for (const recipient of recipients) {
+          await writeScheduledEvent(pageTx, bug, {
+            eventType: 'PENDING_ASSIGNMENT',
+            message: `${bug.bugNumber || 'Bug'} is waiting for assignment.`,
+            sourceKey: boundedSourceKey(`PENDING_ASSIGNMENT:${bug.ID}:${recipient.ID}`),
+            recipientID: recipient.ID,
+            emailRequired: urgent,
+            requirePM: true
+          }, emailConfig, pageResult, 'pendingAssignment')
+          if (isSlaDue({ ...bug, pendingAssignmentAt: anchor.pendingAssignmentAt }, instant, thresholdHours)) {
+            await writeScheduledEvent(pageTx, bug, {
+              eventType: 'PENDING_ASSIGNMENT',
+              message: `${bug.bugNumber || 'Bug'} has been pending assignment for ${thresholdHours} hours.`,
+              sourceKey: boundedSourceKey(`SLA:${bug.ID}:${thresholdHours}h:${recipient.ID}`),
+              recipientID: recipient.ID,
+              emailRequired: urgent,
+              requirePM: true
+            }, emailConfig, pageResult, 'sla')
+          }
+        }
+      }
+      return pageResult
+    }, runPage, committedPageResult => mergeScheduleResult(pageResult, committedPageResult))
+  }
+
+  const overdueResult = await runPage(async pageTx => {
+    // Lock recipient before profile and profile before Bug; PM page roots have already released their Bug locks.
+    const candidateLocks = await prepareCandidateLocks(pageTx, candidates)
+    const currentBugs = []
+    const result = { pendingAssignment: 0, sla: 0, overdue: 0, created: 0, skipped: 0 }
+    for (const candidate of candidates) {
+      const bug = await readCurrentBug(pageTx, candidate.ID)
+      if (!bug || !isScheduledCandidate(bug, businessDate)) {
+        result.skipped += 1
+        continue
+      }
+      currentBugs.push(bug)
+    }
+    const anchors = await readScheduleAnchors(pageTx, currentBugs, businessDate)
+    const overdueRecipients = await readOverdueRecipients(pageTx, currentBugs, candidateLocks)
+    for (const bug of currentBugs) {
+      const anchor = anchors.get(bug.ID) || {}
+      if (!isOverdue(bug, businessDate)) continue
+      const dueDate = String(bug.dueDate).slice(0, 10)
+      for (const recipientID of overdueRecipients.get(bug.ID) || []) {
+        await writeScheduledEvent(pageTx, bug, {
+          eventType: 'OVERDUE',
+          message: `${bug.bugNumber || 'Bug'} is overdue.`,
+          sourceKey: boundedSourceKey(`OVERDUE:${bug.ID}:${dueDate}:${anchor.overdueCycleID}:${recipientID}`),
+          recipientID,
+          emailRequired: false,
+          requirePM: false
+        }, emailConfig, result, 'overdue')
+      }
+    }
+    return result
+  })
+  mergeScheduleResult(pageResult, overdueResult)
+  return pageResult
+}
+
+function mergeScheduleResult (target, source) {
+  for (const key of ['pendingAssignment', 'sla', 'overdue', 'created', 'skipped']) target[key] += source[key] || 0
+}
+
+async function forEachActivePMPage (tx, onPage, runPage = createPageTransactionRunner(tx), onCommittedPage) {
+  // Chỉ advance keyset sau callback commit; PM page lỗi sẽ rollback riêng và rerun từ source key.
   let lastID
   for (;;) {
-    const query = SELECT.from(USERS)
-      .columns('ID')
-      .where({ active: true, role_code: 'PM' })
-      .orderBy('ID asc')
-      .limit(CANDIDATE_PAGE_SIZE)
-    if (lastID) query.and`ID > ${lastID}`
-    const pms = await tx.run(query)
-    if (!pms.length) break
-    await onPage(pms)
-    const nextID = pms.at(-1)?.ID
-    if (pms.length < CANDIDATE_PAGE_SIZE || !nextID || nextID === lastID) break
+    const page = await runPage(async pageTx => {
+      const query = SELECT.from(USERS)
+        .columns('ID')
+        .where({ active: true, role_code: 'PM' })
+        .orderBy('ID asc')
+        .limit(CANDIDATE_PAGE_SIZE)
+      if (lastID) query.and`ID > ${lastID}`
+      const pms = await pageTx.run(query)
+      if (!pms.length) return { pms, pageResult: null }
+      return { pms, pageResult: await onPage(pageTx, pms) }
+    })
+    if (!page.pms.length) break
+    if (page.pageResult) await onCommittedPage?.(page.pageResult)
+    const nextID = page.pms.at(-1)?.ID
+    if (page.pms.length < CANDIDATE_PAGE_SIZE || !nextID || nextID === lastID) break
     lastID = nextID
   }
+}
+
+async function lockActivePMPage (tx, pms) {
+  const pmIDs = pms.map(row => row.ID).filter(Boolean)
+  if (!pmIDs.length) return []
+  return tx.run(
+    SELECT.from(USERS)
+      .columns('ID', 'active', 'role_code')
+      .where({ ID: { in: pmIDs }, active: true, role_code: 'PM' })
+      .orderBy('ID asc')
+      .limit(CANDIDATE_PAGE_SIZE)
+      .forUpdate()
+  )
 }
 
 function createPageTransactionRunner (tx) {
@@ -219,7 +268,12 @@ async function prepareCandidateLocks (tx, candidates) {
 }
 
 function isScheduledCandidate (bug, businessDate) {
-  return bug.status_code === STATUS.PENDING_ASSIGNMENT || isOverdue(bug, businessDate)
+  return isPendingAssignmentCandidate(bug) || isOverdue(bug, businessDate)
+}
+
+function isPendingAssignmentCandidate (bug) {
+  return bug?.status_code === STATUS.PENDING_ASSIGNMENT &&
+    (!bug.nextProcessorRole_code || bug.nextProcessorRole_code === 'PM')
 }
 
 async function readCandidatePage (tx, businessDate, lastID) {
@@ -227,7 +281,7 @@ async function readCandidatePage (tx, businessDate, lastID) {
   const query = SELECT.from(BUGS)
     .columns(
       'ID', 'bugNumber', 'status_code', 'priority_code', 'severity_code',
-      'createdAt', 'dueDate', 'nextProcessorUser_ID', 'assignee_ID'
+      'createdAt', 'dueDate', 'nextProcessorUser_ID', 'nextProcessorRole_code', 'assignee_ID'
     )
     .where`(status_code = ${STATUS.PENDING_ASSIGNMENT} or (dueDate < ${businessDate} and status_code != ${STATUS.CLOSED}))`
     .orderBy('ID asc')
@@ -241,7 +295,7 @@ function readCurrentBug (tx, bugID) {
     SELECT.one.from(BUGS)
       .columns(
         'ID', 'bugNumber', 'status_code', 'priority_code', 'severity_code',
-        'createdAt', 'dueDate', 'nextProcessorUser_ID', 'assignee_ID'
+        'createdAt', 'dueDate', 'nextProcessorUser_ID', 'nextProcessorRole_code', 'assignee_ID'
       )
       .where({ ID: bugID })
       .forUpdate()
@@ -250,22 +304,14 @@ function readCurrentBug (tx, bugID) {
 
 async function readScheduleAnchors (tx, bugs, businessDate) {
   // Lock-time eligibility is established before these page-bounded aggregate reads; history is never materialized per Bug.
-  const anchors = new Map(bugs.map(bug => [bug.ID, {
-    pendingAssignmentAt: bug.createdAt,
+  const anchors = await readPendingAssignmentAnchors(tx, bugs)
+  for (const bug of bugs) {
+    const anchor = anchors.get(bug.ID)
+    if (!anchor) continue
     // History event IDs are immutable cycle identities; the created-at fallback covers legacy Bugs without due-date audit.
-    overdueCycleID: `CREATED:${bug.ID}:${bug.createdAt || ''}`
-  }]))
-  if (!bugs.length) return anchors
-
-  const pendingBugs = bugs.filter(bug => bug.status_code === STATUS.PENDING_ASSIGNMENT)
-  const pendingRows = await readLatestHistoryTimes(tx, pendingBugs.map(bug => bug.ID), {
-    fieldName: 'status',
-    newValue: STATUS.PENDING_ASSIGNMENT
-  })
-  for (const row of pendingRows) {
-    const anchor = anchors.get(row.bug_ID)
-    if (anchor && row.latestAt) anchor.pendingAssignmentAt = row.latestAt
+    anchor.overdueCycleID = `CREATED:${bug.ID}:${bug.createdAt || ''}`
   }
+  if (!bugs.length) return anchors
 
   const overdueBugs = bugs.filter(bug => isOverdue(bug, businessDate) && bug.dueDate)
   const dueRows = await readLatestHistoryTimes(tx, overdueBugs.map(bug => bug.ID), { fieldName: 'dueDate' })
@@ -279,6 +325,20 @@ async function readScheduleAnchors (tx, bugs, businessDate) {
     if (anchor && dueDate && String(row.newValue).slice(0, 10) === dueDate && historyTimestampKey(row.createdAt) === latestDueAtByBug.get(row.bug_ID) && row.cycleID) {
       anchor.overdueCycleID = row.cycleID
     }
+  }
+  return anchors
+}
+
+async function readPendingAssignmentAnchors (tx, bugs) {
+  const anchors = new Map(bugs.map(bug => [bug.ID, { pendingAssignmentAt: bug.createdAt }]))
+  const pendingBugs = bugs.filter(bug => bug.status_code === STATUS.PENDING_ASSIGNMENT)
+  const pendingRows = await readLatestHistoryTimes(tx, pendingBugs.map(bug => bug.ID), {
+    fieldName: 'status',
+    newValue: STATUS.PENDING_ASSIGNMENT
+  })
+  for (const row of pendingRows) {
+    const anchor = anchors.get(row.bug_ID)
+    if (anchor && row.latestAt) anchor.pendingAssignmentAt = row.latestAt
   }
   return anchors
 }

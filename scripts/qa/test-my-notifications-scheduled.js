@@ -242,8 +242,7 @@ async function main () {
     },
     tx: (...args) => {
       const callback = typeof args[0] === 'function' ? args[0] : args[1]
-      const pageNumber = pageStarts.length + 1
-      pageStarts.push({ pageNumber, committedBefore: committedPages.length })
+      const rootStats = { candidatePageNumber: null }
       return db.tx(async actualTx => {
         // Force a real CAP BEGIN so the callback's completion is followed by CAP COMMIT.
         await actualTx.run(SELECT.one.from('idts.cap.Users').columns('ID').where({ ID: '__page_boundary_probe__' }))
@@ -251,14 +250,19 @@ async function main () {
           run: async query => {
             const from = query.SELECT?.from?.ref?.[0]
             if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
-              return candidatePage(pageNumber)
+              if (rootStats.candidatePageNumber === null) {
+                rootStats.candidatePageNumber = ++fallbackCandidatePage
+                pageStarts.push({ pageNumber: rootStats.candidatePageNumber, committedBefore: committedPages.length })
+              }
+              return candidatePage(rootStats.candidatePageNumber)
             }
             if (from === 'idts.cap.Bugs' && query.SELECT.one) return null
+            if (from === 'idts.cap.Users' && !query.SELECT.one && JSON.stringify(query.SELECT.where).includes('role_code')) return []
             return actualTx.run(query)
           }
         })
       }).then(result => {
-        committedPages.push(pageNumber)
+        if (rootStats.candidatePageNumber !== null) committedPages.push(rootStats.candidatePageNumber)
         return result
       })
     }
@@ -330,6 +334,7 @@ async function main () {
       if (from === 'idts.cap.Users' && !query.SELECT.one) {
         if (JSON.stringify(query.SELECT.where).includes('role_code')) {
           bulkPMQueries.push(query)
+          bulkQueryOrder.push('user-lock')
           return [{ ID: 'bulk-pm', active: true, role_code: 'PM' }]
         }
         bulkUserQueries.push(query)
@@ -352,7 +357,7 @@ async function main () {
   }
   await discoverScheduledNotifications({ tx: bulkTx, now: BASE_NOW, emailConfig: emailConfig() })
   assert.equal(bulkCandidateQueries.length, 2, 'full-page discovery reads the bounded second page')
-  assert.equal(bulkCurrentQueries.length, bulkCandidates.length, 'full-page discovery keeps lock-time Bug revalidation')
+  assert.equal(bulkCurrentQueries.length, bulkCandidates.length + 1, 'full-page discovery keeps lock-time Bug revalidation for the PM and overdue units')
   assert.ok(bulkHistoryQueries.length >= 1 && bulkHistoryQueries.length <= 3,
     'history anchors are resolved in a bounded number of page bulk queries')
   assert.ok(bulkHistoryQueries.every(query => query.SELECT.limit?.rows?.val <= 500),
@@ -373,14 +378,17 @@ async function main () {
     'user eligibility recheck stays lock-free after Bug revalidation')
   assert.ok(bulkProfileQueries.slice(-1).every(query => !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')),
     'profile eligibility recheck stays lock-free after Bug revalidation')
-  assert.ok(bulkQueryOrder.indexOf('user-lock') >= 0 &&
-    bulkQueryOrder.indexOf('user-lock') < bulkQueryOrder.indexOf('profile-lock') &&
-    bulkQueryOrder.indexOf('profile-lock') < bulkQueryOrder.indexOf('bug-lock'),
-  'scheduler acquires User -> Profile -> Bug locks')
+  const profileLockIndex = bulkQueryOrder.indexOf('profile-lock')
+  const bugLockAfterProfile = bulkQueryOrder.indexOf('bug-lock', profileLockIndex + 1)
+  const userLockBeforeProfile = bulkQueryOrder.lastIndexOf('user-lock', profileLockIndex - 1)
+  assert.ok(userLockBeforeProfile >= 0 && userLockBeforeProfile < profileLockIndex && profileLockIndex < bugLockAfterProfile,
+    'overdue scheduler unit acquires User -> Profile -> Bug locks after the PM unit')
   assert.ok(bulkFinalUserLocks.length > 0,
     'each written recipient keeps a final locked User revalidation')
   assert.ok(bulkPMQueries.length > 0 && bulkPMQueries.every(query => query.SELECT.limit?.rows?.val <= 500),
     'active PM discovery reads bounded keyset pages')
+
+  await assertActivePMPageBoundedAndRestart()
 
   // Re-read and lock the Bug immediately before writing; stale close/assignment/due-date changes must not emit.
   await assertStaleCandidateSkipped(db, IDS.staleClosed,
@@ -514,6 +522,204 @@ async function assertStaleProfileSkipped (db, bugID, profileID, recipientID, mes
   assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID, recipient_ID: recipientID }), 0, message)
 }
 
+async function assertActivePMPageBoundedAndRestart () {
+  const pageUsers = Array.from({ length: 1001 }, (_, index) => user(
+    `f1000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    `PM page ${index + 1}`,
+    `pm-page-${index + 1}@example.test`,
+    'PM',
+    true
+  ))
+  const bugID = 'f2000000-0000-4000-8000-000000000001'
+
+  const failureFixture = await isolatedSchedulerDatabase()
+  await failureFixture.run(INSERT.into('idts.cap.Users').entries([
+    user('f3000000-0000-4000-8000-000000000001', 'PM page reporter', 'pm-page-reporter@example.test', 'TESTER', true),
+    ...pageUsers
+  ]))
+  await failureFixture.run(INSERT.into('idts.cap.Bugs').entries(
+    bug(bugID, 'BUG-SCHEDULED-PM-PAGES', 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null)
+  ))
+  const failureState = createActivePMPageState()
+  failureState.failAfterPMWritePage = 2
+  const failureService = makeActivePMPageService(failureFixture, failureState)
+  await assert.rejects(
+    () => discoverScheduledNotifications({ tx: failureService, now: BASE_NOW, emailConfig: emailConfig() }),
+    /late PM page failure/,
+    'a late active-PM page failure is observable'
+  )
+  assert.equal(await count(failureFixture, 'idts.cap.Notifications', { sourceKey: `PENDING_ASSIGNMENT:${bugID}:${pageUsers[0].ID}` }), 1,
+    'the first PM page commits before a later PM page fails')
+  assert.equal(await count(failureFixture, 'idts.cap.Notifications', { sourceKey: `PENDING_ASSIGNMENT:${bugID}:${pageUsers[500].ID}` }), 0,
+    'the failed PM page rolls back its source-keyed writes')
+  assert.ok(failureState.pmPageSizes.length >= 2 && failureState.pmPageSizes.every(size => size <= 500),
+    'active PM pages never retain more than 500 recipients')
+  assert.ok(failureState.rootStats.some(root => root.committed && root.pmPages.length === 1),
+    'a successful PM page is a committed CAP root')
+
+  failureState.failAfterPMWritePage = null
+  failureState.failureRaised = false
+  failureState.pmPageQueries = 0
+  const rerun = await discoverScheduledNotifications({ tx: failureService, now: BASE_NOW, emailConfig: emailConfig() })
+  const failureRows = await failureFixture.run(SELECT.from('idts.cap.Notifications').columns('sourceKey').where({ bug_ID: bugID }))
+  const pageUserIDs = new Set(pageUsers.map(row => row.ID))
+  const pageRows = failureRows.filter(row => [...pageUserIDs].some(ID => row.sourceKey.endsWith(`:${ID}`)))
+  assert.equal(pageRows.length, pageUsers.length,
+    `rerun completes all active PM recipients through source keys: ${JSON.stringify(rerun)}`)
+  assert.equal(new Set(pageRows.map(row => row.sourceKey)).size, pageUsers.length,
+    'rerun reuses existing PM source keys without duplicates')
+  assert.ok(failureState.rootStats.filter(root => root.committed && root.pmPages.length > 0).length >= 3,
+    'each committed PM page has its own CAP transaction root')
+  assert.ok(failureState.rootStats.filter(root => root.committed && root.pmPages.length > 0).every(root => root.pmPages.length === 1),
+    'no committed root spans multiple active-PM pages')
+  assert.ok(failureState.maxUserLocks <= 500 && failureState.maxBugLocks <= 500,
+    `scheduler locks stay bounded per candidate page: users=${failureState.maxUserLocks} bugs=${failureState.maxBugLocks}`)
+  assert.ok(failureState.rootStats.filter(root => root.pmPages.length > 0).every(root => root.bugLocks.size <= 500),
+    'each PM page root holds only the bounded pending candidate page locks')
+
+  await assertPMPageBugRevalidation(pageUsers, bugID, { status_code: 'CLOSED' }, 'closed')
+  await assertPMPageBugRevalidation(pageUsers, bugID, { nextProcessorRole_code: 'DEVELOPER' }, 'role-changed')
+  await assertPMPageAnchorFrozen(pageUsers)
+}
+
+async function assertPMPageBugRevalidation (pageUsers, bugID, mutation, label) {
+  const db = await isolatedSchedulerDatabase()
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user('f3000000-0000-4000-8000-000000000001', `PM page ${label} reporter`, `pm-page-${label}-reporter@example.test`, 'TESTER', true),
+    ...pageUsers
+  ]))
+  await db.run(INSERT.into('idts.cap.Bugs').entries(
+    bug(bugID, `BUG-SCHEDULED-PM-PAGES-${label}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null)
+  ))
+  const state = createActivePMPageState()
+  state.mutatePMPage = 2
+  state.mutation = mutation
+  const service = makeActivePMPageService(db, state)
+  await discoverScheduledNotifications({ tx: service, now: BASE_NOW, emailConfig: emailConfig() })
+  const rows = await db.run(SELECT.from('idts.cap.Notifications').columns('recipient_ID').where({ bug_ID: bugID }))
+  assert.equal(rows.length, 500,
+    `a Bug ${label} between PM pages is revalidated without stale events`)
+  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: `PENDING_ASSIGNMENT:${bugID}:${pageUsers[500].ID}` }), 0,
+    `the second PM page emits no stale ${label} event`)
+}
+
+async function assertPMPageAnchorFrozen (pageUsers) {
+  const db = await isolatedSchedulerDatabase()
+  const bugID = 'f2000000-0000-4000-8000-000000000002'
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.pm, 'PM anchor reporter', 'pm-anchor-reporter@example.test', 'PM', true),
+    ...pageUsers
+  ]))
+  await db.run(INSERT.into('idts.cap.Bugs').entries(
+    bug(bugID, 'BUG-SCHEDULED-PM-ANCHOR', 'LOW', 'MINOR', '2026-08-26T00:00:00.000Z', null, null, null)
+  ))
+  const state = createActivePMPageState()
+  state.beforePMPageNumber = 2
+  state.beforePMPage = async run => {
+    await run(INSERT.into('idts.cap.HistoryEvents').entries({
+      ID: 'f5000000-0000-4000-8000-000000000001',
+      bug_ID: bugID,
+      actor_ID: IDS.pm,
+      actorRole_code: 'PM',
+      actionType_code: 'EDIT',
+      summary: 'Late duplicate pending transition for anchor fixture.',
+      createdAt: '2026-08-27T03:59:00.000Z',
+      modifiedAt: '2026-08-27T03:59:00.000Z'
+    }))
+    await run(INSERT.into('idts.cap.HistoryLogs').entries({
+      ID: 'f6000000-0000-4000-8000-000000000001',
+      bug_ID: bugID,
+      event_ID: 'f5000000-0000-4000-8000-000000000001',
+      actor_ID: IDS.pm,
+      actorRole_code: 'PM',
+      actionType_code: 'EDIT',
+      fieldName: 'status',
+      fieldLabel: 'Status',
+      oldValue: 'PENDING_ASSIGNMENT',
+      newValue: 'PENDING_ASSIGNMENT',
+      createdAt: '2026-08-27T03:59:00.000Z',
+      modifiedAt: '2026-08-27T03:59:00.000Z'
+    }))
+  }
+  const service = makeActivePMPageService(db, state)
+  await discoverScheduledNotifications({ tx: service, now: BASE_NOW, emailConfig: emailConfig() })
+  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: `SLA:${bugID}:24h:${pageUsers[500].ID}` }), 1,
+    'the immutable SLA anchor is reused across PM roots after a late HistoryLog change')
+}
+
+function createActivePMPageState () {
+  return {
+    pmPageQueries: 0,
+    pmPageSizes: [],
+    rootStats: [],
+    maxUserLocks: 0,
+    maxBugLocks: 0,
+    failAfterPMWritePage: null,
+    currentPMPage: null,
+    failureRaised: false,
+    mutatePMPage: null,
+    mutation: null,
+    beforePMPageNumber: null,
+    beforePMPage: null
+  }
+}
+
+function makeActivePMPageService (db, state) {
+  const service = {
+    run: query => runActivePMPageQuery(db, state, query, null, null),
+    tx: (...args) => {
+      const callback = typeof args[0] === 'function' ? args[0] : args[1]
+      const rootStats = { pmPages: [], userLocks: new Set(), bugLocks: new Set(), committed: false }
+      state.rootStats.push(rootStats)
+      return db.tx(async actualTx => {
+        const root = {
+          context: { tenant: 'pm-page-tenant', user: new cds.User({ id: 'pm-page-worker' }) },
+          run: query => runActivePMPageQuery(db, state, query, actualTx, rootStats)
+        }
+        Object.setPrototypeOf(root, service)
+        return callback(root)
+      }).then(result => {
+        rootStats.committed = true
+        return result
+      })
+    }
+  }
+  return service
+}
+
+async function runActivePMPageQuery (db, state, query, actualTx, rootStats) {
+  const run = actualTx ? actualTx.run.bind(actualTx) : db.run.bind(db)
+  const from = query.SELECT?.from?.ref?.[0]
+  if (from === 'idts.cap.Users' && !query.SELECT.one && query.SELECT.limit?.rows?.val === 500 &&
+      !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') && JSON.stringify(query.SELECT.where).includes('role_code')) {
+    const rows = await run(query)
+    const pageNumber = ++state.pmPageQueries
+    state.currentPMPage = pageNumber
+    state.pmPageSizes.push(rows.length)
+    if (rootStats) rootStats.pmPages.push(pageNumber)
+    if (state.mutatePMPage === pageNumber) await run(UPDATE('idts.cap.Bugs').set(state.mutation).where({ ID: 'f2000000-0000-4000-8000-000000000001' }))
+    if (state.beforePMPageNumber === pageNumber && state.beforePMPage) await state.beforePMPage(run, pageNumber)
+    return rows
+  }
+  const insertInto = query.INSERT?.into
+  const isNotificationInsert = insertInto === 'idts.cap.Notifications' || insertInto?.ref?.[0] === 'idts.cap.Notifications'
+  if (state.failAfterPMWritePage === state.currentPMPage && !state.failureRaised && isNotificationInsert) {
+    await run(query)
+    state.failureRaised = true
+    throw new Error('late PM page failure')
+  }
+  const result = await run(query)
+  if (rootStats && query.SELECT && Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')) {
+    const lockSet = from === 'idts.cap.Users' ? rootStats.userLocks : from === 'idts.cap.Bugs' ? rootStats.bugLocks : null
+    if (lockSet) {
+      for (const row of Array.isArray(result) ? result : [result]) if (row?.ID) lockSet.add(row.ID)
+      state.maxUserLocks = Math.max(state.maxUserLocks, rootStats.userLocks.size)
+      state.maxBugLocks = Math.max(state.maxBugLocks, rootStats.bugLocks.size)
+    }
+  }
+  return result
+}
+
 async function assertContextBearingRequestPath (db, config) {
   const realDb = await isolatedSchedulerDatabase()
   await realDb.run(INSERT.into('idts.cap.Users').entries(user(
@@ -526,10 +732,11 @@ async function assertContextBearingRequestPath (db, config) {
   const pageCandidates = Array.from({ length: 501 }, (_, index) =>
     bug(`f3000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-PAGE-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
   await realDb.run(INSERT.into('idts.cap.Bugs').entries(pageCandidates))
+  const candidatePage = pageNumber => pageNumber === 1 ? pageCandidates.slice(0, 500) : pageCandidates.slice(500)
   const pageContexts = []
-  const callbackPages = []
-  const committedPages = []
-  const pageStarts = []
+  const candidatePageStarts = []
+  const candidateCommittedPages = []
+  const candidateCallbackPages = []
   const requestUser = new cds.User({ id: 'context-scheduler', roles: ['OutboxProcessor'] })
   const request = new cds.Request({
     tenant: 'tenant-context-test',
@@ -539,19 +746,30 @@ async function assertContextBearingRequestPath (db, config) {
   const servicePrototype = Object.getPrototypeOf(realDb)
   const originalServiceTx = servicePrototype.tx
   const previousDb = cds.db
-  let pageNumber = 0
+  let candidatePageNumber = 0
   servicePrototype.tx = function (...args) {
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const context = typeof args[0] === 'function' ? null : args[0]
     if (typeof callback !== 'function' || !context?.tenant) return originalServiceTx.apply(this, args)
-    const currentPage = ++pageNumber
+    const rootStats = { candidatePageNumber: null }
     pageContexts.push(context)
-    pageStarts.push({ pageNumber: currentPage, committedBefore: committedPages.length })
     return originalServiceTx.call(this, context, async pageTx => {
-      callbackPages.push(currentPage)
-      return callback(pageTx)
+      const wrappedPageTx = {
+        run: async query => {
+          if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+            if (rootStats.candidatePageNumber === null) {
+              rootStats.candidatePageNumber = ++candidatePageNumber
+              candidatePageStarts.push({ pageNumber: rootStats.candidatePageNumber, committedBefore: candidateCommittedPages.length })
+              candidateCallbackPages.push(rootStats.candidatePageNumber)
+            }
+            return candidatePage(rootStats.candidatePageNumber)
+          }
+          return pageTx.run(query)
+        }
+      }
+      return callback(wrappedPageTx)
     }).then(result => {
-      committedPages.push(currentPage)
+      if (rootStats.candidatePageNumber !== null) candidateCommittedPages.push(rootStats.candidatePageNumber)
       return result
     })
   }
@@ -563,15 +781,15 @@ async function assertContextBearingRequestPath (db, config) {
     cds.db = previousDb
   }
 
-  assert.deepEqual(callbackPages, [1, 2],
+  assert.deepEqual(candidateCallbackPages, [1, 2],
     'protected CAP request path invokes both bounded page callbacks')
-  assert.deepEqual(committedPages, [1, 2],
+  assert.deepEqual(candidateCommittedPages, [1, 2],
     'protected CAP request path commits page one before page two')
-  assert.equal(new Set(pageContexts).size, 2,
-    'each page receives a fresh CAP transaction context object')
+  assert.ok(new Set(pageContexts).size >= 2,
+    'each detached candidate/PM page receives a fresh CAP transaction context object')
   assert.ok(pageContexts.every(context => context.tenant === 'tenant-context-test' && context.user === requestUser),
     'tenant and user context propagate to every detached page root')
-  assert.deepEqual(pageStarts.map(page => page.committedBefore), [0, 1],
+  assert.deepEqual(candidatePageStarts.map(page => page.committedBefore), [0, 1],
     'real CAP page roots commit before the next page starts')
   assert.ok(await count(realDb, 'idts.cap.Notifications', { bug_ID: pageCandidates[0].ID }) >= 1,
     'real CAP request path persists page-one notification work')
@@ -592,11 +810,12 @@ async function assertContextPageRollback (db, config) {
   const pageBugs = Array.from({ length: 501 }, (_, index) =>
     bug(`f4000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-ROLLBACK-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
   await realDb.run(INSERT.into('idts.cap.Bugs').entries(pageBugs))
+  const candidatePage = pageNumber => pageNumber === 1 ? pageBugs.slice(0, 500) : pageBugs.slice(500)
 
   const pageContexts = []
-  const callbackPages = []
-  const committedPages = []
-  const pageStarts = []
+  const candidatePageStarts = []
+  const candidateCommittedPages = []
+  const candidateCallbackPages = []
   const requestUser = new cds.User({ id: 'context-rollback-scheduler', roles: ['OutboxProcessor'] })
   const request = new cds.Request({
     tenant: 'tenant-context-rollback',
@@ -606,21 +825,32 @@ async function assertContextPageRollback (db, config) {
   const servicePrototype = Object.getPrototypeOf(realDb)
   const originalServiceTx = servicePrototype.tx
   const previousDb = cds.db
-  let pageNumber = 0
+  let candidatePageNumber = 0
   servicePrototype.tx = function (...args) {
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const context = typeof args[0] === 'function' ? null : args[0]
     if (typeof callback !== 'function' || !context?.tenant) return originalServiceTx.apply(this, args)
-    const currentPage = ++pageNumber
+    const rootStats = { candidatePageNumber: null }
     pageContexts.push(context)
-    pageStarts.push({ pageNumber: currentPage, committedBefore: committedPages.length })
     return originalServiceTx.call(this, context, async pageTx => {
-      callbackPages.push(currentPage)
-      const result = await callback(pageTx)
-      if (currentPage === 2) throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
+      const wrappedPageTx = {
+        run: async query => {
+          if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+            if (rootStats.candidatePageNumber === null) {
+              rootStats.candidatePageNumber = ++candidatePageNumber
+              candidatePageStarts.push({ pageNumber: rootStats.candidatePageNumber, committedBefore: candidateCommittedPages.length })
+              candidateCallbackPages.push(rootStats.candidatePageNumber)
+            }
+            return candidatePage(rootStats.candidatePageNumber)
+          }
+          return pageTx.run(query)
+        }
+      }
+      const result = await callback(wrappedPageTx)
+      if (rootStats.candidatePageNumber === 2) throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
       return result
     }).then(result => {
-      committedPages.push(currentPage)
+      if (rootStats.candidatePageNumber !== null) candidateCommittedPages.push(rootStats.candidatePageNumber)
       return result
     })
   }
@@ -638,15 +868,15 @@ async function assertContextPageRollback (db, config) {
     'page one source/inbox write survives a later page failure')
   assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
     'failed page source/inbox write rolls back as one CAP unit')
-  assert.deepEqual(callbackPages, [1, 2],
+  assert.deepEqual(candidateCallbackPages, [1, 2],
     'the failing page callback still runs before its root transaction rolls back')
-  assert.deepEqual(committedPages, [1],
+  assert.deepEqual(candidateCommittedPages, [1],
     'only the successful first page commits')
-  assert.equal(new Set(pageContexts).size, 2,
-    'rollback path also receives a fresh context per root page')
+  assert.ok(new Set(pageContexts).size >= 2,
+    'rollback path also receives a fresh context per detached root page')
   assert.ok(pageContexts.every(context => context.tenant === request.tenant && context.user === request.user),
     'rollback path preserves tenant and user context')
-  assert.deepEqual(pageStarts.map(page => page.committedBefore), [0, 1],
+  assert.deepEqual(candidatePageStarts.map(page => page.committedBefore), [0, 1],
     'rollback path starts page two only after page one commits')
   assert.equal(config.enabled, true, 'rollback fixture keeps the existing email policy')
 }
