@@ -10,7 +10,7 @@
 - Frozen base/origin-dev/merge-base: `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`
 - Preserved Task 10 prerequisite head before this Task 11 commit: `9018873998d6d223576a458cd6e5364b14037b51`
 - Task 11 implementation commit: `22edfa1d7b84b512ac42178e3daf237b325de786 feat: add weekday notification digest`.
-- Fix round 1 commit: `46ef1c0b3bfebc43288762ea6a1263eb36293f11 fix: harden weekday notification digest` (the exact final head is recorded in `task-11-report.md`).
+- Fix round 1 commit: `3c11fd0172fd1c488013e74e84f1b7147f327975 fix: harden weekday notification digest` (the exact final head is recorded in `task-11-report.md`).
 - Stop boundary: source-only N4. No schema/dependency/lockfile/MTA/XSUAA/live schedule/provider/data/user/role/email/deployment mutation, N5, push, PR, Ready or merge.
 
 ### Recovery and prerequisite evidence
@@ -81,7 +81,7 @@ The full N4 matrix, CAP EDMX/HANA compile, secret/rules/depth checks, affected n
 - Branch: `feature/wp7-notifications-sla-digest-donhv`
 - Frozen base/origin-dev/merge-base: `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`
 - Head Task 10 prerequisite được giữ nguyên trước commit Task 11: `9018873998d6d223576a458cd6e5364b14037b51`
-- Commit Task 11: `22edfa1d7b84b512ac42178e3daf237b325de786 feat: add weekday notification digest`; Fix round 1: `46ef1c0b3bfebc43288762ea6a1263eb36293f11 fix: harden weekday notification digest` (SHA cuối chính xác được ghi trong `task-11-report.md`).
+- Commit Task 11: `22edfa1d7b84b512ac42178e3daf237b325de786 feat: add weekday notification digest`; Fix round 1: `3c11fd0172fd1c488013e74e84f1b7147f327975 fix: harden weekday notification digest` (SHA cuối chính xác được ghi trong `task-11-report.md`).
 - Boundary dừng: N4 source-only. Không mutation schema/dependency/lockfile/MTA/XSUAA/live schedule/provider/data/user/role/email/deployment, N5, push, PR, Ready hoặc merge.
 
 ### Evidence recovery và prerequisite
