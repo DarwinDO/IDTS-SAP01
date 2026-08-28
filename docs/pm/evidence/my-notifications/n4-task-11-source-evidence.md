@@ -9,7 +9,8 @@
 - Branch: `feature/wp7-notifications-sla-digest-donhv`
 - Frozen base/origin-dev/merge-base: `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`
 - Preserved Task 10 prerequisite head before this Task 11 commit: `9018873998d6d223576a458cd6e5364b14037b51`
-- Requested local commit: `feat: add weekday notification digest` (exact final SHA is recorded in `task-11-report.md` after commit).
+- Task 11 implementation commit: `22edfa1d7b84b512ac42178e3daf237b325de786 feat: add weekday notification digest`.
+- Fix round 1 commit: `46ef1c0b3bfebc43288762ea6a1263eb36293f11 fix: harden weekday notification digest` (the exact final head is recorded in `task-11-report.md`).
 - Stop boundary: source-only N4. No schema/dependency/lockfile/MTA/XSUAA/live schedule/provider/data/user/role/email/deployment mutation, N5, push, PR, Ready or merge.
 
 ### Recovery and prerequisite evidence
@@ -80,7 +81,7 @@ The full N4 matrix, CAP EDMX/HANA compile, secret/rules/depth checks, affected n
 - Branch: `feature/wp7-notifications-sla-digest-donhv`
 - Frozen base/origin-dev/merge-base: `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`
 - Head Task 10 prerequisite được giữ nguyên trước commit Task 11: `9018873998d6d223576a458cd6e5364b14037b51`
-- Commit local được yêu cầu: `feat: add weekday notification digest` (SHA cuối chính xác được ghi trong `task-11-report.md` sau commit).
+- Commit Task 11: `22edfa1d7b84b512ac42178e3daf237b325de786 feat: add weekday notification digest`; Fix round 1: `46ef1c0b3bfebc43288762ea6a1263eb36293f11 fix: harden weekday notification digest` (SHA cuối chính xác được ghi trong `task-11-report.md`).
 - Boundary dừng: N4 source-only. Không mutation schema/dependency/lockfile/MTA/XSUAA/live schedule/provider/data/user/role/email/deployment, N5, push, PR, Ready hoặc merge.
 
 ### Evidence recovery và prerequisite
@@ -141,3 +142,35 @@ Evidence focused đã GREEN trước matrix cuối:
 - `officecli --version` — `1.0.145`; Markdown không được OfficeCLI native edit nên dùng `apply_patch` của repository cùng diff/keyword check.
 
 Matrix N4 đầy đủ, compile CAP EDMX/HANA, check secret/rules/depth, regressions notification/email/user-access/assignment/auth, diff guard và SHA cuối chính xác được ghi trong `task-11-report.md`. CAP/UI5/Fiori MCP không khả dụng; không claim MCP hoặc live acceptance. CAP compile vẫn có warning vocabulary attachment `NonUpdateableProperties` đã có từ trước.
+
+### Fix round 1 evidence (English)
+
+The bounded review of head `22edfa1d7b84b512ac42178e3daf237b325de786` identified nine Important findings. The working-tree fix round adds real behavior coverage and addresses them without schema or deployment mutation:
+
+- the scheduled request fixture now uses isolated installed CAP `service.tx({ tenant, user }, callback)` roots and real callback commit/rollback, not a handwritten `_txed_before` simulation;
+- the digest schedule accepts all Bangkok weekday minutes in 08:00–08:59 while the unique key keeps reruns no-op;
+- Pending Assignment SLA uses the latest immutable `HistoryLogs` status transition, with legacy `Bugs.createdAt` fallback;
+- Bug reads and Pending Assignment anchors use 500-row `ID > lastID` pages, with no global 5,000-row truncation;
+- recipient pages are 100 users, one shared Bug/HistoryLog ownership index is built for the schedule, and all recipient pages continue past 1,000;
+- delivery batches and recipient `IN` predicates clamp to the documented HANA-safe bound of 100;
+- recipient row locking/recheck, target-aware exact unique detection and a fresh CAP root conflict read preserve idempotency while unrelated insert errors propagate;
+- status/`nextProcessorRole_code`/profile ownership is aligned, Tester never uses DeveloperProfile assignment, stray retest ownership is rejected, and send-time role/profile changes fail closed; and
+- remainder links use the existing ListReport `exclude_closed=true` and current-action-owner filters, not unknown digest tokens.
+
+The grouped RED/GREEN evidence and final fix-round command matrix are appended to the ignored `task-11-report.md`; the production fix is committed at the exact fix-round head above. The original Task 10 prerequisite remains preserved.
+
+### Evidence Fix round 1 (Tiếng Việt)
+
+Review bounded của head `22edfa1d7b84b512ac42178e3daf237b325de786` phát hiện chín Important. Fix round trong working tree thêm coverage real behavior và xử lý toàn bộ mà không mutation schema/deploy:
+
+- fixture request scheduler dùng root CAP `service.tx({ tenant, user }, callback)` installed thật trong database tách biệt, commit/rollback callback thật, không handwritten `_txed_before` simulation;
+- schedule digest nhận mọi phút trong 08:00–08:59 ngày thường Bangkok, còn unique key giữ rerun no-op;
+- SLA Pending Assignment lấy transition status bất biến mới nhất trong `HistoryLogs`, fallback `Bugs.createdAt` chỉ cho legacy;
+- read Bug và anchor Pending Assignment dùng page `ID > lastID` 500 row, không còn global truncation 5.000;
+- recipient page 100 user, schedule dựng một ownership index Bug/HistoryLog dùng chung, tiếp tục qua mốc 1.000 recipient;
+- delivery batch và recipient `IN` clamp về bound HANA-safe document 100;
+- lock/recheck recipient, detect exact unique target-aware và conflict read bằng CAP root mới giữ idempotency, còn insert error không liên quan vẫn propagate;
+- align status/`nextProcessorRole_code`/profile ownership, Tester không dùng DeveloperProfile assignment, retest owner stray bị reject, thay đổi role/profile lúc send fail-closed; và
+- link remainder dùng filter ListReport hiện có `exclude_closed=true` và current-action-owner, không dùng token digest lạ.
+
+Evidence RED/GREEN theo nhóm và matrix command fix round cuối được append trong `task-11-report.md` ignored; production fix đã commit ở exact fix-round head trên. Prerequisite Task 10 ban đầu vẫn được preserve.

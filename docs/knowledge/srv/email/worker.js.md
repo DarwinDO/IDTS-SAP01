@@ -235,7 +235,7 @@ Gate 6 tái sử dụng `scheduleImmediateEmailOutbox(req)` tại `srv/email/wor
 
 ### English
 
-`processEmailOutboxBatch()` now invokes `processNotificationDigestDeliveries()` after the Bug, invitation, and access processors. The digest processor receives the same `sendMail` closure backed by the one batch sender, plus the batch `now` and `workerID`. It claims and sends only stored `NotificationDigestDeliveries` snapshots; it does not call `buildDigestSnapshot()` during retry. The batch still creates one sender and closes it once in `finally`, so digest delivery cannot introduce a second provider connection, timer, or worker.
+`processEmailOutboxBatch()` now invokes `processNotificationDigestDeliveries()` after the Bug, invitation, and access processors. The digest processor receives the same `sendMail` closure backed by the one batch sender, plus the batch `now` and `workerID`; its configured batch is clamped to the digest module's documented HANA-safe bound of 100. It claims and sends only stored `NotificationDigestDeliveries` snapshots, revalidating recipient persona before send; it does not call `buildDigestSnapshot()` during retry. The batch still creates one sender and closes it once in `finally`, so digest delivery cannot introduce a second provider connection, timer, or worker.
 
 - **Location**: `srv/email/worker.js:31-69` — `processDigests` injection and count aggregation.
   **IDTS concept**: Bug, onboarding, access, and digest outboxes share one provider lifecycle and at-least-once worker boundary.
@@ -244,7 +244,7 @@ Gate 6 tái sử dụng `scheduleImmediateEmailOutbox(req)` tại `srv/email/wor
 
 ### Tiếng Việt
 
-`processEmailOutboxBatch()` giờ gọi `processNotificationDigestDeliveries()` sau processor Bug, invitation và access. Digest processor nhận cùng closure `sendMail` gắn với một sender của batch, cùng `now` và `workerID` của batch. Processor chỉ claim và gửi snapshot `NotificationDigestDeliveries` đã lưu; retry không gọi lại `buildDigestSnapshot()`. Batch vẫn tạo một sender và close một lần trong `finally`, nên digest không thêm connection provider, timer hoặc worker thứ hai.
+`processEmailOutboxBatch()` giờ gọi `processNotificationDigestDeliveries()` sau processor Bug, invitation và access. Digest processor nhận cùng closure `sendMail` gắn với một sender của batch, cùng `now` và `workerID` của batch; batch config được clamp về bound HANA-safe 100 của digest. Processor chỉ claim và gửi snapshot `NotificationDigestDeliveries` đã lưu, revalidate persona recipient trước send; retry không gọi lại `buildDigestSnapshot()`. Batch vẫn tạo một sender và close một lần trong `finally`, nên digest không thêm connection provider, timer hoặc worker thứ hai.
 
 - **Vị trí**: `srv/email/worker.js:31-69` — inject `processDigests` và cộng count.
   **Khái niệm IDTS**: Outbox Bug, onboarding, access và digest dùng chung vòng đời provider và boundary worker at-least-once.

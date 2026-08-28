@@ -505,63 +505,52 @@ async function assertStaleProfileSkipped (db, bugID, profileID, recipientID, mes
 }
 
 async function assertContextBearingRequestPath (db, config) {
-  const pageCandidates = Array.from({ length: 501 }, (_, index) => ({
-    ID: `context-page-${String(index + 1).padStart(4, '0')}`,
-    bugNumber: `CONTEXT-PAGE-${index + 1}`,
-    status_code: 'PENDING_ASSIGNMENT',
-    priority_code: 'LOW',
-    severity_code: 'MINOR',
-    createdAt: '2026-08-27T00:00:00.000Z',
-    dueDate: null,
-    nextProcessorUser_ID: null,
-    assignee_ID: null
-  }))
+  const realDb = await isolatedSchedulerDatabase()
+  await realDb.run(INSERT.into('idts.cap.Users').entries(user(
+    IDS.pm,
+    'Context Scheduler PM',
+    'context-scheduler-pm@example.test',
+    'PM',
+    true
+  )))
+  const pageCandidates = Array.from({ length: 501 }, (_, index) =>
+    bug(`f3000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-PAGE-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
+  await realDb.run(INSERT.into('idts.cap.Bugs').entries(pageCandidates))
   const pageContexts = []
   const callbackPages = []
   const committedPages = []
+  const pageStarts = []
   const requestUser = new cds.User({ id: 'context-scheduler', roles: ['OutboxProcessor'] })
   const request = new cds.Request({
     tenant: 'tenant-context-test',
     user: requestUser,
     data: { now: BASE_NOW.toISOString() }
   })
-  const pageTransactionService = {
-    run: query => db.run(query),
-    tx: (context, callback) => {
-      pageContexts.push(context)
-      const pageNumber = pageContexts.length
-      // Mirror CAP's context-reuse compatibility behavior under test: a reused context
-      // has already been converted to a nested transaction and cannot run the callback.
-      if (Object.prototype.hasOwnProperty.call(context, '_txed_before')) return Promise.resolve({})
-      Object.defineProperty(context, '_txed_before', { value: { tenant: context.tenant, user: context.user } })
-      return db.tx(async actualTx => {
-        const pageTx = {
-          run: async query => {
-            const from = query.SELECT?.from?.ref?.[0]
-            if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
-              return pageNumber === 1 ? pageCandidates.slice(0, 500) : pageCandidates.slice(500)
-            }
-            if (from === 'idts.cap.Bugs' && query.SELECT.one) return null
-            return actualTx.run(query)
-          }
-        }
-        callbackPages.push(pageNumber)
-        const result = await callback(pageTx)
-        return result
-      }).then(result => {
-        committedPages.push(pageNumber)
-        return result
-      })
-    }
+  const servicePrototype = Object.getPrototypeOf(realDb)
+  const originalServiceTx = servicePrototype.tx
+  const previousDb = cds.db
+  let pageNumber = 0
+  servicePrototype.tx = function (...args) {
+    const callback = typeof args[0] === 'function' ? args[0] : args[1]
+    const context = typeof args[0] === 'function' ? null : args[0]
+    if (typeof callback !== 'function' || !context?.tenant) return originalServiceTx.apply(this, args)
+    const currentPage = ++pageNumber
+    pageContexts.push(context)
+    pageStarts.push({ pageNumber: currentPage, committedBefore: committedPages.length })
+    return originalServiceTx.call(this, context, async pageTx => {
+      callbackPages.push(currentPage)
+      return callback(pageTx)
+    }).then(result => {
+      committedPages.push(currentPage)
+      return result
+    })
   }
-  const requestTx = Object.create(pageTransactionService)
-  requestTx.context = { tenant: request.tenant, user: request.user }
-  const originalCdsTx = cds.tx
-  cds.tx = () => requestTx
+  cds.db = realDb
   try {
     await processNotificationSchedules(request)
   } finally {
-    cds.tx = originalCdsTx
+    servicePrototype.tx = originalServiceTx
+    cds.db = previousDb
   }
 
   assert.deepEqual(callbackPages, [1, 2],
@@ -572,58 +561,72 @@ async function assertContextBearingRequestPath (db, config) {
     'each page receives a fresh CAP transaction context object')
   assert.ok(pageContexts.every(context => context.tenant === 'tenant-context-test' && context.user === requestUser),
     'tenant and user context propagate to every detached page root')
-  assert.ok(pageContexts.every(context => context._txed_before),
-    'each page root owns its CAP compatibility marker independently')
+  assert.deepEqual(pageStarts.map(page => page.committedBefore), [0, 1],
+    'real CAP page roots commit before the next page starts')
+  assert.ok(await count(realDb, 'idts.cap.Notifications', { bug_ID: pageCandidates[0].ID }) >= 1,
+    'real CAP request path persists page-one notification work')
+  assert.ok(await count(realDb, 'idts.cap.Notifications', { bug_ID: pageCandidates.at(-1).ID }) >= 1,
+    'real CAP request path persists page-two notification work')
   assert.equal(config.enabled, true, 'context-path fixture keeps the existing email policy')
 }
 
 async function assertContextPageRollback (db, config) {
+  const realDb = await isolatedSchedulerDatabase()
+  await realDb.run(INSERT.into('idts.cap.Users').entries(user(
+    IDS.pm,
+    'Rollback Scheduler PM',
+    'rollback-scheduler-pm@example.test',
+    'PM',
+    true
+  )))
   const pageBugs = Array.from({ length: 501 }, (_, index) =>
-    bug(`00100000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-ROLLBACK-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
-  await db.run(INSERT.into('idts.cap.Bugs').entries(pageBugs))
+    bug(`f4000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-ROLLBACK-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
+  await realDb.run(INSERT.into('idts.cap.Bugs').entries(pageBugs))
 
   const pageContexts = []
   const callbackPages = []
   const committedPages = []
+  const pageStarts = []
   const requestUser = new cds.User({ id: 'context-rollback-scheduler', roles: ['OutboxProcessor'] })
   const request = new cds.Request({
     tenant: 'tenant-context-rollback',
     user: requestUser,
     data: { now: BASE_NOW.toISOString() }
   })
-  const pageTransactionService = {
-    run: query => db.run(query),
-    tx: (context, callback) => {
-      pageContexts.push(context)
-      const pageNumber = pageContexts.length
-      if (Object.prototype.hasOwnProperty.call(context, '_txed_before')) return Promise.resolve({})
-      Object.defineProperty(context, '_txed_before', { value: { tenant: context.tenant, user: context.user } })
-      return db.tx(async actualTx => {
-        callbackPages.push(pageNumber)
-        const result = await callback(actualTx)
-        if (pageNumber === 2) throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
-        return result
-      }).then(result => {
-        committedPages.push(pageNumber)
-        return result
-      })
-    }
+  const servicePrototype = Object.getPrototypeOf(realDb)
+  const originalServiceTx = servicePrototype.tx
+  const previousDb = cds.db
+  let pageNumber = 0
+  servicePrototype.tx = function (...args) {
+    const callback = typeof args[0] === 'function' ? args[0] : args[1]
+    const context = typeof args[0] === 'function' ? null : args[0]
+    if (typeof callback !== 'function' || !context?.tenant) return originalServiceTx.apply(this, args)
+    const currentPage = ++pageNumber
+    pageContexts.push(context)
+    pageStarts.push({ pageNumber: currentPage, committedBefore: committedPages.length })
+    return originalServiceTx.call(this, context, async pageTx => {
+      callbackPages.push(currentPage)
+      const result = await callback(pageTx)
+      if (currentPage === 2) throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
+      return result
+    }).then(result => {
+      committedPages.push(currentPage)
+      return result
+    })
   }
-  const requestTx = Object.create(pageTransactionService)
-  requestTx.context = { tenant: request.tenant, user: request.user }
-  const originalCdsTx = cds.tx
-  cds.tx = () => requestTx
+  cds.db = realDb
   try {
     await assert.rejects(() => processNotificationSchedules(request), /scheduled page failure fixture/)
   } finally {
-    cds.tx = originalCdsTx
+    servicePrototype.tx = originalServiceTx
+    cds.db = previousDb
   }
 
   const firstSource = `PENDING_ASSIGNMENT:${pageBugs[0].ID}:${IDS.pm}`
   const secondSource = `PENDING_ASSIGNMENT:${pageBugs[500].ID}:${IDS.pm}`
-  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: firstSource }), 1,
+  assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: firstSource }), 1,
     'page one source/inbox write survives a later page failure')
-  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
+  assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
     'failed page source/inbox write rolls back as one CAP unit')
   assert.deepEqual(callbackPages, [1, 2],
     'the failing page callback still runs before its root transaction rolls back')
@@ -633,8 +636,16 @@ async function assertContextPageRollback (db, config) {
     'rollback path also receives a fresh context per root page')
   assert.ok(pageContexts.every(context => context.tenant === request.tenant && context.user === request.user),
     'rollback path preserves tenant and user context')
+  assert.deepEqual(pageStarts.map(page => page.committedBefore), [0, 1],
+    'rollback path starts page two only after page one commits')
   assert.equal(config.enabled, true, 'rollback fixture keeps the existing email policy')
-  await db.run(UPDATE('idts.cap.Bugs').set({ status_code: 'CLOSED' }).where({ ID: { in: pageBugs.map(row => row.ID) } }))
+}
+
+async function isolatedSchedulerDatabase () {
+  const csn = await cds.load(['db/schema.cds', 'srv/service.cds', 'srv/notification.cds'])
+  const isolated = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
+  await cds.deploy(csn).to(isolated)
+  return isolated
 }
 
 async function addDueDateHistory (db, bugID, oldValue, newValue, eventID) {

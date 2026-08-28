@@ -40,6 +40,11 @@ const IDS = Object.freeze({
   closed: 'b3000000-0000-4000-8000-000000000005',
   future: 'b3000000-0000-4000-8000-000000000006',
   unsafe: 'b3000000-0000-4000-8000-000000000007',
+  pendingTransition: 'b3000000-0000-4000-8000-000000000009',
+  roleMismatch: 'b3000000-0000-4000-8000-000000000010',
+  strayRetest: 'b3000000-0000-4000-8000-000000000011',
+  strayProfile: 'b3000000-0000-4000-8000-000000000012',
+  strayTesterProfile: 'b2000000-0000-4000-8000-000000000002',
   unique: 'b1000000-0000-4000-8000-000000000005',
   uniqueBug: 'b3000000-0000-4000-8000-000000000008'
 })
@@ -96,21 +101,37 @@ async function main () {
     workloadLimit: 5,
     active: true
   }))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: IDS.strayTesterProfile,
+    user_ID: IDS.tester,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 5,
+    active: true
+  }))
   await db.run(INSERT.into('idts.cap.Bugs').entries([
     bug(IDS.pending, 'BUG-DIGEST-PENDING', 'LOW', 'MINOR', '2026-08-27T00:00:00.000Z', null, IDS.pm, null, 'PENDING_ASSIGNMENT'),
     bug(IDS.urgent, 'BUG-DIGEST-CRITICAL', 'CRITICAL', 'BLOCKER', '2026-08-27T00:00:00.000Z', null, IDS.developer, IDS.developerProfile, 'ASSIGNED'),
     bug(IDS.developerOverdue, 'BUG-DIGEST-DEVELOPER-OVERDUE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, IDS.developerProfile, 'ASSIGNED'),
-    bug(IDS.testerAwaiting, 'BUG-DIGEST-TESTER-AWAITING', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-09-04', IDS.tester, null, 'RETEST_REQUIRED'),
+    bug(IDS.testerAwaiting, 'BUG-DIGEST-TESTER-AWAITING', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-09-04', IDS.tester, null, 'RETEST_REQUIRED', 'BUG-DIGEST-TESTER-AWAITING digest fixture', 'TESTER', IDS.tester),
     bug(IDS.closed, 'BUG-DIGEST-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-26T00:00:00.000Z', '2026-08-27', IDS.pm, null, 'CLOSED'),
     bug(IDS.future, 'BUG-DIGEST-FUTURE', 'CRITICAL', 'BLOCKER', '2026-08-28T02:00:00.000Z', null, IDS.pm, null, 'ASSIGNED'),
-    bug(IDS.unsafe, '<script>alert(1)</script>', 'MEDIUM', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, IDS.developerProfile, 'ASSIGNED', '<img src=x onerror=alert(2)>')
+    bug(IDS.unsafe, '<script>alert(1)</script>', 'MEDIUM', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, IDS.developerProfile, 'ASSIGNED', '<img src=x onerror=alert(2)>'),
+    bug(IDS.pendingTransition, 'BUG-DIGEST-PENDING-RECENT', 'LOW', 'MINOR', '2026-08-20T00:00:00.000Z', null, IDS.pm, null, 'PENDING_ASSIGNMENT', 'Pending Assignment was entered recently', 'PM'),
+    bug(IDS.roleMismatch, 'BUG-DIGEST-ROLE-MISMATCH', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.tester, null, 'ASSIGNED', 'Mismatched next processor role', 'DEVELOPER'),
+    bug(IDS.strayRetest, 'BUG-DIGEST-STRAY-RETEST', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, null, 'ASSIGNED', 'Retest owner on wrong status', 'DEVELOPER', IDS.tester),
+    bug(IDS.strayProfile, 'BUG-DIGEST-STRAY-PROFILE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', null, IDS.strayTesterProfile, 'ASSIGNED', 'Tester has a developer profile', null)
   ]))
+  await addPendingAssignmentHistory(db, IDS.pendingTransition)
 
   // Schedule boundaries are local to Bangkok, not UTC. 07:59 does nothing; 08:00 Friday creates rows.
   assert.equal(isDigestScheduleDue(new Date('2026-08-28T00:59:59.000Z')), false,
     '07:59 Bangkok is before the digest boundary')
   assert.equal(isDigestScheduleDue(SNAPSHOT_AT), true,
     '08:00 Bangkok on a weekday is a digest boundary')
+  assert.equal(isDigestScheduleDue(new Date('2026-08-28T01:01:00.000Z')), true,
+    '08:01 Bangkok remains inside the weekday recovery hour')
+  assert.equal(isDigestScheduleDue(new Date('2026-08-28T01:59:00.000Z')), true,
+    '08:59 Bangkok remains inside the weekday recovery hour')
   assert.equal(isDigestScheduleDue(new Date('2026-08-29T01:00:00.000Z')), false,
     'Saturday 08:00 Bangkok does not run the weekday digest')
   await scheduleNotificationDigests({ tx: db, now: new Date('2026-08-28T00:59:59.000Z') })
@@ -131,6 +152,9 @@ async function main () {
   await scheduleNotificationDigests({ tx: db, now: SNAPSHOT_AT })
   assert.equal(await count(db, 'idts.cap.NotificationDigestDeliveries'), scheduledCount,
     'same recipient/date/type schedule rerun reuses one stored delivery')
+  await scheduleNotificationDigests({ tx: db, now: new Date('2026-08-28T01:59:00.000Z') })
+  assert.equal(await count(db, 'idts.cap.NotificationDigestDeliveries'), scheduledCount,
+    'late invocation in the same Bangkok recovery hour remains idempotent')
   await scheduleNotificationDigests({ tx: db, now: new Date('2026-08-29T01:00:00.000Z') })
   assert.equal(await count(db, 'idts.cap.NotificationDigestDeliveries'), scheduledCount,
     'weekend schedule does not create a new digest')
@@ -166,12 +190,18 @@ async function main () {
 
   assert.ok(pmSnapshot.textBody.includes('BUG-DIGEST-PENDING'), 'PM sees pending assignment work')
   assert.ok(pmSnapshot.textBody.includes('BUG-DIGEST-CRITICAL'), 'PM sees unresolved Critical/Blocker work')
+  const recentPending = pmSnapshot.items.find(item => item.ID === IDS.pendingTransition)
+  assert.ok(recentPending, 'PM snapshot retains a recently pending-assignment Bug')
+  assert.doesNotMatch(recentPending.reason, /SLA breached/, 'PM SLA age starts at the latest Pending Assignment transition')
   assert.doesNotMatch(pmSnapshot.textBody, /BUG-DIGEST-CLOSED|BUG-DIGEST-FUTURE/, 'PM snapshot excludes completed and future rows')
   assert.ok(developerSnapshot.textBody.includes('BUG-DIGEST-DEVELOPER-OVERDUE'), 'Developer sees assigned overdue work')
   assert.ok(developerSnapshot.textBody.includes('<script>'), 'text output keeps source text readable without affecting HTML safety')
   assert.doesNotMatch(developerSnapshot.textBody, /BUG-DIGEST-PENDING|BUG-DIGEST-TESTER-AWAITING/, 'Developer does not receive PM-only or Tester-only work')
   assert.ok(testerSnapshot.textBody.includes('BUG-DIGEST-TESTER-AWAITING'), 'Tester sees the item awaiting that user')
   assert.doesNotMatch(testerSnapshot.textBody, /BUG-DIGEST-DEVELOPER-OVERDUE|BUG-DIGEST-PENDING/, 'Tester does not receive another persona’s work')
+  assert.doesNotMatch(testerSnapshot.textBody, /BUG-DIGEST-ROLE-MISMATCH/, 'Tester does not receive a role-mismatched next processor row')
+  assert.doesNotMatch(testerSnapshot.textBody, /BUG-DIGEST-STRAY-RETEST/, 'Tester does not receive a retest owner outside Retest Required')
+  assert.doesNotMatch(testerSnapshot.textBody, /BUG-DIGEST-STRAY-PROFILE/, 'Tester is never treated as a DeveloperProfile owner')
   assert.equal(idleSnapshot, null, 'an active recipient with no actionable items gets no empty digest')
 
   const criticalPosition = pmSnapshot.textBody.indexOf('BUG-DIGEST-CRITICAL')
@@ -195,11 +225,17 @@ async function main () {
     snapshotAt: SNAPSHOT_AT,
     limit: 20
   })
-  assert.equal(moreSnapshot.itemCount, 24, 'snapshot retains the full actionable count')
+  assert.equal(moreSnapshot.itemCount, 25, 'snapshot retains the full actionable count')
   assert.equal(moreSnapshot.items.length, 20, 'snapshot renders no more than twenty items')
-  assert.match(moreSnapshot.textBody, /and 4 more/i, 'snapshot reports the unrendered remainder')
+  assert.match(moreSnapshot.textBody, /and 5 more/i, 'snapshot reports the unrendered remainder')
   assert.match(moreSnapshot.htmlBody, /href="[^"]*\/idtsbugmanagementui\/index\.html[^\"]*"[^>]*>Open filtered queue<\/a>/,
     'remainder uses an allowlisted filtered queue link')
+  assert.match(moreSnapshot.htmlBody, /exclude_closed=true/,
+    'remainder queue link uses a filter understood by the existing ListReport consumer')
+  assert.match(moreSnapshot.htmlBody, new RegExp(`nextProcessorUser_ID=${IDS.developer}`),
+    'Developer remainder queue link scopes to the current action owner consumer filter')
+  assert.doesNotMatch(moreSnapshot.htmlBody, /filter=digest-(?:pm|my-action)/,
+    'remainder queue link does not advertise an unknown filter token')
   const cappedSnapshot = await buildDigestSnapshot({
     tx: db,
     recipient: { ID: IDS.developer, role_code: 'DEVELOPER' },
@@ -217,7 +253,7 @@ async function main () {
   }))
   await db.run(INSERT.into('idts.cap.Users').entries(user(IDS.unique, 'Digest Unique', 'digest-unique@example.test', 'TESTER')))
   await db.run(INSERT.into('idts.cap.Bugs').entries(
-    bug(IDS.uniqueBug, 'BUG-DIGEST-UNIQUE', 'LOW', 'MINOR', '2026-08-30T00:00:00.000Z', '2026-08-30', IDS.unique, null, 'RETEST_REQUIRED')
+    bug(IDS.uniqueBug, 'BUG-DIGEST-UNIQUE', 'LOW', 'MINOR', '2026-08-30T00:00:00.000Z', '2026-08-30', IDS.unique, null, 'RETEST_REQUIRED', 'BUG-DIGEST-UNIQUE digest fixture', 'TESTER', IDS.unique)
   ))
   await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries({
     ID: cds.utils.uuid(),
@@ -234,25 +270,38 @@ async function main () {
     status_code: 'PENDING'
   }))
   let digestLookupCount = 0
-  const uniqueTx = {
-    run: async query => {
+  let independentReads = 0
+  const uniqueService = {
+    tx: (context, callback) => {
+      independentReads += 1
+      return callback({ run: query => db.run(query) })
+    }
+  }
+  const uniqueTx = Object.create(uniqueService)
+  uniqueTx.context = { tenant: 'unique-race-tenant', user: new cds.User({ id: 'unique-race-worker' }) }
+  uniqueTx.run = async query => {
+      const insertEntries = JSON.stringify(query.INSERT?.entries || '')
       const digestWhere = JSON.stringify(query.SELECT?.where || '')
-      const targetsUnique = digestWhere.includes(IDS.unique) && digestWhere.includes('2026-08-31')
+      const targetsUnique = (digestWhere.includes(IDS.unique) && digestWhere.includes('2026-08-31')) ||
+        (insertEntries.includes(IDS.unique) && insertEntries.includes('2026-08-31'))
       if (targetsUnique && query.SELECT?.from?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries' && query.SELECT.one) {
         digestLookupCount += 1
-        if (digestLookupCount === 1) return undefined
+        if (digestLookupCount <= 2) return undefined
       }
       const insertDigest = query.INSERT?.into === 'idts.cap.NotificationDigestDeliveries' || query.INSERT?.into?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries'
       if (insertDigest && targetsUnique) {
-        throw Object.assign(new Error('UNIQUE constraint failed: NotificationDigestDeliveries.recipient_ID,businessDate,digestType'), {
-          code: 'SQLITE_CONSTRAINT_UNIQUE'
+        throw Object.assign(new Error('unique constraint violated'), {
+          code: 301,
+          constraint: 'idts_cap_NotificationDigestDeliveries_digestRecipientDateType'
         })
       }
       return db.run(query)
     }
-  }
+
   const reused = await scheduleNotificationDigests({ tx: uniqueTx, now: new Date('2026-08-31T01:00:00.000Z') })
-  assert.ok(reused.reused >= 1, 'exact digest unique conflict re-reads and reuses the existing row')
+  assert.ok(reused.reused >= 1,
+    `exact digest unique conflict re-reads and reuses the existing row: ${JSON.stringify(reused)} lookups=${digestLookupCount} independent=${independentReads}`)
+  assert.equal(independentReads, 1, `unique conflict is re-read through an independent CAP transaction boundary: ${independentReads}`)
   const errorTx = {
     run: async query => {
       if (query.INSERT?.into === 'idts.cap.NotificationDigestDeliveries' || query.INSERT?.into?.ref?.[0] === 'idts.cap.NotificationDigestDeliveries') {
@@ -336,6 +385,44 @@ async function main () {
   assert.equal(await count(db, 'idts.cap.Notifications', { message: { like: '%digest%' } }), 0,
     'digest delivery failure/retry creates no end-user failure notification')
 
+  await db.run(UPDATE('idts.cap.NotificationDigestDeliveries').set({
+    status_code: 'SENT',
+    sentAt: SNAPSHOT_AT.toISOString()
+  }).where({ status_code: { in: ['PENDING', 'FAILED'] } }))
+  const sendTimeDeliveryID = cds.utils.uuid()
+  await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries({
+    ID: sendTimeDeliveryID,
+    recipient_ID: IDS.developer,
+    businessDate: '2026-09-03',
+    digestType: 'DAILY',
+    windowStart: '2026-09-02T17:00:00.000Z',
+    windowEnd: '2026-09-03T01:00:00.000Z',
+    snapshotAt: '2026-09-03T01:00:00.000Z',
+    itemCount: developerSnapshot.itemCount,
+    subject: developerSnapshot.subject,
+    textBody: developerSnapshot.textBody,
+    htmlBody: developerSnapshot.htmlBody,
+    status_code: 'PENDING',
+    attemptCount: 0
+  }))
+  await db.run(UPDATE('idts.cap.Users').set({ role_code: 'TESTER' }).where({ ID: IDS.developer }))
+  const sendTimeMessages = []
+  await processNotificationDigestDeliveries({
+    tx: db,
+    config: enabledConfig(),
+    sendMail: async message => {
+      sendTimeMessages.push(message)
+      return { messageId: 'should-not-send-persona-change' }
+    },
+    now: new Date('2026-09-03T01:01:00.000Z'),
+    workerID: 'send-time-persona-worker'
+  })
+  const sendTimeDelivery = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({ ID: sendTimeDeliveryID }))
+  assert.equal(sendTimeDelivery.status_code, 'SKIPPED', 'send-time persona change fails closed for a stored Developer digest')
+  assert.equal(sendTimeDelivery.lastErrorCode, 'RECIPIENT_PERSONA_INVALID')
+  assert.equal(sendTimeMessages.length, 0, 'send-time persona revalidation prevents provider delivery')
+  await db.run(UPDATE('idts.cap.Users').set({ role_code: 'DEVELOPER' }).where({ ID: IDS.developer }))
+
   // The protected scheduler action owns the schedule hook; it still uses the same persisted digest contract.
   const schedulerRequest = new cds.Request({
     user: new cds.User({ id: 'digest-scheduler', roles: ['OutboxProcessor'] }),
@@ -344,6 +431,119 @@ async function main () {
   await processNotificationSchedules(schedulerRequest)
   assert.ok(await count(db, 'idts.cap.NotificationDigestDeliveries', { businessDate: '2026-08-31' }) >= 1,
     'protected scheduled action invokes weekday digest generation')
+
+  const recipientScaleUsers = Array.from({ length: 1001 }, (_, index) =>
+    user(`c1000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `Scale PM ${index + 1}`, `scale-pm-${index + 1}@example.test`, 'PM'))
+  await db.run(INSERT.into('idts.cap.Users').entries(recipientScaleUsers))
+  await db.run(INSERT.into('idts.cap.Bugs').entries(bug(
+    'f8000000-0000-4000-8000-000000000001',
+    'BUG-DIGEST-RECIPIENT-SCALE',
+    'LOW',
+    'MINOR',
+    '2026-09-02T00:00:00.000Z',
+    null,
+    null,
+    null,
+    'PENDING_ASSIGNMENT',
+    'Recipient scale pending assignment',
+    'PM'
+  )))
+  let recipientBugPageReads = 0
+  const recipientScaleTx = {
+    run: async query => {
+      if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) recipientBugPageReads += 1
+      return db.run(query)
+    }
+  }
+  await scheduleNotificationDigests({ tx: recipientScaleTx, now: new Date('2026-09-02T01:00:00.000Z') })
+  const recipientScaleIDs = new Set(recipientScaleUsers.map(row => row.ID))
+  const recipientScaleRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns('recipient_ID').where({ businessDate: '2026-09-02' }))
+  assert.equal(recipientScaleRows.filter(row => recipientScaleIDs.has(row.recipient_ID)).length, 1001,
+    'digest scheduling continues through every eligible recipient page')
+  assert.equal(recipientBugPageReads, 1,
+    'recipient pages reuse one shared bounded Bug read instead of scanning globally per recipient')
+
+  const longScanBaseline = await buildDigestSnapshot({
+    tx: db,
+    recipient: { ID: IDS.developer, role_code: 'DEVELOPER' },
+    businessDate: BUSINESS_DATE,
+    snapshotAt: SNAPSHOT_AT,
+    limit: 20
+  })
+  const irrelevantScanRows = Array.from({ length: 5000 }, (_, index) =>
+    bug(`00000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `BUG-DIGEST-SCAN-FILLER-${index + 1}`, 'LOW', 'MINOR', '2026-08-27T00:00:00.000Z', null, null, null, 'ASSIGNED'))
+  const highPriorityAfterScan = bug(
+    'f9000000-0000-4000-8000-000000000001',
+    'BUG-DIGEST-AFTER-5000',
+    'CRITICAL',
+    'BLOCKER',
+    '2026-08-27T00:00:00.000Z',
+    '2026-08-27',
+    IDS.developer,
+    IDS.developerProfile,
+    'ASSIGNED'
+  )
+  await db.run(INSERT.into('idts.cap.Bugs').entries([...irrelevantScanRows, highPriorityAfterScan]))
+  const longScanSnapshot = await buildDigestSnapshot({
+    tx: db,
+    recipient: { ID: IDS.developer, role_code: 'DEVELOPER' },
+    businessDate: BUSINESS_DATE,
+    snapshotAt: SNAPSHOT_AT,
+    limit: 20
+  })
+  assert.ok(longScanSnapshot && longScanSnapshot.itemCount === longScanBaseline.itemCount + 1,
+    'role-scoped digest paging reaches actionable Bugs after the first 5000 IDs')
+  assert.ok(longScanSnapshot?.textBody.includes('BUG-DIGEST-AFTER-5000'),
+    'high-priority actionable Bug after the first 5000 IDs is included')
+
+  const deliveryDb = await isolatedDigestDatabase()
+  const deliveryUsers = Array.from({ length: 1001 }, (_, index) =>
+    user(`d1000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `Delivery User ${index + 1}`, `delivery-user-${index + 1}@example.test`, 'PM'))
+  await deliveryDb.run(INSERT.into('idts.cap.Users').entries(deliveryUsers))
+  const deliveryRows = deliveryUsers.map((recipient, index) => ({
+    ID: `d2000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
+    recipient_ID: recipient.ID,
+    businessDate: BUSINESS_DATE,
+    digestType: 'DAILY',
+    windowStart: '2026-08-27T17:00:00.000Z',
+    windowEnd: SNAPSHOT_AT.toISOString(),
+    snapshotAt: SNAPSHOT_AT.toISOString(),
+    itemCount: 1,
+    subject: 'Stored digest delivery',
+    textBody: 'Stored digest body',
+    htmlBody: '<p>Stored digest body</p>',
+    status_code: 'PENDING',
+    attemptCount: 0
+  }))
+  await deliveryDb.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries(deliveryRows))
+  const recipientQuerySizes = []
+  const deliveryTx = {
+    run: async query => {
+      if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Users' && !query.SELECT.one) {
+        const where = JSON.stringify(query.SELECT.where)
+        recipientQuerySizes.push(deliveryUsers.filter(recipient => where.includes(recipient.ID)).length)
+      }
+      return deliveryDb.run(query)
+    }
+  }
+  let delivered = 0
+  let skipped = 0
+  for (let attempt = 0; attempt < 20; attempt += 1) {
+    const result = await processNotificationDigestDeliveries({
+      tx: deliveryTx,
+      config: enabledConfig({ batchSize: 5000 }),
+      sendMail: async () => ({ messageId: 'bounded-digest-message' }),
+      now: new Date('2026-08-28T01:00:00.000Z'),
+      workerID: `bounded-delivery-worker-${attempt}`
+    })
+    delivered += result.sent
+    skipped += result.skipped
+    if (!result.sent && !result.failed) break
+  }
+  assert.equal(delivered, 1001, 'large configured batch drains every eligible digest row across bounded worker calls')
+  assert.equal(skipped, 0, 'bounded digest recipient lookup never mislabels a claimed recipient as missing')
+  assert.ok(recipientQuerySizes.length > 0 && recipientQuerySizes.every(size => size <= 100),
+    'digest recipient IN queries stay within the documented safe batch bound')
 
   const senderRefs = []
   let senderCreates = 0
@@ -386,7 +586,7 @@ function user (ID, displayName, email, role_code) {
   return { ID, displayName, email, role_code, active: true }
 }
 
-function bug (ID, bugNumber, priority_code, severity_code, createdAt, dueDate, nextProcessorUser_ID, assignee_ID, status_code, title = `${bugNumber} digest fixture`) {
+function bug (ID, bugNumber, priority_code, severity_code, createdAt, dueDate, nextProcessorUser_ID, assignee_ID, status_code, title = `${bugNumber} digest fixture`, nextProcessorRole_code = nextProcessorUser_ID ? 'DEVELOPER' : null, retestOwner_ID = null) {
   return {
     ID,
     bugNumber,
@@ -406,7 +606,8 @@ function bug (ID, bugNumber, priority_code, severity_code, createdAt, dueDate, n
     reporter_ID: IDS.tester,
     assignee_ID: assignee_ID || null,
     nextProcessorUser_ID: nextProcessorUser_ID || null,
-    nextProcessorRole_code: nextProcessorUser_ID ? 'DEVELOPER' : null,
+    nextProcessorRole_code,
+    retestOwner_ID: retestOwner_ID || null,
     plannedCompletionDate: dueDate,
     dueDate,
     estimatedEffortHours: '2.00',
@@ -417,6 +618,41 @@ function bug (ID, bugNumber, priority_code, severity_code, createdAt, dueDate, n
 
 function uuidFromIndex (index) {
   return `b3000000-0000-4000-8000-${String(index).padStart(12, '0')}`
+}
+
+async function addPendingAssignmentHistory (db, bugID) {
+  const eventID = 'b4000000-0000-4000-8000-000000000001'
+  await db.run(INSERT.into('idts.cap.HistoryEvents').entries({
+    ID: eventID,
+    bug_ID: bugID,
+    actor_ID: IDS.pm,
+    actorRole_code: 'PM',
+    actionType_code: 'STATUS_CHANGE',
+    summary: 'Digest fixture entered Pending Assignment recently.',
+    createdAt: '2026-08-28T00:30:00.000Z',
+    modifiedAt: '2026-08-28T00:30:00.000Z'
+  }))
+  await db.run(INSERT.into('idts.cap.HistoryLogs').entries({
+    ID: 'b5000000-0000-4000-8000-000000000001',
+    bug_ID: bugID,
+    event_ID: eventID,
+    actor_ID: IDS.pm,
+    actorRole_code: 'PM',
+    actionType_code: 'STATUS_CHANGE',
+    fieldName: 'status',
+    fieldLabel: 'Status',
+    oldValue: 'ASSIGNED',
+    newValue: 'PENDING_ASSIGNMENT',
+    createdAt: '2026-08-28T00:30:00.000Z',
+    modifiedAt: '2026-08-28T00:30:00.000Z'
+  }))
+}
+
+async function isolatedDigestDatabase () {
+  const csn = await cds.load(['db/schema.cds', 'srv/service.cds', 'srv/notification.cds'])
+  const isolated = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
+  await cds.deploy(csn).to(isolated)
+  return isolated
 }
 
 main().catch(error => {
