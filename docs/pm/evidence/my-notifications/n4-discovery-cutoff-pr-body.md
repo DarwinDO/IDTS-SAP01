@@ -6,9 +6,13 @@ Add an activation cutoff to the protected N4 scheduled-discovery action so enabl
 
 Focused real-CAP SQLite scheduled discovery/digest suites pass. Cycles anchored exactly at and after the cutoff use the existing source-keyed transactional writer. Existing no-cutoff behavior and immediate email regressions pass.
 
+Live controlled run `a9b908bf-541e-48f3-bfb7-7672ba1178ba` returned HTTP `200`, 11 candidates, zero created historical events and 16 cutoff skips. Final BTP readiness is `DEMO READY`; Codex Security exact-diff scan `26e165a9-e55d-4fbb-82c3-7af0d1f5383a` completed with zero findings.
+
 ## Negative Evidence
 
 Pre-cutoff Pending/SLA/Overdue fixtures create no source, inbox or email row. Blank and malformed cutoff values return `INVALID_DISCOVERY_CUTOFF`. A stale request value cannot override private server configuration.
+
+The first live attempt executed the old assigned droplet and created 24 source/inbox plus six unsent attempt-zero deliveries. Discovery was stopped before the outbox worker/provider; guarded rollback removed exactly those rows and proved zero remaining run sources. The corrected droplet run created zero historical rows.
 
 ## Edge/Boundary Evidence
 
@@ -20,7 +24,7 @@ Coverage includes before/equal/after Pending Assignment anchors, a matching due-
 
 ## Persistence/Reload
 
-The change adds no persistence. Existing `Notifications.sourceKey`, inbox and delivery uniqueness remain authoritative. Live rollout will read back zero new historical source/delivery rows before scheduler activation is accepted.
+The change adds no persistence. Existing `Notifications.sourceKey`, inbox and delivery uniqueness remain authoritative. HANA readback proved zero new historical source/delivery rows after corrected activation and zero pending/failed deliveries.
 
 ## UI/UX Review
 
@@ -47,7 +51,7 @@ Result: PASS
 
 ## Known Gaps
 
-The live Job Scheduler free plan supports a minimum one-hour cadence. Five minutes requires a standard-plan upgrade; immediate prompt email remains independent of this recovery/discovery cadence.
+The live Job Scheduler free plan supports a minimum one-hour cadence. Job `3368450` and its hourly schedule are active with the private no-replay cutoff. Five minutes requires a standard-plan upgrade; immediate prompt email remains independent of this recovery/discovery cadence. PR remains Draft; no Ready/merge is claimed.
 
 ## Jira/Evidence Links
 
