@@ -18,7 +18,8 @@ TDD RED chứng minh unified read cũ bỏ sót bảng Digest và UI chưa có l
 
 ## Verification / Kiểm định
 
-- PASS before final re-review: User Administration Operations and UI focused contracts; My Notifications Digest regression; JavaScript syntax; CAP EDMX compile; User Administration lint/build with UI5 `1.148.0`; secret scan; agent rules `8/8`; QA-depth `15/15`; `git diff --check`.
-- The first bounded review returned 0 Critical / 0 Major / 2 Important / 1 Minor. Both Important findings are covered by RED→GREEN remediation; the stale-mirror Minor is updated. A fresh exact-head review and Security scan remain required before Draft PR.
+- Final fresh PASS: User Administration Operations and UI focused contracts; My Notifications Digest regression; JavaScript syntax; CAP EDMX and HANA compile; User Administration lint/build with UI5 `1.148.0`; secret scan; agent rules `8/8`; QA-depth `15/15`; PR-body `11/11`; `git diff --check`; DB/root manifest/dependency scope guards.
+- The first bounded review returned 0 Critical / 0 Major / 2 Important / 1 Minor. Both Important findings were covered by RED→GREEN remediation. Final exact-head review returned 0 Critical / 0 Major / 0 Important / 1 documentation-only Minor; that final stale wording is now updated.
+- Codex Security remediation scan `086b9fc3-253d-448e-811d-895d2007b5ea` started on the exact candidate and preflight passed 3/3, but the installed plugin cache/MCP namespace disappeared before completion. Its unsealed canonical drafts remain preserved; no sealed zero-finding result is claimed for the remediation head. The earlier pre-remediation scan remains historical evidence only. TAC was not connected.
 - Ponytail and Ponytail Review found no dependency, new screen, action or speculative abstraction to remove: the existing table/DTO/filter are reused. Manual retry and retention remain deliberately unbuilt.
 - OfficeCLI `1.0.145` preflight passed; Markdown is outside native OfficeCLI editing and used repository-native patching. CAP/UI5/Fiori MCP namespaces were not callable.

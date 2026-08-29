@@ -190,10 +190,10 @@ Table Workload khai báo cột i18n `Trạng thái workload` riêng giữa Effor
 
 ### English
 
-Operations → Delivery keeps the existing table and adds one native `Select` for All types, Invitation, and Access change plus two localized columns for Type and Event. Existing recipient/status/attempt/time/details/retry cells remain in the same row. Retry calls `.onRetryDelivery`; no new tab, dialog, page, or custom CSS is introduced.
+Operations → Delivery keeps the existing table and uses one native `Select` for All types, Invitation, Access change, and read-only Daily digest plus two localized columns for Type and Event. Existing recipient/status/attempt/time/details/retry cells remain in the same row. Retry calls `.onRetryDelivery` only when server `canRetry` is true; no new tab, dialog, page, or custom CSS is introduced.
 
 - **Location**: `Main.view.xml:386-393` — delivery type `Select`.
-  **IDTS concept**: PM filters two delivery domains without splitting operational diagnosis.
+  **IDTS concept**: PM filters three delivery domains without splitting operational diagnosis.
   **Impact if broken**: access rows can be hidden, mislabeled, or loaded through an invalid type.
   **Must check together**: controller filter/session state, all i18n bundles, and server type allowlist.
 - **Location**: `Main.view.xml:397-414` — Type/Event columns and normalized row labels.
@@ -203,10 +203,10 @@ Operations → Delivery keeps the existing table and adds one native `Select` fo
 
 ### Tiếng Việt
 
-Operations → Delivery giữ bảng hiện có và thêm một `Select` native cho Tất cả loại, Thư mời và Thay đổi quyền truy cập, cùng hai cột localized Loại và Sự kiện. Các cell recipient/status/attempt/time/details/retry hiện có vẫn trong cùng row. Retry gọi `.onRetryDelivery`; không thêm tab, dialog, page hoặc custom CSS.
+Operations → Delivery giữ bảng hiện có và dùng một `Select` native cho Tất cả loại, Thư mời, Thay đổi quyền truy cập và Bản tổng hợp hằng ngày read-only, cùng hai cột localized Loại và Sự kiện. Các cell recipient/status/attempt/time/details/retry hiện có vẫn trong cùng row. Retry chỉ gọi `.onRetryDelivery` khi `canRetry` từ server là true; không thêm tab, dialog, page hoặc custom CSS.
 
 - **Vị trí**: `Main.view.xml:386-393` — `Select` delivery type.
-  **Khái niệm IDTS**: PM filter hai domain delivery mà không tách chẩn đoán vận hành.
+  **Khái niệm IDTS**: PM filter ba domain delivery mà không tách chẩn đoán vận hành.
   **Ảnh hưởng nếu sai**: row access có thể bị ẩn, gắn nhãn sai hoặc load qua type không hợp lệ.
   **Phải kiểm tra cùng**: filter/session state controller, toàn bộ i18n bundle và allowlist type server.
 - **Vị trí**: `Main.view.xml:397-414` — cột Type/Event và label row đã normalize.
