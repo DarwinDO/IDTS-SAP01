@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2/N3/N4 LIVE — N4 COMPLETE; HOURLY DISCOVERY ACTIVE WITH NO-REPLAY CUTOFF`
+`N1/N2/N3/N4/N5-Lite LIVE — N5-Lite COMPLETE; HOURLY DISCOVERY ACTIVE WITH NO-REPLAY CUTOFF`
 
 ### Authority
 
@@ -27,7 +27,7 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-Current 2026-08-29 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`; additive schema/CAP/UI rollout and incident recovery remain complete. Controlled Job Scheduler/Brevo delivery and HANA source-key concurrency are accepted with one retained `donhvse` acceptance notification and guarded cleanup of the concurrency-only row. Private cutoff `2026-08-29T02:43:41.368Z` prevents historical Pending Assignment/SLA/Overdue replay; a controlled run created zero historical rows. Job `3368450` and hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245` are active. The five-minute cadence remains unavailable on the live `free` plan. N4 is closed; N5 is the next gate. See `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
+Current 2026-08-29 override of the historical entries below: N4 remains live and operationally closed with private no-replay cutoff `2026-08-29T02:43:41.368Z`, active Job `3368450`, and active hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245`. N5-Lite source PR #368 merged at `68f9cba580e4e5e69425ec02ab1b4361468fbb46` and the exact merged artifact was selectively deployed as `idts-sap01-srv` plus `idts-sap01-app-content`. Post-deploy CAP/AppRouter, health, readiness, protected anonymous auth and Web checks returned `DEMO READY`; signed-in Edge acceptance verified the Operations `Type`/`Event` columns, the `Daily digest` filter, reload behavior and an empty browser warning/error log. The live Digest filter currently has no rows, so row-detail/no-retry behavior remains source/contract evidence rather than a fabricated live-data claim. No artificial notification, email, scheduler run or business-data row was created. N5-Lite is closed; no N6, manual Digest retry or retention implementation is automatically opened. See `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md` and `docs/pm/evidence/my-notifications/n5-lite-rollout-acceptance-20260829.md`.
 
 Historical source-only record (superseded by the current override above): N1 #361 and N2 #362 were merged; N3 was the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 were locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. At that historical boundary only the local commit was claimed; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action was claimed, and live UI remained rolled back.
 
@@ -51,9 +51,9 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2/N3/N4 LIVE — N4 HOÀN TẤT; DISCOVERY HOURLY ACTIVE VỚI CUTOFF CHỐNG REPLAY`
+`N1/N2/N3/N4/N5-Lite LIVE — N5-Lite HOÀN TẤT; DISCOVERY HOURLY ACTIVE VỚI CUTOFF CHỐNG REPLAY`
 
-Cập nhật 2026-08-29 thay thế trạng thái lịch sử bên dưới: rollout additive schema/CAP/UI và recovery incident của PR #365 vẫn hoàn tất. Acceptance Job Scheduler/Brevo và concurrency source-key HANA đã PASS bằng một notification `donhvse` được giữ làm evidence; row concurrency đã cleanup có guard. Cutoff private `2026-08-29T02:43:41.368Z` chặn replay Pending Assignment/SLA/Overdue lịch sử; controlled run tạo zero row lịch sử. Job `3368450` và schedule hourly `0282b016-79d1-450b-a2df-b302a76f9245` đang active. Plan `free` vẫn không cho cadence năm phút. N4 đã đóng; N5 là gate tiếp theo. Evidence: `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
+Cập nhật 2026-08-29 thay thế trạng thái lịch sử bên dưới: N4 vẫn live và đã đóng vận hành với cutoff private chống replay `2026-08-29T02:43:41.368Z`, Job `3368450` active và schedule hourly `0282b016-79d1-450b-a2df-b302a76f9245` active. Source N5-Lite PR #368 đã merge tại `68f9cba580e4e5e69425ec02ab1b4361468fbb46`; artifact exact merge được deploy chọn lọc gồm `idts-sap01-srv` và `idts-sap01-app-content`. Sau deploy, CAP/AppRouter, health, readiness, protected anonymous auth và Web đều trả `DEMO READY`; acceptance Edge đã đăng nhập xác nhận cột `Type`/`Event`, filter `Daily digest`, reload và browser log không có warning/error. Live hiện chưa có row Digest, nên detail/no-retry ở cấp row vẫn là evidence source/contract, không claim bằng dữ liệu live giả. Không tạo notification, email, scheduler run hoặc business-data row nhân tạo. N5-Lite đã đóng; không tự động mở N6, retry Digest thủ công hoặc implementation retention. Evidence: `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md` và `docs/pm/evidence/my-notifications/n5-lite-rollout-acceptance-20260829.md`.
 
 ### Thẩm quyền
 
