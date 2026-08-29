@@ -1,5 +1,13 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-29 — N4 final live closure
+
+- **English:** N4 is live and operationally closed. The approved private cutoff `2026-08-29T02:43:41.368Z` is active on CAP droplet `c2be63c9-4f4c-43a1-8de9-40e9b2862dd4`. Controlled run `a9b908bf-541e-48f3-bfb7-7672ba1178ba` returned HTTP 200 with 11 candidates, zero historical creations and 16 skips. Job `3368450` plus hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245` are active. Final readiness is `DEMO READY`; HANA poststate is zero historical scheduled sources and zero pending/failed deliveries.
+- **Tiếng Việt:** N4 đã live và đóng vận hành. Cutoff private đã duyệt `2026-08-29T02:43:41.368Z` đang active trên CAP droplet `c2be63c9-4f4c-43a1-8de9-40e9b2862dd4`. Controlled run `a9b908bf-541e-48f3-bfb7-7672ba1178ba` trả HTTP 200 với 11 candidate, zero historical creation và 16 skip. Job `3368450` cùng schedule hourly `0282b016-79d1-450b-a2df-b302a76f9245` đang active. Readiness cuối là `DEMO READY`; HANA poststate zero source lịch sử và zero delivery pending/failed.
+- **Incident truth:** The first run hit the old assigned droplet and created 24 source/inbox plus six unsent attempt-zero deliveries. Discovery was stopped before worker/provider execution. Guarded rollback task `n4-cutoff-rollback-0f2a41733f` removed exactly those rows and proved zero remaining run sources. No provider email was sent.
+- **Security:** Exact-diff Codex Security scan `26e165a9-e55d-4fbb-82c3-7af0d1f5383a` completed with zero findings. The earlier artifact-writing failure is not used as a security result. TAC remained unavailable.
+- **Boundary:** No Ready/merge of PR #366 or #367, no DB/schema/seed, Bug, user/role, unrelated provider email or N5 mutation. The BTP free plan limits discovery to hourly; immediate email remains event-driven.
+
 ## 2026-08-27 — N4 Task 10 RED precondition
 
 - **English — test-harness/process issue (expected RED):** The new fixed-clock scheduled-discovery QA command `npm run qa:my-notifications:scheduled` exits `1` with `MODULE_NOT_FOUND` for `srv/notification/scheduled.js`, because the production module is intentionally absent at the TDD RED boundary. No runtime, provider, user/role, data, deployment, junction, or external state changed. OfficeCLI preflight `officecli --version` returned `1.0.145`; Markdown remains outside native OfficeCLI editing. The next step is the minimal GREEN implementation, followed by rerunning the same command.

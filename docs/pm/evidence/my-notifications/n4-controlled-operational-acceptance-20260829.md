@@ -6,7 +6,7 @@
 
 The bounded N4 scheduler/provider and HANA idempotency acceptance is complete. One controlled `UPDATED` notification for `BUG-0014` was created for the approved `donhvse` Tester account, processed by the existing SAP Job Scheduling recovery job and delivered by Brevo. Replaying the exact source key created no second notification, inbox row, delivery or provider request.
 
-The N4 scheduled-discovery job is prepared but intentionally inactive. The live Job Scheduling instance is on the `free` plan, whose minimum recurring frequency is one hour rather than five minutes. More importantly, the current live Bug set contains pre-existing Pending Assignment/Overdue candidates; activating discovery without a separately reviewed baseline would create historical notifications. No historical replay was authorized or performed.
+The N4 scheduled-discovery job is now active after the approved cutoff remediation. The live Job Scheduling instance is on the `free` plan, whose minimum recurring frequency is one hour rather than five minutes. Private cutoff `2026-08-29T02:43:41.368Z` excludes all earlier Pending Assignment, SLA and Overdue cycles while preserving event-triggered immediate email.
 
 ### Readiness and pre-state
 
@@ -35,8 +35,16 @@ The N4 scheduled-discovery job is prepared but intentionally inactive. The live 
 ### Scheduler configuration boundary
 
 - The live instance rejected `repeatInterval=5 minutes` with the explicit service-plan error: the `free` plan minimum is one hour; five minutes requires the `standard` plan.
-- Job `3368450`, `IDTSNotificationSchedulesHourly`, is staged against `/odata/v4/notification/processNotificationSchedules` with one `1 hour` schedule. Both job and schedule are inactive.
-- Activation is held to prevent unreviewed historical Pending Assignment/Overdue replay. Prompt Bug/access email does not depend on this cadence; its post-commit immediate worker remains the normal low-latency path, while Job Scheduler is recovery/discovery/digest infrastructure.
+- Job `3368450`, `IDTSNotificationSchedulesHourly`, is active against `/odata/v4/notification/processNotificationSchedules` with active hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245`.
+- Successful controlled run `a9b908bf-541e-48f3-bfb7-7672ba1178ba` returned HTTP `200`, 11 candidates, zero created Pending/SLA/Overdue rows and 16 cutoff skips. HANA poststate remained zero for all historical scheduled source families and zero pending/failed deliveries.
+- Prompt Bug/access email does not depend on this cadence; its post-commit immediate worker remains the normal low-latency path, while Job Scheduler is recovery/discovery/digest infrastructure.
+
+### Cutoff deployment incident and recovery
+
+- A direct CAP artifact update initially restarted the old assigned droplet. The first discovery acceptance run `1952a17c-db2f-4149-ba80-2a13d411be19` therefore executed old code and created exactly 24 source/inbox rows and six attempt-zero `PENDING` deliveries. Discovery was deactivated immediately and no outbox/provider send ran.
+- Guarded rollback task `n4-cutoff-rollback-0f2a41733f` required the exact run time, source prefixes and counts before deleting exactly six deliveries, 24 inbox rows and 24 source rows. Readback proved zero remaining run sources.
+- Assigning droplet `c2be63c9-4f4c-43a1-8de9-40e9b2862dd4` corrected the root cause. CAP restart and final `btp:demo:check` returned `DEMO READY` before the successful no-replay run.
+- Codex Security exact-diff scan `26e165a9-e55d-4fbb-82c3-7af0d1f5383a` completed with zero findings. Prior scan `24035adc-f3a9-4f7a-8ceb-8b8cd2312bf4` failed because its canonical artifact draft was missing and is retained only as tooling evidence; TAC was unavailable.
 
 ### Final verification
 

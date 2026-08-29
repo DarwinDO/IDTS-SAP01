@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2/N3/N4 LIVE — N4 CONTROLLED PROVIDER/HANA ACCEPTANCE COMPLETE; DISCOVERY JOB STAGED INACTIVE`
+`N1/N2/N3/N4 LIVE — N4 COMPLETE; HOURLY DISCOVERY ACTIVE WITH NO-REPLAY CUTOFF`
 
 ### Authority
 
@@ -27,7 +27,7 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-Current 2026-08-29 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`; additive schema/CAP/UI rollout and incident recovery remain complete. Controlled Job Scheduler/Brevo delivery and HANA source-key concurrency are now accepted with one retained `donhvse` acceptance notification and guarded cleanup of the concurrency-only row. The five-minute discovery cadence is unavailable on the live `free` plan; an hourly discovery job is staged inactive so existing Pending Assignment/Overdue data is not replayed without a separate baseline decision. N5 remains pending. See `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
+Current 2026-08-29 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`; additive schema/CAP/UI rollout and incident recovery remain complete. Controlled Job Scheduler/Brevo delivery and HANA source-key concurrency are accepted with one retained `donhvse` acceptance notification and guarded cleanup of the concurrency-only row. Private cutoff `2026-08-29T02:43:41.368Z` prevents historical Pending Assignment/SLA/Overdue replay; a controlled run created zero historical rows. Job `3368450` and hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245` are active. The five-minute cadence remains unavailable on the live `free` plan. N4 is closed; N5 is the next gate. See `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
 
 Historical source-only record (superseded by the current override above): N1 #361 and N2 #362 were merged; N3 was the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 were locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. At that historical boundary only the local commit was claimed; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action was claimed, and live UI remained rolled back.
 
@@ -51,9 +51,9 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2/N3/N4 LIVE — ĐÃ XONG ACCEPTANCE PROVIDER/HANA N4; JOB DISCOVERY ĐÃ STAGE NHƯNG INACTIVE`
+`N1/N2/N3/N4 LIVE — N4 HOÀN TẤT; DISCOVERY HOURLY ACTIVE VỚI CUTOFF CHỐNG REPLAY`
 
-Cập nhật 2026-08-29 thay thế trạng thái lịch sử bên dưới: rollout additive schema/CAP/UI và recovery incident của PR #365 vẫn hoàn tất. Acceptance Job Scheduler/Brevo và concurrency source-key HANA đã PASS bằng một notification `donhvse` được giữ làm evidence; row chỉ dùng cho concurrency đã được cleanup có guard. Plan `free` không cho cadence năm phút; job discovery một giờ đã stage inactive để không replay Bug Pending Assignment/Overdue cũ khi chưa có quyết định baseline riêng. N5 vẫn pending. Evidence: `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
+Cập nhật 2026-08-29 thay thế trạng thái lịch sử bên dưới: rollout additive schema/CAP/UI và recovery incident của PR #365 vẫn hoàn tất. Acceptance Job Scheduler/Brevo và concurrency source-key HANA đã PASS bằng một notification `donhvse` được giữ làm evidence; row concurrency đã cleanup có guard. Cutoff private `2026-08-29T02:43:41.368Z` chặn replay Pending Assignment/SLA/Overdue lịch sử; controlled run tạo zero row lịch sử. Job `3368450` và schedule hourly `0282b016-79d1-450b-a2df-b302a76f9245` đang active. Plan `free` vẫn không cho cadence năm phút. N4 đã đóng; N5 là gate tiếp theo. Evidence: `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
 
 ### Thẩm quyền
 
