@@ -24,17 +24,20 @@ const URGENT_SEVERITIES = new Set(['CRITICAL', 'BLOCKER'])
 async function processNotificationSchedules (req) {
   assertOutboxProcessor(req)
   const now = normalizeNow(req?.data?.now)
+  // Cutoff do operator cấu hình: không biến backlog trước lúc bật scheduler thành notification/email mới.
+  const discoveryFrom = resolveDiscoveryFrom(req?.data)
   const requestTx = cds.tx(req)
-  const result = await discoverScheduledNotifications({ tx: requestTx, now })
+  const result = await discoverScheduledNotifications({ tx: requestTx, now, discoveryFrom })
   if (isDigestScheduleDue(now)) {
     await scheduleNotificationDigests({ tx: requestTx, now })
   }
   return result
 }
 
-async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmailConfig() } = {}) {
+async function discoverScheduledNotifications ({ tx, now, discoveryFrom, emailConfig = getEmailConfig() } = {}) {
   if (!tx || typeof tx.run !== 'function') throw schedulerError(500, 'SCHEDULE_TRANSACTION_REQUIRED', 'A CAP transaction is required.')
   const instant = normalizeNow(now)
+  const activationCutoff = normalizeDiscoveryFrom(discoveryFrom)
   const businessDate = instant.toISOString().slice(0, 10)
   const result = {
     candidates: 0,
@@ -72,6 +75,7 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
       pendingAssignmentAnchors: page.pendingAssignmentAnchors,
       businessDate,
       instant,
+      discoveryFrom: activationCutoff,
       emailConfig
     })
     for (const key of ['candidates', 'pendingAssignment', 'sla', 'overdue', 'created', 'skipped']) {
@@ -86,7 +90,7 @@ async function discoverScheduledNotifications ({ tx, now, emailConfig = getEmail
   return result
 }
 
-async function processScheduledCandidatePage ({ tx, runPage, candidates, pendingAssignmentAnchors, businessDate, instant, emailConfig }) {
+async function processScheduledCandidatePage ({ tx, runPage, candidates, pendingAssignmentAnchors, businessDate, instant, discoveryFrom, emailConfig }) {
   const pageResult = {
     candidates: candidates.length,
     pendingAssignment: 0,
@@ -111,6 +115,10 @@ async function processScheduledCandidatePage ({ tx, runPage, candidates, pending
       }
       for (const bug of currentBugs) {
         const anchor = fixedPendingAssignmentAnchors.get(bug.ID) || { pendingAssignmentAt: bug.createdAt }
+        if (!isAtOrAfterCutoff(anchor.pendingAssignmentAt, discoveryFrom)) {
+          pageResult.skipped += recipients.length
+          continue
+        }
         const urgent = isUrgent(bug)
         const thresholdHours = urgent ? URGENT_SLA_HOURS : STANDARD_SLA_HOURS
         for (const recipient of recipients) {
@@ -156,6 +164,10 @@ async function processScheduledCandidatePage ({ tx, runPage, candidates, pending
     for (const bug of currentBugs) {
       const anchor = anchors.get(bug.ID) || {}
       if (!isOverdue(bug, businessDate)) continue
+      if (!isAtOrAfterCutoff(anchor.overdueCycleAt, discoveryFrom)) {
+        result.skipped += (overdueRecipients.get(bug.ID) || []).length
+        continue
+      }
       const dueDate = String(bug.dueDate).slice(0, 10)
       for (const recipientID of overdueRecipients.get(bug.ID) || []) {
         await writeScheduledEvent(pageTx, bug, {
@@ -310,6 +322,7 @@ async function readScheduleAnchors (tx, bugs, businessDate) {
     if (!anchor) continue
     // History event IDs are immutable cycle identities; the created-at fallback covers legacy Bugs without due-date audit.
     anchor.overdueCycleID = `CREATED:${bug.ID}:${bug.createdAt || ''}`
+    anchor.overdueCycleAt = bug.createdAt
   }
   if (!bugs.length) return anchors
 
@@ -324,6 +337,7 @@ async function readScheduleAnchors (tx, bugs, businessDate) {
     const dueDate = bug?.dueDate && String(bug.dueDate).slice(0, 10)
     if (anchor && dueDate && String(row.newValue).slice(0, 10) === dueDate && historyTimestampKey(row.createdAt) === latestDueAtByBug.get(row.bug_ID) && row.cycleID) {
       anchor.overdueCycleID = row.cycleID
+      anchor.overdueCycleAt = row.createdAt
     }
   }
   return anchors
@@ -469,6 +483,26 @@ function normalizeNow (value) {
   const now = value === undefined || value === null ? new Date() : new Date(value)
   if (Number.isNaN(now.getTime())) throw schedulerError(400, 'INVALID_SCHEDULE_TIMESTAMP', 'Schedule timestamp is invalid.')
   return now
+}
+
+function normalizeDiscoveryFrom (value) {
+  if (value === undefined || value === null) return null
+  const cutoff = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(cutoff.getTime())) {
+    throw schedulerError(400, 'INVALID_DISCOVERY_CUTOFF', 'Discovery activation cutoff is invalid.')
+  }
+  return cutoff
+}
+
+function resolveDiscoveryFrom (data = {}) {
+  const configured = process.env.IDTS_NOTIFICATION_DISCOVERY_FROM
+  return normalizeDiscoveryFrom(configured === undefined || configured === '' ? data.discoveryFrom : configured)
+}
+
+function isAtOrAfterCutoff (value, cutoff) {
+  if (!cutoff) return true
+  const timestamp = new Date(value)
+  return !Number.isNaN(timestamp.getTime()) && timestamp.getTime() >= cutoff.getTime()
 }
 
 function assertOutboxProcessor (req) {

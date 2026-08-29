@@ -27,3 +27,7 @@ File CDS này là hợp đồng OData công khai cho inbox của chính user đ�
 ## Safe editing / Sửa an toàn
 
 Keep the DTO allowlisted and add no recipient selector. Keep `processNotificationSchedules` protected and do not merge it into `processEmailOutbox`; any new result field must be traced to a consumer test. / Giữ DTO theo allowlist và không thêm selector người nhận. Giữ `processNotificationSchedules` được bảo vệ và không gộp vào `processEmailOutbox`; mọi field result mới phải được trace tới consumer test.
+
+## Activation cutoff / Cutoff kích hoạt
+
+The protected action now has signature `processNotificationSchedules(now:Timestamp, discoveryFrom:Timestamp)`. `discoveryFrom` is not a recipient/filter selector; private server configuration is authoritative in production, while the parameter supports controlled environments when that configuration is absent. Invalid/blank values fail closed, and focused QA proves before/equal/after boundaries plus server-config precedence. / Action được bảo vệ giờ có signature `processNotificationSchedules(now:Timestamp, discoveryFrom:Timestamp)`. `discoveryFrom` không phải selector recipient/filter; private server config là authority ở production, còn tham số hỗ trợ môi trường kiểm soát khi config chưa có. Giá trị sai/blank fail-closed và QA focused chứng minh boundary trước/đúng/sau cutoff cùng precedence của server config.

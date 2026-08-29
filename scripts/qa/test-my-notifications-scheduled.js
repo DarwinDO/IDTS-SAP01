@@ -38,7 +38,8 @@ const IDS = Object.freeze({
   staleAssigned: 'a3000000-0000-4000-8000-000000000007',
   staleDueDate: 'a3000000-0000-4000-8000-000000000008',
   staleRecipient: 'a3000000-0000-4000-8000-000000000009',
-  staleProfile: 'a3000000-0000-4000-8000-000000000010'
+  staleProfile: 'a3000000-0000-4000-8000-000000000010',
+  cutoffOverdue: 'a3000000-0000-4000-8000-000000000011'
 })
 
 const BASE_NOW = new Date('2026-08-27T04:00:00.000Z')
@@ -67,8 +68,8 @@ async function notificationBySource (db, sourceKey) {
 
 async function main () {
   const notificationCds = fs.readFileSync(path.join(__dirname, '../../srv/notification.cds'), 'utf8')
-  assert.match(notificationCds, /@\(requires:\s*'OutboxProcessor'\)\s*action processNotificationSchedules\(now:Timestamp\)/,
-    'scheduled action is protected by the OutboxProcessor scope')
+  assert.match(notificationCds, /@\(requires:\s*'OutboxProcessor'\)\s*action processNotificationSchedules\(now:Timestamp,\s*discoveryFrom:Timestamp\)/,
+    'scheduled action is protected and accepts one server-side activation cutoff')
 
   const csn = await cds.load(['db/schema.cds', 'srv/service.cds', 'srv/notification.cds'])
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
@@ -94,9 +95,76 @@ async function main () {
     bug(IDS.standard, 'BUG-SCHEDULED-STANDARD', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', null, null),
     bug(IDS.overdue, 'BUG-SCHEDULED-OVERDUE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
     bug(IDS.closed, 'BUG-SCHEDULED-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-20T00:00:00.000Z', '2026-08-20', IDS.owner, IDS.assigneeProfile, 'CLOSED'),
-    bug(IDS.edited, 'BUG-SCHEDULED-EDITED', 'HIGH', 'MAJOR', '2026-08-27T04:00:00.000Z', null, null)
+    bug(IDS.edited, 'BUG-SCHEDULED-EDITED', 'HIGH', 'MAJOR', '2026-08-27T04:00:00.000Z', null, null),
+    bug(IDS.cutoffOverdue, 'BUG-SCHEDULED-CUTOFF-OVERDUE', 'HIGH', 'MAJOR', '2026-08-27T04:00:00.000Z', '2026-08-26', IDS.owner, null, 'ASSIGNED')
   ]))
   await addStatusHistory(db, IDS.edited, 'a7000000-0000-4000-8000-000000000001')
+  await addDueDateHistory(db, IDS.cutoffOverdue, null, '2026-08-26',
+    'a5000000-0000-4000-8000-000000000003', '2026-08-27T04:00:00.000Z')
+
+  const activationCutoff = new Date('2099-01-01T00:00:00.000Z')
+  const baselineResult = await discoverScheduledNotifications({
+    tx: db,
+    now: BASE_NOW,
+    discoveryFrom: activationCutoff,
+    emailConfig: emailConfig()
+  })
+  const baselineRows = await db.run(SELECT.from('idts.cap.Notifications').columns('sourceKey'))
+  assert.equal(baselineResult.created, 0,
+    `pre-activation Pending/SLA/Overdue backlog is not materialized: ${JSON.stringify(baselineRows)}`)
+  assert.equal(baselineRows.length, 0, 'cutoff leaves the historical source set unchanged')
+
+  await discoverScheduledNotifications({
+    tx: db,
+    now: BASE_NOW,
+    discoveryFrom: new Date('2026-08-27T04:00:00.000Z'),
+    emailConfig: emailConfig()
+  })
+  assert.ok(await notificationBySource(db, `PENDING_ASSIGNMENT:${IDS.edited}:${IDS.pm}`),
+    'a Pending Assignment cycle anchored exactly at activation is discovered')
+  assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: `PENDING_ASSIGNMENT:${IDS.urgent}:${IDS.pm}` }), 0,
+    'a Pending Assignment cycle anchored before activation remains excluded')
+  assert.equal(await count(db, 'idts.cap.Notifications', {
+    bug_ID: IDS.cutoffOverdue,
+    eventType_code: 'OVERDUE',
+    recipient_ID: IDS.owner
+  }), 1, 'an Overdue HistoryLog cycle anchored exactly at activation is discovered')
+
+  const invalidCutoffRequest = new cds.Request({
+    user: new cds.User({ id: 'scheduler', roles: ['OutboxProcessor'] }),
+    data: { now: BASE_NOW.toISOString(), discoveryFrom: 'not-a-timestamp' }
+  })
+  await assert.rejects(() => processNotificationSchedules(invalidCutoffRequest), error => {
+    assert.equal(error.status, 400)
+    assert.equal(error.code, 'INVALID_DISCOVERY_CUTOFF')
+    return true
+  }, 'invalid activation cutoff fails before discovery')
+
+  const blankCutoffRequest = new cds.Request({
+    user: new cds.User({ id: 'scheduler', roles: ['OutboxProcessor'] }),
+    data: { now: BASE_NOW.toISOString(), discoveryFrom: '' }
+  })
+  await assert.rejects(() => processNotificationSchedules(blankCutoffRequest), error => {
+    assert.equal(error.status, 400)
+    assert.equal(error.code, 'INVALID_DISCOVERY_CUTOFF')
+    return true
+  }, 'blank activation cutoff fails before discovery')
+
+  const beforeConfiguredCutoff = await count(db, 'idts.cap.Notifications')
+  const previousConfiguredCutoff = process.env.IDTS_NOTIFICATION_DISCOVERY_FROM
+  process.env.IDTS_NOTIFICATION_DISCOVERY_FROM = '2099-01-01T00:00:00.000Z'
+  try {
+    const configuredCutoffRequest = new cds.Request({
+      user: new cds.User({ id: 'scheduler', roles: ['OutboxProcessor'] }),
+      data: { now: BASE_NOW.toISOString(), discoveryFrom: '2020-01-01T00:00:00.000Z' }
+    })
+    await processNotificationSchedules(configuredCutoffRequest)
+  } finally {
+    if (previousConfiguredCutoff === undefined) delete process.env.IDTS_NOTIFICATION_DISCOVERY_FROM
+    else process.env.IDTS_NOTIFICATION_DISCOVERY_FROM = previousConfiguredCutoff
+  }
+  assert.equal(await count(db, 'idts.cap.Notifications'), beforeConfiguredCutoff,
+    'private server cutoff overrides a stale technical request value')
 
   const boundedQueries = []
   const boundedTx = {
@@ -888,7 +956,13 @@ async function isolatedSchedulerDatabase () {
   return isolated
 }
 
-async function addDueDateHistory (db, bugID, oldValue, newValue, eventID) {
+async function addDueDateHistory (db, bugID, oldValue, newValue, eventID, timestamp) {
+  const createdAt = timestamp || (eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z')
+  const logID = eventID.endsWith('001')
+    ? 'a6000000-0000-4000-8000-000000000001'
+    : eventID.endsWith('002')
+      ? 'a6000000-0000-4000-8000-000000000002'
+      : 'a6000000-0000-4000-8000-000000000003'
   await db.run(INSERT.into('idts.cap.HistoryEvents').entries({
     ID: eventID,
     bug_ID: bugID,
@@ -896,11 +970,11 @@ async function addDueDateHistory (db, bugID, oldValue, newValue, eventID) {
     actorRole_code: 'PM',
     actionType_code: 'EDIT',
     summary: 'Changed due date for scheduled QA.',
-    createdAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z',
-    modifiedAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z'
+    createdAt,
+    modifiedAt: createdAt
   }))
   await db.run(INSERT.into('idts.cap.HistoryLogs').entries({
-    ID: eventID.endsWith('001') ? 'a6000000-0000-4000-8000-000000000001' : 'a6000000-0000-4000-8000-000000000002',
+    ID: logID,
     bug_ID: bugID,
     event_ID: eventID,
     actor_ID: IDS.pm,
@@ -910,8 +984,8 @@ async function addDueDateHistory (db, bugID, oldValue, newValue, eventID) {
     fieldLabel: 'Due Date',
     oldValue,
     newValue,
-    createdAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z',
-    modifiedAt: eventID.endsWith('001') ? '2026-08-27T01:00:00.000Z' : '2026-08-27T02:00:00.000Z'
+    createdAt,
+    modifiedAt: createdAt
   }))
 }
 
