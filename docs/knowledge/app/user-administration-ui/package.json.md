@@ -1,5 +1,7 @@
 # Knowledge: `app/user-administration-ui/package.json`
 
+N5-Lite advances the HTML5 cache identity to `1.0.18` because visible Operations labels changed; dependencies and scripts remain unchanged. / N5-Lite tăng cache identity HTML5 lên `1.0.18` vì label Operations thay đổi; dependency và script giữ nguyên.
+
 ## English
 
 This file is the npm and build contract for the standalone User Administration UI. Its `version` must move with `sap.app/applicationVersion` in `webapp/manifest.json` and the root version in `package-lock.json`; HTML5 Repository and AppRouter use that release identity to distinguish newly deployed content from cached older content. The scripts reuse the installed UI5 toolchain and generate the cache-buster index plus deployable ZIP. Do not add runtime dependencies or change build tasks for wording-only releases.

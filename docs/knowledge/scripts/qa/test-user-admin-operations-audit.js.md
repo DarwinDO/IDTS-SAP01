@@ -1,5 +1,11 @@
 # Knowledge: `scripts/qa/test-user-admin-operations-audit.js`
 
+## N5-Lite coverage / Coverage N5-Lite
+
+English: focused QA proves authorization precedes Digest reads, a concrete type reads only the Digest table, mixed `ALL` includes all three sources, recipient masking is preserved, forbidden snapshot/provider/lock fields are absent, and manual Digest retry is disabled.
+
+Tiếng Việt: QA focused chứng minh authorization chạy trước read Digest, filter concrete chỉ đọc bảng Digest, `ALL` gồm đủ ba source, recipient vẫn mask, field snapshot/provider/lock bị loại và retry Digest thủ công bị tắt.
+
 ## English / Tiếng Việt
 
 The Gate 6 programmatic contract is a source-level and in-memory behavior guard for safe operational visibility. It verifies the CDS DTO/action surface, default/max page clamping, stable safe mapping, masked recipient/actor/target display, 12-character correlation fingerprinting, persisted-state readiness, PM/UserAdmin authorization, exact retry eligibility, optimistic `modifiedAt`, fixed attempt ceiling, lock rejection, atomic reset plus audit, preservation of delivery history, and post-commit immediate-kick registration.

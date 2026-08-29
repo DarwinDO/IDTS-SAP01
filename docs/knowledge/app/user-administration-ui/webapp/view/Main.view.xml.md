@@ -1,5 +1,11 @@
 # Knowledge: `app/user-administration-ui/webapp/view/Main.view.xml`
 
+## N5-Lite unified filter / Filter hợp nhất N5-Lite
+
+English: Digest is one additional option in the existing Delivery type filter. No new tab, table or action is introduced. The same responsive table renders the safe DTO, and the existing retry button remains hidden because Digest rows are read-only.
+
+Tiếng Việt: Digest chỉ là một option mới trong filter Delivery type hiện có. Không thêm tab, table hoặc action mới. Cùng responsive table render DTO an toàn và nút retry hiện có vẫn ẩn vì row Digest read-only.
+
 ## English
 
 Gate 5 adds a Business Catalogs tab with one catalog selector, search, inactive filter, refresh, Add, Edit, Activate, and Deactivate actions. A responsive table shows only safe business labels and state. No hard-delete, infrastructure, credential, or provider control exists.

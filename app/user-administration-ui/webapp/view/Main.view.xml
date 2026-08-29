@@ -387,7 +387,8 @@
 															<Select selectedKey="{deliveries>/deliveryType}" change=".onDeliveryTypeChange" tooltip="{i18n>deliveryTypeFilter}">
 																<core:Item key="ALL" text="{i18n>allDeliveryTypes}"/>
 																<core:Item key="INVITATION" text="{i18n>invitationDeliveryType}"/>
-																<core:Item key="ACCESS_CHANGE" text="{i18n>accessChangeDeliveryType}"/>
+																	<core:Item key="ACCESS_CHANGE" text="{i18n>accessChangeDeliveryType}"/>
+																	<core:Item key="DIGEST" text="{i18n>digestDeliveryType}"/>
 															</Select>
 															<Button icon="sap-icon://refresh" tooltip="{i18n>refreshOperations}" press=".onRefreshOperations"/>
 														</Toolbar>

@@ -1,5 +1,11 @@
 # Knowledge: `scripts/qa/test-user-admin-ui.js`
 
+## N5-Lite coverage / Coverage N5-Lite
+
+English: UI contract verifies one unified table, a localized Digest filter option, safe type/event normalization and `canRetry=false`. It also updates the stale Bug Management cross-app version guard from `0.0.6` to the already-merged `0.0.7`; no Bug Management source changes.
+
+Tiếng Việt: UI contract verify một bảng unified, option filter Digest localized, normalize type/event an toàn và `canRetry=false`. Test cũng cập nhật guard version Bug Management stale từ `0.0.6` lên `0.0.7` đã merge; không đổi source Bug Management.
+
 ## English / Tiếng Việt
 
 The UI contract fixture checks the state-bound link button/dialog, read-only business-role display, full preservation copy, i18n parity, lowercased exact two-parameter action payload, valid-email guard, double-submit guard, queued result, and reload flag. UI runtime/lint/build claims remain separate from source syntax when dependencies are unavailable.

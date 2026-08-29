@@ -1,5 +1,11 @@
 # Knowledge: `app/user-administration-ui/webapp/controller/Main.controller.js`
 
+## N5-Lite Digest normalization / Normalize Digest N5-Lite
+
+English: the existing delivery normalizer accepts only the new `DIGEST` type/event labels and otherwise preserves the same safe fields. The server owns masking and authorization; the browser does not infer retryability and receives `canRetry=false` for Digest rows. Breakpoint `_normalizeDeliveryRow` to compare the CAP DTO with the JSON model row.
+
+Tiếng Việt: normalizer delivery hiện có chỉ thêm label type/event `DIGEST`, còn lại giữ nguyên field an toàn. Server làm authority cho masking và authorization; browser không tự suy luận retry và nhận `canRetry=false` cho row Digest. Đặt breakpoint `_normalizeDeliveryRow` để so DTO CAP với row trong JSON model.
+
 ## English
 
 The controller keeps the existing Active Users detail flow and adds a state-bound existing-identity link dialog. `onOpenExistingIdentityLink` trusts only the safe server `linkEligible` flag, passes the safe current `businessRole` into the read-only dialog, and never passes provider/identity internals. `onConfirmExistingIdentityLink` validates the email, lowercases the action payload, prevents double submit, sends exactly `userID` and `email`, reloads Requests and Active Users through the shared action helper, and reports only queued status.

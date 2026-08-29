@@ -1,5 +1,27 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-08-29 — N5-Lite task-start gate correction
+
+- **Process issue, fixed before source work:** The first read-only Knowledge Gate selection used `2026-08-20` from the progress table and produced seven questions, then a second pass still tried to open three notification questions. Both were unnecessary: verified N4 notification ownership-code activity already occurred on `2026-08-29`, and the existing User Administration composite gate covers the other half of N5-Lite. No new ownership flow starts here, so no additional gate is required. No source/runtime/external state changed.
+- **Lỗi process, đã sửa trước khi làm source:** Lần chọn Knowledge Gate read-only đầu dùng mốc `2026-08-20` nên sinh bảy câu, sau đó lần hai vẫn định mở ba câu notification. Cả hai đều không cần: ownership-code activity N4 đã verify ngay ngày `2026-08-29`, còn composite gate User Administration hiện có đã cover nửa flow còn lại của N5-Lite. Task này không mở flow ownership mới nên không cần gate bổ sung. Không đổi source/runtime/external.
+
+## 2026-08-29 — N5-Lite baseline test-harness issue
+
+- **Test-harness issue, baseline:** `npm run qa:user-admin-operations:programmatic` passed, but `npm run qa:user-admin-ui:programmatic` failed before N5-Lite assertions because `scripts/qa/test-user-admin-ui.js` expected Bug Management version `0.0.6` while merged `origin/dev` contains `0.0.7`. Product source/package state is consistent; only the cross-app guard is stale. The bounded correction updates that single expected value and reruns the unchanged baseline before N5-Lite RED work.
+- **Lỗi test-harness baseline:** `qa:user-admin-operations` PASS nhưng `qa:user-admin-ui` fail trước assertion N5-Lite vì test còn chờ version Bug Management `0.0.6`, trong khi `origin/dev` đã merge `0.0.7`. Source/package product nhất quán; chỉ guard cross-app bị stale. Fix bounded chỉ cập nhật một expected value rồi chạy lại baseline không đổi trước RED N5-Lite.
+
+## 2026-08-29 — N5-Lite TDD RED and tooling note
+
+- **Expected RED:** Backend Operations QA fails because `searchAdministrationDeliveries(ALL)` reads only invitation/access tables and omits `NotificationDigestDeliveries`; UI QA fails because the unified delivery filter/normalizer has no `DIGEST` label. Both failures occur after the corrected baseline passed and directly prove the missing N5-Lite behavior. No production/runtime/external mutation occurred before RED.
+- **RED dự kiến:** QA Operations backend fail vì `searchAdministrationDeliveries(ALL)` mới đọc invitation/access, chưa đọc `NotificationDigestDeliveries`; QA UI fail vì filter/normalizer unified chưa có label `DIGEST`. Hai failure xảy ra sau baseline đã sửa và chứng minh đúng behavior N5-Lite còn thiếu. Chưa mutation production/runtime/external trước RED.
+- **Tooling issue, fixed:** A read-only `rg` command passed a Windows wildcard path literally and returned OS error 123. No file/state changed. Follow-up uses the directory operand plus `--glob '*.properties'`.
+
+## 2026-08-29 — N5-Lite focused GREEN
+
+- **Implementation:** Reused `NotificationDigestDeliveries` as a third read-only source for the existing `searchAdministrationDeliveries` action and `AdministrationDeliverySummary`. One bounded bulk User lookup produces only a masked recipient display. Digest body/subject/provider/lock/internal recipient fields stay private and every Digest row returns `canRetry=false`. The existing Operations table gains one localized Digest filter/type/event; no new screen/action/schema/dependency/worker/scheduler/provider or retention job was added. User Administration HTML5 cache identity advances consistently to `1.0.18`.
+- **Implementation tiếng Việt:** Reuse `NotificationDigestDeliveries` làm source read-only thứ ba cho action/DTO Operations hiện có. Một bulk User lookup bounded chỉ tạo recipient display đã mask. Body/subject/provider/lock/recipient nội bộ vẫn private và mọi row Digest có `canRetry=false`. Bảng Operations chỉ thêm filter/type/event Digest localized; không thêm màn hình/action/schema/dependency/worker/scheduler/provider hoặc retention job. Cache identity HTML5 tăng đồng bộ lên `1.0.18`.
+- **Fresh verification:** Operations/UI focused QA PASS; Digest regression PASS; secret scan PASS; agent rules `8/8`; QA-depth `15/15`; changed JavaScript syntax PASS; CAP EDMX compile exit 0 with the pre-existing attachment `NonUpdateableProperties` warning; User Administration lint/build PASS on UI5 `1.148.0`; `git diff --check` PASS. CAP/UI5/Fiori MCP namespaces were not callable. OfficeCLI `1.0.145` preflight passed and Markdown used repository-native edits.
+
 ## 2026-08-29 — N4 final live closure
 
 - **English:** N4 is live and operationally closed. The approved private cutoff `2026-08-29T02:43:41.368Z` is active on CAP droplet `c2be63c9-4f4c-43a1-8de9-40e9b2862dd4`. Controlled run `a9b908bf-541e-48f3-bfb7-7672ba1178ba` returned HTTP 200 with 11 candidates, zero historical creations and 16 skips. Job `3368450` plus hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245` are active. Final readiness is `DEMO READY`; HANA poststate is zero historical scheduled sources and zero pending/failed deliveries.

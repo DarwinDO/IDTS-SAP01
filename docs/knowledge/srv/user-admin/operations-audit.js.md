@@ -1,5 +1,11 @@
 # Knowledge: `srv/user-admin/operations-audit.js`
 
+## N5-Lite Digest diagnostics / Diagnostic Digest N5-Lite
+
+English: `searchAdministrationDeliveries` reuses the existing `NotificationDigestDeliveries` table as a third read-only source. Authorization still runs before every read. Digest rows are normalized into the existing allowlisted DTO after one bounded bulk User lookup, so Operations receives only masked recipient, status, attempts, timestamps and an allowlisted error summary. Digest body, subject, provider message ID, lock data and internal recipient ID never leave CAP; `canRetry` is always false. Debug at `searchAdministrationDeliveries`, `administrationDeliverySelection`, then `normalizeAdministrationDeliveries`.
+
+Tiếng Việt: `searchAdministrationDeliveries` reuse bảng `NotificationDigestDeliveries` hiện có làm source read-only thứ ba. Authorization vẫn chạy trước mọi read. Row Digest được normalize vào DTO allowlist hiện có sau một bulk User lookup có bound, nên Operations chỉ nhận recipient đã mask, status, attempts, timestamp và error summary allowlist. Body, subject, provider message ID, lock và recipient ID nội bộ không rời CAP; `canRetry` luôn false. Debug theo thứ tự `searchAdministrationDeliveries` → `administrationDeliverySelection` → `normalizeAdministrationDeliveries`.
+
 ## English
 
 This module owns the Gate 6 safe operational read models and one bounded onboarding-delivery retry. It is registered by `srv/user-admin.js` and never exposes the persistence entities directly.
