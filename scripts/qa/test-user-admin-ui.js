@@ -45,13 +45,13 @@ const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'u
 const appPackageLock = JSON.parse(fs.readFileSync(path.join(app, 'package-lock.json'), 'utf8'))
 assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
 assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lockfile versions stay aligned')
-assert.equal(appPackage.version, '1.0.17', 'Gate 6.5 access-change delivery UI must advance the User Administration HTML5 cache identity')
+assert.equal(appPackage.version, '1.0.18', 'N5-Lite Digest diagnostics must advance the User Administration HTML5 cache identity')
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
 assert.equal(appPackageLock.packages[''].name, appPackage.name, 'HTML5 lockfile root keeps package identity')
 assert.equal(appPackageLock.packages[''].license, appPackage.license, 'HTML5 lockfile root keeps package license')
 assert.deepEqual(appPackageLock.packages[''].devDependencies, appPackage.devDependencies, 'HTML5 lockfile root keeps dependency semantics')
 const bugPackage = JSON.parse(fs.readFileSync(path.join(root, 'app/bug-management-ui/package.json'), 'utf8'))
-assert.equal(bugPackage.version, '0.0.6', 'Bug Management UI version remains unchanged')
+assert.equal(bugPackage.version, '0.0.7', 'Bug Management UI version remains unchanged')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
   majorVersion > 1 || minorVersion > 0 || patchVersion >= 13,
@@ -151,6 +151,7 @@ assert.match(view, /deliveryTypeFilter/)
 assert.match(view, /allDeliveryTypes/)
 assert.match(view, /invitationDeliveryType/)
 assert.match(view, /accessChangeDeliveryType/)
+assert.match(view, /digestDeliveryType/)
 assert.match(view, /deliveries>deliveryTypeLabel/)
 assert.match(view, /deliveries>eventTypeLabel/)
 assert.equal((view.match(/id="deliveryOperationsTable"/g) || []).length, 1, 'Delivery remains one unified table')
@@ -540,6 +541,19 @@ async function verifyRuntimeBehavior () {
   for (const forbidden of ['recipientEmail', 'subject', 'textBody', 'htmlBody', 'providerMessageId', 'sourceAuditEvent_ID', 'targetUser_ID', 'lockToken', 'lockedUntil']) {
     assert.equal(forbidden in normalizedAccessDelivery, false, `UI delivery row forbids ${forbidden}`)
   }
+  const normalizedDigestDelivery = await deliveryNormalizer._normalizeDeliveryRow({
+    deliveryID: 'digest-delivery-1',
+    deliveryType: 'DIGEST',
+    eventType: 'DIGEST',
+    recipientDisplay: 'd***@example.invalid',
+    status: 'FAILED',
+    attemptCount: 1,
+    errorSummary: 'Email provider request failed.',
+    canRetry: false
+  })
+  assert.equal(normalizedDigestDelivery.deliveryTypeLabel, 'label:digestDeliveryType')
+  assert.equal(normalizedDigestDelivery.eventTypeLabel, 'label:dailyDigestEvent')
+  assert.equal(normalizedDigestDelivery.canRetry, false)
   const normalizedEmptyDelivery = await deliveryNormalizer._normalizeDeliveryRow({
     deliveryID: 'empty-delivery', deliveryType: 'ACCESS_CHANGE', eventType: 'UNKNOWN_EVENT'
   })

@@ -277,3 +277,10 @@ Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.c
 - Delivery boundary: implement through N1-N6 isolated gates. Schema migration, deployment, real email, Ready, merge, rollout and release require separate DonHV approval.
 - Evidence: `docs/superpowers/specs/2026-08-26-my-notifications-and-delivery-design.md`.
 - Quyết định: thêm `My Notifications` chỉ cho caller bằng inbox index additive tham chiếu Bug notification và access audit quan trọng hiện có. Source record vẫn là authority; quyền Operations PM/UserAdmin không cho phép đọc inbox user khác. Email prompt dùng durable outbox cùng immediate worker kick sau commit, còn Job Scheduler chỉ recovery/retry và chạy SLA/Overdue/digest/retention theo lịch. Không thêm broker, worker, provider, push/WebSocket, Work Zone hoặc preference system trong release đầu.
+
+### DEC-069 — Reduce N5 to read-only Digest diagnostics (2026-08-29)
+
+- Decision: implement N5-Lite only. Reuse the existing User Administration Operations table and safe delivery DTO to expose masked Digest status/attempt/timestamp/sanitized-error diagnostics to exact PM + UserAdmin. Keep Digest `canRetry=false` and expose no body, provider ID, lock or recipient identity.
+- Deferred: manual Digest retry and automated 90-day inbox cleanup. Reopen either only with measured operational need; cleanup additionally requires a separate destructive-operation review and rollback evidence.
+- Simplicity: no schema, dependency, table, screen, worker, provider or scheduler change. This supersedes only DEC-068's first-release retention implementation timing; caller-only inbox and immediate-email boundaries remain unchanged.
+- Quyết định: chỉ làm N5-Lite read-only trong bảng Operations hiện có. Retry Digest thủ công và cleanup inbox tự động 90 ngày được defer đến khi có nhu cầu đo được; cleanup còn cần review operation destructive và rollback riêng. Không thêm schema, dependency, table, screen, worker, provider hoặc scheduler.

@@ -247,7 +247,7 @@ Các trigger notification:
 * `My Notifications` là inbox cá nhân liên kết Bug và material User Access event, có unread/read state, paging, filter và deep link an toàn. PM/UserAdmin không được đọc inbox user khác.
 * `@mention` gửi in-app cộng email nhanh. Pending Assignment/Overdue/SLA dùng inbox và digest theo chính sách đã duyệt; SLA mặc định là 4 giờ cho Critical/Blocker và 24 giờ cho mức khác.
 * Daily digest chạy 08:00 từ thứ Hai đến thứ Sáu theo `Asia/Bangkok`, dùng chung worker/provider/retry, không thay thế email status cần gửi nhanh.
-* Transition chỉ backfill tối đa 30 ngày Bug notification vào inbox index và giữ inbox index/read state 90 ngày; không resend email hoặc rewrite source history.
+* Transition chỉ backfill tối đa 30 ngày Bug notification vào inbox index; không resend email hoặc rewrite source history. N5-Lite không thêm job xóa inbox tự động; retention chỉ được mở lại khi volume thực tế yêu cầu một operation destructive được review riêng.
 
 **Approved AI assistance baseline / Baseline AI assistance đã duyệt:**
 

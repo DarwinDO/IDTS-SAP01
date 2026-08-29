@@ -1,5 +1,11 @@
 # Knowledge: `app/user-administration-ui/webapp/controller/Main.controller.js`
 
+## N5-Lite Digest normalization / Normalize Digest N5-Lite
+
+English: the existing delivery normalizer accepts only the new `DIGEST` type/event labels and otherwise preserves the same safe fields. The server owns masking and authorization; the browser does not infer retryability and receives `canRetry=false` for Digest rows. Breakpoint `_normalizeDeliveryRow` to compare the CAP DTO with the JSON model row.
+
+Tiếng Việt: normalizer delivery hiện có chỉ thêm label type/event `DIGEST`, còn lại giữ nguyên field an toàn. Server làm authority cho masking và authorization; browser không tự suy luận retry và nhận `canRetry=false` cho row Digest. Đặt breakpoint `_normalizeDeliveryRow` để so DTO CAP với row trong JSON model.
+
 ## English
 
 The controller keeps the existing Active Users detail flow and adds a state-bound existing-identity link dialog. `onOpenExistingIdentityLink` trusts only the safe server `linkEligible` flag, passes the safe current `businessRole` into the read-only dialog, and never passes provider/identity internals. `onConfirmExistingIdentityLink` validates the email, lowercases the action payload, prevents double submit, sends exactly `userID` and `email`, reloads Requests and Active Users through the shared action helper, and reports only queued status.
@@ -235,7 +241,7 @@ Change Role khởi tạo `currentRole === role` và không đọc Developer prof
 
 ### English
 
-The existing `deliveries` JSON model gains one persisted allowlisted type (`ALL`, `INVITATION`, `ACCESS_CHANGE`). `_loadDeliveries` calls only `searchAdministrationDeliveries`, preserves busy/error/refresh/load-more request ordering, and normalizes the approved DTO into friendly localized type/event labels, masked/safe text, and em-dash timestamp fallbacks. `onRetryDelivery` accepts exactly the two concrete row types and dispatches the corresponding OData action; unknown or missing types show the existing safe error and call no action.
+The existing `deliveries` JSON model persists the allowlisted types `ALL`, `INVITATION`, `ACCESS_CHANGE`, and `DIGEST`. `_loadDeliveries` calls only `searchAdministrationDeliveries`, preserves busy/error/refresh/load-more request ordering, and normalizes the approved DTO into friendly localized type/event labels, masked/safe text, and em-dash timestamp fallbacks. `onRetryDelivery` accepts exactly the two retryable row types; Digest remains diagnostics-only because its server `canRetry` is always false.
 
 - **Location**: `Main.controller.js:20-31,1266-1297` — label allowlists and `_normalizeDeliveryRow`.
   **IDTS concept**: UI consumes only the safe DTO and never infers raw access/provider meaning.
@@ -256,7 +262,7 @@ The existing `deliveries` JSON model gains one persisted allowlisted type (`ALL`
 
 ### Tiếng Việt
 
-JSON model `deliveries` hiện có thêm một type allowlist được lưu trong session (`ALL`, `INVITATION`, `ACCESS_CHANGE`). `_loadDeliveries` chỉ gọi `searchAdministrationDeliveries`, giữ busy/error/refresh/load-more và thứ tự request, rồi normalize DTO đã duyệt thành label type/event thân thiện đã localize, text đã che/an toàn và fallback timestamp em dash. `onRetryDelivery` chỉ nhận hai type row cụ thể và dispatch action OData tương ứng; type lạ hoặc thiếu hiện lỗi an toàn hiện có và không gọi action.
+JSON model `deliveries` lưu các type allowlist `ALL`, `INVITATION`, `ACCESS_CHANGE`, `DIGEST`. `_loadDeliveries` chỉ gọi `searchAdministrationDeliveries`, giữ busy/error/refresh/load-more và thứ tự request, rồi normalize DTO đã duyệt thành label type/event thân thiện đã localize, text đã che/an toàn và fallback timestamp em dash. `onRetryDelivery` chỉ nhận hai type row có thể retry; Digest chỉ dùng diagnostic vì `canRetry` từ server luôn false.
 
 - **Vị trí**: `Main.controller.js:20-31,1266-1297` — allowlist label và `_normalizeDeliveryRow`.
   **Khái niệm IDTS**: UI chỉ dùng DTO an toàn và không suy diễn raw access/provider meaning.

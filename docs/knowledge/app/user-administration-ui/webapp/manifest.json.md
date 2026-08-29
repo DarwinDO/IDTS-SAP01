@@ -1,5 +1,7 @@
 # Knowledge: `app/user-administration-ui/webapp/manifest.json`
 
+The application version follows package `1.0.18` for the N5-Lite content cache identity; routing and models are unchanged. / Version ứng dụng theo package `1.0.18` cho cache identity N5-Lite; routing và model không đổi.
+
 ## English
 
 The UI5 manifest identifies the User Administration application, its OData V4 service, models, minimum UI5 version, libraries, and application release. `sap.app/applicationVersion/version` is the HTML5 application version presented to the repository and must match `package.json`. Version `1.0.9` forces the generic Cancel invitation resource bundle to be treated as new content instead of reusing the cached `1.0.8` application.

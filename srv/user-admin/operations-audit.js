@@ -9,6 +9,7 @@ const { scheduleImmediateEmailOutbox: defaultSchedule } = require('../email/work
 
 const DELIVERIES = 'idts.cap.UserOnboardingDeliveries'
 const ACCESS_DELIVERIES = 'idts.cap.UserAccessNotificationDeliveries'
+const DIGEST_DELIVERIES = 'idts.cap.NotificationDigestDeliveries'
 const REQUESTS = 'idts.cap.UserOnboardingRequests'
 const OPERATIONS = 'idts.cap.UserAccessOperations'
 const AUDIT_EVENTS = 'idts.cap.UserIdentityAuditEvents'
@@ -18,6 +19,8 @@ const DEFAULT_PAGE_SIZE = 25
 const MAX_PAGE_SIZE = 100
 const MAX_PAGE_SKIP = 1000000
 const MAX_ADMINISTRATION_PAGE_SKIP = 10000
+const DIGEST_SEARCH_PAGE_SIZE = 100
+const MAX_DIGEST_SEARCH_ROWS = 20000
 const READINESS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
 
 const RETRYABLE_DELIVERY_CODES = new Set([
@@ -115,6 +118,10 @@ async function searchAdministrationDeliveries (req, dependencies = {}) {
   const readAt = requestTime(req)
 
   if (deliveryType !== 'ALL') {
+    if (deliveryType === 'DIGEST' && query) {
+      const matches = await searchDigestDeliveries(tx, status, query, skip + top, maxAttempts, readAt)
+      return matches.slice(skip, skip + top).map(entry => entry.value)
+    }
     const rows = await tx.run(administrationDeliverySelection(deliveryType, status, query, top, skip))
     const normalized = await normalizeAdministrationDeliveries(tx, deliveryType, rows, maxAttempts, readAt)
     return normalized.map(entry => entry.value)
@@ -125,9 +132,19 @@ async function searchAdministrationDeliveries (req, dependencies = {}) {
     tx.run(administrationDeliverySelection('INVITATION', status, query, readLimit)),
     tx.run(administrationDeliverySelection('ACCESS_CHANGE', status, query, readLimit))
   ])
+  const digestEntries = query
+    ? await searchDigestDeliveries(tx, status, query, readLimit, maxAttempts, readAt)
+    : await normalizeAdministrationDeliveries(
+        tx,
+        'DIGEST',
+        await tx.run(administrationDeliverySelection('DIGEST', status, '', readLimit)),
+        maxAttempts,
+        readAt
+      )
   const normalized = [
     ...await normalizeAdministrationDeliveries(tx, 'INVITATION', invitations, maxAttempts, readAt),
-    ...await normalizeAdministrationDeliveries(tx, 'ACCESS_CHANGE', accessChanges, maxAttempts, readAt)
+    ...await normalizeAdministrationDeliveries(tx, 'ACCESS_CHANGE', accessChanges, maxAttempts, readAt),
+    ...digestEntries
   ]
   normalized.sort(compareAdministrationDeliveries)
   return normalized.slice(skip, skip + top).map(entry => entry.value)
@@ -135,7 +152,8 @@ async function searchAdministrationDeliveries (req, dependencies = {}) {
 
 function administrationDeliverySelection (deliveryType, status, query, top, skip) {
   const invitation = deliveryType === 'INVITATION'
-  const selection = SELECT.from(invitation ? DELIVERIES : ACCESS_DELIVERIES)
+  const digest = deliveryType === 'DIGEST'
+  const selection = SELECT.from(invitation ? DELIVERIES : digest ? DIGEST_DELIVERIES : ACCESS_DELIVERIES)
     .columns(...(invitation
       ? [
           'ID',
@@ -151,7 +169,21 @@ function administrationDeliverySelection (deliveryType, status, query, top, skip
           'lockedUntil',
           'createdAt'
         ]
-      : [
+      : digest
+        ? [
+            'ID',
+            'recipient_ID',
+            'digestType',
+            'status_code',
+            'attemptCount',
+            'nextAttemptAt',
+            'lastAttemptAt',
+            'sentAt',
+            'lastErrorCode',
+            'modifiedAt',
+            'createdAt'
+          ]
+        : [
           'ID',
           'recipientEmail',
           'eventType',
@@ -164,13 +196,14 @@ function administrationDeliverySelection (deliveryType, status, query, top, skip
           'modifiedAt',
           'lockedUntil',
           'createdAt'
-        ]))
+          ]))
     .orderBy('createdAt desc', 'ID desc')
     .limit(top, skip)
   if (status) selection.where({ status_code: status })
+  // Digest recipient search is applied after the bounded User lookup so raw email never enters the DTO.
   if (query && invitation) {
     selection.where`contains(recipientEmail, ${query}) or contains(ID, ${query}) or contains(onboardingRequest_ID, ${query})`
-  } else if (query) {
+  } else if (query && !digest) {
     selection.where`contains(recipientEmail, ${query}) or contains(ID, ${query}) or contains(eventType, ${query})`
   }
   return selection
@@ -178,12 +211,19 @@ function administrationDeliverySelection (deliveryType, status, query, top, skip
 
 async function normalizeAdministrationDeliveries (tx, deliveryType, rows, maxAttempts, readAt) {
   let requestByID = new Map()
+  let userByID = new Map()
   if (deliveryType === 'INVITATION') {
     const requestIDs = [...new Set(rows.map(row => row.onboardingRequest_ID).filter(Boolean))]
     const requests = requestIDs.length === 0
       ? []
       : await tx.run(SELECT.from(REQUESTS).columns('ID', 'status_code', 'expiresAt').where({ ID: { in: requestIDs } }))
     requestByID = new Map(requests.map(row => [row.ID, row]))
+  } else if (deliveryType === 'DIGEST') {
+    const userIDs = [...new Set(rows.map(row => row.recipient_ID).filter(Boolean))]
+    const users = userIDs.length === 0
+      ? []
+      : await tx.run(SELECT.from(USERS).columns('ID', 'email').where({ ID: { in: userIDs } }).limit(MAX_ADMINISTRATION_PAGE_SKIP + MAX_PAGE_SIZE))
+    userByID = new Map(users.map(row => [row.ID, row]))
   }
   return rows.map(row => ({
     createdAt: row.createdAt,
@@ -193,9 +233,45 @@ async function normalizeAdministrationDeliveries (tx, deliveryType, rows, maxAtt
       deliveryType,
       maxAttempts,
       requestByID.get(row.onboardingRequest_ID),
-      readAt
+      readAt,
+      userByID.get(row.recipient_ID)
     )
   }))
+}
+
+async function searchDigestDeliveries (tx, status, query, limit, maxAttempts, readAt) {
+  const matches = []
+  let offset = 0
+  while (matches.length < limit && offset < MAX_DIGEST_SEARCH_ROWS) {
+    const pageSize = Math.min(DIGEST_SEARCH_PAGE_SIZE, MAX_DIGEST_SEARCH_ROWS - offset)
+    const rows = await tx.run(administrationDeliverySelection(
+      'DIGEST',
+      status,
+      '',
+      pageSize,
+      offset
+    ))
+    if (rows.length === 0) break
+    const normalized = await normalizeAdministrationDeliveries(tx, 'DIGEST', rows, maxAttempts, readAt)
+    matches.push(...filterAdministrationDeliveries(normalized, query))
+    if (rows.length < pageSize) break
+    offset += rows.length
+  }
+  if (matches.length < limit && offset >= MAX_DIGEST_SEARCH_ROWS) {
+    throw serviceError(422, 'DIGEST_SEARCH_TOO_BROAD', 'Digest search is too broad. Refine the search query.')
+  }
+  return matches.slice(0, limit)
+}
+
+function filterAdministrationDeliveries (entries, query) {
+  if (!query) return entries
+  const normalized = query.toLowerCase()
+  return entries.filter(entry => [
+    entry.value.deliveryID,
+    entry.value.deliveryType,
+    entry.value.eventType,
+    entry.value.recipientDisplay
+  ].some(value => String(value || '').toLowerCase().includes(normalized)))
 }
 
 function compareAdministrationDeliveries (left, right) {
@@ -587,21 +663,25 @@ function toDeliverySummary (row, maxAttempts = 3, request, readAt = new Date()) 
   }
 }
 
-function toAdministrationDeliverySummary (row, deliveryType, maxAttempts = 3, request, readAt = new Date()) {
+function toAdministrationDeliverySummary (row, deliveryType, maxAttempts = 3, request, readAt = new Date(), recipient) {
   const invitation = deliveryType === 'INVITATION'
+  const digest = deliveryType === 'DIGEST'
+  const errorCode = row.lastErrorCode ? deliveryErrorCode(row.lastErrorCode) : null
   return {
     deliveryID: row.ID,
     deliveryType,
-    eventType: invitation ? 'INVITATION' : safeCode(row.eventType),
-    recipientDisplay: maskRecipient(row.recipientEmail),
+    eventType: invitation ? 'INVITATION' : digest ? 'DIGEST' : safeCode(row.eventType),
+    recipientDisplay: maskRecipient(digest ? recipient?.email : row.recipientEmail),
     status: safeCode(row.status_code),
     attemptCount: Number(row.attemptCount || 0),
     nextAttemptAt: row.nextAttemptAt || null,
     lastAttemptAt: row.lastAttemptAt || null,
     sentAt: row.sentAt || null,
-    errorCode: row.lastErrorCode ? safeCode(row.lastErrorCode) : null,
-    errorSummary: row.lastErrorCode ? deliverySummary(row.lastErrorCode) : null,
-    canRetry: invitation
+    errorCode,
+    errorSummary: errorCode ? deliverySummary(errorCode) : null,
+    canRetry: digest
+      ? false
+      : invitation
       ? canRetryDelivery(row, maxAttempts, request, readAt)
       : canRetryAccessDelivery(row, maxAttempts, readAt),
     modifiedAt: row.modifiedAt || null
@@ -657,7 +737,7 @@ function clampAdministrationPage (skip, top) {
 
 function administrationDeliveryType (value) {
   const deliveryType = optionalCode(value, 'INVALID_DELIVERY_TYPE') || 'ALL'
-  if (!['ALL', 'INVITATION', 'ACCESS_CHANGE'].includes(deliveryType)) {
+  if (!['ALL', 'INVITATION', 'ACCESS_CHANGE', 'DIGEST'].includes(deliveryType)) {
     throw serviceError(400, 'INVALID_DELIVERY_TYPE', 'Delivery type is invalid.')
   }
   return deliveryType
@@ -726,6 +806,11 @@ function safeCode (value) {
 
 function deliverySummary (code) {
   return DELIVERY_ERROR_SUMMARIES[code] || 'Email delivery failed.'
+}
+
+function deliveryErrorCode (code) {
+  const normalized = safeCode(code)
+  return Object.hasOwn(DELIVERY_ERROR_SUMMARIES, normalized) ? normalized : 'UNAVAILABLE'
 }
 
 function operationSummary (code) {

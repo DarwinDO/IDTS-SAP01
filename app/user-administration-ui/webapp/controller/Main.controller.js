@@ -19,14 +19,16 @@ sap.ui.define([
 	const UUID_PATTERN = /^[0-9a-f-]{36}$/i;
 	const DELIVERY_TYPE_LABEL_KEYS = Object.freeze({
 		INVITATION: "invitationDeliveryType",
-		ACCESS_CHANGE: "accessChangeDeliveryType"
+		ACCESS_CHANGE: "accessChangeDeliveryType",
+		DIGEST: "digestDeliveryType"
 	});
 	const DELIVERY_EVENT_LABEL_KEYS = Object.freeze({
 		INVITATION: "invitationDeliveryType",
 		ACCESS_ROLE_CHANGED: "roleChangedEvent",
 		ACCESS_SUSPENDED: "suspendedEvent",
 		ACCESS_REACTIVATED: "reactivatedEvent",
-		ACCESS_REVOKED: "revokedEvent"
+		ACCESS_REVOKED: "revokedEvent",
+		DIGEST: "dailyDigestEvent"
 	});
 
 	return BaseController.extend("idts.useradministrationui.controller.Main", {
@@ -1725,7 +1727,7 @@ sap.ui.define([
 					workloadQuery: typeof oSaved.workloadQuery === "string" ? oSaved.workloadQuery : oDefault.workloadQuery,
 					deliveryQuery: typeof oSaved.deliveryQuery === "string" ? oSaved.deliveryQuery : oDefault.deliveryQuery,
 					deliveryStatus: typeof oSaved.deliveryStatus === "string" ? oSaved.deliveryStatus : oDefault.deliveryStatus,
-					deliveryType: ["ALL", "INVITATION", "ACCESS_CHANGE"].includes(oSaved.deliveryType) ? oSaved.deliveryType : oDefault.deliveryType,
+					deliveryType: ["ALL", "INVITATION", "ACCESS_CHANGE", "DIGEST"].includes(oSaved.deliveryType) ? oSaved.deliveryType : oDefault.deliveryType,
 					operationState: typeof oSaved.operationState === "string" ? oSaved.operationState : oDefault.operationState,
 					operationType: typeof oSaved.operationType === "string" ? oSaved.operationType : oDefault.operationType,
 					auditAction: typeof oSaved.auditAction === "string" ? oSaved.auditAction : oDefault.auditAction,

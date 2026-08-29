@@ -20,7 +20,7 @@
 2. N2 — native SAPUI5 inbox, badge, filtering, deep links, responsive/accessibility.
 3. N3 — lifecycle/ownership/mention/escalation coverage and prompt immediate email.
 4. N4 — Pending Assignment/Overdue, 4/24-hour SLA and weekday 08:00 digest.
-5. N5 — Operations digest diagnostics, retry/idempotency and 90-day index retention.
+5. N5-Lite — read-only Digest diagnostics in the existing Operations table. Manual retry and automated 90-day cleanup are deferred until measured operational need.
 6. N6 — separately approved additive migration, rollout, timestamped acceptance and rollback evidence.
 
 Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact scope guards, one bounded independent review and one Draft PR, then stops before Ready/merge/deploy unless separately approved.
@@ -69,7 +69,13 @@ Cập nhật 2026-08-29 thay thế trạng thái lịch sử bên dưới: rollo
 2. N2 — inbox SAPUI5 native, badge, filter, deep link, responsive/accessibility.
 3. N3 — lifecycle/ownership/mention/escalation và email nhanh bằng immediate kick.
 4. N4 — Pending Assignment/Overdue, SLA 4/24 giờ và digest 08:00 ngày thường.
-5. N5 — digest diagnostic trong Operations, retry/idempotency và retention index 90 ngày.
+5. N5-Lite — diagnostic Digest read-only trong bảng Operations hiện có. Retry thủ công và cleanup tự động 90 ngày được defer đến khi có nhu cầu vận hành đo được.
+
+## 2026-08-29 — N5-Lite scope decision
+
+DonHV selected the minimum learning-focused gate. N5-Lite reuses `NotificationDigestDeliveries` and the existing safe `AdministrationDeliverySummary`; exact PM + UserAdmin can filter and inspect masked Digest delivery status, attempts, timestamps and sanitized errors in the unified Operations table. Digest body, provider ID, lock data and recipient identity stay private. Digest rows are read-only and `canRetry=false`. No retry action, retention delete job, schema, dependency or new screen is added. The 90-day policy remains a future capacity decision rather than an unimplemented runtime claim.
+
+DonHV chọn gate tối thiểu phục vụ học code. N5-Lite reuse `NotificationDigestDeliveries` và DTO an toàn `AdministrationDeliverySummary`; đúng PM + UserAdmin có thể lọc/xem trạng thái Digest, attempts, timestamp và lỗi đã sanitize trong một bảng Operations. Body digest, provider ID, lock và identity recipient vẫn private. Row Digest read-only và `canRetry=false`. Không thêm retry action, job xóa retention, schema, dependency hoặc màn hình mới. Policy 90 ngày là quyết định capacity tương lai, không claim runtime chưa có.
 6. N6 — additive migration, rollout, acceptance timestamp và rollback evidence được duyệt riêng.
 
 Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope guard, một independent review có giới hạn và một Draft PR, rồi dừng trước Ready/merge/deploy nếu chưa được duyệt riêng.

@@ -1,5 +1,7 @@
 # Knowledge: `i18n_vi.properties`
 
+N5-Lite adds `Bản tổng hợp hằng ngày` for the Digest delivery type and event. / N5-Lite thêm `Bản tổng hợp hằng ngày` cho type và event Digest.
+
 ## 2026-08-26 Gate 6.3 access-readiness copy
 
 Bundle tiếng Việt có `accessReadinessLabel=Mức sẵn sàng truy cập`, `accessReadinessReadyText=Sẵn sàng` và `accessReadinessAttentionText=Cần chú ý` cho Boolean `identityAccessReady` do server tính. Giữ parity với `i18n.properties` và `i18n_en.properties`; không suy luận access readiness từ profile active hoặc user ID trong browser.

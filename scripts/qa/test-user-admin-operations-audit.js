@@ -85,6 +85,7 @@ const ACCESS_PERMANENT_DELIVERY_ID = '91800000-0000-4000-8000-000000000002'
 const ACCESS_EXHAUSTED_DELIVERY_ID = '91800000-0000-4000-8000-000000000003'
 const ACCESS_LOCKED_DELIVERY_ID = '91800000-0000-4000-8000-000000000004'
 const ACCESS_SENT_DELIVERY_ID = '91800000-0000-4000-8000-000000000005'
+const DIGEST_FAILED_DELIVERY_ID = '91800000-0000-4000-8000-000000000006'
 const RETRY_MODIFIED_AT = '2026-08-24T06:00:00.000Z'
 const RECENT_TIMESTAMP = new Date(Date.now() - (60 * 60 * 1000)).toISOString()
 
@@ -162,6 +163,34 @@ function accessDeliveryEntry (ID, sourceAuditEventID, values = {}) {
   }
 }
 
+function digestDeliveryEntry (ID, values = {}) {
+  return {
+    ID,
+    recipient_ID: values.recipientID || ADMIN_ID,
+    businessDate: values.businessDate || '2026-08-24',
+    digestType: values.digestType || 'PM',
+    windowStart: values.windowStart || '2026-08-23T01:00:00.000Z',
+    windowEnd: values.windowEnd || '2026-08-24T01:00:00.000Z',
+    snapshotAt: values.snapshotAt || '2026-08-24T01:00:00.000Z',
+    itemCount: values.itemCount ?? 2,
+    subject: 'Private digest subject must not leave Operations.',
+    textBody: 'Private digest text must not leave Operations.',
+    htmlBody: '<p>Private digest HTML must not leave Operations.</p>',
+    status_code: values.status || 'FAILED',
+    attemptCount: values.attemptCount ?? 1,
+    nextAttemptAt: values.nextAttemptAt || '2026-08-24T06:05:00.000Z',
+    lastAttemptAt: values.lastAttemptAt || '2026-08-24T05:55:00.000Z',
+    sentAt: values.sentAt || null,
+    lastErrorCode: values.errorCode || 'BREVO_API_FAILED',
+    lastErrorSummary: 'Private persisted provider summary must not leave Operations.',
+    providerMessageId: 'private-digest-provider-id',
+    lockedUntil: values.lockedUntil || null,
+    lockToken: values.lockToken || 'private-digest-lock',
+    createdAt: values.createdAt || '2026-08-24T05:40:00.000Z',
+    modifiedAt: values.modifiedAt || RETRY_MODIFIED_AT
+  }
+}
+
 function operationEntry (ID, requestID, values = {}) {
   return {
     ID,
@@ -234,10 +263,12 @@ async function verifyAdministrationDeliveryAuthorizationAndBounds () {
   }, dependencies)
   assert.deepEqual(all, [])
   assert.deepEqual(sources.sort(), [
+    'idts.cap.NotificationDigestDeliveries',
     'idts.cap.UserAccessNotificationDeliveries',
     'idts.cap.UserOnboardingDeliveries'
   ])
   assert.deepEqual(limits, [
+    { rows: 10100, offset: undefined },
     { rows: 10100, offset: undefined },
     { rows: 10100, offset: undefined }
   ], 'ALL reads at most clamped skip plus top from each table')
@@ -250,6 +281,14 @@ async function verifyAdministrationDeliveryAuthorizationAndBounds () {
   }, dependencies)
   assert.deepEqual(sources, ['idts.cap.UserAccessNotificationDeliveries'], 'a concrete type reads only its own table')
   assert.deepEqual(limits, [{ rows: 10, offset: 5 }])
+
+  authorized = false
+  sources.length = 0
+  limits.length = 0
+  await operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'DIGEST', status: '', query: '', skip: 0, top: 25 }
+  }, dependencies)
+  assert.deepEqual(sources, ['idts.cap.NotificationDigestDeliveries'], 'Digest reads only the existing digest delivery table')
 
   let reads = 0
   await expectRejected(operationsAudit.searchAdministrationDeliveries({
@@ -268,6 +307,81 @@ async function verifyAdministrationDeliveryAuthorizationAndBounds () {
     authorize: async () => { throw Object.assign(new Error('forbidden'), { status: 403, code: 'USER_ADMIN_REQUIRED' }) }
   }), 403, 'USER_ADMIN_REQUIRED')
   assert.equal(reads, 0, 'failed authorization performs no access delivery read or mutation')
+}
+
+async function verifyDigestSearchContinuesPastFormerCap () {
+  const targetRecipientID = '91000000-0000-4000-8000-000000000099'
+  let latestDigestRows = []
+  let digestReads = 0
+  const tx = {
+    run: async query => {
+      const source = String(query.SELECT?.from?.ref?.[0] || '')
+      if (source === 'idts.cap.NotificationDigestDeliveries') {
+        digestReads += 1
+        const rows = Number(query.SELECT?.limit?.rows?.val || 0)
+        const offset = Number(query.SELECT?.limit?.offset?.val || 0)
+        if (offset > 10100) return []
+        if (offset === 10100) {
+          latestDigestRows = [digestDeliveryEntry('91800000-0000-4000-8000-000000010101', {
+            recipientID: targetRecipientID,
+            createdAt: '2026-08-20T00:00:00.000Z'
+          })]
+          return latestDigestRows
+        }
+        latestDigestRows = Array.from({ length: rows }, (_, index) => digestDeliveryEntry(
+          `digest-${String(offset + index).padStart(5, '0')}`,
+          { recipientID: `user-${String(offset + index).padStart(5, '0')}` }
+        ))
+        return latestDigestRows
+      }
+      if (source === 'idts.cap.Users') {
+        return latestDigestRows.some(row => row.recipient_ID === targetRecipientID)
+          ? [{ ID: targetRecipientID, email: 'zeta@example.invalid' }]
+          : []
+      }
+      throw new Error(`Unexpected source ${source}`)
+    }
+  }
+  const rows = await operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'DIGEST', status: '', query: 'z***@example.invalid', skip: 0, top: 1 }
+  }, {
+    tx,
+    authorize: async () => {},
+    getEmailConfig: () => ({ maxRetryCount: 2 })
+  })
+  assert.equal(digestReads > 1, true, 'Digest search continues page-by-page beyond the former 10,100-row cap')
+  assert.deepEqual(rows.map(row => row.deliveryID), ['91800000-0000-4000-8000-000000010101'])
+}
+
+async function verifyDigestSearchHasFixedWorkBudget () {
+  let digestReads = 0
+  let latestDigestRows = []
+  const tx = {
+    run: async query => {
+      const source = String(query.SELECT?.from?.ref?.[0] || '')
+      if (source === 'idts.cap.NotificationDigestDeliveries') {
+        digestReads += 1
+        const rows = Number(query.SELECT?.limit?.rows?.val || 0)
+        const offset = Number(query.SELECT?.limit?.offset?.val || 0)
+        if (offset >= 20100) return []
+        latestDigestRows = Array.from({ length: rows }, (_, index) => digestDeliveryEntry(
+          `budget-${String(offset + index).padStart(5, '0')}`,
+          { recipientID: `budget-user-${String(offset + index).padStart(5, '0')}` }
+        ))
+        return latestDigestRows
+      }
+      if (source === 'idts.cap.Users') return []
+      throw new Error(`Unexpected source ${source}`)
+    }
+  }
+  await expectRejected(operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'DIGEST', status: '', query: 'no-match@example.invalid', skip: 0, top: 1 }
+  }, {
+    tx,
+    authorize: async () => {},
+    getEmailConfig: () => ({ maxRetryCount: 2 })
+  }), 422, 'DIGEST_SEARCH_TOO_BROAD')
+  assert.equal(digestReads, 200, 'Digest search performs at most 20,000 candidate-row page reads')
 }
 
 async function main () {
@@ -305,7 +419,14 @@ async function main () {
     provisioningBrokerState: 'RECENT_SUCCESS',
     lastSuccessfulReconciliationAt: RECENT_TIMESTAMP
   }, 'HANA uppercase column names must retain fresh readiness outcomes')
+  assert.equal(operationsAudit.toAdministrationDeliverySummary({
+    ID: DIGEST_FAILED_DELIVERY_ID,
+    status_code: 'FAILED',
+    lastErrorCode: 'PRIVATE_PROVIDER_STACK_TOKEN'
+  }, 'DIGEST').errorCode, 'UNAVAILABLE', 'unknown persisted delivery error codes stay private')
   await verifyAdministrationDeliveryAuthorizationAndBounds()
+  await verifyDigestSearchContinuesPastFormerCap()
+  await verifyDigestSearchHasFixedWorkBudget()
 
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db
@@ -496,6 +617,9 @@ async function main () {
       modifiedAt: RECENT_TIMESTAMP
     })
   ]))
+  await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries(
+    digestDeliveryEntry(DIGEST_FAILED_DELIVERY_ID, { errorCode: 'PRIVATE_PROVIDER_STACK_TOKEN' })
+  ))
 
   const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
   const normalizedDeliveries = await service.send({
@@ -546,6 +670,30 @@ async function main () {
   assert.equal(accessOnly.find(row => row.deliveryID === ACCESS_PERMANENT_DELIVERY_ID).canRetry, false)
   assert.equal(accessOnly.find(row => row.deliveryID === ACCESS_EXHAUSTED_DELIVERY_ID).canRetry, false)
   assert.equal(accessOnly.find(row => row.deliveryID === ACCESS_LOCKED_DELIVERY_ID).canRetry, false)
+  const digestsOnly = await service.send({
+    event: 'searchAdministrationDeliveries',
+    data: { deliveryType: 'DIGEST', status: 'FAILED', query: 's***@example.invalid', skip: 0, top: 25 },
+    user: ADMIN
+  })
+  assert.equal(digestsOnly.length, 1)
+  assert.deepEqual(digestsOnly[0], {
+    deliveryID: DIGEST_FAILED_DELIVERY_ID,
+    deliveryType: 'DIGEST',
+    eventType: 'DIGEST',
+    recipientDisplay: 's***@example.invalid',
+    status: 'FAILED',
+    attemptCount: 1,
+    nextAttemptAt: '2026-08-24T06:05:00.000Z',
+    lastAttemptAt: '2026-08-24T05:55:00.000Z',
+    sentAt: null,
+    errorCode: 'UNAVAILABLE',
+    errorSummary: 'Email delivery failed.',
+    canRetry: false,
+    modifiedAt: RETRY_MODIFIED_AT
+  }, 'Digest diagnostics expose only the shared safe DTO and never enable manual retry')
+  for (const forbidden of ['recipient_ID', 'recipientEmail', 'digestType', 'businessDate', 'itemCount', 'subject', 'textBody', 'htmlBody', 'providerMessageId', 'lockToken', 'lockedUntil']) {
+    assert.equal(forbidden in digestsOnly[0], false, `Digest diagnostic forbids ${forbidden}`)
+  }
   const invitationsOnly = await service.send({
     event: 'searchAdministrationDeliveries',
     data: { deliveryType: 'INVITATION', status: 'FAILED', query: 'retry-action', skip: 0, top: 25 },
