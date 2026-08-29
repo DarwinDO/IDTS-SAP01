@@ -51,3 +51,19 @@ Remediation bounded này thêm một timestamp tùy chọn `discoveryFrom` cho a
 ### Tối giản và boundary
 
 Ponytail chọn thay đổi nhỏ nhất tại shared boundary: một tham số action được bảo vệ, hai phép so anchor và không thêm persistence/config subsystem. Canonical business docs không đổi vì policy notification, recipient, role và ý nghĩa lifecycle không đổi. Rollout runtime, cấu hình scheduler và readback live không-replay là evidence vận hành riêng.
+
+## Live rollout and closure / Rollout live và đóng gate
+
+- The private live cutoff is `2026-08-29T02:43:41.368Z`. The generated CAP artifact was staged without DB/schema deployment; artifact-only Node `22.x` and `fast-xml-parser` `5.11.1` lock corrections left repository manifests and lockfiles unchanged.
+- The first acceptance accidentally executed the previously assigned droplet, not the staged cutoff build. Run `1952a17c-db2f-4149-ba80-2a13d411be19` created 24 inbox/source rows and six unsent delivery rows. Discovery job `3368450` was deactivated immediately; no outbox worker/provider send ran. Guarded rollback task `n4-cutoff-rollback-0f2a41733f` deleted exactly those 24 inbox rows, 24 source rows and six attempt-zero `PENDING` deliveries, then proved zero remaining run sources.
+- Root cause was corrected by assigning droplet `c2be63c9-4f4c-43a1-8de9-40e9b2862dd4` and restarting CAP. `npm run btp:demo:check` returned `DEMO READY` with CAP/AppRouter `1/1`, health/ready `200`, anonymous protected API `401` and Web `200`.
+- Successful controlled run `a9b908bf-541e-48f3-bfb7-7672ba1178ba` returned HTTP `200`, `candidates=11`, `created=0`, `pendingAssignment=0`, `sla=0`, `overdue=0`, `skipped=16`. Poststate remained zero for all three historical source families and zero pending/failed deliveries.
+- Job `3368450` is active with hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245` on the BTP trial/free minimum cadence. Five-minute discovery still requires a paid scheduler plan; immediate event-triggered email remains independent.
+- Codex Security exact-diff scan `26e165a9-e55d-4fbb-82c3-7af0d1f5383a` completed with zero findings across both executable review surfaces. The preceding scan failed only because its canonical artifact draft was absent and is not used as security evidence. TAC remained unavailable.
+
+- Cutoff private trên live là `2026-08-29T02:43:41.368Z`. Artifact CAP generated được stage mà không deploy DB/schema; chỉnh Node `22.x` và lock `fast-xml-parser` `5.11.1` chỉ nằm trong artifact, không đổi manifest/lockfile repository.
+- Acceptance đầu tiên đã chạy nhầm droplet cũ đang được assign, không phải build cutoff mới. Run `1952a17c-db2f-4149-ba80-2a13d411be19` tạo 24 row inbox/source và sáu delivery chưa gửi. Job discovery `3368450` được deactivate ngay; không chạy outbox worker/provider. Task rollback có guard `n4-cutoff-rollback-0f2a41733f` xóa đúng 24 inbox, 24 source và sáu delivery `PENDING` attempt-zero rồi chứng minh không còn source của run.
+- Đã sửa root cause bằng cách assign droplet `c2be63c9-4f4c-43a1-8de9-40e9b2862dd4` và restart CAP. `npm run btp:demo:check` trả `DEMO READY` với CAP/AppRouter `1/1`, health/ready `200`, anonymous API bảo vệ `401`, Web `200`.
+- Run kiểm soát thành công `a9b908bf-541e-48f3-bfb7-7672ba1178ba` trả HTTP `200`, `candidates=11`, `created=0`, ba bucket lịch sử đều bằng `0`, `skipped=16`. Poststate vẫn zero cho ba họ source lịch sử và zero delivery pending/failed.
+- Job `3368450` đang active với lịch hourly `0282b016-79d1-450b-a2df-b302a76f9245`, đúng cadence tối thiểu của plan trial/free. Discovery năm phút vẫn cần plan scheduler trả phí; email immediate theo event không phụ thuộc lịch này.
+- Codex Security scan exact diff `26e165a9-e55d-4fbb-82c3-7af0d1f5383a` hoàn tất với zero finding trên hai surface executable. Scan trước lỗi do thiếu canonical artifact draft và không được dùng làm security evidence. TAC vẫn không khả dụng.
