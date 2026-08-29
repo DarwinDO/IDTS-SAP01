@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2 MERGED — N3 MERGED — N4 ADDITIONAL F4 REMEDIATION SOURCE COMMITTED; SCOPED RE-REVIEW PENDING`
+`N1/N2/N3/N4 LIVE — N4 COMPLETE; HOURLY DISCOVERY ACTIVE WITH NO-REPLAY CUTOFF`
 
 ### Authority
 
@@ -27,7 +27,9 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-N1 #361 and N2 #362 are merged; N3 is the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 are locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. The requested local commit is the only mutation; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action is claimed. Live UI remains rolled back; source completion is not runtime acceptance.
+Current 2026-08-29 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`; additive schema/CAP/UI rollout and incident recovery remain complete. Controlled Job Scheduler/Brevo delivery and HANA source-key concurrency are accepted with one retained `donhvse` acceptance notification and guarded cleanup of the concurrency-only row. Private cutoff `2026-08-29T02:43:41.368Z` prevents historical Pending Assignment/SLA/Overdue replay; a controlled run created zero historical rows. Job `3368450` and hourly schedule `0282b016-79d1-450b-a2df-b302a76f9245` are active. The five-minute cadence remains unavailable on the live `free` plan. N4 is closed; N5 is the next gate. See `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
+
+Historical source-only record (superseded by the current override above): N1 #361 and N2 #362 were merged; N3 was the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 were locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. At that historical boundary only the local commit was claimed; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action was claimed, and live UI remained rolled back.
 
 Fix round 1 addresses the exact-head review's nine Important findings: installed-CAP context-bearing page commit/rollback evidence; the full Bangkok 08:00–08:59 recovery hour; immutable HistoryLogs SLA anchoring; keyset Bug paging beyond 5,000 IDs; shared role/ownership indexing across all recipient pages; HANA-safe delivery batches; target-aware unique-race reuse; role/status/profile and send-time persona fail-closed checks; and ListReport-compatible queue filters. Fix round 2 closes the remaining persona-transition finding. Scoped re-review is clean at `546fb9442bb39eb3193bff8d271275af282a15cc`; final whole-branch review remains required before Draft PR.
 
@@ -49,7 +51,9 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2 ĐÃ MERGE — N3 ĐÃ MERGE — N4 ĐÃ COMMIT REMEDIATION F4 BỔ SUNG; CHỜ SCOPED RE-REVIEW`
+`N1/N2/N3/N4 LIVE — N4 HOÀN TẤT; DISCOVERY HOURLY ACTIVE VỚI CUTOFF CHỐNG REPLAY`
+
+Cập nhật 2026-08-29 thay thế trạng thái lịch sử bên dưới: rollout additive schema/CAP/UI và recovery incident của PR #365 vẫn hoàn tất. Acceptance Job Scheduler/Brevo và concurrency source-key HANA đã PASS bằng một notification `donhvse` được giữ làm evidence; row concurrency đã cleanup có guard. Cutoff private `2026-08-29T02:43:41.368Z` chặn replay Pending Assignment/SLA/Overdue lịch sử; controlled run tạo zero row lịch sử. Job `3368450` và schedule hourly `0282b016-79d1-450b-a2df-b302a76f9245` đang active. Plan `free` vẫn không cho cadence năm phút. N4 đã đóng; N5 là gate tiếp theo. Evidence: `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
 
 ### Thẩm quyền
 
@@ -72,7 +76,7 @@ Mỗi gate freeze base mới, dùng worktree/branch riêng, TDD, exact scope gua
 
 ### Boundary tiếp theo
 
-N1 #361 và N2 #362 đã merge; N3 là predecessor đã merge tại frozen base Task 10 `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 và 11 đã hoàn tất source cục bộ trên `feature/wp7-notifications-sla-digest-donhv`: discovery Pending Assignment/SLA/Overdue bounded, context request mới cho từng page, idempotency source key, protected `NotificationService.processNotificationSchedules`, digest snapshot 08:00 weekday Bangkok, reuse unique exact, retry snapshot đã lưu và một sender worker dùng chung. Chỉ mutation commit local được yêu cầu; không claim PR, Ready, merge, deploy, migration, backfill, email thật, provider, user/role/data hay N5. UI live vẫn rollback; source xong không phải runtime acceptance.
+Ghi nhận source-only lịch sử (đã được current override bên trên thay thế): N1 #361 và N2 #362 đã merge; N3 là predecessor đã merge tại frozen base Task 10 `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 và 11 khi đó hoàn tất source cục bộ trên `feature/wp7-notifications-sla-digest-donhv`: discovery Pending Assignment/SLA/Overdue bounded, context request mới cho từng page, idempotency source key, protected `NotificationService.processNotificationSchedules`, digest snapshot 08:00 weekday Bangkok, reuse unique exact, retry snapshot đã lưu và một sender worker dùng chung. Tại boundary lịch sử đó chỉ claim commit local; không claim PR, Ready, merge, deploy, migration, backfill, email thật, provider, user/role/data hay N5 và UI live vẫn rollback.
 
 Fix round 1 xử lý chín finding Important của review exact-head: evidence commit/rollback page có context từ CAP installed thật; recovery hour Bangkok đầy đủ 08:00–08:59; anchor SLA bằng HistoryLogs bất biến; paging Bug keyset qua 5.000 ID; ownership index role dùng chung qua mọi recipient page; delivery batch HANA-safe; reuse unique-race target-aware; guard role/status/profile và persona fail-closed lúc send; và queue filter tương thích ListReport. Fix round 2 đóng finding persona-transition còn lại. Scoped re-review sạch tại `546fb9442bb39eb3193bff8d271275af282a15cc`; vẫn cần final whole-branch review trước Draft PR.
 
