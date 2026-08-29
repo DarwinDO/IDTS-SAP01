@@ -149,7 +149,7 @@ UI có thể dùng token làm `expectedVersion` cho `requestRoleChange`, `reques
 
 ### English
 
-`AdministrationDeliverySummary` is the only public DTO used to combine invitation and access-change deliveries in Operations. Its thirteen fields are allowlisted: type/event, masked recipient, safe outcome/retry timestamps, sanitized error summary, retry capability, and optimistic `modifiedAt`. `searchAdministrationDeliveries` accepts only `ALL`, `INVITATION`, or `ACCESS_CHANGE`; `retryUserAccessDelivery` retains the existing UUID plus expected-timestamp optimistic contract.
+`AdministrationDeliverySummary` is the only public DTO used to combine invitation, access-change, and read-only Digest deliveries in Operations. Its thirteen fields are allowlisted: type/event, masked recipient, safe outcome/retry timestamps, allowlisted error code/summary, retry capability, and optimistic `modifiedAt`. `searchAdministrationDeliveries` accepts only `ALL`, `INVITATION`, `ACCESS_CHANGE`, or `DIGEST`; `retryUserAccessDelivery` retains the existing UUID plus expected-timestamp optimistic contract, while Digest never exposes retry.
 
 - **Location**: `srv/user-admin.cds:125-140` — `AdministrationDeliverySummary`.
   **IDTS concept**: one privacy-safe operational shape over two domain-owned delivery stores.
@@ -162,7 +162,7 @@ UI có thể dùng token làm `expectedVersion` cho `requestRoleChange`, `reques
 
 ### Tiếng Việt
 
-`AdministrationDeliverySummary` là DTO public duy nhất để hợp nhất delivery invitation và access-change trong Operations. Mười ba field được allowlist: type/event, recipient đã che, outcome/timestamp retry an toàn, error summary đã sanitize, khả năng retry và `modifiedAt` optimistic. `searchAdministrationDeliveries` chỉ nhận `ALL`, `INVITATION`, `ACCESS_CHANGE`; `retryUserAccessDelivery` giữ contract UUID cùng expected timestamp hiện có.
+`AdministrationDeliverySummary` là DTO public duy nhất để hợp nhất delivery invitation, access-change và Digest read-only trong Operations. Mười ba field được allowlist: type/event, recipient đã che, outcome/timestamp retry an toàn, error code/summary allowlist, khả năng retry và `modifiedAt` optimistic. `searchAdministrationDeliveries` chỉ nhận `ALL`, `INVITATION`, `ACCESS_CHANGE`, `DIGEST`; `retryUserAccessDelivery` giữ contract UUID cùng expected timestamp hiện có, còn Digest không expose retry.
 
 - **Vị trí**: `srv/user-admin.cds:125-140` — `AdministrationDeliverySummary`.
   **Khái niệm IDTS**: một shape vận hành bảo vệ privacy trên hai delivery store theo domain.

@@ -309,6 +309,50 @@ async function verifyAdministrationDeliveryAuthorizationAndBounds () {
   assert.equal(reads, 0, 'failed authorization performs no access delivery read or mutation')
 }
 
+async function verifyDigestSearchContinuesPastFormerCap () {
+  const targetRecipientID = '91000000-0000-4000-8000-000000000099'
+  let latestDigestRows = []
+  let digestReads = 0
+  const tx = {
+    run: async query => {
+      const source = String(query.SELECT?.from?.ref?.[0] || '')
+      if (source === 'idts.cap.NotificationDigestDeliveries') {
+        digestReads += 1
+        const rows = Number(query.SELECT?.limit?.rows?.val || 0)
+        const offset = Number(query.SELECT?.limit?.offset?.val || 0)
+        if (offset > 10100) return []
+        if (offset === 10100) {
+          latestDigestRows = [digestDeliveryEntry('91800000-0000-4000-8000-000000010101', {
+            recipientID: targetRecipientID,
+            createdAt: '2026-08-20T00:00:00.000Z'
+          })]
+          return latestDigestRows
+        }
+        latestDigestRows = Array.from({ length: rows }, (_, index) => digestDeliveryEntry(
+          `digest-${String(offset + index).padStart(5, '0')}`,
+          { recipientID: `user-${String(offset + index).padStart(5, '0')}` }
+        ))
+        return latestDigestRows
+      }
+      if (source === 'idts.cap.Users') {
+        return latestDigestRows.some(row => row.recipient_ID === targetRecipientID)
+          ? [{ ID: targetRecipientID, email: 'zeta@example.invalid' }]
+          : []
+      }
+      throw new Error(`Unexpected source ${source}`)
+    }
+  }
+  const rows = await operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'DIGEST', status: '', query: 'z***@example.invalid', skip: 0, top: 1 }
+  }, {
+    tx,
+    authorize: async () => {},
+    getEmailConfig: () => ({ maxRetryCount: 2 })
+  })
+  assert.equal(digestReads > 1, true, 'Digest search continues page-by-page beyond the former 10,100-row cap')
+  assert.deepEqual(rows.map(row => row.deliveryID), ['91800000-0000-4000-8000-000000010101'])
+}
+
 async function main () {
   const serviceModel = await cds.load('srv/user-admin.cds')
   assert.deepEqual(
@@ -344,7 +388,13 @@ async function main () {
     provisioningBrokerState: 'RECENT_SUCCESS',
     lastSuccessfulReconciliationAt: RECENT_TIMESTAMP
   }, 'HANA uppercase column names must retain fresh readiness outcomes')
+  assert.equal(operationsAudit.toAdministrationDeliverySummary({
+    ID: DIGEST_FAILED_DELIVERY_ID,
+    status_code: 'FAILED',
+    lastErrorCode: 'PRIVATE_PROVIDER_STACK_TOKEN'
+  }, 'DIGEST').errorCode, 'UNAVAILABLE', 'unknown persisted delivery error codes stay private')
   await verifyAdministrationDeliveryAuthorizationAndBounds()
+  await verifyDigestSearchContinuesPastFormerCap()
 
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db
@@ -536,7 +586,7 @@ async function main () {
     })
   ]))
   await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries(
-    digestDeliveryEntry(DIGEST_FAILED_DELIVERY_ID)
+    digestDeliveryEntry(DIGEST_FAILED_DELIVERY_ID, { errorCode: 'PRIVATE_PROVIDER_STACK_TOKEN' })
   ))
 
   const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
@@ -604,8 +654,8 @@ async function main () {
     nextAttemptAt: '2026-08-24T06:05:00.000Z',
     lastAttemptAt: '2026-08-24T05:55:00.000Z',
     sentAt: null,
-    errorCode: 'BREVO_API_FAILED',
-    errorSummary: 'Email provider request failed.',
+    errorCode: 'UNAVAILABLE',
+    errorSummary: 'Email delivery failed.',
     canRetry: false,
     modifiedAt: RETRY_MODIFIED_AT
   }, 'Digest diagnostics expose only the shared safe DTO and never enable manual retry')

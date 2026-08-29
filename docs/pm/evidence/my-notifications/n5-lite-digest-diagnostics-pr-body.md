@@ -4,15 +4,15 @@ Add N5-Lite read-only Digest delivery diagnostics to the existing User Administr
 
 ## Positive Evidence
 
-Focused real-CAP SQLite Operations QA proves Digest-only and mixed three-source reads, masked recipients, stable safe DTO mapping and `canRetry=false`. UI QA proves one unified table, localized Digest filter/type/event and hidden retry. Digest regression, CAP compile and User Administration lint/build pass.
+Focused real-CAP SQLite Operations QA proves Digest-only and mixed three-source reads, page-complete masked-recipient search beyond the former 10,100-row cap, allowlisted error codes, stable safe DTO mapping and `canRetry=false`. UI QA proves one unified table, localized Digest filter/type/event and hidden retry. Digest regression, CAP compile and User Administration lint/build pass.
 
 ## Negative Evidence
 
-Non-UserAdmin PM is rejected before any table read. Digest body, subject, provider ID, internal recipient ID, lock fields and persisted provider summary are absent from the service and UI rows. Unsupported delivery types still fail closed. No manual retry or delete action exists.
+Non-UserAdmin PM is rejected before any table read. Digest body, subject, provider ID, internal recipient ID, lock fields, persisted provider summary and non-allowlisted provider error codes are absent from the service and UI rows. Unsupported delivery types still fail closed. No manual retry or delete action exists.
 
 ## Edge/Boundary Evidence
 
-Reads stay bounded by the existing 25 default/100 maximum and 10,000 skip ceiling. Masked-recipient search resolves users only through one bounded bulk read. Existing invitation/access sorting, filtering and retry paths remain covered. UI cache identity advances consistently to `1.0.18` without dependency changes.
+Returned pages stay bounded by the existing 25 default/100 maximum and 10,000 skip ceiling. Digest masked-recipient search scans fixed 100-row pages and performs one bounded User lookup per page until enough ordered matches exist, so rows after 10,100 are not silently lost. Existing invitation/access sorting, filtering and retry paths remain covered. UI cache identity advances consistently to `1.0.18` without dependency changes.
 
 ## Roles/Authorization
 
