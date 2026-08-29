@@ -4,7 +4,7 @@
 
 ### Status
 
-`N1/N2/N3/N4 LIVE — N4 ADDITIVE SCHEMA/CAP/UI ROLLOUT COMPLETE; CONTROLLED SCHEDULE/PROVIDER ACCEPTANCE DEFERRED`
+`N1/N2/N3/N4 LIVE — N4 CONTROLLED PROVIDER/HANA ACCEPTANCE COMPLETE; DISCOVERY JOB STAGED INACTIVE`
 
 ### Authority
 
@@ -27,7 +27,7 @@ Each gate freezes a fresh base, uses a dedicated worktree/branch, TDD, exact sco
 
 ### Next boundary
 
-Current 2026-08-28 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. DonHV authorized and completed the narrow additive prerequisite: exact-seven HDI simulation/make, encrypted before/after preservation proof, insert-only 12-code catalog initialization, CAP/UI rollout and incident recovery. Final CAP/AppRouter topology is healthy and Edge shows the live empty My Notifications popover. The public service view still intentionally excludes sourceKey. Controlled scheduler/provider delivery and HANA concurrency stress remain deferred operational acceptance; N5 remains pending. See `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
+Current 2026-08-29 override of the historical entries below: PR #365 merged at `f79d4a7b9dbdac496db953be3b6cfce60c913b96`; additive schema/CAP/UI rollout and incident recovery remain complete. Controlled Job Scheduler/Brevo delivery and HANA source-key concurrency are now accepted with one retained `donhvse` acceptance notification and guarded cleanup of the concurrency-only row. The five-minute discovery cadence is unavailable on the live `free` plan; an hourly discovery job is staged inactive so existing Pending Assignment/Overdue data is not replayed without a separate baseline decision. N5 remains pending. See `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
 
 Historical source-only record (superseded by the current override above): N1 #361 and N2 #362 were merged; N3 was the merged predecessor at the frozen Task 10 base `90fa1ffddced13c54b2daec852dbaadf90ddf7dc`. N4 Tasks 10 and 11 were locally source-complete on `feature/wp7-notifications-sla-digest-donhv`: bounded Pending Assignment/SLA/Overdue discovery, fresh request-derived page contexts, source-key idempotency, protected `NotificationService.processNotificationSchedules`, Bangkok weekday 08:00 digest snapshots, exact digest uniqueness reuse, stored-snapshot retry and one shared worker sender. At that historical boundary only the local commit was claimed; no PR, Ready, merge, deployment, migration, backfill, live email, provider, user/role/data or N5 action was claimed, and live UI remained rolled back.
 
@@ -51,9 +51,9 @@ Scoped re-review of fix round 1 left one Important: a stored PM/Developer/Tester
 
 ### Trạng thái
 
-`N1/N2/N3/N4 LIVE — ĐÃ XONG ROLLOUT SCHEMA ADDITIVE/CAP/UI N4; DEFER ACCEPTANCE SCHEDULE/PROVIDER CÓ KIỂM SOÁT`
+`N1/N2/N3/N4 LIVE — ĐÃ XONG ACCEPTANCE PROVIDER/HANA N4; JOB DISCOVERY ĐÃ STAGE NHƯNG INACTIVE`
 
-Cập nhật 2026-08-28 thay thế trạng thái lịch sử bên dưới: PR #365 merge tại `f79d4a7b9dbdac496db953be3b6cfce60c913b96`. DonHV đã duyệt và hoàn tất prerequisite additive hẹp: HDI simulation/make đúng bảy artifact, chứng minh bảo toàn trước/sau bằng backup mã hóa, init insert-only 12 code, rollout CAP/UI và recovery incident. Topology CAP/AppRouter cuối khỏe và Edge hiện popover My Notifications live rỗng. Public service view vẫn cố ý exclude sourceKey. Acceptance schedule/provider có kiểm soát và stress concurrency HANA được defer; N5 vẫn pending. Evidence: `docs/pm/evidence/my-notifications/n4-rollout-prerequisite-hold-20260828.md`.
+Cập nhật 2026-08-29 thay thế trạng thái lịch sử bên dưới: rollout additive schema/CAP/UI và recovery incident của PR #365 vẫn hoàn tất. Acceptance Job Scheduler/Brevo và concurrency source-key HANA đã PASS bằng một notification `donhvse` được giữ làm evidence; row chỉ dùng cho concurrency đã được cleanup có guard. Plan `free` không cho cadence năm phút; job discovery một giờ đã stage inactive để không replay Bug Pending Assignment/Overdue cũ khi chưa có quyết định baseline riêng. N5 vẫn pending. Evidence: `docs/pm/evidence/my-notifications/n4-controlled-operational-acceptance-20260829.md`.
 
 ### Thẩm quyền
 
