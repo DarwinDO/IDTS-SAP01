@@ -134,9 +134,9 @@ Vietnamese:
 
 ## In Progress
 
-My Notifications: WP7-NOTIFY is in progress. N1 #361 and N2 #362 are merged. N3 Tasks 7–9 plus final review fix are complete at source head `979a3ef878b0cf58aa55796203845788852030b1`; final scoped review is GO with 0 Critical/Major/Important and one deferred Minor. Fresh matrix passes; closure docs, push and one Draft PR remain. No deploy/migration/real backfill/Ready/merge/N4. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md`.
+My Notifications: WP7-NOTIFY N1–N5-Lite is merged, live and operationally closed. N4 hourly discovery is active with the approved no-replay cutoff; prompt email remains event-driven. N5-Lite read-only Digest diagnostics are live through PR #368 at `68f9cba580e4e5e69425ec02ab1b4361468fbb46`. N6, manual Digest retry and automated retention remain deferred. Details: `docs/pm/tasks/wp7-my-notifications-roadmap.md` and `docs/pm/handoffs/2026-08-29-user-admin-my-notifications-live.md`.
 
-Tiếng Việt: WP7-NOTIFY đang thực hiện; N1 #361 và N2 #362 đã merge. N3 Tasks 7–9 cùng fix final review hoàn tất tại source head trên; scoped review cuối GO 0 Critical/Major/Important, một Minor defer. Full matrix PASS; còn closure docs, push và một Draft PR. Không deploy/migration/backfill thật/Ready/merge/N4.
+Tiếng Việt: WP7-NOTIFY N1–N5-Lite đã merge, live và đóng vận hành. Discovery hourly N4 đang active với cutoff chống replay đã duyệt; prompt email vẫn event-driven. Digest diagnostic read-only N5-Lite đã live qua PR #368 tại `68f9cba580e4e5e69425ec02ab1b4361468fbb46`. N6, retry Digest thủ công và retention tự động vẫn defer. Chi tiết: `docs/pm/tasks/wp7-my-notifications-roadmap.md` và `docs/pm/handoffs/2026-08-29-user-admin-my-notifications-live.md`.
 
 | ID | Task | Primary member | Note |
 | --- | --- | --- | --- |

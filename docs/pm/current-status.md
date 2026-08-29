@@ -1,6 +1,11 @@
 # Current Project Status
 
-Last updated: 2026-08-27
+Last updated: 2026-08-29
+
+## 2026-08-29 User Administration and My Notifications live handoff
+
+- **English:** The canonical bilingual [merged-and-live handoff](handoffs/2026-08-29-user-admin-my-notifications-live.md) now consolidates User Administration from the original access-onboarding foundation through Gate 6.5 and My Notifications N1–N5-Lite. It separates source, merge, BTP acceptance and `DEMO READY` evidence, records deliberate deferrals, and tells a new session to refresh `origin/dev` before any new work. This is documentation only; no product, runtime, provider, data, user/role, email or Drive mutation occurred.
+- **Tiếng Việt:** [Handoff merged-and-live](handoffs/2026-08-29-user-admin-my-notifications-live.md) song ngữ canonical nay tổng hợp User Administration từ nền tảng onboarding access đến Gate 6.5 và My Notifications N1–N5-Lite. File tách evidence source, merge, BTP acceptance và `DEMO READY`, ghi defer có chủ đích và yêu cầu chat mới refresh `origin/dev` trước mọi việc mới. Đây chỉ là tài liệu; không mutation product, runtime, provider, data, user/role, email hay Drive.
 
 ## 2026-08-27 My Notifications N3 source execution
 
