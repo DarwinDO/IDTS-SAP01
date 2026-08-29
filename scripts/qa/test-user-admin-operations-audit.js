@@ -353,6 +353,37 @@ async function verifyDigestSearchContinuesPastFormerCap () {
   assert.deepEqual(rows.map(row => row.deliveryID), ['91800000-0000-4000-8000-000000010101'])
 }
 
+async function verifyDigestSearchHasFixedWorkBudget () {
+  let digestReads = 0
+  let latestDigestRows = []
+  const tx = {
+    run: async query => {
+      const source = String(query.SELECT?.from?.ref?.[0] || '')
+      if (source === 'idts.cap.NotificationDigestDeliveries') {
+        digestReads += 1
+        const rows = Number(query.SELECT?.limit?.rows?.val || 0)
+        const offset = Number(query.SELECT?.limit?.offset?.val || 0)
+        if (offset >= 20100) return []
+        latestDigestRows = Array.from({ length: rows }, (_, index) => digestDeliveryEntry(
+          `budget-${String(offset + index).padStart(5, '0')}`,
+          { recipientID: `budget-user-${String(offset + index).padStart(5, '0')}` }
+        ))
+        return latestDigestRows
+      }
+      if (source === 'idts.cap.Users') return []
+      throw new Error(`Unexpected source ${source}`)
+    }
+  }
+  await expectRejected(operationsAudit.searchAdministrationDeliveries({
+    data: { deliveryType: 'DIGEST', status: '', query: 'no-match@example.invalid', skip: 0, top: 1 }
+  }, {
+    tx,
+    authorize: async () => {},
+    getEmailConfig: () => ({ maxRetryCount: 2 })
+  }), 422, 'DIGEST_SEARCH_TOO_BROAD')
+  assert.equal(digestReads, 200, 'Digest search performs at most 20,000 candidate-row page reads')
+}
+
 async function main () {
   const serviceModel = await cds.load('srv/user-admin.cds')
   assert.deepEqual(
@@ -395,6 +426,7 @@ async function main () {
   }, 'DIGEST').errorCode, 'UNAVAILABLE', 'unknown persisted delivery error codes stay private')
   await verifyAdministrationDeliveryAuthorizationAndBounds()
   await verifyDigestSearchContinuesPastFormerCap()
+  await verifyDigestSearchHasFixedWorkBudget()
 
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db

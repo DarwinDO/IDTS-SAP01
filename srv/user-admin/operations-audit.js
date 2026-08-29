@@ -20,6 +20,7 @@ const MAX_PAGE_SIZE = 100
 const MAX_PAGE_SKIP = 1000000
 const MAX_ADMINISTRATION_PAGE_SKIP = 10000
 const DIGEST_SEARCH_PAGE_SIZE = 100
+const MAX_DIGEST_SEARCH_ROWS = 20000
 const READINESS_WINDOW_MS = 7 * 24 * 60 * 60 * 1000
 
 const RETRYABLE_DELIVERY_CODES = new Set([
@@ -241,19 +242,23 @@ async function normalizeAdministrationDeliveries (tx, deliveryType, rows, maxAtt
 async function searchDigestDeliveries (tx, status, query, limit, maxAttempts, readAt) {
   const matches = []
   let offset = 0
-  while (matches.length < limit) {
+  while (matches.length < limit && offset < MAX_DIGEST_SEARCH_ROWS) {
+    const pageSize = Math.min(DIGEST_SEARCH_PAGE_SIZE, MAX_DIGEST_SEARCH_ROWS - offset)
     const rows = await tx.run(administrationDeliverySelection(
       'DIGEST',
       status,
       '',
-      DIGEST_SEARCH_PAGE_SIZE,
+      pageSize,
       offset
     ))
     if (rows.length === 0) break
     const normalized = await normalizeAdministrationDeliveries(tx, 'DIGEST', rows, maxAttempts, readAt)
     matches.push(...filterAdministrationDeliveries(normalized, query))
-    if (rows.length < DIGEST_SEARCH_PAGE_SIZE) break
+    if (rows.length < pageSize) break
     offset += rows.length
+  }
+  if (matches.length < limit && offset >= MAX_DIGEST_SEARCH_ROWS) {
+    throw serviceError(422, 'DIGEST_SEARCH_TOO_BROAD', 'Digest search is too broad. Refine the search query.')
   }
   return matches.slice(0, limit)
 }

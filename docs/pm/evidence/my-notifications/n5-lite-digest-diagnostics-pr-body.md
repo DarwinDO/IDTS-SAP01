@@ -12,7 +12,7 @@ Non-UserAdmin PM is rejected before any table read. Digest body, subject, provid
 
 ## Edge/Boundary Evidence
 
-Returned pages stay bounded by the existing 25 default/100 maximum and 10,000 skip ceiling. Digest masked-recipient search scans fixed 100-row pages and performs one bounded User lookup per page until enough ordered matches exist, so rows after 10,100 are not silently lost. Existing invitation/access sorting, filtering and retry paths remain covered. UI cache identity advances consistently to `1.0.18` without dependency changes.
+Returned pages stay bounded by the existing 25 default/100 maximum and 10,000 skip ceiling. Digest masked-recipient search scans fixed 100-row pages and performs one bounded User lookup per page until enough ordered matches exist. A request inspects at most 20,000 candidate rows; if that budget cannot satisfy the page, CAP returns `DIGEST_SEARCH_TOO_BROAD` instead of silently truncating or scanning the entire table. Existing invitation/access sorting, filtering and retry paths remain covered. UI cache identity advances consistently to `1.0.18` without dependency changes.
 
 ## Roles/Authorization
 
