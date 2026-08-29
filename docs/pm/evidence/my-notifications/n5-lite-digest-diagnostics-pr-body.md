@@ -47,7 +47,7 @@ Result: PASS
 
 ## Known Gaps
 
-Manual Digest retry and automated inbox cleanup are deferred until measured operational need. No deployment or live-browser/HANA acceptance is claimed by this source gate. TAC advisory was unavailable because the connector was not connected. Exact remediation scan `086b9fc3-253d-448e-811d-895d2007b5ea` passed capability preflight but could not be sealed after the installed Codex Security plugin cache/MCP namespace disappeared; its unsealed canonical drafts are preserved and no zero-finding claim is made for that scan. The final independent exact-head review returned 0 Critical / 0 Major / 0 Important / 1 corrected documentation-only Minor.
+Manual Digest retry and automated inbox cleanup are deferred until measured operational need. No deployment or live-browser/HANA acceptance is claimed by this source gate. TAC advisory was unavailable because the connector was not connected. After the missing plugin was restored, exact-head Codex Security scan `d6540079-0847-4d38-a3a4-63d0e187bdbc` sealed complete seven-file coverage at `1c00ded4` with zero reportable findings. The earlier interrupted scan remains preserved as tooling evidence only.
 
 ## Jira/Evidence Links
 
