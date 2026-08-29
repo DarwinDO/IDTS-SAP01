@@ -50,6 +50,11 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 9. Gate 6.4 — Safe cross-app navigation — COMPLETE. Source PR #353 and cache-identity PR #354 are merged; selective CAP/content rollout and PM + UserAdmin same-tab round-trip acceptance passed at final merge `2993c707f7369e46c45ec2b105c30f9786f0d859`.
 10. Gate 6.5 — Post-completion access-change email notifications — COMPLETE. Source PR #358 merged into `dev` at `e587aa5b1603d32c89ce01b4bcab9854f07eb157`; the additive HANA migration, selective CAP/User Administration `1.0.17` rollout, unified Operations acceptance, controlled Tester Suspend -> Reactivate cycle, mailbox verification, and final `DEMO READY` check are complete.
 
+### Cross-session handoff — 2026-08-29
+
+- **English:** [User Administration and My Notifications — Merged and Live Handoff](../handoffs/2026-08-29-user-admin-my-notifications-live.md) is the canonical bilingual starting point for a fresh chat. It summarizes only merged-and-live User Administration through Gate 6.5 and directs future work to refresh its baseline before any change.
+- **Tiếng Việt:** [User Administration and My Notifications — Merged and Live Handoff](../handoffs/2026-08-29-user-admin-my-notifications-live.md) là điểm bắt đầu song ngữ canonical cho chat mới. File chỉ tóm tắt User Administration đã merge và live đến Gate 6.5, đồng thời yêu cầu refresh baseline trước mọi thay đổi.
+
 ### Gate 6.5 source-evidence boundary — 2026-08-26
 
 - Exact clean planning snapshot: `5a12a7d3b1b32a4def1514daa809352bd22c1013`; exact implementation base/merge-base: `e355f95d7d0eb61e2bd675a35709270454e62276`; documented implementation head: `128f5ba0cbf9edfec6c7c1368d04316cf72f6efe`.
