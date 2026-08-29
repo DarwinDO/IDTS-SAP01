@@ -41,7 +41,7 @@ service NotificationService @(requires: 'authenticated-user') {
   function getMyUnreadNotificationCount() returns UnreadNotificationCount;
 
   @(requires: 'OutboxProcessor')
-  action processNotificationSchedules(now:Timestamp) returns NotificationMaintenanceResult;
+  action processNotificationSchedules(now:Timestamp, discoveryFrom:Timestamp) returns NotificationMaintenanceResult;
 
   action markMyNotificationRead(
     notificationID    : UUID,
