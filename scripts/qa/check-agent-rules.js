@@ -44,6 +44,32 @@ function main () {
     if (!agents.includes(name.replace('.md', ''))) errors.push(`AGENTS.md does not route rule: ${name}`)
   }
 
+  const ownershipLearning = read(path.join(RULES_DIR, 'ownership-learning-and-debug.md'))
+  const pullRequestTemplate = read(path.join(ROOT, '.github', 'pull_request_template.md'))
+  const prDepthValidator = read(path.join(ROOT, 'scripts', 'qa', 'check-pr-depth.js'))
+
+  if (/^## Mandatory Code Ownership and Knowledge Gate$/m.test(agents)) {
+    errors.push('AGENTS.md still declares a mandatory Ownership Knowledge Gate')
+  }
+  if (!/Learning Recap is opt-in/i.test(agents)) {
+    errors.push('AGENTS.md does not state that Learning Recap is opt-in')
+  }
+  if (/^## Required task-start Knowledge Gate$/m.test(ownershipLearning)) {
+    errors.push('Ownership learning rule still requires a task-start Knowledge Gate')
+  }
+  if (!/Learning is opt-in/i.test(ownershipLearning)) {
+    errors.push('Ownership learning rule does not state that learning is opt-in')
+  }
+  if (/Retrofit all 72 runtime/i.test(ownershipLearning)) {
+    errors.push('Ownership learning rule still mandates the historical 72-file learning retrofit')
+  }
+  if (/^## (Ownership Knowledge Gate|Learning Material Bootstrap)$/m.test(pullRequestTemplate)) {
+    errors.push('Pull request template still contains a mandatory learning gate section')
+  }
+  if (/validateOwnershipKnowledgeGate|validateLearningMaterialBootstrap|isOwnershipGateRequired/.test(prDepthValidator)) {
+    errors.push('QA Depth validator still enforces the retired Knowledge Gate')
+  }
+
   const changeControl = read(path.join(RULES_DIR, 'change-control-and-git.md'))
   const worktreeSafetyPhrases = [
     'git worktree remove',

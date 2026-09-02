@@ -3,7 +3,7 @@
 const assert = require('assert')
 const fs = require('fs')
 const path = require('path')
-const { validatePullRequestBody, bangkokDate } = require('./check-pr-depth')
+const { validatePullRequestBody } = require('./check-pr-depth')
 const { isAllowedLocalPreviewResponse, isUnexpectedConsoleError } = require('./lib/browser-harness')
 
 function section(name, body) {
@@ -20,57 +20,16 @@ function validBody() {
     section('Persistence/Reload', 'N/A - no database state is changed by this documentation/tooling gate.'),
     section('UI/UX Review', 'N/A - no user-facing screen is changed by this gate.'),
     section('Ponytail Simplicity', 'Used ponytail; kept the gate dependency-free and did not add a separate validation framework.'),
-    section('Ownership Knowledge Gate', [
-      'Member: DonHV',
-      'Date: 2026-07-13',
-      'Ownership flow: Authentication/session/profile',
-      'Base questions: 3',
-      'Inactive-day questions: 0',
-      'Additional-flow questions: 0',
-      'Score: 100%',
-      'Critical questions: PASS',
-      'Debug exercise: PASS',
-      'Teach-back: PASS',
-      'Evidence: docs/learning/progress/donhv.md',
-      'Result: PASS'
-    ].join('\n')),
     section('Known Gaps', 'None'),
     section('Jira/Evidence Links', 'Jira: IDTS-42. Evidence: local self-test output.')
-  ].join('\n')
-}
-
-function bootstrapBody() {
-  return validBody().replace(section('Ownership Knowledge Gate', [
-    'Member: DonHV',
-    'Date: 2026-07-13',
-    'Ownership flow: Authentication/session/profile',
-    'Base questions: 3',
-    'Inactive-day questions: 0',
-    'Additional-flow questions: 0',
-    'Score: 100%',
-    'Critical questions: PASS',
-    'Debug exercise: PASS',
-    'Teach-back: PASS',
-    'Evidence: docs/learning/progress/donhv.md',
-    'Result: PASS'
-  ].join('\n')), section('Learning Material Bootstrap', bootstrapDeclaration()))
-}
-
-function bootstrapDeclaration() {
-  return [
-    'Purpose: Initial agent-created learning material for IDTS-84.',
-    'Runtime behavior changed: NO',
-    'Scope verified: Source comments and knowledge mirrors only.',
-    'Learner: DatDT',
-    'Follow-up Knowledge Gate: IDTS-84',
-    'Evidence: docs/knowledge/app/'
   ].join('\n')
 }
 
 function main() {
   let result = validatePullRequestBody(validBody(), { ownershipGateRequired: true })
   assert.strictEqual(result.pass, true, result.errors.join('\n'))
-  console.log('  PASS  valid PR body passes')
+  assert.strictEqual(result.checkedSections, 10)
+  console.log('  PASS  valid PR body needs no Knowledge Gate')
 
   result = validatePullRequestBody(`\uFEFF${validBody()}`, { ownershipGateRequired: true })
   assert.strictEqual(result.pass, true, result.errors.join('\n'))
@@ -79,7 +38,7 @@ function main() {
   result = validatePullRequestBody(section('Summary', 'Only summary is present.'), { ownershipGateRequired: true })
   assert.strictEqual(result.pass, false)
   assert(result.errors.some(error => /Missing required section: Positive Evidence/.test(error)))
-  console.log('  PASS  missing required sections fail')
+  console.log('  PASS  missing QA Depth sections fail')
 
   const bareNa = validBody().replace(
     section('Roles/Authorization', 'N/A - documentation-only gate has no runtime role behavior.'),
@@ -90,65 +49,20 @@ function main() {
   assert(result.errors.some(error => /N\/A must include a reason/.test(error)))
   console.log('  PASS  bare N/A fails')
 
-  const failedKnowledgeGate = validBody().replace('Score: 100%', 'Score: 60%')
-  result = validatePullRequestBody(failedKnowledgeGate, { ownershipGateRequired: true })
-  assert.strictEqual(result.pass, false)
-  assert(result.errors.some(error => /Ownership Knowledge Gate score/.test(error)))
-  console.log('  PASS  low ownership score fails')
-
-  const missingTeachBack = validBody().replace('Teach-back: PASS', 'Teach-back: FAIL')
-  result = validatePullRequestBody(missingTeachBack, { ownershipGateRequired: true })
-  assert.strictEqual(result.pass, false)
-  assert(result.errors.some(error => /Ownership Knowledge Gate field must be PASS: Teach-back/.test(error)))
-  console.log('  PASS  failed teach-back blocks PR')
-
-  const beforeEffectiveDate = validBody().replace(section('Ownership Knowledge Gate', [
-    'Member: DonHV',
-    'Date: 2026-07-13',
-    'Ownership flow: Authentication/session/profile',
-    'Base questions: 3',
-    'Inactive-day questions: 0',
-    'Additional-flow questions: 0',
-    'Score: 100%',
-    'Critical questions: PASS',
-    'Debug exercise: PASS',
-    'Teach-back: PASS',
-    'Evidence: docs/learning/progress/donhv.md',
-    'Result: PASS'
-  ].join('\n')), '')
-  result = validatePullRequestBody(beforeEffectiveDate, { today: '2026-07-12' })
+  const legacyLearningSection = validBody() + section('Ownership Knowledge Gate', [
+    'Member: HistoricalMember',
+    'Score: 10%',
+    'Result: FAIL'
+  ].join('\n'))
+  result = validatePullRequestBody(legacyLearningSection, { ownershipGateRequired: true })
   assert.strictEqual(result.pass, true, result.errors.join('\n'))
-  console.log('  PASS  gate is not required before effective date')
-
-  result = validatePullRequestBody(bootstrapBody(), { ownershipGateRequired: true })
-  assert.strictEqual(result.pass, true, result.errors.join('\n'))
-  console.log('  PASS  a narrow learning-material bootstrap can precede the member gate')
-
-  result = validatePullRequestBody(bootstrapBody().replace('Runtime behavior changed: NO', 'Runtime behavior changed: YES'), { ownershipGateRequired: true })
-  assert.strictEqual(result.pass, false)
-  assert(result.errors.some(error => /runtime behavior changed must be NO/.test(error)))
-  console.log('  PASS  bootstrap cannot claim a runtime behavior change')
-
-  const missingGateAndBootstrap = beforeEffectiveDate
-  result = validatePullRequestBody(missingGateAndBootstrap, { ownershipGateRequired: true })
-  assert.strictEqual(result.pass, false)
-  assert(result.errors.some(error => /Ownership Knowledge Gate or Learning Material Bootstrap/.test(error)))
-  console.log('  PASS  post-effective PRs need a gate or a valid bootstrap declaration')
-
-  result = validatePullRequestBody(validBody() + section('Learning Material Bootstrap', bootstrapDeclaration()), { ownershipGateRequired: true })
-  assert.strictEqual(result.pass, false)
-  assert(result.errors.some(error => /either Ownership Knowledge Gate or Learning Material Bootstrap/.test(error)))
-  console.log('  PASS  a PR cannot use both declarations')
+  console.log('  PASS  legacy Knowledge Gate text no longer blocks PR validation')
 
   const template = fs.readFileSync(path.join(__dirname, '../../.github/pull_request_template.md'), 'utf8')
-  result = validatePullRequestBody(template, { ownershipGateRequired: true })
-  assert.strictEqual(result.pass, false)
-  assert(result.errors.some(error => /Ownership Knowledge Gate or Learning Material Bootstrap/.test(error)))
-  assert.strictEqual(result.errors.some(error => /Missing .* field/.test(error)), false)
-  console.log('  PASS  the blank template does not masquerade as a completed declaration')
-
-  assert.match(bangkokDate(), /^\d{4}-\d{2}-\d{2}$/)
-  console.log('  PASS  default gate date is formatted in Asia/Bangkok')
+  assert.doesNotMatch(template, /^## Ownership Knowledge Gate$/m)
+  assert.doesNotMatch(template, /^## Learning Material Bootstrap$/m)
+  assert.doesNotMatch(template, /completed the Ownership Knowledge Gate/i)
+  console.log('  PASS  PR template contains no mandatory learning gate')
 
   assert.strictEqual(
     isAllowedLocalPreviewResponse(404, 'http://localhost:4004/bug-management-ui/webapp/Component-preload.js'),
@@ -164,7 +78,7 @@ function main() {
   assert.strictEqual(isUnexpectedConsoleError('Failed to load resource: the server responded with a status of 404'), false)
   console.log('  PASS  browser harness console classifier keeps runtime TypeError blocking')
 
-  console.log('\nQA Depth Gate self-test: 15 PASS / 0 FAIL')
+  console.log('\nQA Depth Gate self-test: 8 PASS / 0 FAIL')
 }
 
 try {

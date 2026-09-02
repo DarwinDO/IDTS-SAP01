@@ -16,7 +16,7 @@ For every task that creates, reads, edits, reviews, moves, synchronizes, or dele
 | Documents, knowledge mirrors, SAP490, Drive, DOCX/XLSX/PPTX/PDF | `documentation-knowledge-and-sap490.md` plus the OfficeCLI gate |
 | IDTS SAP490 XLSX workbook, generator, render, validation, or Drive synchronization | `idts-sap490-xlsx-fidelity` plus `documentation-knowledge-and-sap490.md` and OfficeCLI |
 | Tests, security, configuration, deployment, or release claims | `testing-security-and-release.md` |
-| Code ownership, beginner debugging, learning recap, task-start knowledge gate, or PR/Jira learning evidence | `ownership-learning-and-debug.md` |
+| User-requested code learning, beginner debugging, learning recap, or ownership guidance | `ownership-learning-and-debug.md` |
 
 ## Mandatory SAP490 Mentor-Review Briefing Gate
 
@@ -779,23 +779,11 @@ Dùng `idts-ba-docx-deliverables` trước khi tạo, chỉnh sửa hoặc conve
 - Cách dùng `brd-creation`, `srs-documentation`, `frs-creation`, `docx`, và `docx-manipulation` như nguồn tham khảo phụ.
 - Rule chất lượng DOCX/XLSX/PPTX như bảng Word thật, heading style, bảng approval/version, traceability matrix, giữ formula/style, visual QA và kiểm tra lỗi tiếng Việt.
 
-## Mandatory Code Ownership and Knowledge Gate
-
-From 2026-07-13 (Asia/Bangkok), all four IDTS members must follow `.agents/rules/ownership-learning-and-debug.md` for nontrivial task-start knowledge checks, beginner debugging, source comments, PR evidence, and Jira Done checks.
-
-Use `docs/learning/ownership-map.md` to identify the primary and backup owner before asking questions or assigning work. A member may learn and code after a failed gate, but the agent must not mark the task PASS, merge the PR, or transition Jira to Done until the retest PASS evidence exists.
-
-Vietnamese:
-
-Từ 13/07/2026 (Asia/Bangkok), cả bốn member IDTS phải tuân theo `.agents/rules/ownership-learning-and-debug.md` cho Knowledge Gate đầu task, beginner debugging, comment source, evidence PR và điều kiện Jira Done.
-
-Dùng `docs/learning/ownership-map.md` để xác định primary/backup owner trước khi hỏi hoặc phân công. Member fail gate vẫn được học và code có hướng dẫn, nhưng agent không được đánh PASS task, merge PR hoặc chuyển Jira Done cho đến khi có retest PASS evidence.
-
 ## Learning Recap / Mentor Mode
 
-Use `.agents/skills/learning-recap` as an optional teaching workflow after nontrivial tasks. This mode is for understanding, not for doing the task faster.
+Learning Recap is opt-in. Use `.agents/skills/learning-recap` only when the user explicitly asks to learn, requests mentor mode, wants an explanation, or asks to check their understanding. Do not automatically offer a quiz, score the user, require a teach-back, or block task completion, PR merge, or Jira status because learning was not requested.
 
-Offer a Learning Recap after tasks involving:
+Useful topics when the user requests learning include:
 
 - SAP, CAP, CDS, OData, Fiori, UI5, or SAP490 concepts.
 - BA/PM decisions, workflow/status/role/ownership changes, or project-scope decisions.
@@ -803,7 +791,7 @@ Offer a Learning Recap after tasks involving:
 - Debugging, architecture, data model, service, handler, annotation, or UI behavior.
 - Any task where the user is likely to benefit from understanding the reasoning and impact.
 
-Activate Learning Recap when the user says `learning recap`, `mentor mode`, `teach me`, `explain what you did`, `check if I understood`, or a similar request.
+Activate Learning Recap only when the user says `learning recap`, `mentor mode`, `teach me`, `explain what you did`, `check if I understood`, or makes a similarly explicit request.
 
 When active:
 
@@ -812,17 +800,17 @@ When active:
 3. Walk through what changed or what was decided.
 4. Explain why this approach was chosen.
 5. Explain the impact on IDTS and future work.
-6. Ask the user to explain one key concept back in their own words.
-7. Correct misunderstandings before continuing.
-8. Ask a short quiz only after the user has tried to answer.
+6. If the user asks for practice, invite them to explain one key concept in their own words.
+7. Correct misunderstandings supportively.
+8. Use a short quiz only when the user requests one.
 
-Do not force this mode after every small task. For routine or tiny tasks, just mention that Learning Recap is available if the user wants it.
+Outside an explicit learning request, complete the normal task without adding a learning gate or quiz.
 
 Vietnamese:
 
-Dùng `.agents/skills/learning-recap` như một workflow dạy lại tùy chọn sau các task không tầm thường. Mode này dùng để giúp user hiểu, không phải để làm task nhanh hơn.
+Learning Recap là opt-in. Chỉ dùng `.agents/skills/learning-recap` khi user chủ động yêu cầu học, bật mentor mode, muốn giải thích hoặc muốn kiểm tra mức hiểu. Không tự đề nghị quiz, chấm điểm user, bắt buộc teach-back hoặc chặn task, merge PR hay Jira chỉ vì user không yêu cầu học.
 
-Hãy đề xuất Learning Recap sau các task liên quan:
+Các chủ đề phù hợp khi user yêu cầu học gồm:
 
 - Khái niệm SAP, CAP, CDS, OData, Fiori, UI5 hoặc SAP490.
 - Quyết định BA/PM, thay đổi workflow/status/role/ownership hoặc quyết định scope.
@@ -830,7 +818,7 @@ Hãy đề xuất Learning Recap sau các task liên quan:
 - Debugging, architecture, data model, service, handler, annotation hoặc UI behavior.
 - Bất kỳ task nào user có lợi khi hiểu reasoning và impact.
 
-Kích hoạt Learning Recap khi user nói `learning recap`, `mentor mode`, `teach me`, `explain what you did`, `check if I understood`, hoặc yêu cầu tương tự.
+Chỉ kích hoạt Learning Recap khi user nói `learning recap`, `mentor mode`, `teach me`, `explain what you did`, `check if I understood`, hoặc có yêu cầu rõ tương tự.
 
 Khi active:
 
@@ -839,11 +827,11 @@ Khi active:
 3. Đi qua phần đã thay đổi hoặc quyết định.
 4. Giải thích vì sao chọn hướng này.
 5. Giải thích tác động tới IDTS và việc sau này.
-6. Yêu cầu user giải thích lại một khái niệm quan trọng bằng lời của họ.
-7. Sửa hiểu sai trước khi đi tiếp.
-8. Chỉ hỏi quiz ngắn sau khi user đã thử trả lời.
+6. Nếu user muốn luyện tập, mời user giải thích lại một khái niệm bằng lời của mình.
+7. Sửa phần hiểu sai theo hướng hỗ trợ.
+8. Chỉ dùng quiz ngắn khi user yêu cầu.
 
-Không ép mode này sau mọi task nhỏ. Với task thường hoặc rất nhỏ, chỉ cần nói Learning Recap có sẵn nếu user muốn.
+Khi không có yêu cầu học rõ ràng, hoàn thành task bình thường mà không thêm learning gate hoặc quiz.
 
 ## Product Discovery Before Specs
 
