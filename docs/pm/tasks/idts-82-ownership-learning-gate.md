@@ -1,5 +1,15 @@
 # IDTS-82 — Code Ownership and Knowledge Gate Governance
 
+## Current policy — 2026-09-02
+
+DonHV retired the mandatory Ownership Knowledge Gate. Task-start quizzes, score thresholds, teach-back evidence, PR-body declarations and Jira/merge blocking are no longer required. Ownership maps, Debug Labs, learning notes and `npm run learning:gate -- ...` remain available only when a user explicitly requests learning or assessment. Historical records below are preserved as the original governance design and completed learning evidence; they do not enforce current work.
+
+DonHV đã bỏ Ownership Knowledge Gate bắt buộc. Quiz đầu task, ngưỡng điểm, evidence teach-back, khai báo PR body và cơ chế chặn Jira/merge không còn bắt buộc. Ownership map, Debug Lab, learning note và `npm run learning:gate -- ...` chỉ còn dùng khi user chủ động yêu cầu học hoặc đánh giá. Nội dung lịch sử bên dưới được giữ như thiết kế governance ban đầu và evidence học tập đã hoàn thành; nó không còn enforce công việc hiện tại.
+
+Status: **DONE AS SUPERSEDED BY DEC-070 — OPTIONAL LEARNING REMAINS AVAILABLE**.
+
+## Historical original governance design
+
 ## English
 
 ### Purpose

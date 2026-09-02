@@ -1,95 +1,63 @@
 ---
 name: idts-ownership-learning-and-debug
-description: Mandatory code ownership, beginner debugging, learning recap, and knowledge-gate rules.
-applies_to: all nontrivial IDTS tasks, PRs, Jira transitions, source comments, and member learning
-priority: required
+description: Optional code ownership learning, beginner debugging, and user-requested learning recap guidance.
+applies_to: user-requested learning, mentor mode, beginner debugging, source comments, and ownership guidance
+priority: optional
 ---
 
-# Ownership, Learning, and Debug Gate
+# Ownership, Optional Learning, and Debugging
 
-## Effective baseline
+## Ownership reference
 
 - Effective from **2026-07-13** in the Asia/Bangkok timezone for DonHV, DatDT, SangVN, and NhanT.
 - Use `docs/learning/ownership-map.md` as the source of truth for file ownership, backup ownership, and flow ownership.
 - File ownership answers who maintains a file. Flow ownership answers who can trace a real request from UI through OData/CAP to persistence or an external integration.
-- Do not use a front-end/backend boundary as an excuse for being unable to explain an end-to-end flow.
+- Use these ownership records as guidance for learning and collaboration, not as a prerequisite for normal task execution.
 
-## Required task-start Knowledge Gate
+## Opt-in learning only
 
-Before the first nontrivial task of a calendar day, the executing member must complete the Knowledge Gate for the task's relevant ownership flow.
+Learning is opt-in. Start this workflow only when the user explicitly asks to learn, requests mentor mode, asks for a walkthrough or quiz, or wants their understanding checked.
 
-### Initial learning-material bootstrap exception
+- Do not start a Knowledge Gate automatically at task start or because a calendar day changed.
+- Do not score the user or require PASS/FAIL evidence unless the user explicitly asks for a scored exercise.
+- Missing learning evidence must never block implementation, task completion, PR creation/merge, or a Jira transition.
+- The PR template and QA Depth validator do not require Ownership Knowledge Gate or Learning Material Bootstrap sections.
+- Historical learning records remain valid learning evidence but do not create current enforcement.
 
-The first rollout of source comments and knowledge mirrors must happen **before** the human owner is assessed on that material. For a dedicated bootstrap task such as IDTS-83, IDTS-84, or IDTS-85, an agent may first prepare concise Vietnamese source comments and matching bilingual knowledge mirrors.
+## User-requested learning path
 
-- A bootstrap PR may be merged before the member Knowledge Gate only when it changes learning material only: source comments and knowledge mirrors, with no runtime behavior, schema, service, manifest, test, dependency, or configuration change.
-- The PR must use the `Learning Material Bootstrap` declaration, name the learner and follow-up IDTS issue, and be reviewed for comment-only scope.
-- The member then studies the prepared PR/merged material, completes the relevant Knowledge Gate, debug exercise, and teach-back before receiving PASS for any later technical implementation, PR merge, or Jira Done.
-- The bootstrap exception never applies to a feature, bug fix, refactor, security change, or mixed behavior-plus-documentation PR. Those PRs always require a passing Ownership Knowledge Gate from 2026-07-13.
+1. Ask which concept or flow the user wants to understand.
+2. Explain the purpose and business context first.
+3. Show the first relevant file, caller and dependency.
+4. Trace UI to OData/CAP to persistence or external integration when applicable.
+5. For debugging practice, use hint, first file, first breakpoint, variables, data effect and failure path.
+6. Ask for teach-back or a quiz only when the user requests practice or assessment.
+7. Store sanitized learning notes only when the user asks for a durable record.
 
-- Start on 2026-07-13 with three questions and zero historical debt.
-- Add one question for each calendar day without an ownership-code activity after the most recent passing task. Cap the first gate at seven questions.
-- When a later task on the same day enters a different ownership flow, ask two additional flow-specific questions.
-- Questions must test purpose, caller/dependency, end-to-end request trace, breakpoint/root-cause reasoning, data effect, or authorization/security. Do not test line-number trivia or syntax memorization.
-- Record the date, flow, question count, score, critical answers, debug exercise, teach-back result, and safe evidence path in the member progress file.
-- Use `npm run learning:gate -- <member> <flow> YYYY-MM-DD [last-activity|-] [additional]` to select one reproducible question set; use `-` when a later new flow has no last-activity date to supply. The command selects questions only; a human/agent must still assess the answer, debug exercise, and teach-back before recording PASS or FAIL.
+The existing `npm run learning:gate -- ...` selector may be used as an optional quiz helper when the user explicitly requests it. Its result is learning feedback, not release authorization.
 
-## PASS, FAIL, and mentoring
+## Optional learning material
 
-PASS requires all of the following:
-
-- At least 80 percent score.
-- Every security, authorization, and data-integrity question is correct.
-- The member traces at least one relevant IDTS flow.
-- The member performs one real or controlled debug exercise.
-- The member explains the result back in their own words.
-
-On FAIL:
-
-- The member may continue learning and work under supervision.
-- The agent must use mentor mode: give a hint, then the first file, then the first breakpoint, then a walkthrough only if needed.
-- The agent must not mark the task PASS, transition the Jira issue to Done, or merge a PR until a new equivalent retest passes.
-- Do not reveal a complete canned answer before the member has attempted a teach-back.
-
-## PR and Jira evidence
-
-- Every PR opened or merged on/after 2026-07-13 must complete the `Ownership Knowledge Gate` PR-body section.
-- The PR check must reject missing evidence, a score below 80 percent, or any `FAIL` critical/debug/teach-back result.
-- Before transitioning a Jira issue to Done, the agent and DonHV must find a Jira comment with `Ownership Knowledge Gate: PASS`, the PR/evidence link, and a matching progress entry.
-- Jira workflow configuration cannot technically prevent a manual administrator bypass; the agent must still refuse the transition when evidence is missing.
-
-## Source comments and mirrors
-
-- Retrofit all 72 runtime JS/CDS/XML/HTML/CSS files under `app/`, `srv/`, and `db/`; exclude generated output, tests, seed CSV, properties, JSON, and private/config files.
-- Source comments are concise Vietnamese UTF-8 comments. Keep code identifiers, APIs, entity names, and SAP/CAP/Fiori terms unchanged.
-- Explain a file's purpose, non-obvious function trigger/input/output/side effect, business-rule rationale, transaction/security boundary, dependency, or debug anchor.
-- Do not comment obvious imports, assignments, or every line. Do not add comments that can appear in the user interface or expose secrets/private infrastructure.
-- Every touched source mirror must add the equivalent bilingual ownership/debug explanation: primary owner, backup owner, flow, breakpoint anchor, linked files, and safe-editing impact.
-
-## English and Vietnamese teaching material
-
+- Reuse existing ownership maps, knowledge notes and Debug Labs before creating another artifact.
+- Create or update dedicated learning material only when the user explicitly requests a durable learning record. The independent source knowledge-mirror rule still applies when source files change.
 - New repository learning Markdown is bilingual: English first, then Vietnamese with equivalent depth.
-- Source-code comments use Vietnamese only by the approved team decision.
-- Debug Labs must be beginner-first: action, request, breakpoint, expected execution order, variables to inspect, data effect, failure path, and teach-back.
+- Keep code identifiers, APIs, entities and SAP/CAP/Fiori terms exact. Never include secrets, credentials, private endpoints or personal data.
+- Debug Labs requested by the user are beginner-first: action, request, first breakpoint, execution order, variables, data effect and failure path. Add teach-back only when requested.
 
-## Vietnamese
+## Tiếng Việt
 
 - Áp dụng từ **13/07/2026** theo múi giờ Asia/Bangkok cho DonHV, DatDT, SangVN và NhanT.
 - `docs/learning/ownership-map.md` là nguồn chính về file owner, backup owner và flow owner.
 - File ownership trả lời ai bảo trì file. Flow ownership trả lời ai có thể lần theo request thật từ UI qua OData/CAP đến database hoặc integration.
-- Không được dùng ranh giới FE/BE làm lý do để không giải thích được luồng end-to-end.
+- Dùng ownership map làm hướng dẫn học và phối hợp, không làm điều kiện để bắt đầu hoặc hoàn thành task.
+- Việc học là opt-in: chỉ bắt đầu khi user chủ động yêu cầu học, mentor mode, walkthrough, quiz hoặc kiểm tra mức hiểu.
+- Không tự chạy Knowledge Gate theo ngày, không tự chấm PASS/FAIL và không yêu cầu evidence học tập.
+- Thiếu learning evidence không được chặn implementation, task completion, tạo/merge PR hoặc Jira transition.
+- PR template và QA Depth validator không yêu cầu section Ownership Knowledge Gate hoặc Learning Material Bootstrap.
+- Evidence học tập lịch sử được giữ nguyên để tham khảo, nhưng không tạo enforcement hiện tại.
 
-Trước task không tầm thường đầu tiên trong ngày, member phải vượt Knowledge Gate theo flow liên quan. Ngày 13/07 bắt đầu ba câu, không tính nợ lịch sử; mỗi ngày lịch không có ownership-code activity cộng một câu, tối đa bảy câu. Nếu cùng ngày chuyển qua flow khác, hỏi thêm hai câu của flow đó.
+Khi user yêu cầu học: hỏi concept/flow cần hiểu; giải thích mục đích và context; chỉ ra file/caller/dependency đầu tiên; trace UI qua OData/CAP đến persistence hoặc integration; nếu luyện debug thì đi theo hint → file đầu → breakpoint đầu → variable/data effect/failure path. Chỉ yêu cầu teach-back hoặc quiz khi user muốn luyện tập hoặc được đánh giá.
 
-### Ngoại lệ bootstrap tài liệu học ban đầu
+Lệnh `npm run learning:gate -- ...` vẫn có thể dùng làm helper quiz tùy chọn khi user yêu cầu rõ. Kết quả chỉ là feedback học tập, không phải quyền release.
 
-Đợt comment source và knowledge mirror đầu tiên phải được agent chuẩn bị **trước** khi đánh giá member trên chính tài liệu đó. Với task bootstrap riêng như IDTS-83, IDTS-84 hoặc IDTS-85, agent được tạo trước comment source tiếng Việt ngắn gọn và knowledge mirror song ngữ tương ứng.
-
-- PR bootstrap chỉ được merge trước Knowledge Gate của member khi chỉ đổi tài liệu học: comment source và knowledge mirror; không được đổi runtime behavior, schema, service, manifest, test, dependency hoặc config.
-- PR phải khai báo `Learning Material Bootstrap`, nêu learner và IDTS follow-up; reviewer phải kiểm tra diff thực sự chỉ có comment/mirror.
-- Sau đó member học từ PR/tài liệu đã merge, làm Knowledge Gate, debug exercise và teach-back trước khi được PASS cho mọi implementation kỹ thuật, merge PR hoặc Jira Done tiếp theo.
-- Ngoại lệ bootstrap không áp dụng cho feature, bug fix, refactor, security change hoặc PR vừa đổi behavior vừa đổi tài liệu. Các PR đó luôn cần Ownership Knowledge Gate PASS từ 13/07/2026.
-
-PASS cần tối thiểu 80%, đúng toàn bộ câu security/authorization/data integrity, trace được một flow, làm debug exercise và teach-back bằng lời của mình. FAIL vẫn được học và code có hướng dẫn, nhưng không được PASS task, merge PR hay Jira Done trước khi retest tương đương đạt.
-
-Comment source chỉ dùng tiếng Việt ngắn gọn cho mục đích, rule khó, side effect, dependency và breakpoint. Không comment từng dòng hiển nhiên. Knowledge mirror và Debug Lab vẫn song ngữ, giải thích đầy đủ cho người mới.
+Ưu tiên dùng lại ownership map, knowledge note và Debug Lab đã có. Chỉ tạo/cập nhật learning material riêng khi user yêu cầu lưu tài liệu học bền vững; rule knowledge mirror độc lập vẫn áp dụng khi source thay đổi. Learning Markdown mới phải song ngữ tương đương, giữ nguyên identifier kỹ thuật và không chứa secret, endpoint private hoặc dữ liệu cá nhân. Debug Lab do user yêu cầu phải bắt đầu từ action, request, breakpoint đầu, execution order, variable, data effect và failure path; chỉ thêm teach-back khi user muốn.
