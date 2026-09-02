@@ -30,36 +30,6 @@
 
 <!-- Required for code changes: list ponytail skill(s) used, the simplest accepted approach, and what was intentionally not added. For non-code changes, write "N/A - documentation-only change". -->
 
-## Ownership Knowledge Gate
-
-<!-- Required from 2026-07-13 unless this PR is a valid Learning Material Bootstrap below. Copy/uncomment and complete this exact block; do not complete both declarations. -->
-<!--
-Member:
-Date:
-Ownership flow:
-Base questions:
-Inactive-day questions:
-Additional-flow questions:
-Score:
-Critical questions:
-Debug exercise:
-Teach-back:
-Evidence:
-Result:
--->
-
-## Learning Material Bootstrap
-
-<!-- Alternative only for the first agent-created source-comment + knowledge-mirror rollout. Copy/uncomment and complete this block; do not complete both declarations. This declaration is invalid for any runtime, schema, service, manifest, test, dependency, or configuration change. -->
-<!--
-Purpose:
-Runtime behavior changed: NO
-Scope verified: Source comments and knowledge mirrors only
-Learner:
-Follow-up Knowledge Gate:
-Evidence:
--->
-
 ## Known Gaps
 
 <!-- Known limitations, untested areas, follow-up Jira links. If none, say "None". -->
@@ -75,5 +45,4 @@ Evidence:
 - [ ] I checked persistence/reload behavior or explained why it is N/A.
 - [ ] I checked UI/UX consistency or explained why it is N/A.
 - [ ] I applied the required Ponytail skill or explained why this is a non-code change.
-- [ ] I completed the Ownership Knowledge Gate or explained why this PR predates 2026-07-13.
 - [ ] I recorded actionable defects in Jira or explained why none were found.
