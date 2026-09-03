@@ -96,9 +96,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call AuthService.login with a valid mixed-case, space-padded email and password.",
       "steps": [
-        "Call Login API with a valid mixed-case, space-padded email and password."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call AuthService.login with a valid mixed-case, space-padded email and password.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "The response generates a secure session token and a public active user; the session securely stores only the token hash.",
+      "expectedResult": "The response returns one transient bearer token and a public active user; the persisted session contains only tokenHash.",
       "sourceTrace": [
         {
           "file": "srv/auth.js",
@@ -148,9 +151,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call login without email.",
       "steps": [
-        "Call login without email."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call login without email.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System rejects access and shows an Invalid Credentials error and no User Session is saved.",
+      "expectedResult": "HTTP 401 returns the generic invalid-credentials message and no AuthSession row is inserted.",
       "sourceTrace": [
         {
           "file": "srv/auth.js",
@@ -200,9 +206,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call login with an empty password.",
       "steps": [
-        "Call login with an empty password."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call login with an empty password.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System rejects access and shows an Invalid Credentials error and no User Session is saved.",
+      "expectedResult": "HTTP 401 returns the generic invalid-credentials message and no AuthSession row is inserted.",
       "sourceTrace": [
         {
           "file": "srv/auth.js",
@@ -253,9 +262,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call the AuthService.login OData endpoint with a non-string password value.",
       "steps": [
-        "Call the Login API OData endpoint with a non-string password value."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call the AuthService.login OData endpoint with a non-string password value.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "The malformed request is rejected by safe System blocks the invalid request validation without type internals or stack trace, and no User Session is saved. Wrong string credentials remain covered separately by the generic HTTP 401 boundary.",
+      "expectedResult": "The malformed request is rejected by safe HTTP 400 validation without type internals or stack trace, and no AuthSession row is inserted. Wrong string credentials remain covered separately by the generic HTTP 401 boundary.",
       "sourceTrace": [
         {
           "file": "srv/auth.cds",
@@ -306,7 +318,10 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Compare login for an unknown email with login for a known email and wrong password.",
       "steps": [
-        "Compare login for an unknown email with login for a known email and wrong password."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Compare login for an unknown email with login for a known email and wrong password.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Both requests return the same safe HTTP 401 boundary and do not reveal account existence.",
       "sourceTrace": [
@@ -356,9 +371,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call login for an inactive seeded user.",
       "steps": [
-        "Call login for an inactive seeded user."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call login for an inactive seeded user.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Access Denied error and no session is persisted.",
+      "expectedResult": "HTTP 401 is returned and no session is persisted.",
       "sourceTrace": [
         {
           "file": "srv/auth.js",
@@ -410,7 +428,10 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call AuthService.me with a valid local bearer token.",
       "steps": [
-        "Call AuthService.me with a valid local bearer token."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call AuthService.me with a valid local bearer token.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The public profile is returned without passwordHash, tokenHash, or private session data.",
       "sourceTrace": [
@@ -461,9 +482,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call a protected endpoint with an expired session token.",
       "steps": [
-        "Call a protected endpoint with an expired session token."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call a protected endpoint with an expired session token.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Access Denied error and no protected Bug data is exposed.",
+      "expectedResult": "HTTP 401 is returned and no protected Bug data is exposed.",
       "sourceTrace": [
         {
           "file": "srv/auth.js",
@@ -512,9 +536,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call a protected endpoint with a revoked session token.",
       "steps": [
-        "Call a protected endpoint with a revoked session token."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call a protected endpoint with a revoked session token.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Access Denied error and the revoked session remains revoked.",
+      "expectedResult": "HTTP 401 is returned and the revoked session remains revoked.",
       "sourceTrace": [
         {
           "file": "srv/auth.js",
@@ -565,7 +592,10 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Logout with a valid token and then reuse the same token.",
       "steps": [
-        "Logout with a valid token and then reuse the same token."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Logout with a valid token and then reuse the same token.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Logout succeeds, the session is revoked, and subsequent use returns HTTP 401.",
       "sourceTrace": [
@@ -613,7 +643,10 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call AuthService.login through AppRouter while XSUAA mode is active.",
       "steps": [
-        "Call Login API through AppRouter while XSUAA mode is active."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call AuthService.login through AppRouter while XSUAA mode is active.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 405 directs the user to SAP BTP authentication and no local session is created.",
       "sourceTrace": [
@@ -670,7 +703,10 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Sign in through AppRouter with an identity mapped to one active IDTS user and one allowed role.",
       "steps": [
-        "Sign in through AppRouter with an identity mapped to one active IDTS user and one allowed role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Sign in through AppRouter with an identity mapped to one active IDTS user and one allowed role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The mapped public profile and protected OData access are returned for the same role.",
       "sourceTrace": [
@@ -724,9 +760,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Sign in with a valid SAP identity that has no active IDTS mapping.",
       "steps": [
-        "Sign in with a valid SAP identity that has no active IDTS mapping."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Sign in with a valid SAP identity that has no active IDTS mapping.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error without exposing internal system data.",
+      "expectedResult": "HTTP 403 is returned without identity internals, HANA diagnostics, or business mutation.",
       "sourceTrace": [
         {
           "file": "srv/auth/platform-role.js",
@@ -776,9 +815,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Sign in with more than one IDTS application role.",
       "steps": [
-        "Sign in with more than one IDTS application role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Sign in with more than one IDTS application role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error without exposing internal system data.",
+      "expectedResult": "HTTP 403 is returned without identity internals, HANA diagnostics, or business mutation.",
       "sourceTrace": [
         {
           "file": "srv/auth/platform-role.js",
@@ -828,9 +870,12 @@
       "preconditions": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Sign in when the platform role differs from the mapped IDTS role.",
       "steps": [
-        "Sign in when the platform role differs from the mapped IDTS role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Sign in when the platform role differs from the mapped IDTS role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error without exposing internal system data.",
+      "expectedResult": "HTTP 403 is returned without identity internals, HANA diagnostics, or business mutation.",
       "sourceTrace": [
         {
           "file": "srv/auth/platform-role.js",
@@ -881,7 +926,10 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Create a NEW Bugs draft as Tester.",
       "steps": [
-        "Create a NEW Bugs draft as Tester."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Create a NEW Bugs draft as Tester.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "A draft is created and reporter_ID is derived from the authenticated Tester.",
       "sourceTrace": [
@@ -934,7 +982,10 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Create a NEW Bugs draft as PM.",
       "steps": [
-        "Create a NEW Bugs draft as PM."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Create a NEW Bugs draft as PM.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "A draft is created and reporter_ID is derived from the authenticated PM.",
       "sourceTrace": [
@@ -986,9 +1037,12 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Create a NEW Bugs draft as Developer.",
       "steps": [
-        "Create a NEW Bugs draft as Developer."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Create a NEW Bugs draft as Developer.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error and no draft or active Bug is created.",
+      "expectedResult": "HTTP 403 is returned and no draft or active Bug is created.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/drafts.js",
@@ -1046,7 +1100,10 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "PATCH only title on an existing draft.",
       "steps": [
-        "PATCH only title on an existing draft."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: PATCH only title on an existing draft.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The new title is merged with the old draft and unrelated fields remain unchanged.",
       "sourceTrace": [
@@ -1095,7 +1152,10 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE a complete draft with assignee_ID null.",
       "steps": [
-        "SAVE a complete draft with assignee_ID null."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE a complete draft with assignee_ID null.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The active Bug is PENDING_ASSIGNMENT, assignee remains null, and PM is the next processor.",
       "sourceTrace": [
@@ -1156,7 +1216,10 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE a complete draft with a valid available responsible assignee.",
       "steps": [
-        "SAVE a complete draft with a valid available responsible assignee."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE a complete draft with a valid available responsible assignee.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The active Bug is ASSIGNED and the assigned Developer is the next processor.",
       "sourceTrace": [
@@ -1216,7 +1279,10 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "CREATE an active Bug while supplying client-owned bugNumber and reporter_ID values.",
       "steps": [
-        "CREATE an active Bug while supplying client-owned bugNumber and reporter_ID values."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: CREATE an active Bug while supplying client-owned bugNumber and reporter_ID values.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Server-generated bugNumber and authenticated reporter values replace the forged input.",
       "sourceTrace": [
@@ -1269,7 +1335,10 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "UPDATE title and severity without changing status or assignee.",
       "steps": [
-        "UPDATE title and severity without changing status or assignee."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: UPDATE title and severity without changing status or assignee.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Only submitted fields change and one EDIT history event contains both field logs.",
       "sourceTrace": [
@@ -1329,9 +1398,12 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "PATCH a Bug as a role that lacks write permission.",
       "steps": [
-        "PATCH a Bug as a role that lacks write permission."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: PATCH a Bug as a role that lacks write permission.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before transition validation and no data or side effect changes.",
+      "expectedResult": "HTTP 403 is returned before transition validation and no data or side effect changes.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/permissions.js",
@@ -1389,9 +1461,12 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "UPDATE a syntactically valid Bug ID that does not exist.",
       "steps": [
-        "UPDATE a syntactically valid Bug ID that does not exist."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: UPDATE a syntactically valid Bug ID that does not exist.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Not Found error and no history, notification, or delivery row is created.",
+      "expectedResult": "HTTP 404 is returned and no history, notification, or delivery row is created.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1449,9 +1524,12 @@
       "preconditions": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "PATCH status_code to a transition that is not allowed from the stored status.",
       "steps": [
-        "PATCH status_code to a transition that is not allowed from the stored status."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: PATCH status_code to a transition that is not allowed from the stored status.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and status, history, and notification remain unchanged.",
+      "expectedResult": "HTTP 400 is returned and status, history, and notification remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1509,9 +1587,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with title omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with title omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with title omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets title; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets title; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1561,9 +1642,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with description omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with description omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with description omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets description; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets description; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1613,9 +1697,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with stepsToReproduce omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with stepsToReproduce omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with stepsToReproduce omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets stepsToReproduce; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets stepsToReproduce; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1665,9 +1752,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with actualResult omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with actualResult omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with actualResult omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets actualResult; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets actualResult; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1717,9 +1807,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with expectedResult omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with expectedResult omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with expectedResult omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets expectedResult; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets expectedResult; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1769,9 +1862,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with priority_code omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with priority_code omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with priority_code omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets priority_code; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets priority_code; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1821,9 +1917,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with severity_code omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with severity_code omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with severity_code omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets severity_code; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets severity_code; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1873,9 +1972,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with applicationComponent_ID omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with applicationComponent_ID omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with applicationComponent_ID omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets applicationComponent_ID; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets applicationComponent_ID; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1925,9 +2027,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug with defectCategory_ID omitted.",
       "steps": [
-        "SAVE or CREATE a Bug with defectCategory_ID omitted."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug with defectCategory_ID omitted.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets defectCategory_ID; no active write, history, notification, or delivery is committed.",
+      "expectedResult": "HTTP 400 targets defectCategory_ID; no active write, history, notification, or delivery is committed.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -1979,7 +2084,10 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "SAVE or CREATE a Bug when the authenticated actor cannot be resolved to one active IDTS user.",
       "steps": [
-        "SAVE or CREATE a Bug when the authenticated actor cannot be resolved to one active IDTS user."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: SAVE or CREATE a Bug when the authenticated actor cannot be resolved to one active IDTS user.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The write is rejected safely before persistence; no Bug, history, notification, or delivery is committed. A client omission of reporter_ID remains valid when the authenticated actor resolves.",
       "sourceTrace": [
@@ -2031,9 +2139,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit a required text field containing only spaces.",
       "steps": [
-        "Submit a required text field containing only spaces."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit a required text field containing only spaces.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets the field and no active write occurs.",
+      "expectedResult": "HTTP 400 targets the field and no active write occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2084,9 +2195,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit a code that does not exist in the target code list.",
       "steps": [
-        "Submit a code that does not exist in the target code list."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit a code that does not exist in the target code list.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request identifies the invalid catalog reference and no business write occurs.",
+      "expectedResult": "HTTP 400 identifies the invalid catalog reference and no business write occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2137,9 +2251,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit a historical code-list row with isActive=false.",
       "steps": [
-        "Submit a historical code-list row with isActive=false."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit a historical code-list row with isActive=false.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request identifies the invalid catalog reference and no business write occurs.",
+      "expectedResult": "HTTP 400 identifies the invalid catalog reference and no business write occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2190,9 +2307,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit an otherwise valid code with leading or trailing spaces.",
       "steps": [
-        "Submit an otherwise valid code with leading or trailing spaces."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit an otherwise valid code with leading or trailing spaces.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request identifies the invalid catalog reference and no business write occurs.",
+      "expectedResult": "HTTP 400 identifies the invalid catalog reference and no business write occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2243,9 +2363,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit an empty string for a required code-list field.",
       "steps": [
-        "Submit an empty string for a required code-list field."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit an empty string for a required code-list field.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request identifies the invalid catalog reference and no business write occurs.",
+      "expectedResult": "HTTP 400 identifies the invalid catalog reference and no business write occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2296,9 +2419,12 @@
       "preconditions": "Use an isolated validation fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit a non-string value for a code-list field.",
       "steps": [
-        "Submit a non-string value for a code-list field."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit a non-string value for a code-list field.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request identifies the invalid catalog reference and no business write occurs.",
+      "expectedResult": "HTTP 400 identifies the invalid catalog reference and no business write occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2348,7 +2474,10 @@
       "preconditions": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit an active Application Component and Defect Category pair with an active bridge.",
       "steps": [
-        "Submit an active Application Component and Defect Category pair with an active bridge."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit an active Application Component and Defect Category pair with an active bridge.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The matching componentCategory_ID is derived and persisted.",
       "sourceTrace": [
@@ -2400,9 +2529,12 @@
       "preconditions": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit two active codes whose Component Category bridge does not exist or is inactive.",
       "steps": [
-        "Submit two active codes whose Component Category bridge does not exist or is inactive."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit two active codes whose Component Category bridge does not exist or is inactive.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets classification and no stale derived value is retained.",
+      "expectedResult": "HTTP 400 targets classification and no stale derived value is retained.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2452,9 +2584,12 @@
       "preconditions": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit componentCategory_ID different from the ID derived by the selected pair.",
       "steps": [
-        "Submit componentCategory_ID different from the ID derived by the selected pair."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit componentCategory_ID different from the ID derived by the selected pair.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and no classification write occurs.",
+      "expectedResult": "HTTP 400 is returned and no classification write occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/bug-write.js",
@@ -2504,7 +2639,10 @@
       "preconditions": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "PATCH both classification inputs from one valid pair to another.",
       "steps": [
-        "PATCH both classification inputs from one valid pair to another."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: PATCH both classification inputs from one valid pair to another.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The new derived componentCategory_ID is persisted with the pair in one transaction.",
       "sourceTrace": [
@@ -2556,7 +2694,10 @@
       "preconditions": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "PATCH only one classification input and leave the pair incomplete.",
       "steps": [
-        "PATCH only one classification input and leave the pair incomplete."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: PATCH only one classification input and leave the pair incomplete.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The stale componentCategory_ID is cleared and final Save remains blocked until the pair is valid.",
       "sourceTrace": [
@@ -2609,7 +2750,10 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Assign an active, available Developer with a matching active responsibility.",
       "steps": [
-        "Assign an active, available Developer with a matching active responsibility."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Assign an active, available Developer with a matching active responsibility.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The Bug becomes ASSIGNED; assignee and next processor persist with exact assignment history.",
       "sourceTrace": [
@@ -2669,7 +2813,10 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Reassign an active Bug as PM to another eligible Developer.",
       "steps": [
-        "Reassign an active Bug as PM to another eligible Developer."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Reassign an active Bug as PM to another eligible Developer.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The new assignee is persisted and the exact reassignment audit identifies PM as actor.",
       "sourceTrace": [
@@ -2730,9 +2877,12 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call assignToDeveloper without assigneeID.",
       "steps": [
-        "Call assignToDeveloper without assigneeID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call assignToDeveloper without assigneeID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assignee and no assignment side effect occurs.",
+      "expectedResult": "HTTP 400 targets assignee and no assignment side effect occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/actions.js",
@@ -2791,9 +2941,12 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Assign a syntactically valid DeveloperProfile ID that does not exist.",
       "steps": [
-        "Assign a syntactically valid DeveloperProfile ID that does not exist."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Assign a syntactically valid DeveloperProfile ID that does not exist.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and assignment state remains unchanged.",
+      "expectedResult": "HTTP 400 is returned and assignment state remains unchanged.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/actions.js",
@@ -2852,9 +3005,12 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Assign a DeveloperProfile whose user or profile is inactive.",
       "steps": [
-        "Assign a DeveloperProfile whose user or profile is inactive."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Assign a DeveloperProfile whose user or profile is inactive.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and assignment state remains unchanged.",
+      "expectedResult": "HTTP 400 is returned and assignment state remains unchanged.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/actions.js",
@@ -2913,9 +3069,12 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Assign a candidate whose availability status is UNAVAILABLE.",
       "steps": [
-        "Assign a candidate whose availability status is UNAVAILABLE."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Assign a candidate whose availability status is UNAVAILABLE.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and no assignment/history/notification occurs.",
+      "expectedResult": "HTTP 400 is returned and no assignment/history/notification occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/actions.js",
@@ -2974,9 +3133,12 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Assign a Developer without an active responsibility for the derived Component Category.",
       "steps": [
-        "Assign a Developer without an active responsibility for the derived Component Category."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Assign a Developer without an active responsibility for the derived Component Category.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and no mutation occurs.",
+      "expectedResult": "HTTP 400 is returned and no mutation occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/actions.js",
@@ -3035,9 +3197,12 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Assign a Developer whose responsibility SAP Module conflicts with the Bug SAP Module.",
       "steps": [
-        "Assign a Developer whose responsibility SAP Module conflicts with the Bug SAP Module."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Assign a Developer whose responsibility SAP Module conflicts with the Bug SAP Module.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and no mutation occurs.",
+      "expectedResult": "HTTP 400 is returned and no mutation occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/actions.js",
@@ -3096,7 +3261,10 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Assign a Developer with a matching category responsibility and no module restriction.",
       "steps": [
-        "Assign a Developer with a matching category responsibility and no module restriction."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Assign a Developer with a matching category responsibility and no module restriction.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Assignment succeeds when the other eligibility rules pass.",
       "sourceTrace": [
@@ -3156,9 +3324,12 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call assignToDeveloper as Developer.",
       "steps": [
-        "Call assignToDeveloper as Developer."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call assignToDeveloper as Developer.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error and status, assignee, history, notification, and delivery remain unchanged.",
+      "expectedResult": "HTTP 403 is returned and status, assignee, history, notification, and delivery remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/actions.js",
@@ -3217,7 +3388,10 @@
       "preconditions": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Read AssignableDevelopers for one valid classification pair.",
       "steps": [
-        "Read AssignableDevelopers for one valid classification pair."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Read AssignableDevelopers for one valid classification pair.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Only active profiles with matching responsibility are returned with safe workload fields.",
       "sourceTrace": [
@@ -3248,7 +3422,7 @@
     {
       "caseId": "UT-LC-01A",
       "domain": "Lifecycle",
-      "title": "assignToDeveloper System successfully updates status and records the action.",
+      "title": "assignToDeveloper performs the allowed transition and exact audit",
       "objective": "Verify assignToDeveloper performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -3268,7 +3442,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Tester or PM assigns a valid Developer.",
       "steps": [
-        "Tester or PM assigns a valid Developer."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Tester or PM assigns a valid Developer.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes ASSIGNED; exact ActionType ASSIGN_TO_DEVELOPER, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -3313,7 +3490,7 @@
     {
       "caseId": "UT-LC-01B",
       "domain": "Lifecycle",
-      "title": "assignToDeveloper System blocks the action because user lacks permission.",
+      "title": "assignToDeveloper rejects an unauthorized actor",
       "objective": "Verify assignToDeveloper rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -3332,9 +3509,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call assignToDeveloper as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call assignToDeveloper as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call assignToDeveloper as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3377,7 +3557,7 @@
     {
       "caseId": "UT-LC-01C",
       "domain": "Lifecycle",
-      "title": "assignToDeveloper System blocks the action because current status is invalid.",
+      "title": "assignToDeveloper rejects an illegal source status",
       "objective": "Verify assignToDeveloper rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -3398,9 +3578,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call assignToDeveloper from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call assignToDeveloper from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call assignToDeveloper from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3462,9 +3645,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call assignToDeveloper without assigneeID.",
       "steps": [
-        "Call assignToDeveloper without assigneeID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call assignToDeveloper without assigneeID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assigneeID and no state changes.",
+      "expectedResult": "HTTP 400 targets assigneeID and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3507,7 +3693,7 @@
     {
       "caseId": "UT-LC-02A",
       "domain": "Lifecycle",
-      "title": "moveToPendingAssignment System successfully updates status and records the action.",
+      "title": "moveToPendingAssignment performs the allowed transition and exact audit",
       "objective": "Verify moveToPendingAssignment performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -3527,7 +3713,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Tester or PM clears the current assignee.",
       "steps": [
-        "Tester or PM clears the current assignee."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Tester or PM clears the current assignee.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes PENDING_ASSIGNMENT; exact ActionType MOVE_TO_PENDING_ASSIGNMENT, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -3572,7 +3761,7 @@
     {
       "caseId": "UT-LC-02B",
       "domain": "Lifecycle",
-      "title": "moveToPendingAssignment System blocks the action because user lacks permission.",
+      "title": "moveToPendingAssignment rejects an unauthorized actor",
       "objective": "Verify moveToPendingAssignment rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -3591,9 +3780,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call moveToPendingAssignment as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call moveToPendingAssignment as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call moveToPendingAssignment as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3636,7 +3828,7 @@
     {
       "caseId": "UT-LC-02C",
       "domain": "Lifecycle",
-      "title": "moveToPendingAssignment System blocks the action because current status is invalid.",
+      "title": "moveToPendingAssignment rejects an illegal source status",
       "objective": "Verify moveToPendingAssignment rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -3657,9 +3849,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call moveToPendingAssignment from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call moveToPendingAssignment from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call moveToPendingAssignment from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3702,7 +3897,7 @@
     {
       "caseId": "UT-LC-03A",
       "domain": "Lifecycle",
-      "title": "markInReview System successfully updates status and records the action.",
+      "title": "markInReview performs the allowed transition and exact audit",
       "objective": "Verify markInReview performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -3722,7 +3917,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "The assigned Developer marks the Bug in review.",
       "steps": [
-        "The assigned Developer marks the Bug in review."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: The assigned Developer marks the Bug in review.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes IN_REVIEW; exact ActionType MARK_IN_REVIEW, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -3767,7 +3965,7 @@
     {
       "caseId": "UT-LC-03B",
       "domain": "Lifecycle",
-      "title": "markInReview System blocks the action because user lacks permission.",
+      "title": "markInReview rejects an unauthorized actor",
       "objective": "Verify markInReview rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -3786,9 +3984,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call markInReview as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call markInReview as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call markInReview as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3831,7 +4032,7 @@
     {
       "caseId": "UT-LC-03C",
       "domain": "Lifecycle",
-      "title": "markInReview System blocks the action because current status is invalid.",
+      "title": "markInReview rejects an illegal source status",
       "objective": "Verify markInReview rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -3852,9 +4053,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call markInReview from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call markInReview from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call markInReview from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3897,7 +4101,7 @@
     {
       "caseId": "UT-LC-03D",
       "domain": "Lifecycle",
-      "title": "markInReview System requires a Developer to be assigned first.",
+      "title": "markInReview rejects missing assigned Developer",
       "objective": "Verify markInReview rejects missing assigned Developer.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -3916,9 +4120,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call markInReview on an eligible Bug without assignee_ID.",
       "steps": [
-        "Call markInReview on an eligible Bug without assignee_ID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call markInReview on an eligible Bug without assignee_ID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assignee and no state changes.",
+      "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -3961,7 +4168,7 @@
     {
       "caseId": "UT-LC-04A",
       "domain": "Lifecycle",
-      "title": "requestMoreInformation System successfully updates status and records the action.",
+      "title": "requestMoreInformation performs the allowed transition and exact audit",
       "objective": "Verify requestMoreInformation performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -3981,7 +4188,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "The assigned Developer submits a nonblank reason.",
       "steps": [
-        "The assigned Developer submits a nonblank reason."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: The assigned Developer submits a nonblank reason.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes NEED_MORE_INFORMATION; exact ActionType REQUEST_MORE_INFORMATION, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -4026,7 +4236,7 @@
     {
       "caseId": "UT-LC-04B",
       "domain": "Lifecycle",
-      "title": "requestMoreInformation System blocks the action because user lacks permission.",
+      "title": "requestMoreInformation rejects an unauthorized actor",
       "objective": "Verify requestMoreInformation rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -4045,9 +4255,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call requestMoreInformation as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call requestMoreInformation as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call requestMoreInformation as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4090,7 +4303,7 @@
     {
       "caseId": "UT-LC-04C",
       "domain": "Lifecycle",
-      "title": "requestMoreInformation System blocks the action because current status is invalid.",
+      "title": "requestMoreInformation rejects an illegal source status",
       "objective": "Verify requestMoreInformation rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -4111,9 +4324,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call requestMoreInformation from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call requestMoreInformation from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call requestMoreInformation from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4156,7 +4372,7 @@
     {
       "caseId": "UT-LC-04D",
       "domain": "Lifecycle",
-      "title": "requestMoreInformation System requires a Developer to be assigned first.",
+      "title": "requestMoreInformation rejects missing assigned Developer",
       "objective": "Verify requestMoreInformation rejects missing assigned Developer.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -4175,9 +4391,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call requestMoreInformation on an eligible Bug without assignee_ID.",
       "steps": [
-        "Call requestMoreInformation on an eligible Bug without assignee_ID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call requestMoreInformation on an eligible Bug without assignee_ID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assignee and no state changes.",
+      "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4239,9 +4458,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call requestMoreInformation with a blank reason.",
       "steps": [
-        "Call requestMoreInformation with a blank reason."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call requestMoreInformation with a blank reason.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets reason and no state changes.",
+      "expectedResult": "HTTP 400 targets reason and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4284,7 +4506,7 @@
     {
       "caseId": "UT-LC-05A",
       "domain": "Lifecycle",
-      "title": "resubmitToDeveloper System successfully updates status and records the action.",
+      "title": "resubmitToDeveloper performs the allowed transition and exact audit",
       "objective": "Verify resubmitToDeveloper performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -4304,7 +4526,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Tester or PM resubmits with a nonblank follow-up note.",
       "steps": [
-        "Tester or PM resubmits with a nonblank follow-up note."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Tester or PM resubmits with a nonblank follow-up note.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes ASSIGNED; exact ActionType RESUBMIT_TO_DEVELOPER, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -4349,7 +4574,7 @@
     {
       "caseId": "UT-LC-05B",
       "domain": "Lifecycle",
-      "title": "resubmitToDeveloper System blocks the action because user lacks permission.",
+      "title": "resubmitToDeveloper rejects an unauthorized actor",
       "objective": "Verify resubmitToDeveloper rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -4368,9 +4593,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resubmitToDeveloper as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call resubmitToDeveloper as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resubmitToDeveloper as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4413,7 +4641,7 @@
     {
       "caseId": "UT-LC-05C",
       "domain": "Lifecycle",
-      "title": "resubmitToDeveloper System blocks the action because current status is invalid.",
+      "title": "resubmitToDeveloper rejects an illegal source status",
       "objective": "Verify resubmitToDeveloper rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -4434,9 +4662,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resubmitToDeveloper from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call resubmitToDeveloper from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resubmitToDeveloper from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4498,9 +4729,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resubmitToDeveloper with a blank note.",
       "steps": [
-        "Call resubmitToDeveloper with a blank note."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resubmitToDeveloper with a blank note.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets note and no state changes.",
+      "expectedResult": "HTTP 400 targets note and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4543,7 +4777,7 @@
     {
       "caseId": "UT-LC-05E",
       "domain": "Lifecycle",
-      "title": "resubmitToDeveloper System requires a Developer to be assigned first.",
+      "title": "resubmitToDeveloper rejects missing assigned Developer",
       "objective": "Verify resubmitToDeveloper rejects missing assigned Developer.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -4562,9 +4796,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resubmitToDeveloper on an eligible Bug without assignee_ID.",
       "steps": [
-        "Call resubmitToDeveloper on an eligible Bug without assignee_ID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resubmitToDeveloper on an eligible Bug without assignee_ID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assignee and no state changes.",
+      "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4607,7 +4844,7 @@
     {
       "caseId": "UT-LC-06A",
       "domain": "Lifecycle",
-      "title": "rejectBug System successfully updates status and records the action.",
+      "title": "rejectBug performs the allowed transition and exact audit",
       "objective": "Verify rejectBug performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -4627,7 +4864,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "The assigned Developer submits a nonblank rejection reason.",
       "steps": [
-        "The assigned Developer submits a nonblank rejection reason."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: The assigned Developer submits a nonblank rejection reason.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes REJECTED; exact ActionType REJECT_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -4672,7 +4912,7 @@
     {
       "caseId": "UT-LC-06B",
       "domain": "Lifecycle",
-      "title": "rejectBug System blocks the action because user lacks permission.",
+      "title": "rejectBug rejects an unauthorized actor",
       "objective": "Verify rejectBug rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -4691,9 +4931,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call rejectBug as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call rejectBug as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call rejectBug as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4736,7 +4979,7 @@
     {
       "caseId": "UT-LC-06C",
       "domain": "Lifecycle",
-      "title": "rejectBug System blocks the action because current status is invalid.",
+      "title": "rejectBug rejects an illegal source status",
       "objective": "Verify rejectBug rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -4757,9 +5000,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call rejectBug from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call rejectBug from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call rejectBug from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4802,7 +5048,7 @@
     {
       "caseId": "UT-LC-06D",
       "domain": "Lifecycle",
-      "title": "rejectBug System requires a Developer to be assigned first.",
+      "title": "rejectBug rejects missing assigned Developer",
       "objective": "Verify rejectBug rejects missing assigned Developer.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -4821,9 +5067,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call rejectBug on an eligible Bug without assignee_ID.",
       "steps": [
-        "Call rejectBug on an eligible Bug without assignee_ID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call rejectBug on an eligible Bug without assignee_ID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assignee and no state changes.",
+      "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4885,9 +5134,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call rejectBug with a blank reason.",
       "steps": [
-        "Call rejectBug with a blank reason."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call rejectBug with a blank reason.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets reason and no state changes.",
+      "expectedResult": "HTTP 400 targets reason and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -4930,7 +5182,7 @@
     {
       "caseId": "UT-LC-07A",
       "domain": "Lifecycle",
-      "title": "startProgress System successfully updates status and records the action.",
+      "title": "startProgress performs the allowed transition and exact audit",
       "objective": "Verify startProgress performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -4950,7 +5202,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "The assigned Developer starts progress.",
       "steps": [
-        "The assigned Developer starts progress."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: The assigned Developer starts progress.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes IN_PROGRESS; exact ActionType START_PROGRESS, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -4995,7 +5250,7 @@
     {
       "caseId": "UT-LC-07B",
       "domain": "Lifecycle",
-      "title": "startProgress System blocks the action because user lacks permission.",
+      "title": "startProgress rejects an unauthorized actor",
       "objective": "Verify startProgress rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -5014,9 +5269,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call startProgress as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call startProgress as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call startProgress as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5059,7 +5317,7 @@
     {
       "caseId": "UT-LC-07C",
       "domain": "Lifecycle",
-      "title": "startProgress System blocks the action because current status is invalid.",
+      "title": "startProgress rejects an illegal source status",
       "objective": "Verify startProgress rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -5080,9 +5338,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call startProgress from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call startProgress from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call startProgress from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5125,7 +5386,7 @@
     {
       "caseId": "UT-LC-07D",
       "domain": "Lifecycle",
-      "title": "startProgress System requires a Developer to be assigned first.",
+      "title": "startProgress rejects missing assigned Developer",
       "objective": "Verify startProgress rejects missing assigned Developer.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -5144,9 +5405,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call startProgress on an eligible Bug without assignee_ID.",
       "steps": [
-        "Call startProgress on an eligible Bug without assignee_ID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call startProgress on an eligible Bug without assignee_ID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assignee and no state changes.",
+      "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5189,7 +5453,7 @@
     {
       "caseId": "UT-LC-08A",
       "domain": "Lifecycle",
-      "title": "resolveBug System successfully updates status and records the action.",
+      "title": "resolveBug performs the allowed transition and exact audit",
       "objective": "Verify resolveBug performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -5209,7 +5473,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "The assigned Developer resolves with a nonblank note.",
       "steps": [
-        "The assigned Developer resolves with a nonblank note."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: The assigned Developer resolves with a nonblank note.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes RESOLVED; exact ActionType RESOLVE_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -5254,7 +5521,7 @@
     {
       "caseId": "UT-LC-08B",
       "domain": "Lifecycle",
-      "title": "resolveBug System blocks the action because user lacks permission.",
+      "title": "resolveBug rejects an unauthorized actor",
       "objective": "Verify resolveBug rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -5273,9 +5540,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resolveBug as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call resolveBug as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resolveBug as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5318,7 +5588,7 @@
     {
       "caseId": "UT-LC-08C",
       "domain": "Lifecycle",
-      "title": "resolveBug System blocks the action because current status is invalid.",
+      "title": "resolveBug rejects an illegal source status",
       "objective": "Verify resolveBug rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -5339,9 +5609,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resolveBug from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call resolveBug from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resolveBug from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5384,7 +5657,7 @@
     {
       "caseId": "UT-LC-08D",
       "domain": "Lifecycle",
-      "title": "resolveBug System requires a Developer to be assigned first.",
+      "title": "resolveBug rejects missing assigned Developer",
       "objective": "Verify resolveBug rejects missing assigned Developer.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -5403,9 +5676,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resolveBug on an eligible Bug without assignee_ID.",
       "steps": [
-        "Call resolveBug on an eligible Bug without assignee_ID."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resolveBug on an eligible Bug without assignee_ID.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets assignee and no state changes.",
+      "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5467,9 +5743,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call resolveBug with a blank note.",
       "steps": [
-        "Call resolveBug with a blank note."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call resolveBug with a blank note.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets note and no state changes.",
+      "expectedResult": "HTTP 400 targets note and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5512,7 +5791,7 @@
     {
       "caseId": "UT-LC-09A",
       "domain": "Lifecycle",
-      "title": "sendToRetest System successfully updates status and records the action.",
+      "title": "sendToRetest performs the allowed transition and exact audit",
       "objective": "Verify sendToRetest performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -5532,7 +5811,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Tester or PM sends a resolved Bug to retest.",
       "steps": [
-        "Tester or PM sends a resolved Bug to retest."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Tester or PM sends a resolved Bug to retest.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes RETEST_REQUIRED; exact ActionType SEND_TO_RETEST, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -5577,7 +5859,7 @@
     {
       "caseId": "UT-LC-09B",
       "domain": "Lifecycle",
-      "title": "sendToRetest System blocks the action because user lacks permission.",
+      "title": "sendToRetest rejects an unauthorized actor",
       "objective": "Verify sendToRetest rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -5596,9 +5878,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call sendToRetest as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call sendToRetest as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call sendToRetest as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5641,7 +5926,7 @@
     {
       "caseId": "UT-LC-09C",
       "domain": "Lifecycle",
-      "title": "sendToRetest System blocks the action because current status is invalid.",
+      "title": "sendToRetest rejects an illegal source status",
       "objective": "Verify sendToRetest rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -5662,9 +5947,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call sendToRetest from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call sendToRetest from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call sendToRetest from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5707,7 +5995,7 @@
     {
       "caseId": "UT-LC-10A",
       "domain": "Lifecycle",
-      "title": "closeBug System successfully updates status and records the action.",
+      "title": "closeBug performs the allowed transition and exact audit",
       "objective": "Verify closeBug performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -5727,7 +6015,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Tester or PM closes an eligible Bug.",
       "steps": [
-        "Tester or PM closes an eligible Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Tester or PM closes an eligible Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes CLOSED; exact ActionType CLOSE_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -5772,7 +6063,7 @@
     {
       "caseId": "UT-LC-10B",
       "domain": "Lifecycle",
-      "title": "closeBug System blocks the action because user lacks permission.",
+      "title": "closeBug rejects an unauthorized actor",
       "objective": "Verify closeBug rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -5791,9 +6082,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call closeBug as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call closeBug as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call closeBug as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5836,7 +6130,7 @@
     {
       "caseId": "UT-LC-10C",
       "domain": "Lifecycle",
-      "title": "closeBug System blocks the action because current status is invalid.",
+      "title": "closeBug rejects an illegal source status",
       "objective": "Verify closeBug rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -5857,9 +6151,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call closeBug from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call closeBug from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call closeBug from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -5902,7 +6199,7 @@
     {
       "caseId": "UT-LC-11A",
       "domain": "Lifecycle",
-      "title": "reopenBug System successfully updates status and records the action.",
+      "title": "reopenBug performs the allowed transition and exact audit",
       "objective": "Verify reopenBug performs the allowed transition and exact audit.",
       "classification": "POSITIVE",
       "priority": "HIGH",
@@ -5922,7 +6219,10 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Tester or PM reopens with a nonblank reason.",
       "steps": [
-        "Tester or PM reopens with a nonblank reason."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Tester or PM reopens with a nonblank reason.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status becomes REOPENED; exact ActionType REOPEN_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceTrace": [
@@ -5967,7 +6267,7 @@
     {
       "caseId": "UT-LC-11B",
       "domain": "Lifecycle",
-      "title": "reopenBug System blocks the action because user lacks permission.",
+      "title": "reopenBug rejects an unauthorized actor",
       "objective": "Verify reopenBug rejects an unauthorized actor.",
       "classification": "ROLE",
       "priority": "HIGH",
@@ -5986,9 +6286,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call reopenBug as a role or Developer owner not permitted for the stored Bug.",
       "steps": [
-        "Call reopenBug as a role or Developer owner not permitted for the stored Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call reopenBug as a role or Developer owner not permitted for the stored Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
+      "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -6031,7 +6334,7 @@
     {
       "caseId": "UT-LC-11C",
       "domain": "Lifecycle",
-      "title": "reopenBug System blocks the action because current status is invalid.",
+      "title": "reopenBug rejects an illegal source status",
       "objective": "Verify reopenBug rejects an illegal source status.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
@@ -6052,9 +6355,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call reopenBug from one disallowed stored status while all required input is valid.",
       "steps": [
-        "Call reopenBug from one disallowed stored status while all required input is valid."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call reopenBug from one disallowed stored status while all required input is valid.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request rejects the transition and the transaction produces no partial side effect.",
+      "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -6116,9 +6422,12 @@
       "preconditions": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call reopenBug with a blank reason.",
       "steps": [
-        "Call reopenBug with a blank reason."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call reopenBug with a blank reason.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets reason and no state changes.",
+      "expectedResult": "HTTP 400 targets reason and no state changes.",
       "sourceTrace": [
         {
           "file": "srv/service.js",
@@ -6180,7 +6489,10 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Add a nonblank comment as TESTER.",
       "steps": [
-        "Add a nonblank comment as TESTER."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Add a nonblank comment as TESTER.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The comment persists with authenticated author and role, survives reload, and does not change Bug status.",
       "sourceTrace": [
@@ -6240,7 +6552,10 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Add a nonblank comment as DEVELOPER.",
       "steps": [
-        "Add a nonblank comment as DEVELOPER."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Add a nonblank comment as DEVELOPER.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The comment persists with authenticated author and role, survives reload, and does not change Bug status.",
       "sourceTrace": [
@@ -6300,7 +6615,10 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Add a nonblank comment as PM.",
       "steps": [
-        "Add a nonblank comment as PM."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Add a nonblank comment as PM.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The comment persists with authenticated author and role, survives reload, and does not change Bug status.",
       "sourceTrace": [
@@ -6360,9 +6678,12 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit an empty comment.",
       "steps": [
-        "Submit an empty comment."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit an empty comment.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets content and no comment/history row is inserted.",
+      "expectedResult": "HTTP 400 targets content and no comment/history row is inserted.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/content.js",
@@ -6412,9 +6733,12 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit a comment containing only whitespace.",
       "steps": [
-        "Submit a comment containing only whitespace."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit a comment containing only whitespace.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request targets content and no comment/history row is inserted.",
+      "expectedResult": "HTTP 400 targets content and no comment/history row is inserted.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/content.js",
@@ -6464,7 +6788,10 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Submit comment author_ID and authorRole_code for another user.",
       "steps": [
-        "Submit comment author_ID and authorRole_code for another user."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Submit comment author_ID and authorRole_code for another user.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Server-owned actor values are persisted; impersonation data is not accepted.",
       "sourceTrace": [
@@ -6517,7 +6844,10 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call the bound addComment action with valid content.",
       "steps": [
-        "Call the bound addComment action with valid content."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call the bound addComment action with valid content.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "One comment and one readable comment audit are committed while status and next processor remain unchanged.",
       "sourceTrace": [
@@ -6577,9 +6907,12 @@
       "preconditions": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Attempt a direct composition write with an invalid or inactive actor role.",
       "steps": [
-        "Attempt a direct composition write with an invalid or inactive actor role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Attempt a direct composition write with an invalid or inactive actor role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request/403 is returned and no comment row is inserted.",
+      "expectedResult": "HTTP 400/403 is returned and no comment row is inserted.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/content.js",
@@ -6631,7 +6964,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Select one allowed file on a root NEW draft, then save the Bug.",
       "steps": [
-        "Select one allowed file on a root NEW draft, then save the Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Select one allowed file on a root NEW draft, then save the Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "No binary is uploaded before SAVE; after activation metadata and binary are linked to the active Bug.",
       "sourceTrace": [
@@ -6686,7 +7022,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Upload an allowed file below the UI size limit to an active Bug.",
       "steps": [
-        "Upload an allowed file below the UI size limit to an active Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Upload an allowed file below the UI size limit to an active Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Metadata and bytes persist with the recorded size and safe filename.",
       "sourceTrace": [
@@ -6741,7 +7080,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Upload through the production S3 binding.",
       "steps": [
-        "Upload through the production S3 binding."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Upload through the production S3 binding.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HANA stores metadata, S3 stores one binary object, and no secret appears in the response.",
       "sourceTrace": [
@@ -6801,7 +7143,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Download a previously uploaded attachment and calculate SHA-256.",
       "steps": [
-        "Download a previously uploaded attachment and calculate SHA-256."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Download a previously uploaded attachment and calculate SHA-256.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The downloaded hash matches the sanitized source evidence hash.",
       "sourceTrace": [
@@ -6860,7 +7205,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Restart/redeploy the service, reload the Bug, and download the attachment.",
       "steps": [
-        "Restart/redeploy the service, reload the Bug, and download the attachment."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Restart/redeploy the service, reload the Bug, and download the attachment.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Metadata and byte hash remain unchanged.",
       "sourceTrace": [
@@ -6920,7 +7268,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Delete an existing attachment.",
       "steps": [
-        "Delete an existing attachment."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Delete an existing attachment.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Metadata and object are removed while unrelated Bug state remains unchanged.",
       "sourceTrace": [
@@ -6983,7 +7334,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Select a MIME type outside the UI allowlist.",
       "steps": [
-        "Select a MIME type outside the UI allowlist."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Select a MIME type outside the UI allowlist.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The UI rejects the selection before upload and shows the safe supported-type message.",
       "sourceTrace": [
@@ -7030,7 +7384,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Select a payload larger than 10 MB.",
       "steps": [
-        "Select a payload larger than 10 MB."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Select a payload larger than 10 MB.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The UI rejects the selection before upload and shows the safe 10 MB message.",
       "sourceTrace": [
@@ -7078,9 +7435,12 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Upload without an authenticated IDTS role.",
       "steps": [
-        "Upload without an authenticated IDTS role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Upload without an authenticated IDTS role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks unauthorized access immediately and existing attachment state is unchanged.",
+      "expectedResult": "HTTP 401/403 is returned before storage access and existing attachment state is unchanged.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/content.js",
@@ -7129,7 +7489,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled S3 upload failure after metadata preparation.",
       "steps": [
-        "Inject a controlled S3 upload failure after metadata preparation."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled S3 upload failure after metadata preparation.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "A safe error is returned and metadata/object state rolls back consistently.",
       "sourceTrace": [
@@ -7189,7 +7552,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled S3 download failure.",
       "steps": [
-        "Inject a controlled S3 download failure."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled S3 download failure.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "A safe error is returned and Bug status/history/notification remain unchanged.",
       "sourceTrace": [
@@ -7249,7 +7615,10 @@
       "preconditions": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled S3 delete failure.",
       "steps": [
-        "Inject a controlled S3 delete failure."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled S3 delete failure.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The UI/API reports failure and does not falsely report deletion or mutate Bug workflow.",
       "sourceTrace": [
@@ -7311,7 +7680,10 @@
       "preconditions": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Create a valid Bug.",
       "steps": [
-        "Create a valid Bug."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Create a valid Bug.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "One create HistoryEvent identifies the actor and readable summary.",
       "sourceTrace": [
@@ -7363,7 +7735,10 @@
       "preconditions": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Update multiple important fields in one transaction.",
       "steps": [
-        "Update multiple important fields in one transaction."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Update multiple important fields in one transaction.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "One EDIT event contains one HistoryLog per changed field.",
       "sourceTrace": [
@@ -7415,7 +7790,10 @@
       "preconditions": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Execute each of the eleven lifecycle actions on eligible fixtures.",
       "steps": [
-        "Execute each of the eleven lifecycle actions on eligible fixtures."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Execute each of the eleven lifecycle actions on eligible fixtures.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Each event stores the exact registered ActionType rather than inferred generic status text.",
       "sourceTrace": [
@@ -7467,7 +7845,10 @@
       "preconditions": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Read and reload an event containing code, user, status, and attachment values.",
       "steps": [
-        "Read and reload an event containing code, user, status, and attachment values."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Read and reload an event containing code, user, status, and attachment values.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Display labels and values are stable and ordered newest first.",
       "sourceTrace": [
@@ -7519,7 +7900,10 @@
       "preconditions": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Force a validation rejection before a write.",
       "steps": [
-        "Force a validation rejection before a write."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Force a validation rejection before a write.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "No HistoryEvent or HistoryLog is inserted.",
       "sourceTrace": [
@@ -7571,7 +7955,10 @@
       "preconditions": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Force an authorization rejection before a write.",
       "steps": [
-        "Force an authorization rejection before a write."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Force an authorization rejection before a write.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "No HistoryEvent or HistoryLog is inserted.",
       "sourceTrace": [
@@ -7623,7 +8010,10 @@
       "preconditions": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled history or notification failure after an attempted update.",
       "steps": [
-        "Inject a controlled history or notification failure after an attempted update."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled history or notification failure after an attempted update.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Bug, history, comment, and notification changes roll back together.",
       "sourceTrace": [
@@ -7677,7 +8067,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Trigger a status event with a valid next recipient.",
       "steps": [
-        "Trigger a status event with a valid next recipient."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Trigger a status event with a valid next recipient.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "One IN_APP/SENT notification identifies the correct recipient and event.",
       "sourceTrace": [
@@ -7739,7 +8132,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Trigger an invalid lifecycle action.",
       "steps": [
-        "Trigger an invalid lifecycle action."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Trigger an invalid lifecycle action.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "No notification or email delivery row is inserted.",
       "sourceTrace": [
@@ -7801,7 +8197,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Create a notification with email enabled and a valid recipient.",
       "steps": [
-        "Create a notification with email enabled and a valid recipient."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Create a notification with email enabled and a valid recipient.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "One EMAIL/PENDING delivery with a safe snapshot is persisted.",
       "sourceTrace": [
@@ -7863,7 +8262,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Process notification while email delivery is disabled.",
       "steps": [
-        "Process notification while email delivery is disabled."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Process notification while email delivery is disabled.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Delivery is SKIPPED with a safe reason and the Bug workflow remains committed.",
       "sourceTrace": [
@@ -7925,7 +8327,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Process an active recipient with no email.",
       "steps": [
-        "Process an active recipient with no email."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Process an active recipient with no email.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Delivery is SKIPPED and sendMail is not called.",
       "sourceTrace": [
@@ -7987,7 +8392,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Process a notification for an inactive recipient.",
       "steps": [
-        "Process a notification for an inactive recipient."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Process a notification for an inactive recipient.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Delivery is SKIPPED and sendMail is not called.",
       "sourceTrace": [
@@ -8049,7 +8457,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Run one worker against an eligible PENDING delivery.",
       "steps": [
-        "Run one worker against an eligible PENDING delivery."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Run one worker against an eligible PENDING delivery.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Lock and attempt count update atomically; final status is SENT and lock/error are cleared.",
       "sourceTrace": [
@@ -8111,7 +8522,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled provider failure on the first attempt.",
       "steps": [
-        "Inject a controlled provider failure on the first attempt."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled provider failure on the first attempt.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Status is FAILED, diagnostic is sanitized, nextAttemptAt is bounded, and workflow remains committed.",
       "sourceTrace": [
@@ -8173,7 +8587,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Evaluate a FAILED row whose nextAttemptAt is in the future through processEmailDeliveries.",
       "steps": [
-        "Evaluate a FAILED row whose nextAttemptAt is in the future through processEmailDeliveries."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Evaluate a FAILED row whose nextAttemptAt is in the future through processEmailDeliveries.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The row is not claimed or sent.",
       "sourceTrace": [
@@ -8235,7 +8652,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Evaluate a FAILED row whose nextAttemptAt has elapsed through processEmailDeliveries.",
       "steps": [
-        "Evaluate a FAILED row whose nextAttemptAt has elapsed through processEmailDeliveries."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Evaluate a FAILED row whose nextAttemptAt has elapsed through processEmailDeliveries.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The row becomes eligible and attempt count increments once.",
       "sourceTrace": [
@@ -8297,7 +8717,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Evaluate a FAILED row whose attemptCount reached maxAttempts through processEmailDeliveries.",
       "steps": [
-        "Evaluate a FAILED row whose attemptCount reached maxAttempts through processEmailDeliveries."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Evaluate a FAILED row whose attemptCount reached maxAttempts through processEmailDeliveries.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The row is not retried and remains FAILED.",
       "sourceTrace": [
@@ -8359,7 +8782,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Start two controlled workers against the same eligible delivery.",
       "steps": [
-        "Start two controlled workers against the same eligible delivery."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Start two controlled workers against the same eligible delivery.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Only one compare-and-set claim succeeds and exactly one provider send occurs; repeat on HANA for production-parity evidence.",
       "sourceTrace": [
@@ -8421,7 +8847,10 @@
       "preconditions": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Invoke processEmailOutbox through the bound Job Scheduler task.",
       "steps": [
-        "Invoke processEmailOutbox through the bound Job Scheduler task."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Invoke processEmailOutbox through the bound Job Scheduler task.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The authorized batch runs and HANA/provider statuses agree without exposing credentials.",
       "sourceTrace": [
@@ -8485,7 +8914,10 @@
       "preconditions": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Evaluate open/closed Bugs before, on, and after due date.",
       "steps": [
-        "Evaluate open/closed Bugs before, on, and after due date."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Evaluate open/closed Bugs before, on, and after due date.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Only open Bugs past due are overdue.",
       "sourceTrace": [
@@ -8539,7 +8971,10 @@
       "preconditions": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Aggregate seeded pending-assignment Bugs.",
       "steps": [
-        "Aggregate seeded pending-assignment Bugs."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Aggregate seeded pending-assignment Bugs.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Count matches stored eligible rows.",
       "sourceTrace": [
@@ -8593,7 +9028,10 @@
       "preconditions": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Aggregate open Bugs for each Developer.",
       "steps": [
-        "Aggregate open Bugs for each Developer."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Aggregate open Bugs for each Developer.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Open counts match stored assignee/status data.",
       "sourceTrace": [
@@ -8647,7 +9085,10 @@
       "preconditions": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Evaluate below, equal, and above workload limits.",
       "steps": [
-        "Evaluate below, equal, and above workload limits."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Evaluate below, equal, and above workload limits.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "isOverloaded changes at the documented boundary only.",
       "sourceTrace": [
@@ -8701,7 +9142,10 @@
       "preconditions": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Aggregate Bugs across next-processor roles and statuses.",
       "steps": [
-        "Aggregate Bugs across next-processor roles and statuses."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Aggregate Bugs across next-processor roles and statuses.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Only rows currently requiring that Developer action are counted.",
       "sourceTrace": [
@@ -8755,7 +9199,10 @@
       "preconditions": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Apply search, where, orderBy, and limit to the same workload rows.",
       "steps": [
-        "Apply search, where, orderBy, and limit to the same workload rows."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Apply search, where, orderBy, and limit to the same workload rows.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The same stable filtered order is returned.",
       "sourceTrace": [
@@ -8810,9 +9257,12 @@
       "preconditions": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call readAiOperationalMetrics as Tester and Developer.",
       "steps": [
-        "Call readAiOperationalMetrics as Tester and Developer."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call readAiOperationalMetrics as Tester and Developer.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error and no metric payload is exposed.",
+      "expectedResult": "HTTP 403 is returned and no metric payload is exposed.",
       "sourceTrace": [
         {
           "file": "srv/ai/review.js",
@@ -8863,7 +9313,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call provider operations with AI disabled.",
       "steps": [
-        "Call provider operations with AI disabled."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call provider operations with AI disabled.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "A stable AI_DISABLED result is returned and no provider/network/business mutation occurs.",
       "sourceTrace": [
@@ -8914,7 +9367,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call structured generation with controlled mock output.",
       "steps": [
-        "Call structured generation with controlled mock output."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call structured generation with controlled mock output.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The schema result is normalized and excluded secrets remain absent.",
       "sourceTrace": [
@@ -8965,7 +9421,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Request a controlled embedding with configured dimension six.",
       "steps": [
-        "Request a controlled embedding with configured dimension six."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Request a controlled embedding with configured dimension six.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Exactly six finite values and the embedding model alias are returned.",
       "sourceTrace": [
@@ -9016,7 +9475,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled provider timeout.",
       "steps": [
-        "Inject a controlled provider timeout."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled provider timeout.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "AI_TIMEOUT is returned without raw stack, key, endpoint, or business input.",
       "sourceTrace": [
@@ -9067,7 +9529,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled network failure.",
       "steps": [
-        "Inject a controlled network failure."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled network failure.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "A safe retryable provider status is returned without raw diagnostics.",
       "sourceTrace": [
@@ -9118,7 +9583,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Return malformed structured provider output.",
       "steps": [
-        "Return malformed structured provider output."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Return malformed structured provider output.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Validation rejects the payload and produces the documented safe fallback.",
       "sourceTrace": [
@@ -9169,7 +9637,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Pass synthetic key, token, email, DB URL, and private endpoint-shaped text.",
       "steps": [
-        "Pass synthetic key, token, email, DB URL, and private endpoint-shaped text."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Pass synthetic key, token, email, DB URL, and private endpoint-shaped text.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Sensitive patterns are removed without retaining raw input.",
       "sourceTrace": [
@@ -9223,7 +9694,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Suggest similar Bugs for a persisted source with eligible candidates.",
       "steps": [
-        "Suggest similar Bugs for a persisted source with eligible candidates."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Suggest similar Bugs for a persisted source with eligible candidates.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Grounded candidates are ranked; source Bug is excluded; review audit is safe.",
       "sourceTrace": [
@@ -9279,7 +9753,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Use input with no candidate above the threshold.",
       "steps": [
-        "Use input with no candidate above the threshold."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Use input with no candidate above the threshold.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "An empty/safe result is returned and DuplicateLinks remains unchanged.",
       "sourceTrace": [
@@ -9335,7 +9812,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Request classification for a Bug with adequate context.",
       "steps": [
-        "Request classification for a Bug with adequate context."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Request classification for a Bug with adequate context.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Every suggested code maps to an active catalog row and audit remains review-only.",
       "sourceTrace": [
@@ -9391,7 +9871,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Request classification with minimal title/description context.",
       "steps": [
-        "Request classification with minimal title/description context."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Request classification with minimal title/description context.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Unsafe or ungrounded fields return no suggestion or rules-based baseline, not invented codes.",
       "sourceTrace": [
@@ -9447,7 +9930,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Summarize a Bug with comments and lifecycle history.",
       "steps": [
-        "Summarize a Bug with comments and lifecycle history."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Summarize a Bug with comments and lifecycle history.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Summary, comment summary, events, and next action are grounded in stored data.",
       "sourceTrace": [
@@ -9499,7 +9985,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Include instruction-like text inside a stored comment.",
       "steps": [
-        "Include instruction-like text inside a stored comment."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Include instruction-like text inside a stored comment.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The comment is summarized as data and cannot override system constraints.",
       "sourceTrace": [
@@ -9551,7 +10040,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Request explanations for the eligible candidate list.",
       "steps": [
-        "Request explanations for the eligible candidate list."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Request explanations for the eligible candidate list.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Every explanation maps by safe candidate reference and no assignment occurs.",
       "sourceTrace": [
@@ -9603,7 +10095,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Return an explanation for a candidate not issued by the backend.",
       "steps": [
-        "Return an explanation for a candidate not issued by the backend."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Return an explanation for a candidate not issued by the backend.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The unknown row is discarded and no Developer ID is accepted from AI.",
       "sourceTrace": [
@@ -9655,7 +10150,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Accept a PENDING suggestion as an allowed role.",
       "steps": [
-        "Accept a PENDING suggestion as an allowed role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Accept a PENDING suggestion as an allowed role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Review state, reviewer, and time persist; Bug workflow remains unchanged.",
       "sourceTrace": [
@@ -9711,7 +10209,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Reject a PENDING suggestion as an allowed role.",
       "steps": [
-        "Reject a PENDING suggestion as an allowed role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Reject a PENDING suggestion as an allowed role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Review state, reviewer, and time persist; Bug workflow remains unchanged.",
       "sourceTrace": [
@@ -9767,7 +10268,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Ignore a PENDING suggestion as an allowed role.",
       "steps": [
-        "Ignore a PENDING suggestion as an allowed role."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Ignore a PENDING suggestion as an allowed role.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Review state, reviewer, and time persist; Bug workflow remains unchanged.",
       "sourceTrace": [
@@ -9823,7 +10327,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Review an already ACCEPTED suggestion again.",
       "steps": [
-        "Review an already ACCEPTED suggestion again."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Review an already ACCEPTED suggestion again.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 409 is returned and original review/business state remains unchanged.",
       "sourceTrace": [
@@ -9879,7 +10386,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Review an already REJECTED suggestion again.",
       "steps": [
-        "Review an already REJECTED suggestion again."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Review an already REJECTED suggestion again.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 409 is returned and original review/business state remains unchanged.",
       "sourceTrace": [
@@ -9935,7 +10445,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Review an already IGNORED suggestion again.",
       "steps": [
-        "Review an already IGNORED suggestion again."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Review an already IGNORED suggestion again.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 409 is returned and original review/business state remains unchanged.",
       "sourceTrace": [
@@ -9991,7 +10504,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Review a suggestion after expiresAt.",
       "steps": [
-        "Review a suggestion after expiresAt."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Review a suggestion after expiresAt.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 409 is returned and no state is changed.",
       "sourceTrace": [
@@ -10047,7 +10563,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Apply one ACCEPTED, unexpired, non-stale classification suggestion as Tester or PM.",
       "steps": [
-        "Apply one ACCEPTED, unexpired, non-stale classification suggestion as Tester or PM."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Apply one ACCEPTED, unexpired, non-stale classification suggestion as Tester or PM.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Only classification allowlist fields change atomically; status/assignee/next processor remain unchanged.",
       "sourceTrace": [
@@ -10104,7 +10623,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Change source classification after suggestion creation, then Apply.",
       "steps": [
-        "Change source classification after suggestion creation, then Apply."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Change source classification after suggestion creation, then Apply.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 409 is returned and current classification remains unchanged.",
       "sourceTrace": [
@@ -10161,7 +10683,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Confirm one candidate stored in an ACCEPTED Similar Bugs suggestion as Tester or PM.",
       "steps": [
-        "Confirm one candidate stored in an ACCEPTED Similar Bugs suggestion as Tester or PM."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Confirm one candidate stored in an ACCEPTED Similar Bugs suggestion as Tester or PM.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "One normalized DuplicateLink is committed without lifecycle mutation.",
       "sourceTrace": [
@@ -10218,9 +10743,12 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Confirm the source Bug as its own duplicate.",
       "steps": [
-        "Confirm the source Bug as its own duplicate."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Confirm the source Bug as its own duplicate.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System blocks the invalid request is returned and no DuplicateLink is created.",
+      "expectedResult": "HTTP 400 is returned and no DuplicateLink is created.",
       "sourceTrace": [
         {
           "file": "srv/ai/duplicate-detection.js",
@@ -10275,7 +10803,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Confirm a pair whose forward link already exists.",
       "steps": [
-        "Confirm a pair whose forward link already exists."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Confirm a pair whose forward link already exists.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 409 or the documented idempotent boundary is returned with one stored link only.",
       "sourceTrace": [
@@ -10332,7 +10863,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Confirm a pair whose reverse link already exists.",
       "steps": [
-        "Confirm a pair whose reverse link already exists."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Confirm a pair whose reverse link already exists.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 409 or the documented idempotent boundary is returned with one stored link only.",
       "sourceTrace": [
@@ -10389,7 +10923,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Read 30-day metrics as PM through the OData function.",
       "steps": [
-        "Read 30-day metrics as PM through the OData function."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Read 30-day metrics as PM through the OData function.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Only aggregate capability/status/latency/review counts are returned; prompt/response/error/secret fields are absent. Repeat on BTP for deployed-role confirmation.",
       "sourceTrace": [
@@ -10446,7 +10983,10 @@
       "preconditions": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled HTTP 429 provider response.",
       "steps": [
-        "Inject a controlled HTTP 429 provider response."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled HTTP 429 provider response.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The documented cooldown/fallback result is recorded without retry storm or business mutation; live quota behavior is acceptance evidence, not a prerequisite for this component case.",
       "sourceTrace": [
@@ -10499,7 +11039,10 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Call protected BugService without authentication.",
       "steps": [
-        "Call protected BugService without authentication."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Call protected BugService without authentication.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 401 returns no business data.",
       "sourceTrace": [
@@ -10559,9 +11102,12 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Run a Developer-only lifecycle action on another Developer assignee.",
       "steps": [
-        "Run a Developer-only lifecycle action on another Developer assignee."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Run a Developer-only lifecycle action on another Developer assignee.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "System returns Forbidden error and no mutation occurs.",
+      "expectedResult": "HTTP 403 is returned and no mutation occurs.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/guards.js",
@@ -10618,7 +11164,10 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "CREATE, UPDATE, or DELETE a projected code-list entity.",
       "steps": [
-        "CREATE, UPDATE, or DELETE a projected code-list entity."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: CREATE, UPDATE, or DELETE a projected code-list entity.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 405/403 is returned and the entity remains unchanged.",
       "sourceTrace": [
@@ -10677,7 +11226,10 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "CREATE, UPDATE, or DELETE HistoryEvents, HistoryLogs, AiSuggestions, or Notifications.",
       "steps": [
-        "CREATE, UPDATE, or DELETE HistoryEvents, HistoryLogs, AiSuggestions, or Notifications."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: CREATE, UPDATE, or DELETE HistoryEvents, HistoryLogs, AiSuggestions, or Notifications.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "HTTP 405/403 is returned and the entity remains unchanged.",
       "sourceTrace": [
@@ -10736,7 +11288,10 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Read public Users, sessions, notifications, and AI projections.",
       "steps": [
-        "Read public Users, sessions, notifications, and AI projections."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Read public Users, sessions, notifications, and AI projections.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "passwordHash, tokenHash, lockToken, raw email body, prompt, and response are absent.",
       "sourceTrace": [
@@ -10796,7 +11351,10 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled database exception containing sensitive text.",
       "steps": [
-        "Inject a controlled database exception containing sensitive text."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled database exception containing sensitive text.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Public error and persisted diagnostic omit SQL, credentials, endpoint, and stack.",
       "sourceTrace": [
@@ -10855,7 +11413,10 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Inject a controlled provider exception containing sensitive text.",
       "steps": [
-        "Inject a controlled provider exception containing sensitive text."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Inject a controlled provider exception containing sensitive text.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "Public error and audit diagnostic contain only allowlisted stable tokens.",
       "sourceTrace": [
@@ -10915,7 +11476,10 @@
       "preconditions": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
       "input": "Force a failure during an operation that would touch Bug, history, notification, duplicate, classification, or attachment state.",
       "steps": [
-        "Force a failure during an operation that would touch Bug, history, notification, duplicate, classification, or attachment state."
+        "Prepare the stated precondition and capture the before-state.",
+        "Execute only this branch using: Force a failure during an operation that would touch Bug, history, notification, duplicate, classification, or attachment state.",
+        "Assert the response, persisted state, side effects, and safe error boundary described below.",
+        "Reload or read back state when persistence is part of the case."
       ],
       "expectedResult": "The transaction leaves all affected business entities consistent with the before-state.",
       "sourceTrace": [
