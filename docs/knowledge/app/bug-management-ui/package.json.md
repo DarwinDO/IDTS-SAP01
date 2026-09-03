@@ -118,3 +118,8 @@ Tiếng Việt: N2 tăng identity app lên `0.0.7`, đồng bộ manifest và me
 Bug Management advances to `0.0.9` so the live HTML5 repository and browser can distinguish the notification metadata-spacing bundle from `0.0.8`. Scripts and dependencies are unchanged.
 
 Bug Management tăng lên `0.0.9` để HTML5 repository và trình duyệt phân biệt bundle sửa khoảng cách metadata notification với `0.0.8`. Script và dependency không đổi.
+# 2026-09-03 cache identity 0.0.10
+
+Version `0.0.10` identifies the compact My Notifications Bug-title layout. Scripts and dependencies are unchanged.
+
+Version `0.0.10` định danh layout My Notifications gọn có Bug title. Script và dependency không đổi.

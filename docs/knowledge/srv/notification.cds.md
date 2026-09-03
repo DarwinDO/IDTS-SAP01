@@ -31,3 +31,8 @@ Keep the DTO allowlisted and add no recipient selector. Keep `processNotificatio
 ## Activation cutoff / Cutoff kích hoạt
 
 The protected action now has signature `processNotificationSchedules(now:Timestamp, discoveryFrom:Timestamp)`. `discoveryFrom` is not a recipient/filter selector; private server configuration is authoritative in production, while the parameter supports controlled environments when that configuration is absent. Invalid/blank values fail closed, and focused QA proves before/equal/after boundaries plus server-config precedence. / Action được bảo vệ giờ có signature `processNotificationSchedules(now:Timestamp, discoveryFrom:Timestamp)`. `discoveryFrom` không phải selector recipient/filter; private server config là authority ở production, còn tham số hỗ trợ môi trường kiểm soát khi config chưa có. Giá trị sai/blank fail-closed và QA focused chứng minh boundary trước/đúng/sau cutoff cùng precedence của server config.
+# 2026-09-03 bounded Bug title context
+
+`NotificationSummary` adds only `bugNumber` and `bugTitle` for caller-owned Bug notifications. It deliberately omits Bug description and retains all existing safe DTO exclusions.
+
+`NotificationSummary` chỉ thêm `bugNumber` và `bugTitle` cho Bug notification thuộc caller. Contract chủ động không đưa Bug description và giữ toàn bộ loại trừ DTO an toàn hiện có.

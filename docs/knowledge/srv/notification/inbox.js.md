@@ -57,3 +57,8 @@ Never accept a recipient ID from the client, never hydrate before caller scope, 
 **English.** `PRIORITY_ESCALATED` and `SEVERITY_ESCALATED` are allowlisted Bug sources with localized safe summaries and `actionRequired=true`. The mapper still exposes no raw source message, recipient identity, or delivery/provider state.
 
 **Tiếng Việt.** `PRIORITY_ESCALATED` và `SEVERITY_ESCALATED` là Bug source được allowlist, có summary an toàn đã localize và `actionRequired=true`. Mapper vẫn không lộ raw source message, identity người nhận hoặc delivery/provider state.
+# 2026-09-03 bounded Bug title hydration
+
+The existing bounded source hydration query now selects the related Bug number and title in the same query as priority. `bugSummary` returns those two fields only; access/unavailable rows receive `null`. There is no per-row query and no Bug description exposure.
+
+Query hydrate source có giới hạn hiện lấy thêm Bug number và title trong cùng query với priority. `bugSummary` chỉ trả hai field này; row access/unavailable nhận `null`. Không phát sinh query theo từng row và không expose Bug description.
