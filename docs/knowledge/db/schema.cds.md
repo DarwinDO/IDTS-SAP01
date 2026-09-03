@@ -1,5 +1,11 @@
 # Knowledge: `db/schema.cds`
 
+## 2026-09-03 profile fields / Field hồ sơ 2026-09-03
+
+`UserOnboardingRequests.requestedDisplayName` carries a name across asynchronous provisioning and stays nullable for safe additive migration of historical rows. `UserIdentityAuditEvents` gains optional before/after display names and a profile-change reason so the audit remains structured. These fields do not replace immutable external identity fields and do not authorize requests.
+
+`UserOnboardingRequests.requestedDisplayName` giữ tên xuyên suốt provisioning bất đồng bộ và để nullable nhằm migrate additive an toàn cho row lịch sử. `UserIdentityAuditEvents` thêm tên trước/sau và lý do đổi hồ sơ dạng optional để audit có cấu trúc. Các field này không thay identity ngoài bất biến và không dùng để authorize.
+
 ## User-admin Developer profile additions / Bổ sung Developer profile cho User Admin
 
 `DeveloperProfileAdministrationStates` stores the one-to-one optimistic version used for PM updates without adding a column to the existing seeded `DeveloperProfiles` table. `UserOnboardingRequests` owns one `UserOnboardingDeveloperProfiles` header and many `UserOnboardingDeveloperResponsibilities`. Together they form the desired availability/workload and Component Category, optional SAP Module, and responsibility-level snapshot used only after provider readback. Keeping both concurrency state and desired invitation data in new owned tables makes the HANA migration additive and avoids seed-data redeployment.

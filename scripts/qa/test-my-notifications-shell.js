@@ -109,6 +109,8 @@ function row (index, readAt = null, eventType = 'ASSIGNED') {
     eventType,
     title: `Notification ${index}`,
     summary: 'Safe summary',
+    bugNumber: index % 2 ? `BUG-${String(index).padStart(4, '0')}` : null,
+    bugTitle: index % 2 ? `Tracked bug ${index}` : null,
     priority: index === 1 ? 'CRITICAL' : 'NORMAL',
     actionRequired: index === 1,
     occurredAt: `2026-08-27T01:${String(index % 60).padStart(2, '0')}:00.000Z`,
@@ -159,6 +161,7 @@ async function main () {
   }
   const host = { dataset: {}, controls: [] }
   const shellModule = loadShell(client, globals)
+  assert.ok(!globals.loadedDeps.includes('sap/ui/core/Icon'), 'notification rows do not load or render the redundant category icon')
   assert.ok(globals.loadedDeps.includes('sap/ui/core/library'), 'use the real UI5 core library export for InvisibleMessageMode')
   assert.ok(!globals.loadedDeps.includes('sap/ui/core/InvisibleMessageMode'), 'do not depend on a nonexistent UI5 module')
   const model = {}
@@ -187,16 +190,35 @@ async function main () {
   await new Promise(resolve => setImmediate(resolve))
   const popover = globals.created.ResponsivePopover[0]
   assert.ok(popover && popover.isOpen, 'bell opens native ResponsivePopover')
+  assert.equal(popover.horizontalScrolling, false, 'popover never exposes horizontal scrolling')
   assert.equal(calls.search[0].category, 'ALL')
   assert.equal(calls.search[0].readState, 'ALL')
   assert.equal(calls.search[0].skip, 0)
   assert.equal(calls.search[0].top, 25)
   const list = popover.content[0].items.find(item => item.settings && item.settings.mode === 'None')
   assert.equal(list.items.length, 25, 'first page is 25 rows')
-  assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationUnread'), 'unread state has a literal marker')
-  assert.ok(globals.created.Icon.some(icon => icon.src === 'sap-icon://bug'), 'Bug rows render a category icon')
-  assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventCOMMENT_MENTIONED'), 'persisted comment mentions render their localized event label')
-  assert.ok(!list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventOther'), 'persisted comment mentions do not fall back to the generic event label')
+  const firstRow = list.items[0]
+  assert.equal(firstRow.highlight, 'Information', 'unread rows use native highlight instead of relying on text alone')
+  assert.ok(firstRow.content[0].classes.includes('sapUiSmallMarginTopBottom sapUiTinyMarginBeginEnd'), 'row content uses compact native spacing')
+  assert.equal(firstRow.content[0].items.length, 3, 'Bug row contains metadata, Bug title and time without a redundant description region')
+  assert.ok(
+    firstRow.content[0].items[0].items.every(item => item.classes.includes('sapUiTinyMarginEnd')),
+    'each metadata control has native end spacing so labels never concatenate'
+  )
+  assert.ok(firstRow.content[0].items[0].items.some(item => item.text === 'notificationUnread'), 'unread state has a literal marker')
+  assert.equal(firstRow.content[0].items[1].text, 'BUG-0001 — Tracked bug 1', 'Bug number and title form the readable primary line')
+  assert.match(firstRow.content[0].items[2].text, /^notificationOccurredAt:/, 'timestamp follows the Bug title without dead space')
+  const accessRow = list.items[1]
+  assert.equal(accessRow.content[0].items[1].text, 'Notification 2', 'Access notification keeps its localized title')
+  assert.equal(accessRow.content[0].items[2].text, 'Safe summary', 'Access notification keeps its localized summary')
+  const filterRow = popover.content[0].items.find(item => item.settings && item.settings.wrap === 'Wrap' && item.items.length === 2)
+  assert.ok(filterRow, 'filters share a compact responsive native row')
+  assert.equal(filterRow.items.length, 2, 'read-state and category filters remain distinct')
+  assert.equal(filterRow.settings.width, undefined, 'filter margins do not overflow an explicit 100% width')
+  assert.ok(filterRow.classes.includes('sapUiSmallMarginTopBottom'), 'filters keep vertical breathing room without horizontal overflow margins')
+  assert.equal(globals.created.Icon.length, 0, 'notification rows render no category icon')
+  assert.ok(firstRow.content[0].items[0].items.some(item => item.text === 'notificationEventCOMMENT_MENTIONED'), 'persisted comment mentions render their localized event label')
+  assert.ok(!firstRow.content[0].items[0].items.some(item => item.text === 'notificationEventOther'), 'persisted comment mentions do not fall back to the generic event label')
 
   const countBeforeSignal = calls.unread
   globals.window['idts:notification-change']()

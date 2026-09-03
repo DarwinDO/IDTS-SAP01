@@ -1,0 +1,37 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+	<Dialog
+		id="editUserInformationDialog"
+		title="{i18n>editUserInformation}"
+		contentWidth="30rem"
+		stretch="{device>/system/phone}"
+		busy="{activeUsers>/editProfile/submitting}">
+		<content>
+			<VBox class="sapUiSmallMargin">
+				<Label text="{i18n>displayName}" labelFor="editUserDisplayName" required="true"/>
+				<Input
+					id="editUserDisplayName"
+					value="{activeUsers>/editProfile/displayName}"
+					valueLiveUpdate="true"
+					maxLength="120"
+					valueState="{= ${activeUsers>/editProfile/displayNameTouched} &amp;&amp; !${activeUsers>/editProfile/displayNameValid} ? 'Error' : 'None' }"
+					valueStateText="{i18n>invalidDisplayName}"
+					liveChange=".onEditUserInformationChange"/>
+				<Label text="{i18n>editUserInformationReason}" labelFor="editUserReason" required="true" class="sapUiSmallMarginTop"/>
+				<TextArea
+					id="editUserReason"
+					value="{activeUsers>/editProfile/reason}"
+					maxLength="500"
+					rows="3"
+					valueState="{= ${activeUsers>/editProfile/reasonTouched} &amp;&amp; !${activeUsers>/editProfile/reasonValid} ? 'Error' : 'None' }"
+					valueStateText="{i18n>reasonRequired}"
+					liveChange=".onEditUserInformationChange"/>
+			</VBox>
+		</content>
+		<beginButton>
+			<Button text="{i18n>saveUserInformation}" type="Emphasized" enabled="{= ${activeUsers>/editProfile/canSubmit} &amp;&amp; !${activeUsers>/editProfile/submitting} }" press=".onConfirmEditUserInformation"/>
+		</beginButton>
+		<endButton>
+			<Button text="{i18n>cancel}" enabled="{= !${activeUsers>/editProfile/submitting} }" press=".onCancelEditUserInformation"/>
+		</endButton>
+	</Dialog>
+</core:FragmentDefinition>

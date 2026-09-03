@@ -17,7 +17,6 @@ sap.ui.define([
     "sap/m/Label",
     "sap/m/BadgeCustomData",
     "sap/ui/core/Item",
-    "sap/ui/core/Icon",
     "sap/ui/core/InvisibleMessage",
     "sap/ui/core/library",
     "sap/ui/core/format/DateFormat",
@@ -40,7 +39,6 @@ sap.ui.define([
     Label,
     BadgeCustomData,
     Item,
-    Icon,
     InvisibleMessage,
     coreLibrary,
     DateFormat,
@@ -226,14 +224,25 @@ sap.ui.define([
             visible: false,
             press: function () { loadPage(state, false); }
         });
-        var filterLabels = new VBox({
+        var filterLabels = new HBox({
+            wrap: "Wrap",
             items: [
-                new Label({ text: text(bundle, "notificationReadFilterLabel"), labelFor: controlId(readFilter) }),
-                readFilter,
-                new Label({ text: text(bundle, "notificationCategoryFilterLabel"), labelFor: controlId(categoryFilter) }),
-                categoryFilter
+                new VBox({
+                    width: "18rem",
+                    items: [
+                        new Label({ text: text(bundle, "notificationReadFilterLabel"), labelFor: controlId(readFilter) }),
+                        readFilter
+                    ]
+                }).addStyleClass("sapUiTinyMarginEnd sapUiTinyMarginBottom"),
+                new VBox({
+                    width: "10rem",
+                    items: [
+                        new Label({ text: text(bundle, "notificationCategoryFilterLabel"), labelFor: controlId(categoryFilter) }),
+                        categoryFilter
+                    ]
+                }).addStyleClass("sapUiTinyMarginBottom")
             ]
-        });
+        }).addStyleClass("sapUiSmallMarginTopBottom");
         var content = new VBox({
             width: "100%",
             items: [
@@ -253,6 +262,7 @@ sap.ui.define([
             placement: PlacementType.Bottom,
             showHeader: true,
             contentWidth: "30rem",
+            horizontalScrolling: false,
             content: [content],
             afterClose: function () {
                 if (state.lastFocus && typeof state.lastFocus.focus === "function") state.lastFocus.focus();
@@ -416,11 +426,11 @@ sap.ui.define([
         var bundle = state.bundle;
         var unread = !row.readAt;
         var statusItems = [
-            new Icon({
-                src: row.category === "BUG" ? "sap-icon://bug" : "sap-icon://locked",
-                decorative: false,
-                tooltip: row.category === "BUG" ? text(bundle, "notificationCategoryBug") : text(bundle, "notificationCategoryAccess")
+            new ObjectStatus({
+                text: row.category === "BUG" ? text(bundle, "notificationCategoryBug") : text(bundle, "notificationCategoryAccess"),
+                state: "None"
             }),
+            new ObjectStatus({ text: eventLabel(bundle, row.eventType), state: "None" }),
             new ObjectStatus({
                 text: unread ? text(bundle, "notificationUnread") : text(bundle, "notificationRead"),
                 state: unread ? ValueState.Information : "None"
@@ -429,18 +439,21 @@ sap.ui.define([
                 text: row.actionRequired ? text(bundle, "notificationActionRequired") : "",
                 state: ValueState.Warning,
                 visible: Boolean(row.actionRequired)
-            }),
-            new ObjectStatus({ text: String(row.category || ""), state: "None" })
-        ];
+            })
+        ].map(function (item) {
+            return item.addStyleClass("sapUiTinyMarginEnd");
+        });
+        var bugContext = [row.bugNumber, row.bugTitle].filter(Boolean).join(" — ");
+        var primaryText = bugContext || String(row.title || "");
+        var secondaryText = bugContext ? "" : String(row.summary || "");
+        var contentItems = [new HBox({ wrap: "Wrap", items: statusItems })];
+        if (primaryText) contentItems.push(new Text({ text: primaryText, wrapping: true, maxLines: 2 }).addStyleClass("sapUiTinyMarginTop"));
+        if (secondaryText) contentItems.push(new Text({ text: secondaryText, wrapping: true, maxLines: 2 }).addStyleClass("sapUiTinyMarginTop"));
+        contentItems.push(new Text({ text: text(bundle, "notificationOccurredAt", [safeDate(bundle, row.occurredAt)]), wrapping: true }).addStyleClass("sapUiTinyMarginTop"));
         return new CustomListItem({
             type: "Active",
-            content: [new VBox({
-                items: [
-                    new HBox({ wrap: "Wrap", items: [statusItems[0], new Text({ text: String(row.title || ""), wrapping: true }), statusItems[1], statusItems[2], statusItems[3], new Text({ text: eventLabel(bundle, row.eventType), wrapping: true })] }),
-                    new Text({ text: String(row.summary || ""), wrapping: true }),
-                    new Text({ text: text(bundle, "notificationOccurredAt", [safeDate(bundle, row.occurredAt)]), wrapping: true })
-                ]
-            })],
+            highlight: unread ? "Information" : "None",
+            content: [new VBox({ items: contentItems }).addStyleClass("sapUiSmallMarginTopBottom sapUiTinyMarginBeginEnd")],
             press: function () { openNotification(state, row); }
         });
     }

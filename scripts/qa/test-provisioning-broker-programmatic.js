@@ -57,6 +57,7 @@ async function main () {
   }))
   await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
     ID: REQUEST_ID,
+    requestedDisplayName: 'New User',
     targetEmailNormalized: 'new.user@example.invalid',
     openRequestKey: 'a'.repeat(64),
     requestedRole_code: 'TESTER',
@@ -124,6 +125,7 @@ async function main () {
   assert.ok(request.activeUser_ID)
   assert.ok(request.provisionedAt)
   const user = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: request.activeUser_ID }))
+  assert.equal(user.displayName, 'New User')
   assert.equal(user.role_code, 'TESTER')
   assert.equal(user.active, true)
   assert.equal(user.externalIdentityKeyHash, 'c'.repeat(64))

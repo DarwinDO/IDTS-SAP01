@@ -142,9 +142,11 @@
 										items="{activeUsers>/items}"
 										busy="{activeUsers>/busy}"
 										noDataText="{i18n>noActiveUsers}"
-										sticky="ColumnHeaders">
+										sticky="ColumnHeaders"
+										autoPopinMode="true"
+										contextualWidth="Auto">
 										<columns>
-											<Column><Text text="{i18n>user}"/></Column>
+											<Column importance="High"><Text text="{i18n>user}"/></Column>
 											<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>businessRole}"/></Column>
 											<Column width="11rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>userAdminCapability}"/></Column>
 											<Column width="9rem"><Text text="{i18n>accessState}"/></Column>
@@ -152,7 +154,7 @@
 											<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>developerReady}"/></Column>
 											<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>pendingOperation}"/></Column>
 											<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>lastReconciled}"/></Column>
-											<Column width="8rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+											<Column width="8rem" hAlign="End" importance="High"><Text text="{i18n>actions}"/></Column>
 										</columns>
 										<items>
 											<ColumnListItem type="Inactive">
@@ -260,7 +262,8 @@
 														busy="{workload>/busy}"
 														noDataText="{i18n>noDeveloperWorkloads}"
 														sticky="ColumnHeaders"
-														autoPopinMode="true">
+														autoPopinMode="true"
+														contextualWidth="Auto">
 														<columns>
 															<Column importance="High"><Text text="{i18n>user}"/></Column>
 															<Column width="10rem"><Text text="{i18n>availability}"/></Column>
@@ -270,7 +273,7 @@
 															<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>overdue}"/></Column>
 															<Column width="10rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>estimatedEffort}"/></Column>
 															<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>workloadStatus}"/></Column>
-															<Column width="11rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+															<Column width="11rem" hAlign="End" importance="High"><Text text="{i18n>actions}"/></Column>
 														</columns>
 														<items>
 															<ColumnListItem type="Inactive">
@@ -393,7 +396,7 @@
 															<Button icon="sap-icon://refresh" tooltip="{i18n>refreshOperations}" press=".onRefreshOperations"/>
 														</Toolbar>
 														<MessageStrip visible="{deliveries>/error}" text="{i18n>deliveryLoadFailed}" type="Error" showIcon="true"/>
-														<Table id="deliveryOperationsTable" items="{deliveries>/items}" busy="{deliveries>/busy}" noDataText="{i18n>noDeliveries}" sticky="ColumnHeaders" autoPopinMode="true">
+														<Table id="deliveryOperationsTable" items="{deliveries>/items}" busy="{deliveries>/busy}" noDataText="{i18n>noDeliveries}" sticky="ColumnHeaders" autoPopinMode="true" contextualWidth="Auto">
 															<columns>
 																<Column width="10rem"><Text text="{i18n>deliveryType}"/></Column>
 																<Column width="11rem"><Text text="{i18n>deliveryEvent}"/></Column>
@@ -402,7 +405,7 @@
 																<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>attempts}"/></Column>
 																<Column width="12rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>nextAttempt}"/></Column>
 																<Column minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>deliveryError}"/></Column>
-																<Column width="11rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+																<Column width="11rem" hAlign="End" importance="High"><Text text="{i18n>actions}"/></Column>
 															</columns>
 															<items>
 																<ColumnListItem type="Inactive">
@@ -446,14 +449,14 @@
 															<Button icon="sap-icon://refresh" tooltip="{i18n>refreshOperations}" press=".onRefreshOperations"/>
 														</Toolbar>
 														<MessageStrip visible="{operations>/error}" text="{i18n>operationsLoadFailed}" type="Error" showIcon="true"/>
-														<Table id="provisioningOperationsTable" items="{operations>/items}" busy="{operations>/busy}" noDataText="{i18n>noOperations}" sticky="ColumnHeaders" autoPopinMode="true">
+														<Table id="provisioningOperationsTable" items="{operations>/items}" busy="{operations>/busy}" noDataText="{i18n>noOperations}" sticky="ColumnHeaders" autoPopinMode="true" contextualWidth="Auto">
 															<columns>
 																<Column importance="High"><Text text="{i18n>operation}"/></Column>
 																<Column width="10rem"><Text text="{i18n>operationState}"/></Column>
 																<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>requestedBy}"/></Column>
 																<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>target}"/></Column>
 																<Column width="7rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>attempts}"/></Column>
-																<Column width="14rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+																<Column width="14rem" hAlign="End" importance="High"><Text text="{i18n>actions}"/></Column>
 															</columns>
 															<items>
 															<ColumnListItem type="Inactive">
@@ -507,14 +510,14 @@
 										<Button icon="sap-icon://refresh" tooltip="{i18n>refreshAudit}" press=".onRefreshAudit"/>
 									</Toolbar>
 									<MessageStrip visible="{audit>/error}" text="{i18n>auditLoadFailed}" type="Error" showIcon="true"/>
-									<Table id="administrationAuditTable" items="{audit>/items}" busy="{audit>/busy}" noDataText="{i18n>noAuditEvents}" sticky="ColumnHeaders" autoPopinMode="true">
+									<Table id="administrationAuditTable" items="{audit>/items}" busy="{audit>/busy}" noDataText="{i18n>noAuditEvents}" sticky="ColumnHeaders" autoPopinMode="true" contextualWidth="Auto">
 										<columns>
 											<Column importance="High"><Text text="{i18n>auditAction}"/></Column>
 											<Column width="9rem"><Text text="{i18n>auditResult}"/></Column>
 											<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>actor}"/></Column>
 											<Column minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>target}"/></Column>
 											<Column width="12rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>occurredAt}"/></Column>
-											<Column width="9rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+											<Column width="9rem" hAlign="End" importance="High"><Text text="{i18n>actions}"/></Column>
 										</columns>
 										<items>
 																<ColumnListItem type="Inactive">

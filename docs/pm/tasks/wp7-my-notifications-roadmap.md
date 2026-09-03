@@ -1,5 +1,17 @@
 # WP7 My Notifications Roadmap
 
+## 2026-09-03 — Compact Bug-title row follow-up
+
+- **English:** DonHV selected a compact follow-up: remove the row category icon, show only `bugNumber — bugTitle` for Bug notifications, omit Bug description, retain localized Access copy, eliminate empty content controls, and prevent horizontal scrolling with native UI5 layout. Bug UI cache identity advances to `0.0.10`; CAP/UI rollout evidence is tracked in `docs/pm/evidence/my-notifications/notification-row-density-title-20260903.md`.
+- **Tiếng Việt:** DonHV chọn follow-up gọn: bỏ icon category của row, chỉ hiện `bugNumber — bugTitle` cho Bug notification, không hiện Bug description, giữ copy Access đã localize, bỏ control nội dung rỗng và ngăn scroll ngang bằng layout UI5 native. Cache identity Bug UI tăng lên `0.0.10`; evidence rollout CAP/UI được theo dõi tại `docs/pm/evidence/my-notifications/notification-row-density-title-20260903.md`.
+- **Closure:** PR #381 merged at `391e500f9f180dd3039bc6a2a276d45472d76a63`; CAP droplet `2382e503-e645-4ba2-bd03-e1b2c2b2ff5f` and UI content operation `4d78c12b-a78e-11f1-b693-eeee0a88f756` are live. Final readiness is `DEMO READY`; signed-in Edge proves the empty popover has no horizontal overflow. No synthetic notification or business-data mutation was used for acceptance.
+
+## 2026-09-03 — Notification row metadata spacing fix
+
+- **English:** A UI-only follow-up keeps the N1–N5-Lite behavior unchanged and adds native `sapUiTinyMarginEnd` spacing between notification metadata controls. A focused RED/GREEN contract prevents `BugAssignedReadAction required` from returning. Bug Management cache identity advances to `0.0.9`; source merge, content-only rollout, and signed-in Edge acceptance are tracked in `docs/pm/evidence/my-notifications/notification-row-metadata-spacing-20260903.md`.
+- **Tiếng Việt:** Follow-up chỉ đổi UI, giữ nguyên hành vi N1–N5-Lite và thêm khoảng cách native `sapUiTinyMarginEnd` giữa các control metadata notification. Contract RED/GREEN focused ngăn chuỗi `BugAssignedReadAction required` xuất hiện lại. Cache identity Bug Management tăng lên `0.0.9`; merge source, rollout content-only và acceptance Edge đã đăng nhập được theo dõi tại `docs/pm/evidence/my-notifications/notification-row-metadata-spacing-20260903.md`.
+- **Closure:** PR #379 merged at `61bdd23b012be36675d1769cbdc46376b5958a48`; content operation `42c8b7a9-a787-11f1-866f-eeee0a815b5e` completed and post-check returned `DEMO READY`. Cache-disabled Edge readback proved live `0.0.9` plus the native margin fix. No synthetic notification was created; DonHV's current live screenshot then confirmed the four existing row labels are visually separated.
+
 ## English
 
 ### Status

@@ -1,5 +1,23 @@
 # NotificationShell.js — native personal notification shell
 
+## 2026-09-03 compact Bug row / Row Bug gọn 2026-09-03
+
+Bug rows no longer render the redundant category icon. Their primary line is the bounded `bugNumber — bugTitle` supplied by the caller-only service; Bug description is intentionally not shown. Access rows keep their localized notification title and summary. Empty fallback strings do not create controls, row padding uses native compact margins, filter margins no longer exceed an explicit 100% width, and the popover disables horizontal scrolling.
+
+Row Bug không còn render icon category dư thừa. Dòng chính dùng `bugNumber — bugTitle` có giới hạn từ service caller-only; Bug description chủ động không hiển thị. Row Access vẫn giữ title và summary notification đã localize. Chuỗi fallback rỗng không tạo control, padding row dùng margin compact native, margin filter không còn cộng vượt width 100%, và popover tắt horizontal scrolling.
+
+## 2026-09-03 metadata spacing / Khoảng cách metadata 2026-09-03
+
+The metadata `HBox` still contains the same category icon, category, event, read state, and optional action-required marker. Each native control now receives `sapUiTinyMarginEnd`, preventing labels such as `Bug`, `Assigned`, `Read`, and `Action required` from visually concatenating while preserving wrapping and semantics. Check the focused shell contract whenever this row composition changes.
+
+`HBox` metadata vẫn chứa đúng icon category, category, event, trạng thái đọc và marker cần xử lý tùy chọn. Mỗi control native giờ nhận `sapUiTinyMarginEnd`, nên các nhãn như `Bug`, `Assigned`, `Read`, `Action required` không còn dính liền trong khi vẫn giữ wrap và ý nghĩa cũ. Luôn chạy contract shell focused khi đổi cấu trúc row này.
+
+## 2026-09-03 notification hierarchy / Phân cấp notification 2026-09-03
+
+The shell keeps the existing caller-only service, polling, paging, read actions, and safe target paths. It now separates row metadata, title, summary, and occurrence time into four native-control regions, uses an `Information` highlight for unread rows, and places the two filters in a wrapping `HBox`. Check this file together with `NotificationClient.js`, notification i18n, and `scripts/qa/test-my-notifications-shell.js`; changing DTO names or flattening the row can recreate the unreadable concatenation.
+
+Shell giữ nguyên service chỉ dành cho caller, polling, paging, thao tác read và target path an toàn. Row hiện tách metadata, tiêu đề, tóm tắt và thời gian thành bốn vùng control native, dùng highlight `Information` cho row chưa đọc và đặt hai filter trong `HBox` có thể wrap. Khi sửa phải kiểm tra cùng `NotificationClient.js`, i18n notification và `scripts/qa/test-my-notifications-shell.js`; đổi tên DTO hoặc làm phẳng row có thể khiến nội dung dính lại.
+
 ## English
 
 `NotificationShell` owns the small authenticated Bug Management header surface: a native toolbar bell with a capped badge and a native `ResponsivePopover`. It consumes safe DTOs through `NotificationClient`; it never reads source/audit/delivery tables or chooses a recipient.
@@ -20,7 +38,7 @@ Rows use literal **Unread/Read** text in addition to semantic state, wrap safe t
 | `refreshUnread` visibility/timer | Background traffic or stale/false badge | count endpoint and visibility QA |
 | `openNotification` | Navigation blocked by transient read error or unsafe route | client target allowlist, target CAP auth |
 
-Owner: DonHV. Break first at `init`, then `loadPage`, `refreshUnread`, `markAll`, or `openNotification`. The shell also listens for the payload-free `idts:notification-change` signal after a relevant successful Bug action and removes it on destroy. Category icons and localized event labels accompany safe row text. Run shell/client QA, UI build, responsive browser checks (375/768/1366/1920), 200% zoom and keyboard focus checks. This UI does not authorize deployment, backfill or notification producer changes.
+Owner: DonHV. Break first at `init`, then `loadPage`, `refreshUnread`, `markAll`, or `openNotification`. The shell also listens for the payload-free `idts:notification-change` signal after a relevant successful Bug action and removes it on destroy. Localized category/event labels accompany safe row text without a redundant category icon. Run shell/client QA, UI build, responsive browser checks (375/768/1366/1920), 200% zoom and keyboard focus checks. This UI does not authorize deployment, backfill or notification producer changes.
 
 ## Tiếng Việt
 
@@ -42,7 +60,7 @@ Row có chữ **Chưa đọc/Đã đọc** ngoài semantic state, wrap title/sum
 | `refreshUnread` visibility/timer | Request nền hoặc badge cũ/sai | endpoint count và QA visibility |
 | `openNotification` | Lỗi read tạm thời chặn điều hướng hoặc đi route không an toàn | allowlist client, quyền CAP đích |
 
-Owner: DonHV. Đặt breakpoint lần lượt tại `init`, `loadPage`, `refreshUnread`, `markAll`, `openNotification`. Shell còn nghe event không payload `idts:notification-change` sau Bug action thành công và gỡ listener khi destroy. Icon category cùng label event đã localize đi với row text an toàn. Chạy QA shell/client, build UI, browser responsive 375/768/1366/1920, zoom 200% và keyboard focus. UI này không cho phép deploy, backfill hoặc đổi notification producer.
+Owner: DonHV. Đặt breakpoint lần lượt tại `init`, `loadPage`, `refreshUnread`, `markAll`, `openNotification`. Shell còn nghe event không payload `idts:notification-change` sau Bug action thành công và gỡ listener khi destroy. Label category/event đã localize đi với row text an toàn mà không có icon category dư thừa. Chạy QA shell/client, build UI, browser responsive 375/768/1366/1920, zoom 200% và keyboard focus. UI này không cho phép deploy, backfill hoặc đổi notification producer.
 
 N3 adds lifecycle label recognition only. `ASSIGNMENT_REMOVED` remains distinct from `PENDING_ASSIGNMENT`, so the UI never reuses a previous-developer explanation for a later PM queue event. `COMMENT_MENTIONED` is also an explicit known event, so a persisted selected-comment mention resolves `notificationEventCOMMENT_MENTIONED` instead of the generic `notificationEventOther`. / N3 chỉ thêm nhận diện label lifecycle. `ASSIGNMENT_REMOVED` tách biệt `PENDING_ASSIGNMENT`, vì vậy UI không dùng lại giải thích previous developer cho event PM queue sau này. `COMMENT_MENTIONED` cũng là event known rõ ràng, nên selected-comment mention đã persist dùng `notificationEventCOMMENT_MENTIONED` thay vì `notificationEventOther` chung chung.
 

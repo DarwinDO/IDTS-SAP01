@@ -1,5 +1,11 @@
 # Knowledge: `srv/user-admin/active-users.js`
 
+## 2026-09-03 display-name update / Cập nhật tên hiển thị 2026-09-03
+
+The handler registers `updateActiveUserDisplayName`. It authorizes an active PM with `UserAdmin`, validates the UUID/name/reason/version, locks and compares the target `Users` row, updates only `displayName`, and appends a structured `USER_PROFILE_UPDATED` audit event. `profileModifiedAt` prevents stale dialogs from overwriting a later update. Email, role, access, identity, password, and Developer Profile remain untouched.
+
+Handler đăng ký `updateActiveUserDisplayName`. Nó authorize PM active có `UserAdmin`, validate UUID/name/reason/version, lock và so sánh row `Users`, chỉ cập nhật `displayName`, rồi append audit `USER_PROFILE_UPDATED` có cấu trúc. `profileModifiedAt` ngăn dialog cũ ghi đè update mới. Email, role, access, identity, password và Developer Profile không đổi.
+
 ## Overview / Tổng quan
 
 `active-users.js` is the Gate 2 request-local read-model module for the User Administration service. It returns one safe row per persisted IDTS user, separates the current access state from invitation history, and exposes read-only details. It does not call a provider, mutate a role or session, write a business entity, or cache rows between requests.

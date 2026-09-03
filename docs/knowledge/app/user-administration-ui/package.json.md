@@ -1,6 +1,6 @@
 # Knowledge: `app/user-administration-ui/package.json`
 
-N5-Lite advances the HTML5 cache identity to `1.0.18` because visible Operations labels changed; dependencies and scripts remain unchanged. / N5-Lite tăng cache identity HTML5 lên `1.0.18` vì label Operations thay đổi; dependency và script giữ nguyên.
+The responsive-table remediation advances the HTML5 cache identity to `1.0.19`; dependencies and scripts remain unchanged. / Bản sửa table responsive tăng cache identity HTML5 lên `1.0.19`; dependency và script giữ nguyên.
 
 ## English
 
@@ -56,3 +56,9 @@ Version ứng dụng top-level tăng từ `1.0.16` lên `1.0.17` để filter De
   **Phải kiểm tra cùng**: `package-lock.json:3,9`, `webapp/manifest.json:10`, check semantic JSON parity, lint và build.
 
 **Safe editing / Sửa an toàn:** Change only the version for this gate; do not upgrade dependencies or rewrite scripts. / Gate này chỉ đổi version; không upgrade dependency hoặc rewrite script.
+
+## Gate 7 cache identity / Cache identity Gate 7
+
+**English:** Version `1.0.20` identifies the reviewed Display name invitation and UserAdmin profile-edit UI. Scripts and dependencies remain unchanged; verify parity with the lock root and manifest before rollout.
+
+**Tiếng Việt:** Version `1.0.20` định danh UI mời user có Display name và chỉnh tên bởi UserAdmin đã review. Script và dependency không đổi; phải kiểm tra khớp lock root và manifest trước rollout.

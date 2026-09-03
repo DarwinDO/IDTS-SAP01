@@ -10,6 +10,8 @@ service NotificationService @(requires: 'authenticated-user') {
     eventType      : String(40);
     title          : String(160);
     summary        : String(500);
+    bugNumber      : String(30);
+    bugTitle       : String(255);
     priority       : String(20);
     actionRequired : Boolean;
     occurredAt     : Timestamp;

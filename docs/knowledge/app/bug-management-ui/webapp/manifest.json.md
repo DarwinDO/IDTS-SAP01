@@ -569,3 +569,19 @@ The List Report uses the supported `sap.fe.templates.ListReport.ListReportContro
 **Tiếng Việt.** Action header `UserAdministration` nằm cạnh `OpenDashboard`. `visible` và `enabled` bind vào `session>/canAdministerUsers`, press handler là `BugListActions.openUserAdministration`, còn text lấy từ i18n. Không thêm domain, AppRouter route, token hoặc tooltip metadata chưa được hỗ trợ vào đây.
 
 **Gate 6.4 release identity.** `sap.app.applicationVersion.version` is `0.0.6`, aligned with the app package and lockfile so AppRouter/HTML5 Repository can distinguish the new navigation bundle. Vietnamese: `sap.app.applicationVersion.version` là `0.0.6`, đồng bộ package và lockfile để AppRouter/HTML5 Repository phân biệt bundle navigation mới.
+
+## Gate 7 notification cache identity / Cache identity thông báo Gate 7
+
+**English:** `sap.app.applicationVersion.version` advances to `0.0.8` for the reviewed notification presentation. Notification service routing, models, and application routes are unchanged.
+
+**Tiếng Việt:** `sap.app.applicationVersion.version` tăng lên `0.0.8` cho phần hiển thị thông báo đã review. Routing Notification service, model và application route không đổi.
+# 2026-09-03 cache identity 0.0.9
+
+`sap.app.applicationVersion.version` is aligned to `0.0.9` for the notification row presentation rollout. Routes, models, data sources, and authorization surface remain unchanged.
+
+`sap.app.applicationVersion.version` được đồng bộ thành `0.0.9` cho rollout phần trình bày notification row. Route, model, data source và bề mặt phân quyền không đổi.
+# 2026-09-03 cache identity 0.0.10
+
+The application version advances to `0.0.10` for the compact notification row. Routes, models, and data-source authorization are unchanged.
+
+Application version tăng lên `0.0.10` cho row notification gọn. Route, model và phân quyền data source không đổi.

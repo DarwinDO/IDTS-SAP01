@@ -169,7 +169,7 @@ async function completeSuccess (tx, options) {
     userID = cds.utils.uuid()
     await tx.run(INSERT.into('idts.cap.Users').entries({
       ID: userID,
-      displayName: request.targetEmailNormalized,
+      displayName: request.requestedDisplayName || request.targetEmailNormalized,
       email: request.targetEmailNormalized,
       role_code: operation.desiredRole_code,
       externalIdentityOrigin: request.identityOrigin,

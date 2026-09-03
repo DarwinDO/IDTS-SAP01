@@ -12,6 +12,12 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 
 ## Current status
 
+`GATE 7 SOURCE CANDIDATE — notification UX and audited display-name administration; login-email provider gate is NO-GO on the current Role Collection-only contract`
+
+- Gate 7.1 keeps the My Notifications service behavior and replaces the crowded row/filter presentation with a native responsive hierarchy.
+- Gates 7.2–7.3 require a display name at invitation, persist it through provisioning, and add a UserAdmin-only audited display-name edit in Active User details.
+- Gates 7.4–7.6 are held: changing `Users.email` or a BTP shadow-user attribute would not prove the SAP account login identifier changed. A separately approved Identity Authentication/SAP account provider contract is required.
+
 `GATE 6.4 COMPLETE — GATE 6.5 SOURCE/EVIDENCE COMPLETE AT 128F5BA0; INDEPENDENT FINAL REVIEW AND LATER ROLLOUT REMAIN SEPARATE`
 
 - Gates 1–3B are merged, deployed and accepted. Gate 3 browser closure is recorded by PR #325 at `04643e12727290f2f35fd56e9c3d2a8df4cbcdbc`.
@@ -49,6 +55,7 @@ Deliver the post-PR-318 administration roadmap through sequential, independently
 8. Gate 6.3 — Developer workload and assigned-Bug drill-down — COMPLETE. PR #351 fixed the live 8-column/9-cell mismatch, HTML5 content `1.0.15` was deployed content-only, and PM reacceptance passed for Workload status, View workload, details ownership fields and exact Bug Object Page navigation.
 9. Gate 6.4 — Safe cross-app navigation — COMPLETE. Source PR #353 and cache-identity PR #354 are merged; selective CAP/content rollout and PM + UserAdmin same-tab round-trip acceptance passed at final merge `2993c707f7369e46c45ec2b105c30f9786f0d859`.
 10. Gate 6.5 — Post-completion access-change email notifications — COMPLETE. Source PR #358 merged into `dev` at `e587aa5b1603d32c89ce01b4bcab9854f07eb157`; the additive HANA migration, selective CAP/User Administration `1.0.17` rollout, unified Operations acceptance, controlled Tester Suspend -> Reactivate cycle, mailbox verification, and final `DEMO READY` check are complete.
+11. Gate 7 — Profile and notification UX — COMPLETE. Source PR #376 and cache-identity PR #377 merged through `cff43a0146bfa3a9b4e122e0203bc7076ebca8be`; the exact two-table additive HANA make, selective CAP/UI rollout, and Edge PM + UserAdmin read-only acceptance passed. User Administration `1.0.20` exposes invitation Display name and audited profile-name editing; Bug Management `0.0.8` exposes the improved My Notifications layout. Login-email mutation remains intentionally excluded pending an authoritative IdP contract.
 
 ### Cross-session handoff — 2026-08-29
 

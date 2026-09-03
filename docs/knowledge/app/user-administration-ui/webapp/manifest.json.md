@@ -1,6 +1,6 @@
 # Knowledge: `app/user-administration-ui/webapp/manifest.json`
 
-The application version follows package `1.0.18` for the N5-Lite content cache identity; routing and models are unchanged. / Version ứng dụng theo package `1.0.18` cho cache identity N5-Lite; routing và model không đổi.
+The application version follows package `1.0.19` for the responsive-table content cache identity; routing and models are unchanged. / Version ứng dụng theo package `1.0.19` cho cache identity của bản sửa table responsive; routing và model không đổi.
 
 ## English
 
@@ -84,3 +84,9 @@ Giữ `bugService` cùng origin và giữ `bugApi` là model có tên, paging ph
   **Phải kiểm tra cùng**: `package.json:3`, `package-lock.json:3,9`, UI build và readback content live ở gate sau.
 
 **Safe editing / Sửa an toàn:** Keep the main OData model and routing unchanged in this version-only manifest delta. / Giữ nguyên main OData model và routing trong delta manifest chỉ đổi version này.
+
+## Gate 7 cache identity / Cache identity Gate 7
+
+**English:** `sap.app.applicationVersion.version` advances to `1.0.20`; data sources, models, routing, and libraries are unchanged.
+
+**Tiếng Việt:** `sap.app.applicationVersion.version` tăng lên `1.0.20`; data source, model, routing và library không đổi.

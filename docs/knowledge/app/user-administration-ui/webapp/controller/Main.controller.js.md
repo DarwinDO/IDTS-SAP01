@@ -1,5 +1,11 @@
 # Knowledge: `app/user-administration-ui/webapp/controller/Main.controller.js`
 
+## 2026-09-03 profile state / State hồ sơ 2026-09-03
+
+The controller now owns two bounded profile interactions: invitation display-name validation and the transient `editProfile` dialog state. It normalizes whitespace before sending but never treats email as a display-name source and never mutates login identity. The edit action sends `userID`, `displayName`, `reason`, and the server-provided `profileModifiedAt`; CAP revalidates every value.
+
+Controller hiện quản lý hai interaction hồ sơ có giới hạn: validate display name lúc mời và state tạm `editProfile`. Nó normalize khoảng trắng trước khi gửi nhưng không dùng email làm nguồn tên và không đổi identity đăng nhập. Edit action gửi `userID`, `displayName`, `reason` và `profileModifiedAt` từ server; CAP validate lại toàn bộ.
+
 ## N5-Lite Digest normalization / Normalize Digest N5-Lite
 
 English: the existing delivery normalizer accepts only the new `DIGEST` type/event labels and otherwise preserves the same safe fields. The server owns masking and authorization; the browser does not infer retryability and receives `canRetry=false` for Digest rows. Breakpoint `_normalizeDeliveryRow` to compare the CAP DTO with the JSON model row.

@@ -1,5 +1,9 @@
 # Project Context: Issue and Defect Tracking System in SAP
 
+## User profile and login-email boundary — 2026-09-03
+
+User Administration collects `requestedDisplayName` for new invitations and lets only an active PM with `UserAdmin` correct `Users.displayName` with optimistic concurrency and structured audit. This profile action never edits email or immutable identity fields. The live XSUAA identity is still resolved by `origin + issuer + user_uuid`; the reviewed broker contract administers allowlisted Role Collections, not the upstream SAP account login identifier. A future login-email feature requires a separately approved authoritative IdP API and must not be simulated by updating HANA email alone.
+
 ## Workflow audit command contract
 
 The 11 state-changing public Bug workflow OData actions use one dedicated ActionType each in `HistoryEvents` and `HistoryLogs`. New workflow audit must identify the initiating command without status inference. Legacy ActionTypes stay in the catalog for old history and generic edits. The exact mapping, authorization groups, request lifecycle, breakpoint order, and non-destructive code-list rollout are documented in `docs/ai/implementation/knowledge-one-to-one-action-audit.md`.

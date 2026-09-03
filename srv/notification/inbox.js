@@ -134,7 +134,12 @@ async function hydrateNotificationPage (tx, rows, locale = 'en') {
   const accessIDs = [...new Set(validRows.map(row => row.accessAuditEvent_ID).filter(Boolean))]
   const bugSources = bugIDs.length
     ? await tx.run(SELECT.from(BUG_NOTIFICATIONS)
-        .columns('ID', 'recipient_ID', 'bug_ID', 'eventType_code', { ref: ['bug', 'priority_code'], as: 'priority' })
+        .columns(
+          'ID', 'recipient_ID', 'bug_ID', 'eventType_code',
+          { ref: ['bug', 'bugNumber'], as: 'bugNumber' },
+          { ref: ['bug', 'title'], as: 'bugTitle' },
+          { ref: ['bug', 'priority_code'], as: 'priority' }
+        )
         .where({ ID: { in: bugIDs } }))
     : []
   const accessSources = accessIDs.length
@@ -160,6 +165,8 @@ function bugSummary (row, source, locale) {
     eventType,
     title: texts.at(`BUG_${eventType}_TITLE`, locale),
     summary: texts.at(`BUG_${eventType}_SUMMARY`, locale),
+    bugNumber: source.bugNumber,
+    bugTitle: source.bugTitle,
     priority: ['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'].includes(source.priority) ? source.priority : null,
     actionRequired: ACTION_REQUIRED_EVENTS.has(eventType),
     targetPath: typeof source.bug_ID === 'string' && /^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}$/i.test(source.bug_ID)
@@ -203,6 +210,8 @@ function baseSummary (row, source) {
     eventType: source.eventType,
     title: source.title,
     summary: source.summary,
+    bugNumber: source.bugNumber || null,
+    bugTitle: source.bugTitle || null,
     priority: source.priority,
     actionRequired: source.actionRequired,
     occurredAt: row.occurredAt,
