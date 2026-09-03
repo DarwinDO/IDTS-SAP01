@@ -1,5 +1,7 @@
 # Knowledge: `i18n_vi.properties`
 
+The 2026-09-03 Vietnamese keys match the English display-name/profile-edit semantics and safe errors. / Các key tiếng Việt ngày 03/09/2026 tương đương semantic tên hiển thị, sửa hồ sơ và lỗi an toàn của bản English.
+
 N5-Lite adds `Bản tổng hợp hằng ngày` for the Digest delivery type and event. / N5-Lite thêm `Bản tổng hợp hằng ngày` cho type và event Digest.
 
 ## 2026-08-26 Gate 6.3 access-readiness copy

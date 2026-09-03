@@ -1,5 +1,11 @@
 # Knowledge: `app/user-administration-ui/webapp/fragment/InviteUser.fragment.xml`
 
+## 2026-09-03 display name / Tên hiển thị 2026-09-03
+
+The invitation form now requires `invite>/displayName` before email and sends changes through `onInviteDisplayNameChange`. The name is profile data, not an SAP login identifier. Check it with `Main.controller.js`, `srv/user-admin.cds`, and `UserOnboardingRequests.requestedDisplayName` so asynchronous provisioning never falls back to email for new requests.
+
+Form mời hiện yêu cầu `invite>/displayName` trước email và chuyển thay đổi qua `onInviteDisplayNameChange`. Đây là dữ liệu hồ sơ, không phải định danh đăng nhập SAP. Phải kiểm tra cùng `Main.controller.js`, `srv/user-admin.cds` và `UserOnboardingRequests.requestedDisplayName` để provisioning bất đồng bộ không dùng email làm tên cho request mới.
+
 ## English
 
 `InviteUser.fragment.xml` is the onboarding dialog. It binds email, role, UserAdmin capability, and the optional Developer profile to the `invite` JSON model. The role selector accepts `TESTER`, `DEVELOPER`, or `PM`; the UserAdmin checkbox and hint are visible only for `PM`.

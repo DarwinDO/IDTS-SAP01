@@ -16,7 +16,8 @@ const required = [
   'type ActiveUserSummary',
   'type ActiveUserDetails',
   'action searchActiveUsers(query : String(255), includeNonActive : Boolean, skip : Integer, top : Integer) returns many ActiveUserSummary;',
-  'action readActiveUserDetails('
+  'action readActiveUserDetails(',
+  'action updateActiveUserDisplayName('
 ]
 for (const marker of required) assert.ok(cdsSource.includes(marker), marker)
 
@@ -509,6 +510,48 @@ async function main () {
   assert.equal(details.developerWorkloadLimit, 3)
   assert.equal(details.developerOpenBugImpactCount, 0)
   assert.equal(details.accessRequestVersion, 7, 'details must carry the selected authoritative request version for lifecycle actions')
+  assert.ok(details.profileModifiedAt, 'details expose a safe optimistic profile version')
+
+  const originalEmail = details.email
+  const updatedDetails = await service.send({
+    event: 'updateActiveUserDisplayName',
+    data: {
+      userID: ACTIVE_USER_ID,
+      displayName: '  Alice Updated  ',
+      reason: 'Correct the user-facing name.',
+      expectedModifiedAt: details.profileModifiedAt
+    },
+    user: admin
+  })
+  assert.equal(updatedDetails.displayName, 'Alice Updated')
+  assert.equal(updatedDetails.email, originalEmail, 'profile edit cannot change login/contact email')
+  assert.notEqual(updatedDetails.profileModifiedAt, details.profileModifiedAt)
+  const updatedUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: ACTIVE_USER_ID }))
+  assert.equal(updatedUser.displayName, 'Alice Updated')
+  assert.equal(updatedUser.email, originalEmail)
+  const profileAudit = await db.run(SELECT.one.from('idts.cap.UserIdentityAuditEvents').where({
+    targetUser_ID: ACTIVE_USER_ID,
+    action: 'USER_PROFILE_UPDATED'
+  }))
+  assert.equal(profileAudit.beforeDisplayName, 'Active Alice')
+  assert.equal(profileAudit.afterDisplayName, 'Alice Updated')
+  assert.equal(profileAudit.profileChangeReason, 'Correct the user-facing name.')
+
+  await expectRejected(service.send({
+    event: 'updateActiveUserDisplayName',
+    data: { userID: ACTIVE_USER_ID, displayName: 'Stale Name', reason: 'Stale request.', expectedModifiedAt: details.profileModifiedAt },
+    user: admin
+  }), 409, 'USER_PROFILE_VERSION_CONFLICT')
+  await expectRejected(service.send({
+    event: 'updateActiveUserDisplayName',
+    data: { userID: ACTIVE_USER_ID, displayName: '   ', reason: 'Invalid name.', expectedModifiedAt: updatedDetails.profileModifiedAt },
+    user: admin
+  }), 400, 'INVALID_DISPLAY_NAME')
+  await expectRejected(service.send({
+    event: 'updateActiveUserDisplayName',
+    data: { userID: ACTIVE_USER_ID, displayName: 'Unauthorized', reason: 'Missing capability.', expectedModifiedAt: updatedDetails.profileModifiedAt },
+    user: new cds.User({ id: 'gate2.admin@example.invalid', roles: ['authenticated-user', 'PM'] })
+  }), 403, 'USER_ADMIN_REQUIRED')
 
   for (const forbidden of [
     'identityOrigin',

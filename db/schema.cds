@@ -279,6 +279,7 @@ annotate NotificationDeliveries with @assert.unique.notificationChannel: [ notif
 // Unique constraint ngăn cùng một notification tạo hai delivery EMAIL khi workflow/worker chạy lặp.
 
 entity UserOnboardingRequests : cuid, managed {
+  requestedDisplayName   : String(120);
   targetEmailNormalized : String(255) not null;
   linkTargetUser            : Association to Users;
   linkSourceEmailNormalized : String(255);
@@ -388,6 +389,9 @@ entity UserIdentityAuditEvents : cuid, managed {
   correlationId      : UUID not null;
   beforeIdentityHash : String(64);
   afterIdentityHash  : String(64);
+  beforeDisplayName  : String(120);
+  afterDisplayName   : String(120);
+  profileChangeReason: String(500);
   detailsSummary     : String(500);
 }
 

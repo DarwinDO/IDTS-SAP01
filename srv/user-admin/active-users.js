@@ -1,7 +1,7 @@
 'use strict'
 
 const cds = require('@sap/cds')
-const { SELECT } = cds.ql
+const { INSERT, SELECT, UPDATE } = cds.ql
 const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../access/identity-readiness')
 
 const USERS = 'idts.cap.Users'
@@ -57,6 +57,7 @@ function registerActiveUserHandlers (service, { authorize }) {
   if (typeof authorize !== 'function') throw new TypeError('Active user authorization is required.')
   service.on('searchActiveUsers', req => searchActiveUsers(req, { authorize }))
   service.on('readActiveUserDetails', req => readActiveUserDetails(req, { authorize }))
+  service.on('updateActiveUserDisplayName', req => updateActiveUserDisplayName(req, { authorize }))
 }
 
 async function searchActiveUsers (req, { authorize }) {
@@ -86,12 +87,50 @@ async function readActiveUserDetails (req, { authorize }) {
   return toDetails({ ...row, ...counts })
 }
 
+async function updateActiveUserDisplayName (req, { authorize }) {
+  const userID = normalizeUuid(req.data?.userID)
+  const displayName = normalizeDisplayName(req.data?.displayName)
+  const reason = normalizeReason(req.data?.reason)
+  const expectedModifiedAt = normalizeTimestamp(req.data?.expectedModifiedAt)
+  if (!userID) throw serviceError(400, 'INVALID_USER_ID', 'User ID is invalid.')
+  if (!expectedModifiedAt) throw serviceError(400, 'INVALID_PROFILE_VERSION', 'The user profile version is invalid.')
+
+  const tx = cds.tx(req)
+  const administrator = await authorize(req, tx)
+  const user = await tx.run(
+    SELECT.one.from(USERS).columns('ID', 'displayName', 'email', 'modifiedAt').where({ ID: userID }).forUpdate()
+  )
+  if (!user) throw serviceError(404, 'ACTIVE_USER_NOT_FOUND', 'User was not found.')
+  if (String(user.modifiedAt) !== expectedModifiedAt) {
+    throw serviceError(409, 'USER_PROFILE_VERSION_CONFLICT', 'The user profile changed. Reload and try again.')
+  }
+  if (user.displayName === displayName) throw serviceError(400, 'DISPLAY_NAME_UNCHANGED', 'The display name is unchanged.')
+
+  const modifiedAt = new Date(req.timestamp || Date.now()).toISOString()
+  const changed = await tx.run(UPDATE(USERS).set({ displayName, modifiedAt }).where({ ID: userID, modifiedAt: user.modifiedAt }))
+  if (changed !== 1) throw serviceError(409, 'USER_PROFILE_VERSION_CONFLICT', 'The user profile changed. Reload and try again.')
+  await tx.run(INSERT.into(AUDIT_EVENTS).entries({
+    ID: cds.utils.uuid(),
+    actor_ID: administrator.ID,
+    targetUser_ID: userID,
+    action: 'USER_PROFILE_UPDATED',
+    result: 'APPLIED',
+    correlationId: cds.utils.uuid(),
+    beforeDisplayName: user.displayName,
+    afterDisplayName: displayName,
+    profileChangeReason: reason,
+    detailsSummary: 'The user display name was updated.'
+  }))
+  return readActiveUserDetails(req, { authorize })
+}
+
 async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
   const users = await tx.run(
     SELECT.from(USERS).columns(
       'ID',
       'displayName',
       'email',
+      'modifiedAt',
       'role_code',
       'active',
       'externalIdentityKeyHash'
@@ -216,6 +255,7 @@ async function buildReadModel (tx, { includeDeveloperDetails = false } = {}) {
     return {
       userID: user.ID,
       displayName: String(user.displayName || ''),
+      profileModifiedAt: user.modifiedAt || null,
       email: normalizeContactEmail(user.email),
       businessRole: user.role_code || null,
       userAdminCapability: identityLinked &&
@@ -319,7 +359,8 @@ function toDetails (row) {
     developerProfileID: row.developerProfile?.ID || null,
     developerAvailabilityStatus: row.developerProfile?.availabilityStatus || null,
     developerWorkloadLimit: row.developerProfile?.workloadLimit ?? null,
-    developerOpenBugImpactCount: row.developerProfile?.openBugImpactCount || 0
+    developerOpenBugImpactCount: row.developerProfile?.openBugImpactCount || 0,
+    profileModifiedAt: row.profileModifiedAt
   }
 }
 
@@ -408,6 +449,27 @@ function normalizeUuid (value) {
   return /^[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}$/.test(uuid) ? uuid : null
 }
 
+function normalizeDisplayName (value) {
+  const displayName = typeof value === 'string' ? value.trim().replace(/\s+/g, ' ') : ''
+  if (!displayName || displayName.length > 120 || /[\u0000-\u001f\u007f]/.test(displayName)) {
+    throw serviceError(400, 'INVALID_DISPLAY_NAME', 'A valid display name is required.')
+  }
+  return displayName
+}
+
+function normalizeReason (value) {
+  const reason = typeof value === 'string' ? value.trim() : ''
+  if (!reason || reason.length > 500 || /[\r\n]/.test(reason)) {
+    throw serviceError(400, 'USER_PROFILE_REASON_REQUIRED', 'A valid reason is required.')
+  }
+  return reason
+}
+
+function normalizeTimestamp (value) {
+  if (typeof value !== 'string' || !value.trim() || !Number.isFinite(Date.parse(value))) return null
+  return value.trim()
+}
+
 function serviceError (status, code, message) {
   return Object.assign(new Error(message), { status, statusCode: status, code })
 }
@@ -416,5 +478,6 @@ module.exports = {
   registerActiveUserHandlers,
   searchActiveUsers,
   readActiveUserDetails,
+  updateActiveUserDisplayName,
   deriveAccessState
 }

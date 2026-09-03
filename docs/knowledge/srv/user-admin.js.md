@@ -1,5 +1,11 @@
 # Knowledge: `srv/user-admin.js`
 
+## 2026-09-03 invitation name / Tên invitation 2026-09-03
+
+New onboarding requests normalize and persist `requestedDisplayName` before writing delivery/profile children. Missing, overlength, or control-character names fail with `INVALID_DISPLAY_NAME`. The existing authorization, duplicate-email reservation, token, delivery, and Developer Profile flow remains unchanged.
+
+Request onboarding mới normalize và persist `requestedDisplayName` trước delivery/profile child. Tên thiếu, quá dài hoặc có control character bị chặn bằng `INVALID_DISPLAY_NAME`. Authorization, giữ chỗ email chống trùng, token, delivery và Developer Profile hiện có không đổi.
+
 ## Gate 2 Active Users registration / Đăng ký Active Users Gate 2
 
 `UserAdministrationService.init` registers the focused `active-users.js` module with the existing `requireActiveUserAdministrator` guard. The guard is reused rather than duplicated, and each Active Users action authorizes with its request transaction before reading persisted entities.

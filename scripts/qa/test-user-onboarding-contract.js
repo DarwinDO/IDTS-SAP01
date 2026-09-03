@@ -43,6 +43,10 @@ function xsuaaUser ({ email, userUuid, platformUserId = '11111111-1111-4111-8111
 function main () {
   const serviceSource = fs.readFileSync(path.join(__dirname, '../../srv/user-admin.cds'), 'utf8')
   const handlerSource = fs.readFileSync(path.join(__dirname, '../../srv/user-admin.js'), 'utf8')
+  const schemaSource = fs.readFileSync(path.join(__dirname, '../../db/schema.cds'), 'utf8')
+  assert.match(serviceSource, /requestOnboarding\([\s\S]*displayName\s*:\s*String\(120\)/)
+  assert.match(schemaSource, /entity UserOnboardingRequests[\s\S]*requestedDisplayName\s*:\s*String\(120\)/)
+  assert.match(handlerSource, /requestedDisplayName:\s*displayName/)
   assert.doesNotMatch(serviceSource, /normalizeCurrentBootstrapPm/, 'temporary bootstrap PM action must be removed')
   assert.doesNotMatch(handlerSource, /normalizeCurrentBootstrapPm|BOOTSTRAP_PM_NORMALIZED/, 'temporary bootstrap PM handler must be removed')
 

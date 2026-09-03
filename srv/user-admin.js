@@ -156,6 +156,7 @@ function onboardingSummary (request, latestOperationAttemptCount) {
 
 async function requestOnboarding (req) {
   const access = assertRequestedAccess(req.data.requestedRole, req.data.userAdminRequested)
+  const displayName = normalizeDisplayName(req.data.displayName)
   const developerProfile = normalizeDeveloperProfileInput(req.data.developerProfile)
   assertDeveloperProfileForRole(access.requestedRole, developerProfile)
   const targetEmail = normalizeEmail(req.data.email)
@@ -201,6 +202,7 @@ async function requestOnboarding (req) {
   try {
     await tx.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
       ID: invitationID,
+      requestedDisplayName: displayName,
       targetEmailNormalized: targetEmail,
       openRequestKey,
       requestedRole_code: access.requestedRole,
@@ -982,6 +984,15 @@ function normalizeReason (value) {
     throw serviceError(400, 'ACCESS_CHANGE_REASON_REQUIRED', 'A valid reason is required.')
   }
   return reason
+}
+
+function normalizeDisplayName (value) {
+  if (typeof value !== 'string') throw serviceError(400, 'INVALID_DISPLAY_NAME', 'A valid display name is required.')
+  const displayName = value.trim().replace(/\s+/g, ' ')
+  if (!displayName || displayName.length > 120 || /[\u0000-\u001f\u007f]/.test(displayName)) {
+    throw serviceError(400, 'INVALID_DISPLAY_NAME', 'A valid display name is required.')
+  }
+  return displayName
 }
 
 async function resolveActiveRequester (tx, req) {

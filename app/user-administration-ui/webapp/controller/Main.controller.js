@@ -86,7 +86,8 @@ sap.ui.define([
 				busy: false,
 				error: false,
 				details: null,
-				detailsBusy: false
+				detailsBusy: false,
+				editProfile: null
 			}), "activeUsers");
 			this.setModel(new JSONModel({
 				items: [],
@@ -529,6 +530,97 @@ sap.ui.define([
 			this._updateInviteState();
 		},
 
+		onOpenEditUserInformation: async function () {
+			const oDetails = this.getModel("activeUsers").getProperty("/details");
+			if (!oDetails?.userID || !oDetails.profileModifiedAt) return;
+			this.getModel("activeUsers").setProperty("/editProfile", {
+				userID: oDetails.userID,
+				displayName: oDetails.displayName || "",
+				reason: "",
+				expectedModifiedAt: oDetails.profileModifiedAt,
+				displayNameTouched: false,
+				displayNameValid: true,
+				reasonTouched: false,
+				reasonValid: false,
+				canSubmit: false,
+				submitting: false
+			});
+			if (!this._editUserInformationDialog) {
+				this._editUserInformationDialog = await Fragment.load({
+					id: this.getView().getId(),
+					name: "idts.useradministrationui.fragment.EditUserInformation",
+					controller: this
+				});
+				this.getView().addDependent(this._editUserInformationDialog);
+			}
+			this._editUserInformationDialog.open();
+		},
+
+		onEditUserInformationChange: function (oEvent) {
+			const oModel = this.getModel("activeUsers");
+			const oEdit = oModel.getProperty("/editProfile");
+			if (!oEdit) return;
+			const sControlId = oEvent?.getSource?.().getId?.() || "";
+			const sValue = oEvent?.getParameter?.("value");
+			if (typeof sValue === "string" && sControlId.endsWith("editUserDisplayName")) {
+				oModel.setProperty("/editProfile/displayName", sValue);
+				oModel.setProperty("/editProfile/displayNameTouched", true);
+			} else if (typeof sValue === "string" && sControlId.endsWith("editUserReason")) {
+				oModel.setProperty("/editProfile/reason", sValue);
+				oModel.setProperty("/editProfile/reasonTouched", true);
+			}
+			const oCurrentEdit = oModel.getProperty("/editProfile");
+			const bDisplayNameValid = this._isValidDisplayName(oCurrentEdit.displayName);
+			const sReason = typeof oCurrentEdit.reason === "string" ? oCurrentEdit.reason.trim() : "";
+			const bReasonValid = sReason.length > 0 && sReason.length <= 500 && !/[\r\n]/.test(sReason);
+			oModel.setProperty("/editProfile/displayNameValid", bDisplayNameValid);
+			oModel.setProperty("/editProfile/reasonValid", bReasonValid);
+			oModel.setProperty("/editProfile/canSubmit", bDisplayNameValid && bReasonValid && oCurrentEdit.displayName.trim().replace(/\s+/g, " ") !== this.getModel("activeUsers").getProperty("/details/displayName"));
+		},
+
+		onConfirmEditUserInformation: async function () {
+			const oModel = this.getModel("activeUsers");
+			const oEdit = oModel.getProperty("/editProfile");
+			if (!oEdit || oEdit.submitting) return;
+			this.onEditUserInformationChange();
+			if (!oModel.getProperty("/editProfile/canSubmit")) return;
+			oModel.setProperty("/editProfile/submitting", true);
+			try {
+				const oOperation = this.getView().getModel().bindContext("/updateActiveUserDisplayName(...)");
+				oOperation.setParameter("userID", oEdit.userID);
+				oOperation.setParameter("displayName", oEdit.displayName.trim().replace(/\s+/g, " "));
+				oOperation.setParameter("reason", oEdit.reason.trim());
+				oOperation.setParameter("expectedModifiedAt", oEdit.expectedModifiedAt);
+				await oOperation.invoke("$direct");
+				const oContext = oOperation.getBoundContext();
+				const oResult = await (oContext ? oContext.requestObject() : {});
+				oModel.setProperty("/details", Array.isArray(oResult?.value) ? oResult.value[0] : oResult);
+				this._editUserInformationDialog.close();
+				oModel.setProperty("/editProfile", null);
+				await this._loadActiveUsers();
+				MessageToast.show(await this._text("userInformationUpdated"));
+			} catch {
+				MessageBox.error(await this._text("userInformationUpdateFailed"));
+			} finally {
+				if (oModel.getProperty("/editProfile")) oModel.setProperty("/editProfile/submitting", false);
+			}
+		},
+
+		onCancelEditUserInformation: function () {
+			if (this._editUserInformationDialog) this._editUserInformationDialog.close();
+			this.getModel("activeUsers").setProperty("/editProfile", null);
+		},
+
+		onInviteDisplayNameChange: function (oEvent) {
+			const oInviteModel = this.getModel("invite");
+			const sValue = oEvent?.getParameter?.("value");
+			if (typeof sValue === "string") {
+				oInviteModel.setProperty("/displayName", sValue);
+				oInviteModel.setProperty("/displayNameTouched", true);
+			}
+			this._updateInviteState();
+		},
+
 		onRoleChange: function (oEvent) {
 			const sRole = oEvent.getSource().getSelectedKey();
 			const oInviteModel = this.getModel("invite");
@@ -556,6 +648,7 @@ sap.ui.define([
 			this.getModel("invite").setProperty("/submitting", true);
 			try {
 				const oOperation = this.getView().getModel().bindContext("/requestOnboarding(...)");
+				oOperation.setParameter("displayName", oInvite.displayName.trim().replace(/\s+/g, " "));
 				oOperation.setParameter("email", oInvite.email.trim());
 				oOperation.setParameter("requestedRole", oInvite.role);
 				oOperation.setParameter("userAdminRequested", oInvite.role === "PM" && oInvite.userAdminRequested === true);
@@ -805,9 +898,16 @@ sap.ui.define([
 			const oInviteModel = this.getModel("invite");
 			const oInvite = oInviteModel.getData();
 			const bEmailValid = this._isValidEmail(oInvite.email);
+			const bDisplayNameValid = this._isValidDisplayName(oInvite.displayName);
 			oInviteModel.setProperty("/emailValid", bEmailValid);
+			oInviteModel.setProperty("/displayNameValid", bDisplayNameValid);
 			const bDeveloperReady = oInvite.role !== "DEVELOPER" || this._hasDeveloperResponsibility(oInvite.developerProfile);
-			oInviteModel.setProperty("/canSubmit", bEmailValid && bDeveloperReady && ["PM", "TESTER", "DEVELOPER"].includes(oInvite.role));
+			oInviteModel.setProperty("/canSubmit", bDisplayNameValid && bEmailValid && bDeveloperReady && ["PM", "TESTER", "DEVELOPER"].includes(oInvite.role));
+		},
+
+		_isValidDisplayName: function (sDisplayName) {
+			const sNormalized = typeof sDisplayName === "string" ? sDisplayName.trim().replace(/\s+/g, " ") : "";
+			return sNormalized.length > 0 && sNormalized.length <= 120;
 		},
 
 		_isValidEmail: function (sEmail) {
@@ -816,11 +916,14 @@ sap.ui.define([
 
 		_emptyInvite: function () {
 			return {
+				displayName: "",
 				email: "",
 				role: "TESTER",
 				userAdminRequested: false,
 				emailTouched: false,
 				emailValid: false,
+				displayNameTouched: false,
+				displayNameValid: false,
 				canSubmit: false,
 				submitting: false,
 				developerProfile: this._emptyDeveloperProfile()

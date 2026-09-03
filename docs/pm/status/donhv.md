@@ -1,5 +1,16 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-09-03 — Gate 7 profile and notification source candidate
+
+- Frozen base: `origin/dev` at `d5de0b39d2314719a138d8a1438b4af22921ee6c`; isolated branch `feature/wp8-user-admin-profile-notification-donhv`.
+- Baseline notification UI, User Administration UI, onboarding, and Active Users suites passed before RED changes.
+- Root causes: notification metadata/title/summary/time were flattened into one wrapping row; provisioning used normalized email as `Users.displayName` because invitations carried no name.
+- Implemented candidate: native notification hierarchy, persisted invitation display name, UserAdmin-only audited display-name update. No login-email mutation was implemented because the current SAP broker controls Role Collections, not the authoritative SAP login identifier.
+- Tooling issue: initial context reads referenced three nonexistent PM paths (`docs/pm/wp8-user-administration.md`, `docs/pm/risk-register.md`, and `docs/pm/decision-log.md`). The existing roadmap/status paths were used; no file mutation resulted from those failed reads.
+- Test-harness issue fixed: `test-user-admin-operations-audit.js` used `2026-09-01` as a supposedly future invitation expiry, so its retry assertion became false on 2026-09-03. The default fixture now uses `2099-09-01`; the explicit expired fixture remains `2026-08-01`, preserving the negative case without changing production code.
+- OfficeCLI preflight: `officecli --version` returned `1.0.146`. OfficeCLI does not natively edit repository Markdown, so repo-native `apply_patch` was used.
+- Verification is green across focused/adjacent programmatic suites, CAP/HANA compile, both UI lint/build pipelines, secret/rule/depth checks, AI DevKit lint, and diff whitespace. Codex Security scan `05ed1775-a17e-4643-b4a3-4a0811a18ac5` completed with zero reportable findings; TAC could not be checked because its connector was disconnected.
+
 ## 2026-09-03 — User Administration responsive-table rollout
 
 - **Integration/deployment:** PR `#373` merged at `7beb3f22a27a9c786ecc6ec01ccb6ab291c6bfe7`. Exact UI-only artifact SHA-256 `DB67E57AB642B68907785F1C91AD187544204A93A76C926DDA6582D6F3E3C93D`; content-only operation `2f270c1c-a756-11f1-866f-eeee0a815b5e` finished with no service deletion. Pre/post readiness is `DEMO READY`; active MTA operations are zero.

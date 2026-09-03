@@ -10,6 +10,17 @@
 		busyIndicatorDelay="0">
 		<content>
 			<VBox class="sapUiSmallMargin">
+				<Label text="{i18n>displayName}" labelFor="inviteDisplayName" required="true"/>
+				<Input
+					id="inviteDisplayName"
+					value="{invite>/displayName}"
+					valueLiveUpdate="true"
+					maxLength="120"
+					placeholder="{i18n>displayNamePlaceholder}"
+					enabled="{= !${invite>/submitting} }"
+					valueState="{= ${invite>/displayNameTouched} &amp;&amp; !${invite>/displayNameValid} ? 'Error' : 'None' }"
+					valueStateText="{i18n>invalidDisplayName}"
+					liveChange=".onInviteDisplayNameChange"/>
 				<Label text="{i18n>targetEmail}" labelFor="inviteEmail" required="true"/>
 				<Input
 					id="inviteEmail"

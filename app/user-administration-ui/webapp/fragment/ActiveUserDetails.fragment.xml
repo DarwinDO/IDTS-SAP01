@@ -92,6 +92,11 @@
 				</VBox>
 				<HBox width="100%" wrap="Wrap" class="sapUiSmallMarginTop">
 					<Button
+						text="{i18n>editUserInformation}"
+						icon="sap-icon://edit"
+						class="sapUiTinyMarginEnd sapUiTinyMarginBottom"
+						press=".onOpenEditUserInformation"/>
+					<Button
 						text="{i18n>linkExistingIdentity}"
 						type="Emphasized"
 						visible="{= ${activeUsers>/details/linkEligible} === true }"

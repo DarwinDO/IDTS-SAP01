@@ -248,9 +248,15 @@ assertHighImportanceColumn(workloadBugsTable, 'title', 'developerWorkloadBugsTab
 assertHighImportanceColumn(workloadBugsTable, 'actions', 'developerWorkloadBugsTable')
 
 const activeUserDetailsFragment = fs.readFileSync(path.join(webapp, 'fragment/ActiveUserDetails.fragment.xml'), 'utf8')
+const editUserInformationFragment = fs.readFileSync(path.join(webapp, 'fragment/EditUserInformation.fragment.xml'), 'utf8')
 assert.match(activeUserDetailsFragment, /<Dialog/)
 assert.match(activeUserDetailsFragment, /activeUsers>\/details/)
 assert.match(activeUserDetailsFragment, /press="\.onCloseActiveUserDetails"/)
+assert.match(activeUserDetailsFragment, /press="\.onOpenEditUserInformation"/)
+assert.match(editUserInformationFragment, /activeUsers>\/editProfile\/displayName/)
+assert.match(editUserInformationFragment, /activeUsers>\/editProfile\/reason/)
+assert.match(editUserInformationFragment, /press="\.onConfirmEditUserInformation"/)
+assert.match(editUserInformationFragment, /press="\.onCancelEditUserInformation"/)
 assert.doesNotMatch(activeUserDetailsFragment, /requestRoleChange|requestRevoke|updateDeveloperProfile|onConfirmAccessChange|onConfirmDeveloperProfile|onOpenRevoke|onRevoke/i)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserRoleChange"/)
 assert.match(activeUserDetailsFragment, /press="\.onOpenActiveUserSuspend"/)
@@ -302,6 +308,8 @@ assert.doesNotMatch(linkExistingIdentityFragment, /Role Collection|IdP|subaccoun
 
 const fragment = fs.readFileSync(path.join(webapp, 'fragment/InviteUser.fragment.xml'), 'utf8')
 assert.match(fragment, /<Input[^>]+type="Email"/)
+assert.match(fragment, /invite>\/displayName/)
+assert.match(fragment, /onInviteDisplayNameChange/)
 assert.match(fragment, /<Select/)
 assert.match(fragment, /<CheckBox/)
 assert.match(fragment, /press="\.onConfirmInvite"/)
@@ -326,6 +334,7 @@ assert.match(controller, /^sap\.ui\.define\(/)
 assert.doesNotMatch(controller, /normalizeCurrentBootstrapPm|bootstrapPmNormalize/, 'temporary PM normalization UI must be removed')
 assert.doesNotMatch(activeUserDetailsFragment, /bootstrapPmNormalize|onNormalizeCurrentBootstrapPm/, 'temporary PM normalization button must be removed')
 assert.match(controller, /bindContext\("\/requestOnboarding\(\.\.\.\)"\)/)
+assert.match(controller, /setParameter\("displayName"/)
 assert.match(controller, /setParameter\("email"/)
 assert.match(controller, /setParameter\("requestedRole"/)
 assert.match(controller, /setParameter\("userAdminRequested"/)
@@ -359,6 +368,8 @@ assert.match(controller, /setParameter\("includeNonActive"/)
 assert.match(controller, /setParameter\("skip"/)
 assert.match(controller, /setParameter\("top"/)
 assert.match(controller, /bindContext\("\/readActiveUserDetails\(\.\.\.\)"\)/)
+assert.match(controller, /bindContext\("\/updateActiveUserDisplayName\(\.\.\.\)"\)/)
+assert.match(controller, /setParameter\("expectedModifiedAt"/)
 assert.match(controller, /onTabSelect/)
 assert.match(controller, /_ensureActiveUsersLoaded/)
 assert.match(controller, /onLoadMoreActiveUsers/)
@@ -459,6 +470,9 @@ assert.equal(typeof controllerDefinition._loadActiveUsers, 'function')
 assert.equal(typeof controllerDefinition._ensureActiveUsersLoaded, 'function')
 assert.equal(typeof controllerDefinition.onLoadMoreActiveUsers, 'function')
 assert.equal(typeof controllerDefinition.onOpenActiveUserDetails, 'function')
+assert.equal(typeof controllerDefinition.onOpenEditUserInformation, 'function')
+assert.equal(typeof controllerDefinition.onConfirmEditUserInformation, 'function')
+assert.equal(typeof controllerDefinition.onCancelEditUserInformation, 'function')
 assert.equal(typeof controllerDefinition.onConfirmExistingIdentityLink, 'function')
 assert.equal(typeof controllerDefinition.onExistingIdentityLinkFieldChange, 'function')
 assert.equal(typeof controllerDefinition._loadCatalogs, 'function')
@@ -725,6 +739,7 @@ async function verifyRuntimeBehavior () {
   assert.equal(loadQuery, '')
 
   let inviteData = {
+    displayName: 'Controlled Test User',
     email: 'controlled.test@example.invalid',
     role: 'PM',
     userAdminRequested: true,
@@ -771,6 +786,11 @@ async function verifyRuntimeBehavior () {
   instance.onInviteFieldChange({ getParameter: name => name === 'value' ? 'new.user@example.invalid' : undefined })
   assert.equal(inviteData.email, 'new.user@example.invalid')
   assert.equal(inviteData.emailValid, true)
+  assert.equal(inviteData.canSubmit, true)
+
+  inviteData.displayName = ''
+  instance.onInviteDisplayNameChange({ getParameter: name => name === 'value' ? '  New Person  ' : undefined })
+  assert.equal(inviteData.displayName, '  New Person  ')
   assert.equal(inviteData.canSubmit, true)
 
   const first = instance.onConfirmInvite()
@@ -1260,7 +1280,7 @@ function loadController (source, oWindow = { location: { assign: () => {} } }) {
 
 for (const locale of ['i18n.properties', 'i18n_en.properties']) {
   const text = fs.readFileSync(path.join(webapp, 'i18n', locale), 'utf8')
-  for (const key of ['appTitle', 'inviteUser', 'bugManagementOpenAction', 'bugManagementOpenActionTooltip', 'targetEmail', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'developerProfileConfirmation', 'existingBugsKeepAssignee', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'businessCatalogsTab', 'catalogType', 'catalogSearchPlaceholder', 'includeInactiveCatalogs', 'addCatalogItem', 'editCatalogItem', 'deactivateCatalogItem', 'activateCatalogItem', 'catalogImpactTitle', 'catalogReason', 'saveCatalogItem', 'confirmCatalogDeactivation', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
+  for (const key of ['appTitle', 'inviteUser', 'bugManagementOpenAction', 'bugManagementOpenActionTooltip', 'targetEmail', 'displayName', 'invalidDisplayName', 'editUserInformation', 'editUserInformationReason', 'saveUserInformation', 'userInformationUpdated', 'userInformationUpdateFailed', 'businessRole', 'userAdminCapability', 'sendInvitation', 'retryConfirmation', 'reconcileConfirmation', 'changeRoleConfirmation', 'revokeConfirmation', 'manageResponsibilities', 'developerProfileConfirmation', 'existingBugsKeepAssignee', 'accessRequestsTab', 'activeUsersTab', 'developerResponsibilitiesTab', 'businessCatalogsTab', 'catalogType', 'catalogSearchPlaceholder', 'includeInactiveCatalogs', 'addCatalogItem', 'editCatalogItem', 'deactivateCatalogItem', 'activateCatalogItem', 'catalogImpactTitle', 'catalogReason', 'saveCatalogItem', 'confirmCatalogDeactivation', 'activeUserSearchPlaceholder', 'includeNonActive', 'includeRevoked', 'noActiveUsers', 'activeUsersLoadFailed', 'retryActiveUsers', 'loadMoreActiveUsers', 'viewDetails', 'activeUserDetails', 'linkExistingIdentity', 'existingIdentityLinkRole', 'existingIdentityLinkNotice', 'existingIdentityLinkEmail', 'sendIdentityLink', 'identityLinkQueued', 'cancelExistingLinkInvitation', 'cancelExistingLinkConfirmation', 'existingLinkCancelled', 'accessState', 'identityLinked', 'developerReady', 'activeResponsibilityCount', 'pendingOperation', 'lastReconciled', 'developerProfile', 'close', 'activeUsersNoDeveloper', 'suspendAccess', 'reactivateAccess', 'suspendWarning', 'reactivateWarning', 'suspendQueued', 'reactivateQueued']) {
     assert.match(text, new RegExp(`^${key}=`, 'm'))
   }
   assert.match(text, /^cancelExistingLinkInvitation=Cancel invitation$/m)

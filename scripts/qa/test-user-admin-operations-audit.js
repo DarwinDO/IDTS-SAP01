@@ -102,7 +102,7 @@ function requestEntry (ID, values = {}) {
     userAdminRequested: values.userAdmin === true,
     status_code: values.status || 'INVITED',
     requestedBy_ID: PM_ID,
-    expiresAt: values.expiresAt || '2026-09-01T00:00:00.000Z',
+    expiresAt: values.expiresAt || '2099-09-01T00:00:00.000Z',
     tokenNonce: `${ID}-nonce`,
     tokenHash: crypto.createHash('sha256').update(`${ID}-token`).digest('hex'),
     correlationId: `${ID}`,

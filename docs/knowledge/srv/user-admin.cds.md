@@ -1,5 +1,11 @@
 # Knowledge: `srv/user-admin.cds`
 
+## 2026-09-03 public profile contract / Contract hồ sơ public 2026-09-03
+
+`requestOnboarding` accepts a bounded display name, and `updateActiveUserDisplayName` accepts only user ID, display name, reason, and optimistic timestamp. `ActiveUserDetails.profileModifiedAt` is the safe version token. No email-write or raw identity/provider field is exposed. Check `db/schema.cds`, `srv/user-admin.js`, `srv/user-admin/active-users.js`, and the UI controller together.
+
+`requestOnboarding` nhận display name có giới hạn; `updateActiveUserDisplayName` chỉ nhận user ID, display name, reason và timestamp optimistic. `ActiveUserDetails.profileModifiedAt` là version token an toàn. Contract không expose email-write hoặc identity/provider field thô. Phải kiểm tra cùng schema, hai handler và UI controller.
+
 ## Gate 2 Active Users contract / Contract Active Users Gate 2
 
 Gate 2 adds the read-only `ActiveUserSummary` and `ActiveUserDetails` structured types plus `searchActiveUsers(query, includeNonActive, skip, top)` and `readActiveUserDetails(userID)` actions. The summary is one row per persisted IDTS user, not one row per invitation. Default search excludes only derived `REVOKED` rows; `SUSPENDED` and `INCOMPLETE` rows remain visible for admin attention, while `includeNonActive=true` adds revoked rows. `skip`/`top` provide explicit stable paging; `top` is bounded to 100.
