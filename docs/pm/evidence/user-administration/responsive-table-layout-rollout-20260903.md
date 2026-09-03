@@ -35,6 +35,14 @@ The existing unversioned application alias initially retained the prior browser 
 - PowerShell JSON parsing required `ConvertFrom-Json -AsHashtable` because the UI5 manifest contains an empty-name property. One regex probe also produced a false negative because literal `>` appears inside binding values; direct opening-tag readback confirmed the packaged property.
 - The local CF client initially lacked `html5-list`. Two direct service-key metadata endpoint probes returned only HTTP `404`; credentials and tokens stayed in memory and were never printed or persisted. The SAP-documented CF Community `html5-plugin` `1.4.9` was installed temporarily, supplied the authoritative repository inventory, and was removed after acceptance.
 - One Browser Control wait reached its 30-second session limit, and one semantic subtab locator missed an element already present in accessibility state. The session was reclaimed and the exact AX element was used; no product or external state changed.
+- The first temporary-plugin removal command used the install-only `-f` flag and stopped with `unknown flag`; rerunning the documented uninstall command removed `html5-plugin` `1.4.9`. The first cleanup readback also treated `$LASTEXITCODE` as if `Select-String` set it, producing a false FAIL after both paths were already absent; the corrected match-count check passed.
+
+### Cleanup receipt
+
+- Both source and rollout worktrees were tracked-clean and their heads were ancestors of final `origin/dev` before removal.
+- The two exact NTFS dependency junctions were verified and detached without touching their targets. Both worktree paths and registrations were removed, local and remote task branches were deleted after reachability proof, and `git worktree prune` completed.
+- Local `dev` was not checked out in any worktree, so it was safely fast-forwarded to and configured to track final `origin/dev` `04caf72be1caa212b587b1ece592a3a0bffc31d0`.
+- Final independent `npm run btp:demo:check` remained `DEMO READY`.
 
 ## Tiếng Việt
 
