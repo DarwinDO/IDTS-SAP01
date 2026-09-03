@@ -193,10 +193,20 @@ async function main () {
   assert.equal(calls.search[0].top, 25)
   const list = popover.content[0].items.find(item => item.settings && item.settings.mode === 'None')
   assert.equal(list.items.length, 25, 'first page is 25 rows')
-  assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationUnread'), 'unread state has a literal marker')
+  const firstRow = list.items[0]
+  assert.equal(firstRow.highlight, 'Information', 'unread rows use native highlight instead of relying on text alone')
+  assert.ok(firstRow.content[0].classes.includes('sapUiSmallMargin'), 'row content has native responsive spacing')
+  assert.equal(firstRow.content[0].items.length, 4, 'metadata, title, summary and time are separate visual regions')
+  assert.ok(firstRow.content[0].items[0].items.some(item => item.text === 'notificationUnread'), 'unread state has a literal marker')
+  assert.equal(firstRow.content[0].items[1].text, 'Notification 1', 'title is not concatenated with metadata')
+  assert.equal(firstRow.content[0].items[2].text, 'Safe summary', 'summary is a separate readable line')
+  assert.match(firstRow.content[0].items[3].text, /^notificationOccurredAt:/, 'timestamp is a separate readable line')
+  const filterRow = popover.content[0].items.find(item => item.settings && item.settings.wrap === 'Wrap' && item.classes.includes('sapUiSmallMargin'))
+  assert.ok(filterRow, 'filters share a compact responsive native row')
+  assert.equal(filterRow.items.length, 2, 'read-state and category filters remain distinct')
   assert.ok(globals.created.Icon.some(icon => icon.src === 'sap-icon://bug'), 'Bug rows render a category icon')
-  assert.ok(list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventCOMMENT_MENTIONED'), 'persisted comment mentions render their localized event label')
-  assert.ok(!list.items[0].content[0].items[0].items.some(item => item.text === 'notificationEventOther'), 'persisted comment mentions do not fall back to the generic event label')
+  assert.ok(firstRow.content[0].items[0].items.some(item => item.text === 'notificationEventCOMMENT_MENTIONED'), 'persisted comment mentions render their localized event label')
+  assert.ok(!firstRow.content[0].items[0].items.some(item => item.text === 'notificationEventOther'), 'persisted comment mentions do not fall back to the generic event label')
 
   const countBeforeSignal = calls.unread
   globals.window['idts:notification-change']()

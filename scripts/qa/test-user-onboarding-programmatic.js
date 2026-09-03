@@ -89,6 +89,7 @@ async function main () {
   const created = await service.send({
     event: 'requestOnboarding',
     data: {
+      displayName: 'Controlled Test User',
       email: 'Controlled.Test@Example.invalid',
       requestedRole: 'TESTER',
       userAdminRequested: false
@@ -104,6 +105,21 @@ async function main () {
   assert.equal('tokenNonce' in created, false)
   await new Promise(resolve => setImmediate(resolve))
   assert.equal(immediateSpawnCount, 1)
+  const persistedCreated = await db.run(
+    SELECT.one.from('idts.cap.UserOnboardingRequests').columns('requestedDisplayName').where({ ID: created.ID })
+  )
+  assert.equal(persistedCreated.requestedDisplayName, 'Controlled Test User')
+
+  await expectRejected(service.send({
+    event: 'requestOnboarding',
+    data: {
+      displayName: '   ',
+      email: 'missing-name@example.invalid',
+      requestedRole: 'TESTER',
+      userAdminRequested: false
+    },
+    user: administrator
+  }), 400, 'INVALID_DISPLAY_NAME')
 
   const searchResults = await service.send({
     event: 'searchOnboarding',
@@ -217,12 +233,12 @@ async function main () {
 
   await expectRejected(service.send({
     event: 'requestOnboarding',
-    data: { email: 'controlled.test@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+    data: { displayName: 'Controlled Test User', email: 'controlled.test@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
     user: administrator
   }), 409, 'ONBOARDING_ALREADY_OPEN')
   await expectRejected(service.send({
     event: 'requestOnboarding',
-    data: { email: 'other@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+    data: { displayName: 'Other User', email: 'other@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
     user: new cds.User({ id: 'pm@example.invalid', roles: ['authenticated-user', 'PM'] })
   }), 403, 'USER_ADMIN_REQUIRED')
 
@@ -293,6 +309,7 @@ async function main () {
   const privilegedCreated = await service.send({
     event: 'requestOnboarding',
     data: {
+      displayName: 'Controlled PM',
       email: 'controlled.pm@example.invalid',
       requestedRole: 'PM',
       userAdminRequested: true
@@ -317,6 +334,7 @@ async function main () {
   await expectRejected(service.send({
     event: 'requestOnboarding',
     data: {
+      displayName: 'Missing Developer Profile',
       email: 'missing.developer.profile@example.invalid',
       requestedRole: 'DEVELOPER',
       userAdminRequested: false
@@ -327,6 +345,7 @@ async function main () {
   await expectRejected(service.send({
     event: 'requestOnboarding',
     data: {
+      displayName: 'Tester With Profile',
       email: 'tester.with.profile@example.invalid',
       requestedRole: 'TESTER',
       userAdminRequested: false,
@@ -338,6 +357,7 @@ async function main () {
   const developerInvitation = await service.send({
     event: 'requestOnboarding',
     data: {
+      displayName: 'Desired Developer',
       email: 'desired.developer@example.invalid',
       requestedRole: 'DEVELOPER',
       userAdminRequested: false,
@@ -708,6 +728,7 @@ async function main () {
   const failingInvite = await service.send({
     event: 'requestOnboarding',
     data: {
+      displayName: 'Controlled Developer',
       email: 'controlled.developer@example.invalid',
       requestedRole: 'DEVELOPER',
       userAdminRequested: false,
@@ -758,12 +779,12 @@ async function main () {
   const concurrentResults = await Promise.allSettled([
     service.send({
       event: 'requestOnboarding',
-      data: { email: 'concurrent@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+      data: { displayName: 'Concurrent User', email: 'concurrent@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
       user: administrator
     }),
     service.send({
       event: 'requestOnboarding',
-      data: { email: 'CONCURRENT@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+      data: { displayName: 'Concurrent User', email: 'CONCURRENT@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
       user: administrator
     })
   ])
@@ -791,7 +812,7 @@ async function main () {
   }))
   const reinvited = await service.send({
     event: 'requestOnboarding',
-    data: { email: 'expired@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+    data: { displayName: 'Reinvited User', email: 'expired@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
     user: administrator
   })
   assert.equal(reinvited.status, 'INVITED')
@@ -804,7 +825,7 @@ async function main () {
 
   const cancellableInvite = await service.send({
     event: 'requestOnboarding',
-    data: { email: 'cancel.standard@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+    data: { displayName: 'Cancelled Standard User', email: 'cancel.standard@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
     user: administrator
   })
   const cancellableRow = await db.run(
@@ -871,7 +892,7 @@ async function main () {
   }), 409, 'ONBOARDING_INVITATION_NOT_OPEN')
   const replacementStandard = await service.send({
     event: 'requestOnboarding',
-    data: { email: 'cancel.standard@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
+    data: { displayName: 'Replacement Standard User', email: 'cancel.standard@example.invalid', requestedRole: 'TESTER', userAdminRequested: false },
     user: administrator
   })
   assert.equal(replacementStandard.status, 'INVITED')

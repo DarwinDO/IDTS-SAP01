@@ -1,5 +1,12 @@
 # **Business Rules \- Issue and Defect Tracking System in SAP**
 
+## User profile rules — 2026-09-03
+
+- A new invitation requires a human display name; IDTS must not infer a person's name from an email address.
+- Only an active PM with the separate `UserAdmin` capability may update an existing display name, with a reason and append-only audit.
+- A display-name change does not change email, SAP identity, role, access, password, or Developer responsibilities and sends no email.
+- IDTS must not claim to change a SAP login email until the authoritative identity provider supports an approved, verified, reversible administration flow.
+
 ## One-to-one workflow audit rule
 
 Every public Bug workflow OData action that changes workflow state or ownership and writes History must persist its own dedicated `HistoryEvents.actionType_code`. Different named commands must not share a generic code such as `STATUS_CHANGE` or `REASSIGN`. The same exact code is copied to child `HistoryLogs`; the readable timeline label comes from `ActionTypes`. Legacy codes remain valid for existing history and generic non-command edits, and existing History rows are not rewritten.

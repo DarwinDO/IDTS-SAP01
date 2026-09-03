@@ -72,6 +72,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
     developerAvailabilityStatus  : String(40);
     developerWorkloadLimit       : Integer;
     developerOpenBugImpactCount  : Integer;
+    profileModifiedAt            : Timestamp;
   }
 
   type OnboardingResult {
@@ -186,6 +187,7 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   }
 
   action requestOnboarding(
+    displayName        : String(120),
     email              : String(255),
     requestedRole      : String(40),
     userAdminRequested : Boolean,
@@ -252,6 +254,13 @@ service UserAdministrationService @(requires: 'authenticated-user') {
   action searchActiveUsers(query : String(255), includeNonActive : Boolean, skip : Integer, top : Integer) returns many ActiveUserSummary;
 
   action readActiveUserDetails(userID : UUID) returns ActiveUserDetails;
+
+  action updateActiveUserDisplayName(
+    userID             : UUID,
+    displayName        : String(120),
+    reason             : String(500),
+    expectedModifiedAt : Timestamp
+  ) returns ActiveUserDetails;
 
   action approveProvisioning(
     requestID       : UUID,

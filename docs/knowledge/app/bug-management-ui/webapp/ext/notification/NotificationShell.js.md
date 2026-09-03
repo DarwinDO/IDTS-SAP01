@@ -1,5 +1,11 @@
 # NotificationShell.js — native personal notification shell
 
+## 2026-09-03 notification hierarchy / Phân cấp notification 2026-09-03
+
+The shell keeps the existing caller-only service, polling, paging, read actions, and safe target paths. It now separates row metadata, title, summary, and occurrence time into four native-control regions, uses an `Information` highlight for unread rows, and places the two filters in a wrapping `HBox`. Check this file together with `NotificationClient.js`, notification i18n, and `scripts/qa/test-my-notifications-shell.js`; changing DTO names or flattening the row can recreate the unreadable concatenation.
+
+Shell giữ nguyên service chỉ dành cho caller, polling, paging, thao tác read và target path an toàn. Row hiện tách metadata, tiêu đề, tóm tắt và thời gian thành bốn vùng control native, dùng highlight `Information` cho row chưa đọc và đặt hai filter trong `HBox` có thể wrap. Khi sửa phải kiểm tra cùng `NotificationClient.js`, i18n notification và `scripts/qa/test-my-notifications-shell.js`; đổi tên DTO hoặc làm phẳng row có thể khiến nội dung dính lại.
+
 ## English
 
 `NotificationShell` owns the small authenticated Bug Management header surface: a native toolbar bell with a capped badge and a native `ResponsivePopover`. It consumes safe DTOs through `NotificationClient`; it never reads source/audit/delivery tables or chooses a recipient.

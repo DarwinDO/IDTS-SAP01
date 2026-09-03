@@ -1,5 +1,9 @@
 ---
 
+## User profile administration direction — 2026-09-03
+
+User Administration treats display name as explicit profile data: it is collected during invitation and only an authorized User Administrator may correct it later. Email remains visible but is not editable through this profile action. SAP BTP login-email administration is outside the current Role Collection-only broker contract.
+
 ## One-to-one workflow action audit
 
 The Bug workflow is command-traceable: `assignToDeveloper`, `moveToPendingAssignment`, `markInReview`, `requestMoreInformation`, `resubmitToDeveloper`, `rejectBug`, `startProgress`, `resolveBug`, `sendToRetest`, `closeBug`, and `reopenBug` each persist a distinct ActionType in `HistoryEvents` and `HistoryLogs`. This improves audit meaning only; it does not rename OData actions, change the status lifecycle, change roles, or rewrite legacy history.

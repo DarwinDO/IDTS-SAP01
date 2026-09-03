@@ -1,5 +1,9 @@
 # **Project Scope \- Issue and Defect Tracking System in SAP**
 
+## User Administration profile boundary — 2026-09-03
+
+In scope: readable personal notification presentation, invitation display names, and UserAdmin-only audited display-name correction. Out of scope for the current provider contract: modifying a person's SAP Universal ID or Identity Authentication login email from IDTS.
+
 ## Audit traceability baseline
 
 In scope, every named public Bug workflow OData action that writes History has one dedicated ActionType. `HistoryEvents.actionType_code` identifies the initiating command directly, and child `HistoryLogs` use the same code. Preserving legacy ActionTypes and historical rows is also in scope. Renaming endpoints, changing the lifecycle/role model, migrating old history, or applying this contract to read-only AI suggestion actions is out of scope.

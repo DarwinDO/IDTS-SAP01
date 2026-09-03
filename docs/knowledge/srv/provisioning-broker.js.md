@@ -1,5 +1,11 @@
 # Knowledge: `srv/provisioning-broker.js`
 
+## 2026-09-03 provisioned display name / Tên provision 2026-09-03
+
+Successful `PROVISION` now uses `UserOnboardingRequests.requestedDisplayName` for a new `Users.displayName`. The email fallback exists only for legacy requests created before the additive field. Existing-user linking still preserves the selected row's current display name. This broker still changes Role Collection membership only; it does not administer an SAP account login email.
+
+`PROVISION` thành công hiện dùng `requestedDisplayName` làm `Users.displayName`. Fallback email chỉ dành cho request legacy có trước field additive. Link existing user vẫn giữ tên hiện tại của row đã chọn. Broker vẫn chỉ đổi Role Collection, không quản trị email đăng nhập tài khoản SAP.
+
 ## English
 
 After the external provider confirms the exact DEVELOPER Role Collection, CAP materializes the desired Developer Profile and responsibilities in the same transaction that activates the User and onboarding request. Missing desired data aborts local completion, so `ACTIVE` cannot be written with an incomplete Developer. Role change or revoke away from DEVELOPER deactivates the profile and responsibilities without changing existing Bug assignees.

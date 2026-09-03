@@ -226,14 +226,26 @@ sap.ui.define([
             visible: false,
             press: function () { loadPage(state, false); }
         });
-        var filterLabels = new VBox({
+        var filterLabels = new HBox({
+            width: "100%",
+            wrap: "Wrap",
             items: [
-                new Label({ text: text(bundle, "notificationReadFilterLabel"), labelFor: controlId(readFilter) }),
-                readFilter,
-                new Label({ text: text(bundle, "notificationCategoryFilterLabel"), labelFor: controlId(categoryFilter) }),
-                categoryFilter
+                new VBox({
+                    width: "18rem",
+                    items: [
+                        new Label({ text: text(bundle, "notificationReadFilterLabel"), labelFor: controlId(readFilter) }),
+                        readFilter
+                    ]
+                }).addStyleClass("sapUiTinyMarginEnd sapUiTinyMarginBottom"),
+                new VBox({
+                    width: "10rem",
+                    items: [
+                        new Label({ text: text(bundle, "notificationCategoryFilterLabel"), labelFor: controlId(categoryFilter) }),
+                        categoryFilter
+                    ]
+                }).addStyleClass("sapUiTinyMarginBottom")
             ]
-        });
+        }).addStyleClass("sapUiSmallMargin");
         var content = new VBox({
             width: "100%",
             items: [
@@ -422,6 +434,11 @@ sap.ui.define([
                 tooltip: row.category === "BUG" ? text(bundle, "notificationCategoryBug") : text(bundle, "notificationCategoryAccess")
             }),
             new ObjectStatus({
+                text: row.category === "BUG" ? text(bundle, "notificationCategoryBug") : text(bundle, "notificationCategoryAccess"),
+                state: "None"
+            }),
+            new ObjectStatus({ text: eventLabel(bundle, row.eventType), state: "None" }),
+            new ObjectStatus({
                 text: unread ? text(bundle, "notificationUnread") : text(bundle, "notificationRead"),
                 state: unread ? ValueState.Information : "None"
             }),
@@ -429,18 +446,19 @@ sap.ui.define([
                 text: row.actionRequired ? text(bundle, "notificationActionRequired") : "",
                 state: ValueState.Warning,
                 visible: Boolean(row.actionRequired)
-            }),
-            new ObjectStatus({ text: String(row.category || ""), state: "None" })
+            })
         ];
         return new CustomListItem({
             type: "Active",
+            highlight: unread ? "Information" : "None",
             content: [new VBox({
                 items: [
-                    new HBox({ wrap: "Wrap", items: [statusItems[0], new Text({ text: String(row.title || ""), wrapping: true }), statusItems[1], statusItems[2], statusItems[3], new Text({ text: eventLabel(bundle, row.eventType), wrapping: true })] }),
-                    new Text({ text: String(row.summary || ""), wrapping: true }),
-                    new Text({ text: text(bundle, "notificationOccurredAt", [safeDate(bundle, row.occurredAt)]), wrapping: true })
+                    new HBox({ wrap: "Wrap", items: statusItems }),
+                    new Text({ text: String(row.title || ""), wrapping: true, maxLines: 2 }).addStyleClass("sapUiTinyMarginTop"),
+                    new Text({ text: String(row.summary || ""), wrapping: true, maxLines: 2 }).addStyleClass("sapUiTinyMarginTop"),
+                    new Text({ text: text(bundle, "notificationOccurredAt", [safeDate(bundle, row.occurredAt)]), wrapping: true }).addStyleClass("sapUiTinyMarginTop")
                 ]
-            })],
+            }).addStyleClass("sapUiSmallMargin")],
             press: function () { openNotification(state, row); }
         });
     }

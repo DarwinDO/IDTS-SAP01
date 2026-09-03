@@ -1,5 +1,7 @@
 # Knowledge: `i18n_en.properties`
 
+The 2026-09-03 English keys cover display-name invitation and profile editing without implying that SAP login email can be changed. / Các key English ngày 03/09/2026 bao phủ tên lúc mời và sửa hồ sơ, không tạo hiểu nhầm rằng email đăng nhập SAP có thể đổi.
+
 N5-Lite adds the localized `Daily digest` delivery type and event labels. / N5-Lite thêm label type và event delivery `Daily digest`.
 
 ## 2026-08-26 Gate 6.3 access-readiness copy
