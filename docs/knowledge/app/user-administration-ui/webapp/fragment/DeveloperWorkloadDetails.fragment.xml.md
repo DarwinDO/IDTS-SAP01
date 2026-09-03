@@ -1,5 +1,9 @@
 # Knowledge: `app/user-administration-ui/webapp/fragment/DeveloperWorkloadDetails.fragment.xml`
 
+## Container-aware pop-in / Pop-in theo container
+
+The Bug table uses `autoPopinMode="true"` with `contextualWidth="Auto"`. Bug number, Title and Actions are high importance, so the dialog preserves identification and navigation while lower-priority Bug metadata moves into the native pop-in when the stretched dialog is narrower than the browser viewport. / Table Bug dùng `autoPopinMode="true"` cùng `contextualWidth="Auto"`. Bug number, Title và Actions có importance cao để dialog giữ định danh và điều hướng, còn metadata Bug ưu tiên thấp hơn chuyển vào pop-in native khi dialog stretch hẹp hơn viewport browser.
+
 ## English
 
 This fragment is the read-only detail dialog opened from a Developer Workload row. It shows a bounded summary of open assigned Bugs and a responsive table with Bug number, title, status, priority, severity, due date, technical assignee, Current Action Owner, estimated effort, overdue state, and an `Open Bug` action. The dialog never exposes description, comments, attachments, identity/provider data, or audit fields.

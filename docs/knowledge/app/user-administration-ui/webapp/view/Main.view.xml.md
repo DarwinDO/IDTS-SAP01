@@ -1,5 +1,15 @@
 # Knowledge: `app/user-administration-ui/webapp/view/Main.view.xml`
 
+## Container-aware responsive tables / Table responsive theo container
+
+English: Wide fixed-layout tables must calculate native pop-in breakpoints from their actual table container, not the wider browser window. Active Users enables `autoPopinMode="true"`; Active Users, Developer Workload, Delivery, Provisioning and Audit use `contextualWidth="Auto"`. Their identity/primary column and Actions column remain `importance="High"`, while lower-priority fields move into the native pop-in before the primary column can collapse. Access Requests, Developer Responsibilities and Business Catalogs keep their simpler layout because live 100% measurements showed flexible columns remained readable and rows stayed compact.
+
+Tiếng Việt: Table fixed-layout rộng phải tính breakpoint pop-in native theo container thật của table, không theo cửa sổ browser rộng hơn. Active Users bật `autoPopinMode="true"`; Active Users, Developer Workload, Delivery, Provisioning và Audit dùng `contextualWidth="Auto"`. Cột identity/chính và cột Actions giữ `importance="High"`, còn field ưu tiên thấp hơn chuyển vào pop-in native trước khi cột chính bị co. Access Requests, Developer Responsibilities và Business Catalogs giữ layout đơn giản vì đo live ở 100% cho thấy cột flexible vẫn dễ đọc và row vẫn gọn.
+
+Safe editing: do not replace this with custom CSS, a horizontal-scroll wrapper or `fixedLayout="false"`. When a new fixed-width column is added, update the focused UI contract and verify the primary column and actions at 100%, 80% and a narrow viewport.
+
+Sửa an toàn: không thay bằng custom CSS, wrapper scroll ngang hoặc `fixedLayout="false"`. Khi thêm cột fixed-width, cập nhật focused UI contract và kiểm tra cột chính cùng actions ở 100%, 80% và viewport hẹp.
+
 ## N5-Lite unified filter / Filter hợp nhất N5-Lite
 
 English: Digest is one additional option in the existing Delivery type filter. No new tab, table or action is introduced. The same responsive table renders the safe DTO, and the existing retry button remains hidden because Digest rows are read-only.

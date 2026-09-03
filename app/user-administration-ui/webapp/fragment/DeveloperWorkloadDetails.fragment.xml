@@ -43,7 +43,8 @@
 					busy="{workload>/bugsBusy}"
 					noDataText="{i18n>noDeveloperWorkloadBugs}"
 					sticky="ColumnHeaders"
-					autoPopinMode="true">
+					autoPopinMode="true"
+					contextualWidth="Auto">
 					<columns>
 						<Column importance="High"><Text text="{i18n>bugNumber}"/></Column>
 						<Column importance="High"><Text text="{i18n>title}"/></Column>
@@ -55,7 +56,7 @@
 						<Column width="12rem" minScreenWidth="Desktop" demandPopin="true"><Text text="{i18n>currentActionOwner}"/></Column>
 						<Column width="9rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>estimatedEffort}"/></Column>
 						<Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><Text text="{i18n>overdue}"/></Column>
-						<Column width="8rem" hAlign="End"><Text text="{i18n>actions}"/></Column>
+						<Column width="8rem" hAlign="End" importance="High"><Text text="{i18n>actions}"/></Column>
 					</columns>
 					<items>
 						<ColumnListItem type="Inactive">

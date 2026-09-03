@@ -35,6 +35,21 @@ const workloadTableStart = workloadSectionSource.indexOf('id="developerWorkloadT
 const workloadTableEnd = workloadSectionSource.indexOf('</Table>', workloadTableStart)
 const workloadTableSource = workloadSectionSource.slice(workloadTableStart, workloadTableEnd)
 
+function openingTagById (source, controlName, id) {
+  const idIndex = source.indexOf(`id="${id}"`)
+  assert.ok(idIndex >= 0, `${id} must exist`)
+  const start = source.lastIndexOf(`<${controlName}`, idIndex)
+  assert.ok(start >= 0, `${id} must be a ${controlName}`)
+  let lineStart = start
+  while (lineStart < source.length) {
+    const lineEnd = source.indexOf('\n', lineStart)
+    const end = lineEnd < 0 ? source.length : lineEnd
+    if (source.slice(lineStart, end).trimEnd().endsWith('>')) return source.slice(start, end)
+    lineStart = end + 1
+  }
+  assert.fail(`${id} opening tag is incomplete`)
+}
+
 function countDirectXmlControls (source, containerName) {
   const containerStart = source.indexOf(`<${containerName}>`)
   const containerEnd = source.indexOf(`</${containerName}>`, containerStart)
@@ -47,6 +62,10 @@ function countDirectXmlControls (source, containerName) {
 
 assert.equal(countDirectXmlControls(workloadTableSource, 'columns'), 9, 'Workload table must declare one column for every cell')
 assert.equal(countDirectXmlControls(workloadTableSource, 'cells'), 9, 'Workload row must provide one cell for every column')
+const workloadOpeningTag = openingTagById(workloadSectionSource, 'Table', 'developerWorkloadTable')
+assert.match(workloadOpeningTag, /autoPopinMode="true"/)
+assert.match(workloadOpeningTag, /contextualWidth="Auto"/)
+assert.match(workloadTableSource.split(/\r?\n/).find(line => line.includes('i18n>actions')), /importance="High"/)
 assert.match(workloadTableSource, /i18n>workloadStatus/)
 assert.match(workloadTableSource, /<HBox[^>]*>[\s\S]*?<Button[^>]*i18n>viewWorkload[^>]*press="\.onOpenDeveloperWorkload"/)
 assert.match(viewSource, /items="\{workload>\/items\}"/)
@@ -56,6 +75,10 @@ assert.match(viewSource, /press="\.onRefreshDeveloperWorkload"/)
 assert.match(viewSource, /press="\.onLoadMoreDeveloperWorkload"/)
 assert.doesNotMatch(viewSource, /workload>developerProfileID/)
 assert.match(detailFragmentSource, /press="\.openBugInManagement"/)
+const workloadBugsOpeningTag = openingTagById(detailFragmentSource, 'Table', 'developerWorkloadBugsTable')
+assert.match(workloadBugsOpeningTag, /autoPopinMode="true"/)
+assert.match(workloadBugsOpeningTag, /contextualWidth="Auto"/)
+assert.match(detailFragmentSource.split(/\r?\n/).find(line => line.includes('i18n>actions')), /importance="High"/)
 assert.match(detailFragmentSource, /workload>assigneeDisplayName/)
 assert.match(detailFragmentSource, /workload>currentActionOwnerDisplayName/)
 assert.match(detailFragmentSource, /class="sapUiSmallMargin"/)
