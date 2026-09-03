@@ -4,6 +4,7 @@
 
 - **English:** DonHV selected a compact follow-up: remove the row category icon, show only `bugNumber — bugTitle` for Bug notifications, omit Bug description, retain localized Access copy, eliminate empty content controls, and prevent horizontal scrolling with native UI5 layout. Bug UI cache identity advances to `0.0.10`; CAP/UI rollout evidence is tracked in `docs/pm/evidence/my-notifications/notification-row-density-title-20260903.md`.
 - **Tiếng Việt:** DonHV chọn follow-up gọn: bỏ icon category của row, chỉ hiện `bugNumber — bugTitle` cho Bug notification, không hiện Bug description, giữ copy Access đã localize, bỏ control nội dung rỗng và ngăn scroll ngang bằng layout UI5 native. Cache identity Bug UI tăng lên `0.0.10`; evidence rollout CAP/UI được theo dõi tại `docs/pm/evidence/my-notifications/notification-row-density-title-20260903.md`.
+- **Closure:** PR #381 merged at `391e500f9f180dd3039bc6a2a276d45472d76a63`; CAP droplet `2382e503-e645-4ba2-bd03-e1b2c2b2ff5f` and UI content operation `4d78c12b-a78e-11f1-b693-eeee0a88f756` are live. Final readiness is `DEMO READY`; signed-in Edge proves the empty popover has no horizontal overflow. No synthetic notification or business-data mutation was used for acceptance.
 
 ## 2026-09-03 — Notification row metadata spacing fix
 
