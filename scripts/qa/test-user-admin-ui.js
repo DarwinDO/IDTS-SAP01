@@ -45,7 +45,7 @@ const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'u
 const appPackageLock = JSON.parse(fs.readFileSync(path.join(app, 'package-lock.json'), 'utf8'))
 assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
 assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lockfile versions stay aligned')
-assert.equal(appPackage.version, '1.0.18', 'N5-Lite Digest diagnostics must advance the User Administration HTML5 cache identity')
+assert.equal(appPackage.version, '1.0.19', 'responsive table remediation must advance the User Administration HTML5 cache identity')
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
 assert.equal(appPackageLock.packages[''].name, appPackage.name, 'HTML5 lockfile root keeps package identity')
 assert.equal(appPackageLock.packages[''].license, appPackage.license, 'HTML5 lockfile root keeps package license')
@@ -72,6 +72,35 @@ assert.match(indexHtml, /data-sap-ui-app-cache-buster="\.\/"/)
 
 const controller = fs.readFileSync(path.join(webapp, 'controller/Main.controller.js'), 'utf8')
 const view = fs.readFileSync(path.join(webapp, 'view/Main.view.xml'), 'utf8')
+
+function openingTagById (source, controlName, id) {
+  const idIndex = source.indexOf(`id="${id}"`)
+  assert.ok(idIndex >= 0, `${id} must exist`)
+  const start = source.lastIndexOf(`<${controlName}`, idIndex)
+  assert.ok(start >= 0, `${id} must be a ${controlName}`)
+  let lineStart = start
+  while (lineStart < source.length) {
+    const lineEnd = source.indexOf('\n', lineStart)
+    const end = lineEnd < 0 ? source.length : lineEnd
+    if (source.slice(lineStart, end).trimEnd().endsWith('>')) return source.slice(start, end)
+    lineStart = end + 1
+  }
+  assert.fail(`${id} opening tag is incomplete`)
+}
+
+function tableBlockById (source, id) {
+  const start = source.indexOf(`id="${id}"`)
+  assert.ok(start >= 0, `${id} must exist`)
+  const end = source.indexOf('</Table>', start)
+  assert.ok(end > start, `${id} must have a closing Table tag`)
+  return source.slice(start, end)
+}
+
+function assertHighImportanceColumn (tableSource, headerKey, tableId) {
+  const line = tableSource.split(/\r?\n/).find(candidate => candidate.includes(`i18n>${headerKey}`))
+  assert.ok(line, `${tableId} must contain ${headerKey}`)
+  assert.match(line, /<Column\b[^>]*importance="High"/, `${tableId} must keep ${headerKey} in the main row`)
+}
 assert.match(controller, /setModel\(new JSONModel\([\s\S]*?\), "developerCatalogs"\)/)
 assert.match(controller, /setModel\(new JSONModel\([\s\S]*?\), "businessCatalogs"\)/)
 assert.match(controller, /_ensureDeveloperCatalogs[\s\S]*?getModel\("developerCatalogs"\)/)
@@ -193,6 +222,30 @@ const activeUsersTableStart = view.indexOf('id="activeUsersTable"')
 const activeUsersTable = view.slice(activeUsersTableStart, view.indexOf('</Table>', activeUsersTableStart))
 assert.match(activeUsersTable, /i18n>userAdminCapability/)
 assert.match(activeUsersTable, /activeUsers>userAdminCapability/)
+
+for (const tableId of [
+  'activeUsersTable',
+  'developerWorkloadTable',
+  'deliveryOperationsTable',
+  'provisioningOperationsTable',
+  'administrationAuditTable'
+]) {
+  const openingTag = openingTagById(view, 'Table', tableId)
+  assert.match(openingTag, /autoPopinMode="true"/, `${tableId} must use native automatic pop-in`)
+  assert.match(openingTag, /contextualWidth="Auto"/, `${tableId} must calculate breakpoints from its container`)
+  assertHighImportanceColumn(tableBlockById(view, tableId), 'actions', tableId)
+}
+assertHighImportanceColumn(activeUsersTable, 'user', 'activeUsersTable')
+assertHighImportanceColumn(tableBlockById(view, 'developerWorkloadTable'), 'user', 'developerWorkloadTable')
+
+const developerWorkloadDetailsFragment = fs.readFileSync(path.join(webapp, 'fragment/DeveloperWorkloadDetails.fragment.xml'), 'utf8')
+const workloadBugsOpeningTag = openingTagById(developerWorkloadDetailsFragment, 'Table', 'developerWorkloadBugsTable')
+assert.match(workloadBugsOpeningTag, /autoPopinMode="true"/)
+assert.match(workloadBugsOpeningTag, /contextualWidth="Auto"/)
+const workloadBugsTable = tableBlockById(developerWorkloadDetailsFragment, 'developerWorkloadBugsTable')
+assertHighImportanceColumn(workloadBugsTable, 'bugNumber', 'developerWorkloadBugsTable')
+assertHighImportanceColumn(workloadBugsTable, 'title', 'developerWorkloadBugsTable')
+assertHighImportanceColumn(workloadBugsTable, 'actions', 'developerWorkloadBugsTable')
 
 const activeUserDetailsFragment = fs.readFileSync(path.join(webapp, 'fragment/ActiveUserDetails.fragment.xml'), 'utf8')
 assert.match(activeUserDetailsFragment, /<Dialog/)

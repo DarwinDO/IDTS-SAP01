@@ -1,6 +1,6 @@
 # Knowledge: `app/user-administration-ui/package.json`
 
-N5-Lite advances the HTML5 cache identity to `1.0.18` because visible Operations labels changed; dependencies and scripts remain unchanged. / N5-Lite tăng cache identity HTML5 lên `1.0.18` vì label Operations thay đổi; dependency và script giữ nguyên.
+The responsive-table remediation advances the HTML5 cache identity to `1.0.19`; dependencies and scripts remain unchanged. / Bản sửa table responsive tăng cache identity HTML5 lên `1.0.19`; dependency và script giữ nguyên.
 
 ## English
 

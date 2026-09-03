@@ -1,6 +1,6 @@
 # Knowledge: `app/user-administration-ui/webapp/manifest.json`
 
-The application version follows package `1.0.18` for the N5-Lite content cache identity; routing and models are unchanged. / Version ứng dụng theo package `1.0.18` cho cache identity N5-Lite; routing và model không đổi.
+The application version follows package `1.0.19` for the responsive-table content cache identity; routing and models are unchanged. / Version ứng dụng theo package `1.0.19` cho cache identity của bản sửa table responsive; routing và model không đổi.
 
 ## English
 
