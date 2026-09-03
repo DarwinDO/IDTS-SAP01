@@ -1,5 +1,11 @@
 # NotificationShell.js — native personal notification shell
 
+## 2026-09-03 metadata spacing / Khoảng cách metadata 2026-09-03
+
+The metadata `HBox` still contains the same category icon, category, event, read state, and optional action-required marker. Each native control now receives `sapUiTinyMarginEnd`, preventing labels such as `Bug`, `Assigned`, `Read`, and `Action required` from visually concatenating while preserving wrapping and semantics. Check the focused shell contract whenever this row composition changes.
+
+`HBox` metadata vẫn chứa đúng icon category, category, event, trạng thái đọc và marker cần xử lý tùy chọn. Mỗi control native giờ nhận `sapUiTinyMarginEnd`, nên các nhãn như `Bug`, `Assigned`, `Read`, `Action required` không còn dính liền trong khi vẫn giữ wrap và ý nghĩa cũ. Luôn chạy contract shell focused khi đổi cấu trúc row này.
+
 ## 2026-09-03 notification hierarchy / Phân cấp notification 2026-09-03
 
 The shell keeps the existing caller-only service, polling, paging, read actions, and safe target paths. It now separates row metadata, title, summary, and occurrence time into four native-control regions, uses an `Information` highlight for unread rows, and places the two filters in a wrapping `HBox`. Check this file together with `NotificationClient.js`, notification i18n, and `scripts/qa/test-my-notifications-shell.js`; changing DTO names or flattening the row can recreate the unreadable concatenation.

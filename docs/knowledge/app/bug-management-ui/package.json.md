@@ -113,3 +113,8 @@ Tiếng Việt: N2 tăng identity app lên `0.0.7`, đồng bộ manifest và me
 **English:** Version `0.0.8` publishes the reviewed My Notifications hierarchy under a fresh HTML5 cache identity. Dependencies and scripts are unchanged.
 
 **Tiếng Việt:** Version `0.0.8` phát hành bố cục My Notifications đã review bằng cache identity HTML5 mới. Dependency và script không đổi.
+# 2026-09-03 cache identity 0.0.9
+
+Bug Management advances to `0.0.9` so the live HTML5 repository and browser can distinguish the notification metadata-spacing bundle from `0.0.8`. Scripts and dependencies are unchanged.
+
+Bug Management tăng lên `0.0.9` để HTML5 repository và trình duyệt phân biệt bundle sửa khoảng cách metadata notification với `0.0.8`. Script và dependency không đổi.

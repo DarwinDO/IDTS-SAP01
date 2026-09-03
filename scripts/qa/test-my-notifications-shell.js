@@ -197,6 +197,10 @@ async function main () {
   assert.equal(firstRow.highlight, 'Information', 'unread rows use native highlight instead of relying on text alone')
   assert.ok(firstRow.content[0].classes.includes('sapUiSmallMargin'), 'row content has native responsive spacing')
   assert.equal(firstRow.content[0].items.length, 4, 'metadata, title, summary and time are separate visual regions')
+  assert.ok(
+    firstRow.content[0].items[0].items.every(item => item.classes.includes('sapUiTinyMarginEnd')),
+    'each metadata control has native end spacing so labels never concatenate'
+  )
   assert.ok(firstRow.content[0].items[0].items.some(item => item.text === 'notificationUnread'), 'unread state has a literal marker')
   assert.equal(firstRow.content[0].items[1].text, 'Notification 1', 'title is not concatenated with metadata')
   assert.equal(firstRow.content[0].items[2].text, 'Safe summary', 'summary is a separate readable line')

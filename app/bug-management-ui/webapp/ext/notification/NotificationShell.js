@@ -447,7 +447,9 @@ sap.ui.define([
                 state: ValueState.Warning,
                 visible: Boolean(row.actionRequired)
             })
-        ];
+        ].map(function (item) {
+            return item.addStyleClass("sapUiTinyMarginEnd");
+        });
         return new CustomListItem({
             type: "Active",
             highlight: unread ? "Information" : "None",
