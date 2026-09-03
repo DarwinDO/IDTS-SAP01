@@ -580,3 +580,8 @@ The List Report uses the supported `sap.fe.templates.ListReport.ListReportContro
 `sap.app.applicationVersion.version` is aligned to `0.0.9` for the notification row presentation rollout. Routes, models, data sources, and authorization surface remain unchanged.
 
 `sap.app.applicationVersion.version` được đồng bộ thành `0.0.9` cho rollout phần trình bày notification row. Route, model, data source và bề mặt phân quyền không đổi.
+# 2026-09-03 cache identity 0.0.10
+
+The application version advances to `0.0.10` for the compact notification row. Routes, models, and data-source authorization are unchanged.
+
+Application version tăng lên `0.0.10` cho row notification gọn. Route, model và phân quyền data source không đổi.

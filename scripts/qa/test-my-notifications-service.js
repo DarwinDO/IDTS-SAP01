@@ -45,6 +45,9 @@ async function main () {
   for (const forbidden of ['recipientEmail', 'sourceAuditEvent', 'providerMessageId', 'lockToken', 'detailsSummary']) {
     assert.equal(summary.elements[forbidden], undefined, `summary omits ${forbidden}`)
   }
+  assert.ok(summary.elements.bugNumber, 'caller-only summary exposes the related Bug number')
+  assert.ok(summary.elements.bugTitle, 'caller-only summary exposes the related Bug title')
+  assert.equal(summary.elements.bugDescription, undefined, 'notification popover does not expose the Bug description')
 
   const db = await cds.deploy('db').to('sqlite::memory:')
   cds.db = db
@@ -112,6 +115,8 @@ async function main () {
     'equal timestamps use notification ID descending as a stable tie-breaker'
   )
   assert.ok(defaultPage.every(row => row.category === 'BUG'))
+  assert.ok(defaultPage.every(row => row.bugNumber === 'BUG-0001'))
+  assert.ok(defaultPage.every(row => row.bugTitle === 'List report filters do not show defect category value help'))
   assert.ok(defaultPage.every(row => row.targetPath === `/idtsbugmanagementui/index.html#/Bugs(ID=${BUG_ID},IsActiveEntity=true)`),
     'Bug deep links include the active-entity key used by the real Fiori route')
   assert.ok(defaultPage.every(row => !('recipientEmail' in row) && !('detailsSummary' in row)))
@@ -139,6 +144,8 @@ async function main () {
   assert.equal(userBRows.length, 1)
   assert.equal(userBRows[0].category, 'ACCESS')
   assert.equal(userBRows[0].eventType, 'CHANGE_ROLE')
+  assert.equal(userBRows[0].bugNumber, null)
+  assert.equal(userBRows[0].bugTitle, null)
   assert.equal(userBRows[0].summary, 'Your access role changed.')
   assert.doesNotMatch(userBRows[0].summary, /safely/i, 'raw audit details do not enter the public DTO')
   assert.equal(userBRows[0].targetPath, '/idtsbugmanagementui/index.html')

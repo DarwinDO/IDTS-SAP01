@@ -1,5 +1,10 @@
 # WP7 My Notifications Roadmap
 
+## 2026-09-03 — Compact Bug-title row follow-up
+
+- **English:** DonHV selected a compact follow-up: remove the row category icon, show only `bugNumber — bugTitle` for Bug notifications, omit Bug description, retain localized Access copy, eliminate empty content controls, and prevent horizontal scrolling with native UI5 layout. Bug UI cache identity advances to `0.0.10`; CAP/UI rollout evidence is tracked in `docs/pm/evidence/my-notifications/notification-row-density-title-20260903.md`.
+- **Tiếng Việt:** DonHV chọn follow-up gọn: bỏ icon category của row, chỉ hiện `bugNumber — bugTitle` cho Bug notification, không hiện Bug description, giữ copy Access đã localize, bỏ control nội dung rỗng và ngăn scroll ngang bằng layout UI5 native. Cache identity Bug UI tăng lên `0.0.10`; evidence rollout CAP/UI được theo dõi tại `docs/pm/evidence/my-notifications/notification-row-density-title-20260903.md`.
+
 ## 2026-09-03 — Notification row metadata spacing fix
 
 - **English:** A UI-only follow-up keeps the N1–N5-Lite behavior unchanged and adds native `sapUiTinyMarginEnd` spacing between notification metadata controls. A focused RED/GREEN contract prevents `BugAssignedReadAction required` from returning. Bug Management cache identity advances to `0.0.9`; source merge, content-only rollout, and signed-in Edge acceptance are tracked in `docs/pm/evidence/my-notifications/notification-row-metadata-spacing-20260903.md`.
