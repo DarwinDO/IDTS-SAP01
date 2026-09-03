@@ -45,13 +45,13 @@ const appPackage = JSON.parse(fs.readFileSync(path.join(app, 'package.json'), 'u
 const appPackageLock = JSON.parse(fs.readFileSync(path.join(app, 'package-lock.json'), 'utf8'))
 assert.equal(manifest['sap.app'].applicationVersion.version, appPackage.version, 'HTML5 manifest and package versions stay aligned')
 assert.equal(appPackageLock.version, appPackage.version, 'HTML5 package and lockfile versions stay aligned')
-assert.equal(appPackage.version, '1.0.19', 'responsive table remediation must advance the User Administration HTML5 cache identity')
+assert.equal(appPackage.version, '1.0.20', 'Gate 7 must advance the User Administration HTML5 cache identity')
 assert.equal(appPackageLock.packages[''].version, appPackage.version, 'HTML5 lockfile root version stays aligned')
 assert.equal(appPackageLock.packages[''].name, appPackage.name, 'HTML5 lockfile root keeps package identity')
 assert.equal(appPackageLock.packages[''].license, appPackage.license, 'HTML5 lockfile root keeps package license')
 assert.deepEqual(appPackageLock.packages[''].devDependencies, appPackage.devDependencies, 'HTML5 lockfile root keeps dependency semantics')
 const bugPackage = JSON.parse(fs.readFileSync(path.join(root, 'app/bug-management-ui/package.json'), 'utf8'))
-assert.equal(bugPackage.version, '0.0.7', 'Bug Management UI version remains unchanged')
+assert.equal(bugPackage.version, '0.0.8', 'Gate 7 notification presentation must advance the Bug Management HTML5 cache identity')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
   majorVersion > 1 || minorVersion > 0 || patchVersion >= 13,

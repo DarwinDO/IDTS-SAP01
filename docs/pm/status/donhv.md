@@ -1,5 +1,11 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-09-03 — Gate 7 cache identity integration
+
+- Tooling issue, fixed workflow: the first PowerShell version-parity probe used `ConvertFrom-Json` without `-AsHashTable`; repository JSON contains an empty-string `packages[""]` key, so parsing failed before tests. No source, package, provider, runtime, or external state changed. The corrected read-only probe uses `-AsHashTable` and verifies only the two application-owned version fields plus manifest parity.
+- Test-harness issue, expected RED: the first cache-identity run reached the new `0.0.8` manifest but existing UI contracts still pinned `0.0.7` (and User Administration `1.0.19`). Production behavior was not failing. The focused contract constants are advanced together with the reviewed release identities, then rerun before commit.
+- Cache identity candidate advances User Administration `1.0.19 -> 1.0.20` and Bug Management `0.0.7 -> 0.0.8`; dependency graphs, scripts, routes, and service models remain unchanged.
+
 ## 2026-09-03 — Gate 7 profile and notification source candidate
 
 - Frozen base: `origin/dev` at `d5de0b39d2314719a138d8a1438b4af22921ee6c`; isolated branch `feature/wp8-user-admin-profile-notification-donhv`.
