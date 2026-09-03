@@ -4,6 +4,7 @@
 
 - **English:** A UI-only follow-up keeps the N1–N5-Lite behavior unchanged and adds native `sapUiTinyMarginEnd` spacing between notification metadata controls. A focused RED/GREEN contract prevents `BugAssignedReadAction required` from returning. Bug Management cache identity advances to `0.0.9`; source merge, content-only rollout, and signed-in Edge acceptance are tracked in `docs/pm/evidence/my-notifications/notification-row-metadata-spacing-20260903.md`.
 - **Tiếng Việt:** Follow-up chỉ đổi UI, giữ nguyên hành vi N1–N5-Lite và thêm khoảng cách native `sapUiTinyMarginEnd` giữa các control metadata notification. Contract RED/GREEN focused ngăn chuỗi `BugAssignedReadAction required` xuất hiện lại. Cache identity Bug Management tăng lên `0.0.9`; merge source, rollout content-only và acceptance Edge đã đăng nhập được theo dõi tại `docs/pm/evidence/my-notifications/notification-row-metadata-spacing-20260903.md`.
+- **Closure:** PR #379 merged at `61bdd23b012be36675d1769cbdc46376b5958a48`; content operation `42c8b7a9-a787-11f1-866f-eeee0a815b5e` completed and post-check returned `DEMO READY`. Cache-disabled Edge readback proved live `0.0.9` plus the native margin fix. Signed-in sessions had no rows, so no synthetic notification was created for visual evidence.
 
 ## English
 
