@@ -1,0 +1,129 @@
+{
+  "schemaVersion": "1.0",
+  "sourceWorkbook": "SU26SAP01_GSU26SAP01_Unit_Test (1).xlsx",
+  "sourceBaseline": "9d5aad699662bde65a747de4c0d631678de639e4",
+  "workbookClaimedCaseCount": 203,
+  "approvedCatalogCaseCount": 188,
+  "proposals": [
+    {
+      "sourceNumber": 189,
+      "title": "read active Developer profiles returns accurate availability",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Query active Developers.",
+      "expectedResult": "Active profiles and true availability statuses are returned.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 190,
+      "title": "read inactive user returns no profile data",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Query inactive users.",
+      "expectedResult": "No profile data is exposed.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 191,
+      "title": "user role check strictly validates TESTER",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Verify TESTER role.",
+      "expectedResult": "Only valid TESTER users return true.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 192,
+      "title": "user role check strictly validates DEVELOPER",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Verify DEVELOPER role.",
+      "expectedResult": "Only valid DEVELOPER users return true.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 193,
+      "title": "user role check strictly validates PM",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Verify PM role.",
+      "expectedResult": "Only valid PM users return true.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 194,
+      "title": "create Application Component requires PM role",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Create component as PM.",
+      "expectedResult": "Component is created successfully.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 195,
+      "title": "create Defect Category requires PM role",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Create category as PM.",
+      "expectedResult": "Category is created successfully.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 196,
+      "title": "non-PM role cannot modify catalog entities",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Create component as TESTER.",
+      "expectedResult": "HTTP 403 is returned.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 197,
+      "title": "active pair bridge validation applies across entities",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Validate active pair.",
+      "expectedResult": "Active pair bridge is strictly validated.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 198,
+      "title": "inactive catalog item blocks new classification",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Classify using inactive item.",
+      "expectedResult": "HTTP 400 is returned.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 199,
+      "title": "workload dashboard calculates active bugs correctly",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Read PM monitoring dashboard.",
+      "expectedResult": "Active bugs per developer are calculated correctly.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 200,
+      "title": "overdue bugs reflect accurate SLA thresholds",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Read SLA metrics.",
+      "expectedResult": "Overdue bugs reflect accurate SLA.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 201,
+      "title": "closed bugs are excluded from active workload",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Read PM monitoring dashboard.",
+      "expectedResult": "Closed bugs are excluded.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 202,
+      "title": "developer filter isolated accurately",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Filter dashboard by developer.",
+      "expectedResult": "Metrics correspond strictly to the developer.",
+      "suppliedResult": "O"
+    },
+    {
+      "sourceNumber": 203,
+      "title": "PM operational metrics enforce access controls",
+      "precondition": "Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "action": "Read monitoring as Developer.",
+      "expectedResult": "HTTP 403 is returned.",
+      "suppliedResult": "O"
+    }
+  ]
+}
