@@ -313,25 +313,6 @@ const securityCases = [
 ]
 for (const [id, title, input, expectedResult] of securityCases) add({ caseId: `UT-SEC-${id}`, domain: 'Security', title, classification: 'SECURITY', testLevel: id === '001' || id === '005' ? 'ODATA_CONTRACT' : 'CAP_COMPONENT', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-AUTH-002', 'SRS-FR-AI-003'), input, expectedResult, sourceTrace: source.guards.concat(source.permissions), coverage: ['ROLE', 'SANITIZATION', ...(id === '008' ? ['PERSISTENCE'] : [])] })
 
-const extraCases = [
-  ['UT-USR-001', 'User Management', 'read active Developer profiles returns accurate availability', 'Query active Developers.', 'Active profiles and true availability statuses are returned.', source.permissions],
-  ['UT-USR-002', 'User Management', 'read inactive user returns no profile data', 'Query inactive users.', 'No profile data is exposed.', source.permissions],
-  ['UT-USR-003', 'User Management', 'user role check strictly validates TESTER', 'Verify TESTER role.', 'Only valid TESTER users return true.', source.permissions],
-  ['UT-USR-004', 'User Management', 'user role check strictly validates DEVELOPER', 'Verify DEVELOPER role.', 'Only valid DEVELOPER users return true.', source.permissions],
-  ['UT-USR-005', 'User Management', 'user role check strictly validates PM', 'Verify PM role.', 'Only valid PM users return true.', source.permissions],
-  ['UT-CAT-001', 'Classification', 'create Application Component requires PM role', 'Create component as PM.', 'Component is created successfully.', source.classification],
-  ['UT-CAT-002', 'Classification', 'create Defect Category requires PM role', 'Create category as PM.', 'Category is created successfully.', source.classification],
-  ['UT-CAT-003', 'Classification', 'non-PM role cannot modify catalog entities', 'Create component as TESTER.', 'HTTP 403 is returned.', source.classification],
-  ['UT-CAT-004', 'Classification', 'active pair bridge validation applies across entities', 'Validate active pair.', 'Active pair bridge is strictly validated.', source.classification],
-  ['UT-CAT-005', 'Classification', 'inactive catalog item blocks new classification', 'Classify using inactive item.', 'HTTP 400 is returned.', source.classification],
-  ['UT-OPS-001', 'Monitoring', 'workload dashboard calculates active bugs correctly', 'Read PM monitoring dashboard.', 'Active bugs per developer are calculated correctly.', source.assignmentRead],
-  ['UT-OPS-002', 'Monitoring', 'overdue bugs reflect accurate SLA thresholds', 'Read SLA metrics.', 'Overdue bugs reflect accurate SLA.', source.assignmentRead],
-  ['UT-OPS-003', 'Monitoring', 'closed bugs are excluded from active workload', 'Read PM monitoring dashboard.', 'Closed bugs are excluded.', source.assignmentRead],
-  ['UT-OPS-004', 'Monitoring', 'developer filter isolated accurately', 'Filter dashboard by developer.', 'Metrics correspond strictly to the developer.', source.assignmentRead],
-  ['UT-OPS-005', 'Monitoring', 'PM operational metrics enforce access controls', 'Read monitoring as Developer.', 'HTTP 403 is returned.', source.permissions]
-]
-for (const [caseId, domain, title, input, expectedResult, sourceTrace] of extraCases) add({ caseId, domain, title, classification: 'POSITIVE', testLevel: 'CAP_COMPONENT', environment: 'HYBRID_BTP', requirementIds: ['SRS-FR-MISC'], roles: ['PM'], input, expectedResult, sourceTrace, coverage: ['POSITIVE', 'ROLE'] })
-
 function validate () {
   const errors = []
   const ids = new Set()

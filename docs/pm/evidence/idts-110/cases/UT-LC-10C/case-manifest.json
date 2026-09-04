@@ -1,20 +1,65 @@
 {
   "caseId": "UT-LC-10C",
   "title": "closeBug rejects an illegal source status",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "deploySha": null,
-  "environment": "LOCAL",
-  "runtime": "Node.js v24.11.0, win32 x64",
-  "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
+  "environment": "HYBRID_BTP",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/service.js#closeBug",
+    "srv/bug-service/actions.js#transitionBug",
+    "srv/bug-service/bug-write.js#validateTransition",
+    "srv/bug-service/permissions.js#enforceActionPermission",
+    "srv/bug-service/permissions.js#enforceBugWritePermission"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+  "assertions": [
+    "lifecycle: PASS  SC-01a Create bug all required fields [HTTP 201 exp 201] | status=PENDING_ASSIGNMENT",
+    "lifecycle: PASS  SC-01b Create missing title -> 400 [HTTP 400 exp 400] | Title is required.",
+    "lifecycle: PASS  SC-01c Create bug with assignee -> ASSIGNED [HTTP 201 exp 201] | status=ASSIGNED",
+    "lifecycle: PASS  SC-02a Assign BUG-0001 to DatDT [HTTP 200 exp 200] | ASSIGNED",
+    "lifecycle: PASS  SC-02b Assign without assigneeID -> 400 [HTTP 400 exp 400] | Assign Developer requires an assigneeID parameter.",
+    "lifecycle: PASS  SC-03a markInReview ASSIGNED -> IN_REVIEW [HTTP 200 exp 200] | IN_REVIEW",
+    "lifecycle: PASS  SC-04a startProgress IN_REVIEW -> IN_PROGRESS [HTTP 200 exp 200] | IN_PROGRESS",
+    "lifecycle: PASS  SC-05a requestMoreInfo with reason [HTTP 200 exp 200] | NEED_MORE_INFORMATION",
+    "lifecycle: PASS  SC-05b requestMoreInfo empty reason -> 400 [HTTP 400 exp 400] | This action requires a reason.",
+    "lifecycle: PASS  SC-05c resubmitToDeveloper NEED_MORE_INFORMATION -> ASSIGNED [HTTP 200 exp 200] | ASSIGNED",
+    "lifecycle: PASS  SC-05d resubmitToDeveloper creates follow-up comment [HTTP 200 exp 200] | Resubmitted after information request: Updated steps and attached the missing evidence.",
+    "lifecycle: PASS  SC-05e resubmitToDeveloper creates developer notification [HTTP 200 exp 200] | BUG-0001 was resubmitted with additional information.",
+    "lifecycle: PASS  SC-06a rejectBug with reason [HTTP 200 exp 200] | REJECTED",
+    "lifecycle: PASS  SC-06b rejectBug empty reason -> 400 [HTTP 400 exp 400] | This action requires a reason.",
+    "lifecycle: PASS  SC-06c requestMoreInfo on REJECTED -> 400 [HTTP 400 exp 400] | Status transition from REJECTED to NEED_MORE_INFORMATION is not allowed.",
+    "lifecycle: PASS  SC-07a moveToPendingAssignment after REJECTED [HTTP 200 exp 200] | PENDING_ASSIGNMENT",
+    "lifecycle: PASS  SC-08-prep1 Assign BUG3 to SangVN [HTTP 200 exp 200] | ASSIGNED",
+    "lifecycle: PASS  SC-08-prep2 markInReview BUG3 [HTTP 200 exp 200] | IN_REVIEW",
+    "lifecycle: PASS  SC-08-prep3 startProgress BUG3 [HTTP 200 exp 200] | IN_PROGRESS",
+    "lifecycle: PASS  SC-08b resolveBug NO note -> 400 [IDTS-3] [HTTP 400 exp 400] | This action requires a reason.",
+    "lifecycle: PASS  SC-08a resolveBug WITH note -> 200 [IDTS-3] [HTTP 200 exp 200] | RESOLVED",
+    "lifecycle: PASS  SC-09a sendToRetest on RESOLVED [HTTP 200 exp 200] | RETEST_REQUIRED",
+    "lifecycle: PASS  SC-10a reopenBug with reason [HTTP 200 exp 200] | REOPENED",
+    "lifecycle: PASS  SC-10b reopenBug empty reason -> 400 [HTTP 400 exp 400] | This action requires a reason.",
+    "lifecycle: PASS  SC-11a closeBug on RESOLVED [HTTP 200 exp 200] | CLOSED",
+    "lifecycle: PASS  SC-12a HistoryLogs for BUG-0003 [HTTP 200 exp 200] | entries found: 5",
+    "lifecycle: PASS  SC-12b HistoryEvents for BUG-0003 [HTTP 200 exp 200] | events found: 3",
+    "lifecycle: PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1785834923773",
+    "lifecycle: PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1785834923773\"}",
+    "lifecycle: PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1785834923773\"}",
+    "lifecycle: TOTAL: 30 PASS  |  0 FAIL  |  30 tests"
+  ],
   "evidenceIds": [
-    "IDTS110-UT-LC-10C-RESULT"
+    "IDTS110-UT-LC-10C-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "lifecycle"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

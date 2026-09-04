@@ -1,20 +1,53 @@
 {
   "caseId": "UT-SEC-004",
   "title": "audit entity rejects client write",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312",
+  "executedAt": "2026-08-04T09:15:45.802Z",
+  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
   "deploySha": null,
-  "environment": "LOCAL",
-  "runtime": "Node.js v24.11.0, win32 x64",
-  "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
+  "environment": "HYBRID_BTP",
+  "runtime": "Node.js v22.23.1, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
+  "sourceAssertions": [
+    "srv/bug-service/guards.js#registerReadOnlyEntityGuards",
+    "srv/ai/safety.js#containsUnsafeDiagnosticText",
+    "srv/bug-service/permissions.js#enforceActionPermission",
+    "srv/bug-service/permissions.js#enforceBugWritePermission"
+  ],
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+  "assertions": [
+    "audit: PASS  AI feature type seed count | actual=4 expected=4",
+    "audit: PASS  first feature type is duplicate detection | actual=\"DUPLICATE_DETECTION\" expected=\"DUPLICATE_DETECTION\"",
+    "audit: PASS  AI review state seed count | actual=5 expected=5",
+    "audit: PASS  first review state is pending | actual=\"PENDING\" expected=\"PENDING\"",
+    "audit: PASS  serialized payload keeps safe summary | actual=true",
+    "audit: PASS  serialized payload drops rawPrompt key | actual=false expected=false",
+    "audit: PASS  serialized payload drops messages key | actual=false expected=false",
+    "audit: PASS  serialized payload redacts provider-like secrets | actual=false expected=false",
+    "audit: PASS  backend writer creates audit row ID | actual=\"941b36ee-c33f-4255-8806-39d9ee6a88c4\"",
+    "audit: PASS  backend writer normalizes feature type | actual=\"DUPLICATE_DETECTION\" expected=\"DUPLICATE_DETECTION\"",
+    "audit: PASS  backend writer defaults review state to PENDING | actual=\"PENDING\" expected=\"PENDING\"",
+    "audit: PASS  backend writer clamps confidence to four decimals | actual=0.8765 expected=0.8765",
+    "audit: PASS  backend writer stores only sanitized suggestion payload | no unsafe detail detected",
+    "audit: PASS  BugService exposes audit row read-only projection | actual=1 expected=1",
+    "audit: PASS  projection resolves feature type display name | actual=\"Duplicate Detection\" expected=\"Duplicate Detection\"",
+    "audit: PASS  projection resolves review state display name | actual=\"Pending Review\" expected=\"Pending Review\"",
+    "audit: PASS  projection resolves requester display name | actual=\"DonHV\" expected=\"DonHV\"",
+    "audit: PASS  client write to BugService.AiSuggestions is rejected | actual=true expected=true",
+    "audit: PASS  backend writer rejects inactive feature type | actual=true expected=true",
+    "audit: TOTAL: 19 PASS  |  0 FAIL  |  19 checks"
+  ],
   "evidenceIds": [
-    "IDTS110-UT-SEC-004-RESULT"
+    "IDTS110-UT-SEC-004-LOCAL-PRIMARY-RESULT"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
+  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
+  "suiteKeys": [
+    "audit"
+  ],
+  "structuredEvidenceFile": "../../local-primary-suite-results.json"
 }

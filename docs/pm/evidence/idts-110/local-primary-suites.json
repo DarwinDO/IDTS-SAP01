@@ -2,40 +2,34 @@
   "schemaVersion": "1.0",
   "jiraKey": "IDTS-110",
   "purpose": "Fresh local-primary domain-suite rerun evidence for the 135 HYBRID_BTP cases corrected by DonHV.",
-  "startedAt": "2026-09-04T06:23:32.019Z",
-  "completedAt": "2026-09-04T06:23:32.020Z",
-  "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312",
+  "startedAt": "2026-09-04T10:43:34.521Z",
+  "completedAt": "2026-09-04T10:43:34.522Z",
+  "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab",
   "policy": {
-    "mappingOnlyIsAtomicExecution": true,
+    "mappingOnlyIsAtomicExecution": false,
     "humanReviewer": "DonHV",
     "btpConfirmationIsOptionalForPrimaryAssertion": true
   },
   "executions": {
     "auth": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-auth-foundation-programmatic.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-auth-foundation-programmatic.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  active login token type | actual=\"Bearer\" expected=\"Bearer\"",
         "PASS  active login returns token | present=true",
         "PASS  active login maps user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
         "PASS  active login maps role | actual=\"PM\" expected=\"PM\"",
-        "PASS  active login returns expiry | actual=\"2026-09-04T14:22:54.576Z\"",
+        "PASS  active login returns expiry | actual=\"2026-09-04T18:43:10.517Z\"",
         "PASS  wrong password is denied safely | code=401 message=Invalid email or password.",
         "PASS  inactive user is denied safely | code=401 message=Invalid email or password.",
         "PASS  unexpected login diagnostic excludes raw SQL details | no unsafe detail detected",
         "PASS  unexpected login error response is sanitized | code=500 message=Sign-in is temporarily unavailable. Please try again later.",
-        "PASS  session row created | actual=\"cd5d3d33-0260-4926-a986-92f4b774b5a2\"",
+        "PASS  session row created | actual=\"6173b8ee-7163-41f5-9a4b-73b7dd54605f\"",
         "PASS  raw token is not stored | actual=false expected=false",
         "PASS  stored hash matches token | equal=true",
         "PASS  session starts unrevoked | actual=null expected=null",
@@ -44,7 +38,7 @@
         "PASS  middleware maps authenticated-user role | actual=true expected=true",
         "PASS  middleware maps business role | actual=true expected=true",
         "PASS  middleware maps IDTS user attribute | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-        "PASS  middleware maps session attribute | actual=\"cd5d3d33-0260-4926-a986-92f4b774b5a2\" expected=\"cd5d3d33-0260-4926-a986-92f4b774b5a2\"",
+        "PASS  middleware maps session attribute | actual=\"6173b8ee-7163-41f5-9a4b-73b7dd54605f\" expected=\"6173b8ee-7163-41f5-9a4b-73b7dd54605f\"",
         "PASS  me returns current user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
         "PASS  me returns current user email | actual=\"donhv@example.local\" expected=\"donhv@example.local\"",
         "PASS  me returns current user role | actual=\"PM\" expected=\"PM\"",
@@ -60,7 +54,7 @@
         "PASS  XSUAA missing identity fails closed | status=403",
         "PASS  safe XSUAA profile has no provider or identity fields | actual=false expected=false",
         "PASS  logout returns true for active session | actual=true expected=true",
-        "PASS  logout sets revokedAt | actual=\"2026-09-04T06:22:54.627Z\"",
+        "PASS  logout sets revokedAt | actual=\"2026-09-04T10:43:10.572Z\"",
         "PASS  middleware rejects revoked token | actual=401 expected=401",
         "PASS  middleware internal auth error status is generic | actual=500 expected=500",
         "PASS  middleware internal auth error code is generic | actual=\"AUTHENTICATION_UNAVAILABLE\" expected=\"AUTHENTICATION_UNAVAILABLE\"",
@@ -70,27 +64,16 @@
       "totals": [
         "TOTAL: 39 PASS  |  0 FAIL  |  39 checks"
       ],
-      "outputSha256": "3ceb38eb32472ae8d86d67aad480c954e22fa71c17439e2ecb47bde1eccae0f7"
+      "outputSha256": "8f6936e99f59135db4366b2aecd6b6dc09903602ae3a65778661cb806e5ad649"
     },
     "bug": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts6-programmatic.js"
-        ],
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts23-regression.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts6-programmatic.js",
+        "test-idts23-regression.js"
       ],
-      "exitCodes": [
-        0,
-        0
-      ],
-      "signals": [
-        null,
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  SC-01a Create bug all required fields [HTTP 201 exp 201] | status=PENDING_ASSIGNMENT",
@@ -121,78 +104,23 @@
         "PASS  SC-11a closeBug on RESOLVED [HTTP 200 exp 200] | CLOSED",
         "PASS  SC-12a HistoryLogs for BUG-0003 [HTTP 200 exp 200] | entries found: 5",
         "PASS  SC-12b HistoryEvents for BUG-0003 [HTTP 200 exp 200] | events found: 3",
-        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1788502976065",
-        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1788502976065\"}",
-        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1788502976065\"}",
-        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests",
-        "PASS  OWN-01 Pending Assignment owner = Project Manager | actual=\"Project Manager\" expected=\"Project Manager\"",
-        "PASS  OWN-02 Assigned owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-03 In Review owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-04 In Progress owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-05 Need More Info owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-06 Resubmitted owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-07 In Review again owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-08 In Progress again owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-09 Resolved owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-10 Retest Required owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-11 Closed owner = null | actual=null expected=null",
-        "PASS  OWN-12 Reopened owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-13 Rejected owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-14 Pending Assignment owner = Project Manager | actual=\"Project Manager\" expected=\"Project Manager\"",
-        "PASS  HIS-01 Assign event exists | Assigned bug to a developer. Status changed from Reopened to Assigned.",
-        "PASS  HIS-02 Assign grouped context has Status | haystack=\"Status: Reopened → Assigned\" needle=\"Status:\"",
-        "PASS  HIS-03 Assign changeCount >= 1 | changeCount=1",
-        "PASS  HIS-04 Mark In Review event exists | Marked bug as In Review.",
-        "PASS  HIS-05 Mark In Review grouped context has Status | haystack=\"Status: Assigned → In Review\" needle=\"Status:\"",
-        "PASS  HIS-05b Start Progress event exists | Started progress on the bug.",
-        "PASS  HIS-06 Request Info event exists | Requested more information. Status changed from In Progress to Need More Information.",
-        "PASS  HIS-07 Request Info reason is present | Need more logs for regression test",
-        "PASS  HIS-08 Resolve event exists | Marked bug as resolved. Status changed from In Progress to Resolved.",
-        "PASS  HIS-09 Resolve grouped context has Status | haystack=\"Status: In Progress → Resolved · Current Action Owner: SangVN → NhanT · Action Owner Role: Developer → Tester\" needle=\"Status:\"",
-        "PASS  HIS-10 Retest event exists | Sent bug to retest. Status changed from Resolved to Retest Required.",
-        "PASS  HIS-11 Close event exists | Closed bug. Status changed from Retest Required to Closed.",
-        "PASS  HIS-12 Close grouped context has Status | haystack=\"Status: Retest Required → Closed · Current Action Owner cleared · Action Owner Role: Tester → None\" needle=\"Status:\"",
-        "PASS  HIS-13 Reopen event exists | Reopened bug. Status changed from Closed to Reopened.",
-        "PASS  HIS-14 Reopen reason is present | Reopening for additional regression checks",
-        "PASS  HIS-15 Reject event exists | Rejected bug for follow-up. Status changed from Assigned to Rejected.",
-        "PASS  HIS-16 Reject reason is present | Wrong classification for regression test",
-        "PASS  MON-01 Pending Assignment isPendingAssignment=true | actual=true expected=true",
-        "PASS  MON-02 Pending Assignment isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-03 Pending Assignment isOverdue=true (past due) | actual=true expected=true",
-        "PASS  MON-04 Assigned isPendingAssignment=false | actual=false expected=false",
-        "PASS  MON-05 Assigned isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-06 Rejected isRejectedFollowUp=true | actual=true expected=true",
-        "PASS  MON-07 Rejected isPendingAssignment=false | actual=false expected=false",
-        "PASS  MON-08 Pending isPendingAssignment=true | actual=true expected=true",
-        "PASS  MON-09 Pending isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-10 Resolved isRetestRequired=false | actual=false expected=false",
-        "PASS  MON-11 Retest Required isRetestRequired=true | actual=true expected=true",
-        "PASS  MON-12 Closed isPendingAssignment=false | actual=false expected=false",
-        "PASS  MON-13 Closed isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-14 Closed isRetestRequired=false | actual=false expected=false",
-        "PASS  MON-15 Closed isOverdue=false | actual=false expected=false",
-        "TOTAL: 46 PASS  |  0 FAIL  |  46 checks"
+        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1788518592049",
+        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1788518592049\"}",
+        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1788518592049\"}",
+        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests"
       ],
       "totals": [
-        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests",
-        "PASS  HIS-14 Reopen reason is present | Reopening for additional regression checks",
-        "TOTAL: 46 PASS  |  0 FAIL  |  46 checks"
+        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests"
       ],
-      "outputSha256": "560c71030c5d419b83bdb8750a750eaabec84fe5bddcf71e34c66d24c8ca3747"
+      "outputSha256": "9f50e9c0190de305780f99f014cfe4fd72a8451bbea06323cbe8a4338772f37f"
     },
     "classification": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts41-code-list-validation.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts41-code-list-validation.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  valid active catalog codes create a bug",
@@ -223,21 +151,15 @@
         "PASS  PM is denied at root draft creation | code=403 target=n/a"
       ],
       "totals": [],
-      "outputSha256": "a2f3ccf32ebbb48a1f47cd8d8c11f41c64207b8bda5bb022ebce390a8c41e88a"
+      "outputSha256": "8d670699330c3bb3f84ddf6d8d672dbd18b7de8ae591e09c7372612028a0c98e"
     },
     "assignment": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts56-smart-assign.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts56-smart-assign.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  manifest wires Smart Assign through the Assignee custom section, not a header action",
@@ -260,34 +182,18 @@
       "totals": [
         "TOTAL: 15 PASS  |  0 FAIL"
       ],
-      "outputSha256": "4f81f360284a40b516da2653cd165e25dcb7844bdaa16fa365b92e8e23e6c450"
+      "outputSha256": "07c2b1429d138c9dc7ec2d950c3653a2e78746b8af1fb407820f5b2a4ad50083"
     },
     "lifecycle": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts6-programmatic.js"
-        ],
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts23-regression.js"
-        ],
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-history-events-programmatic.js",
-          "all"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts6-programmatic.js",
+        "test-idts23-regression.js",
+        "test-history-events-programmatic.js",
+        "all"
       ],
-      "exitCodes": [
-        0,
-        0,
-        0
-      ],
-      "signals": [
-        null,
-        null,
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  SC-01a Create bug all required fields [HTTP 201 exp 201] | status=PENDING_ASSIGNMENT",
@@ -318,104 +224,40 @@
         "PASS  SC-11a closeBug on RESOLVED [HTTP 200 exp 200] | CLOSED",
         "PASS  SC-12a HistoryLogs for BUG-0003 [HTTP 200 exp 200] | entries found: 5",
         "PASS  SC-12b HistoryEvents for BUG-0003 [HTTP 200 exp 200] | events found: 3",
-        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1788502986520",
-        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1788502986520\"}",
-        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1788502986520\"}",
-        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests",
-        "PASS  OWN-01 Pending Assignment owner = Project Manager | actual=\"Project Manager\" expected=\"Project Manager\"",
-        "PASS  OWN-02 Assigned owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-03 In Review owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-04 In Progress owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-05 Need More Info owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-06 Resubmitted owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-07 In Review again owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-08 In Progress again owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-09 Resolved owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-10 Retest Required owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-11 Closed owner = null | actual=null expected=null",
-        "PASS  OWN-12 Reopened owner = SangVN | actual=\"SangVN\" expected=\"SangVN\"",
-        "PASS  OWN-13 Rejected owner = NhanT | actual=\"NhanT\" expected=\"NhanT\"",
-        "PASS  OWN-14 Pending Assignment owner = Project Manager | actual=\"Project Manager\" expected=\"Project Manager\"",
-        "PASS  HIS-01 Assign event exists | Assigned bug to a developer. Status changed from Reopened to Assigned.",
-        "PASS  HIS-02 Assign grouped context has Status | haystack=\"Status: Reopened → Assigned\" needle=\"Status:\"",
-        "PASS  HIS-03 Assign changeCount >= 1 | changeCount=1",
-        "PASS  HIS-04 Mark In Review event exists | Marked bug as In Review.",
-        "PASS  HIS-05 Mark In Review grouped context has Status | haystack=\"Status: Assigned → In Review\" needle=\"Status:\"",
-        "PASS  HIS-05b Start Progress event exists | Started progress on the bug.",
-        "PASS  HIS-06 Request Info event exists | Requested more information. Status changed from In Progress to Need More Information.",
-        "PASS  HIS-07 Request Info reason is present | Need more logs for regression test",
-        "PASS  HIS-08 Resolve event exists | Marked bug as resolved. Status changed from In Progress to Resolved.",
-        "PASS  HIS-09 Resolve grouped context has Status | haystack=\"Status: In Progress → Resolved · Current Action Owner: SangVN → NhanT · Action Owner Role: Developer → Tester\" needle=\"Status:\"",
-        "PASS  HIS-10 Retest event exists | Sent bug to retest. Status changed from Resolved to Retest Required.",
-        "PASS  HIS-11 Close event exists | Closed bug. Status changed from Retest Required to Closed.",
-        "PASS  HIS-12 Close grouped context has Status | haystack=\"Status: Retest Required → Closed · Current Action Owner cleared · Action Owner Role: Tester → None\" needle=\"Status:\"",
-        "PASS  HIS-13 Reopen event exists | Reopened bug. Status changed from Closed to Reopened.",
-        "PASS  HIS-14 Reopen reason is present | Reopening for additional regression checks",
-        "PASS  HIS-15 Reject event exists | Rejected bug for follow-up. Status changed from Assigned to Rejected.",
-        "PASS  HIS-16 Reject reason is present | Wrong classification for regression test",
-        "PASS  MON-01 Pending Assignment isPendingAssignment=true | actual=true expected=true",
-        "PASS  MON-02 Pending Assignment isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-03 Pending Assignment isOverdue=true (past due) | actual=true expected=true",
-        "PASS  MON-04 Assigned isPendingAssignment=false | actual=false expected=false",
-        "PASS  MON-05 Assigned isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-06 Rejected isRejectedFollowUp=true | actual=true expected=true",
-        "PASS  MON-07 Rejected isPendingAssignment=false | actual=false expected=false",
-        "PASS  MON-08 Pending isPendingAssignment=true | actual=true expected=true",
-        "PASS  MON-09 Pending isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-10 Resolved isRetestRequired=false | actual=false expected=false",
-        "PASS  MON-11 Retest Required isRetestRequired=true | actual=true expected=true",
-        "PASS  MON-12 Closed isPendingAssignment=false | actual=false expected=false",
-        "PASS  MON-13 Closed isRejectedFollowUp=false | actual=false expected=false",
-        "PASS  MON-14 Closed isRetestRequired=false | actual=false expected=false",
-        "PASS  MON-15 Closed isOverdue=false | actual=false expected=false",
-        "TOTAL: 46 PASS  |  0 FAIL  |  46 checks",
-        "PASS  HE-01 assign summary is readable | Assigned bug to DatDT. Status changed from Pending Assignment to Assigned.",
-        "PASS  HE-02 assign grouped context is event-first readable | Status: Pending Assignment → Assigned · Assignee: DatDT · Current Action Owner: DonHV → DatDT · +1 more changes",
-        "PASS  HE-03 assign change count is populated | changeCount=4"
+        "PASS  SC-13a updateBug title/description [HTTP 200 exp 200] | QA title update 1788518596106",
+        "PASS  SC-13b title edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"title\",\"newValue\":\"QA title update 1788518596106\"}",
+        "PASS  SC-13c description edit writes history [HTTP 200 exp 200] | {\"fieldName\":\"description\",\"newValue\":\"QA description update 1788518596106\"}",
+        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests"
       ],
       "totals": [
-        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests",
-        "PASS  HIS-14 Reopen reason is present | Reopening for additional regression checks",
-        "TOTAL: 46 PASS  |  0 FAIL  |  46 checks"
+        "TOTAL: 31 PASS  |  0 FAIL  |  31 tests"
       ],
-      "outputSha256": "131b2dfedbb95cd867c33378bcb6215328c8971250cb6ce1e17c3d0c7e0104d7"
+      "outputSha256": "aac3e117c44f26449dd1129e579b210cdc19c2628ddb24fcfa110113fe0bed5d"
     },
     "collaboration": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-comments-attachments-programmatic.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-comments-attachments-programmatic.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
-        "PASS  comment row created: c6b4c6c2-e86e-4509-8c09-573742ae8f24",
+        "PASS  comment row created: b5efbd69-15b6-4bc2-bdd9-7d51d09264d4",
         "PASS  comment row still exists after reconnecting to the same SQLite file",
         "RESULT: PASS"
       ],
       "totals": [],
-      "outputSha256": "0c4bdab527beb1b7d6cd2dcc7dcd7cef96fc7bb2fbd0b34a3b5c32a326d7e7d2"
+      "outputSha256": "b00d177f6c56ae8750f7f3480f9d614ced30bf166ca0a7af26d4ab920769ea3b"
     },
     "history": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-history-events-programmatic.js",
-          "all"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-history-events-programmatic.js",
+        "all"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  HE-01 assign summary is readable | Assigned bug to DatDT. Status changed from Pending Assignment to Assigned.",
@@ -423,21 +265,15 @@
         "PASS  HE-03 assign change count is populated | changeCount=4"
       ],
       "totals": [],
-      "outputSha256": "aa89f167814396e3a258af5b50b7ca9d8898e33ee1a8361fb60efb022930bd8f"
+      "outputSha256": "a800e3bf54a221838e9da0633459c2fa25e7425db355d8b1a4f7cee49bae8091"
     },
     "notification": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-email-outbox-programmatic.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-email-outbox-programmatic.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "IDTS-36 email outbox programmatic checks: PASS"
@@ -446,18 +282,12 @@
       "outputSha256": "bfd50f78faedd88754ed97ca5dcf70cb413ae7063e3b6d0693e326021bca8765"
     },
     "monitoring": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-pm-monitoring-programmatic.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-pm-monitoring-programmatic.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  BUG-0001 isOverdue | actual=true expected=true",
@@ -485,21 +315,15 @@
       "totals": [
         "TOTAL: 20 PASS  |  0 FAIL  |  20 checks"
       ],
-      "outputSha256": "a8358d976b914d414539fa0b66eb8b4d9ed950c9a54e62b89c78091b8185f280"
+      "outputSha256": "268a1b186c3f4eaff315992f471455069e792c83c018a6107bdf0c2eb5f9d342"
     },
     "aiDuplicate": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts66-duplicate-detection.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts66-duplicate-detection.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  positive search returns at least one candidate | actual=1",
@@ -508,13 +332,13 @@
         "PASS  top candidate includes a concise human-review reason | actual=true",
         "PASS  successful provider path uses an embedding | actual=true expected=true",
         "PASS  successful provider path reports SUCCESS | actual=\"SUCCESS\" expected=\"SUCCESS\"",
-        "PASS  persisted source search returns suggestion audit ID | actual=\"71c30362-5ce3-44d6-a6ba-e83aab5c14db\"",
+        "PASS  persisted source search returns suggestion audit ID | actual=\"e7b5fcc4-788f-40ba-9135-88372d8bd384\"",
         "PASS  all similar candidates share one review audit ID | actual=true expected=true",
         "PASS  source bug is excluded from its own candidates | actual=false expected=false",
         "PASS  positive response contains no unsafe diagnostic text | no unsafe detail detected",
         "PASS  unrelated bug is absent or remains below similar confidence | not returned",
         "PASS  source-linked search writes one audit row | actual=1 expected=1",
-        "PASS  candidate review ID matches persisted audit row | actual=\"71c30362-5ce3-44d6-a6ba-e83aab5c14db\" expected=\"71c30362-5ce3-44d6-a6ba-e83aab5c14db\"",
+        "PASS  candidate review ID matches persisted audit row | actual=\"e7b5fcc4-788f-40ba-9135-88372d8bd384\" expected=\"e7b5fcc4-788f-40ba-9135-88372d8bd384\"",
         "PASS  audit row starts in pending review | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  duplicate audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
         "PASS  duplicate audit persists non-negative latency | actual=true",
@@ -552,21 +376,15 @@
       "totals": [
         "TOTAL: 45 PASS  |  0 FAIL  |  45 checks"
       ],
-      "outputSha256": "584222f313d5517310256cb1b537be98e905a6c57904521ba698163ea2b2c73d"
+      "outputSha256": "bfbbba77d601759b0440ad391da13384ffa42eef4ee03fd9e3913ea6d16be792"
     },
     "aiClassification": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts67-classification-suggestion.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts67-classification-suggestion.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  classification schema requires all five grounded fields | actual=5 expected=5",
@@ -581,11 +399,11 @@
         "PASS  high-confidence valid provider suggestion status | actual=\"SUGGESTED\" expected=\"SUGGESTED\"",
         "PASS  provider-backed rows are explicitly labelled as AI suggestions | actual=true expected=true",
         "PASS  classification suggestions always require human review | actual=true expected=true",
-        "PASS  persisted source classification returns suggestion audit ID | actual=\"a6b5289d-2678-461b-b7e2-5859b4fb312c\"",
+        "PASS  persisted source classification returns suggestion audit ID | actual=\"21bebc68-3812-44c7-b9ed-e66e8e71eccd\"",
         "PASS  all classification rows share one review audit ID | actual=true expected=true",
         "PASS  positive response contains no unsafe diagnostic text | no unsafe detail detected",
         "PASS  source-linked classification writes one AI audit row | actual=1 expected=1",
-        "PASS  classification review ID matches persisted audit row | actual=\"a6b5289d-2678-461b-b7e2-5859b4fb312c\" expected=\"a6b5289d-2678-461b-b7e2-5859b4fb312c\"",
+        "PASS  classification review ID matches persisted audit row | actual=\"21bebc68-3812-44c7-b9ed-e66e8e71eccd\" expected=\"21bebc68-3812-44c7-b9ed-e66e8e71eccd\"",
         "PASS  classification audit starts pending review | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  classification audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
         "PASS  classification audit persists non-negative latency | actual=true",
@@ -610,21 +428,15 @@
       "totals": [
         "TOTAL: 36 PASS  |  0 FAIL  |  36 checks"
       ],
-      "outputSha256": "d3779eaeeb23b186af15a431ce1d1c864c5ff05af2d6dc2ccc4272f41dcd6da4"
+      "outputSha256": "33d8847294043661b8b537a3525bcbdfcca7b010e704954003360cc22507488d"
     },
     "aiSummary": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts68-bug-summary.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts68-bug-summary.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  summary action returns the requested bug ID | actual=\"93000000-0000-0000-0000-000000000001\" expected=\"93000000-0000-0000-0000-000000000001\"",
@@ -639,11 +451,11 @@
         "PASS  important events expose the stored field change | actual=\"[2026-07-09T09:10:00.000Z] SangVN (DEVELOPER) — REQUEST_INFO: Requested more information from tester. Changes: Status: Assigned -> Need More Information\\n[2026-07-09T09:15:00.000Z] DonHV (PM) — EDIT: Updated expected result. Changes: Expected Result: No SQL error. -> The page should show a safe business-facing error.\" expected includes=\"Status: Assigned -> Need More Information\"",
         "PASS  next expected action is explicit | actual=\"Tester or PM should provide the requested information, then resubmit the bug to the assigned developer.\" expected includes=\"resubmit\"",
         "PASS  summary always requires human review | actual=true expected=true",
-        "PASS  summary returns its persisted suggestion ID | actual=\"19e6eba9-0735-40dd-913e-00c94ca949fe\"",
-        "PASS  summary includes generated timestamp | actual=\"2026-09-04T06:23:23.193Z\"",
+        "PASS  summary returns its persisted suggestion ID | actual=\"68df5bdb-126e-4843-834d-3bf30bdf389f\"",
+        "PASS  summary includes generated timestamp | actual=\"2026-09-04T10:43:25.435Z\"",
         "PASS  positive summary response contains no unsafe diagnostic text | no unsafe detail detected",
         "PASS  source-linked summary writes one AI audit row | actual=1 expected=1",
-        "PASS  summary response points to the persisted audit row | actual=\"19e6eba9-0735-40dd-913e-00c94ca949fe\" expected=\"19e6eba9-0735-40dd-913e-00c94ca949fe\"",
+        "PASS  summary response points to the persisted audit row | actual=\"68df5bdb-126e-4843-834d-3bf30bdf389f\" expected=\"68df5bdb-126e-4843-834d-3bf30bdf389f\"",
         "PASS  summary audit starts pending review | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  summary audit persists final operation status | actual=\"SUCCESS\" expected=\"SUCCESS\"",
         "PASS  summary audit persists non-negative latency | actual=true",
@@ -673,27 +485,21 @@
         "PASS  malformed output fallback still explains current action owner | actual=\"BUG-AI-SUMMARY-001: Login form exposes raw SQL text after invalid password. Current status is NEED_MORE_INFORMATION - Need More Information. Current action owner is DonHV. There are 8 recent comment(s) included in this handoff.\" expected includes=\"Current action owner\"",
         "PASS  unknown source bug is rejected with 404 | actual=true expected=true",
         "PASS  summary action never mutates bug status | actual=\"NEED_MORE_INFORMATION\" expected=\"NEED_MORE_INFORMATION\"",
-        "PASS  summary action never updates bug modifiedAt | actual=\"2026-09-04T06:23:23.174Z\" expected=\"2026-09-04T06:23:23.174Z\"",
+        "PASS  summary action never updates bug modifiedAt | actual=\"2026-09-04T10:43:25.415Z\" expected=\"2026-09-04T10:43:25.415Z\"",
         "TOTAL: 47 PASS  |  0 FAIL  |  47 checks"
       ],
       "totals": [
         "TOTAL: 47 PASS  |  0 FAIL  |  47 checks"
       ],
-      "outputSha256": "775cdeb61c857dea25291de7b352934da6f9675f25ee2c3655713cd3a7bcdeaf"
+      "outputSha256": "6272ecf188d0a15eb9e9376ab8e4144cf4d2270403b2923a2403a2a725fb07be"
     },
     "aiAssignment": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts69-assignment-explanation.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts69-assignment-explanation.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  Smart Assign keeps its provider work inside the AppRouter response budget",
@@ -714,30 +520,24 @@
       "totals": [
         "TOTAL: 13 PASS  |  0 FAIL"
       ],
-      "outputSha256": "89b0f7b15c8441d32b7949a29e25831026caafa8b37667670d87f19f89fa0a55"
+      "outputSha256": "ff8f1ff67be367a7a0a73945ceceacc978daab97460ae7f5c38f35b5d9862b1a"
     },
     "aiReview": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts91-ai-review-actions.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts91-ai-review-actions.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
-        "PASS  accept returns the reviewed suggestion ID | actual=\"8929393b-9f56-4905-bae5-e6f6f4d8fe59\" expected=\"8929393b-9f56-4905-bae5-e6f6f4d8fe59\"",
+        "PASS  accept returns the reviewed suggestion ID | actual=\"e23ac8c0-263d-41e6-9ac7-75bbf8a26638\" expected=\"e23ac8c0-263d-41e6-9ac7-75bbf8a26638\"",
         "PASS  accept returns ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
         "PASS  accept returns reviewer display name | actual=\"DonHV\" expected=\"DonHV\"",
-        "PASS  accept returns review timestamp | actual=\"2026-09-04T06:23:25.742Z\"",
+        "PASS  accept returns review timestamp | actual=\"2026-09-04T10:43:28.020Z\"",
         "PASS  accept persists ACCEPTED state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
         "PASS  accept persists authenticated reviewer | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-        "PASS  accept persists reviewedAt | actual=\"2026-09-04T06:23:25.742Z\"",
+        "PASS  accept persists reviewedAt | actual=\"2026-09-04T10:43:28.020Z\"",
         "PASS  review action does not mutate Bug business data | actual=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\" expected=\"{\\\"status_code\\\":\\\"PENDING_ASSIGNMENT\\\",\\\"assignee_ID\\\":null,\\\"sapModule_ID\\\":null,\\\"applicationComponent_ID\\\":\\\"40000000-0000-0000-0000-000000000005\\\",\\\"defectCategory_ID\\\":\\\"50000000-0000-0000-0000-000000000001\\\",\\\"componentCategory_ID\\\":\\\"60000000-0000-0000-0000-000000000009\\\",\\\"priority_code\\\":\\\"HIGH\\\",\\\"severity_code\\\":\\\"MAJOR\\\"}\"",
         "PASS  a second decision on the same suggestion is rejected safely | status=409 message=This AI suggestion is no longer pending review.",
         "PASS  repeat decision keeps the original state | actual=\"ACCEPTED\" expected=\"ACCEPTED\"",
@@ -755,21 +555,15 @@
       "totals": [
         "TOTAL: 19 PASS  |  0 FAIL  |  19 checks"
       ],
-      "outputSha256": "b91eed38dfeb129a6fce644a4ccd0cd79453959e4d6e45340bd23e5e80e9f983"
+      "outputSha256": "04c021489a17e36187c223170729eb4b781b1fba0301ffcbd7936498be4dfb5b"
     },
     "aiApply": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts93-apply-classification.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts93-apply-classification.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  Tester can apply an accepted classification suggestion | actual=\"95000000-0000-0000-0000-000000000001\" expected=\"95000000-0000-0000-0000-000000000001\"",
@@ -812,21 +606,15 @@
       "totals": [
         "TOTAL: 35 PASS  |  0 FAIL  |  35 checks"
       ],
-      "outputSha256": "3f86236c14663aba407f95b9289d292dd590b8fc681d26e13777243b730c5b23"
+      "outputSha256": "19561c1581ea17a54df7845e9f51877b3c997717f72475cc5d39d809f4e1e3b1"
     },
     "aiDuplicateConfirm": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts95-confirm-duplicate-suggestion.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts95-confirm-duplicate-suggestion.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  the same Bug pair always receives the same link ID | actual=\"193e856c-6bc9-554a-a8ee-70056df240eb\" expected=\"193e856c-6bc9-554a-a8ee-70056df240eb\"",
@@ -865,21 +653,15 @@
       "totals": [
         "TOTAL: 31 PASS  |  0 FAIL  |  31 checks"
       ],
-      "outputSha256": "b97171879dc101280c19af87b1f57dfcae2afc3932ad0d572799f56c7c611d86"
+      "outputSha256": "67b787b4e1a47f4d39a5d80facc37bde1e717a7f2af8899325194959d92f7db9"
     },
     "aiMetrics": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts97-ai-operational-metrics.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts97-ai-operational-metrics.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  migration uses exactly two additive idempotent columns | actual=true",
@@ -933,21 +715,15 @@
       "totals": [
         "TOTAL: 46 PASS  |  0 FAIL  |  46 checks"
       ],
-      "outputSha256": "545bc92c8e8847c1f65fc8133c4db8eb6df974454c3edc0697d96497e1b7a471"
+      "outputSha256": "4dfaec7b5a4a8b1a904be8b9681cfb0764a094b52c8c79fdb115cbea64ca724f"
     },
     "securityAi": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts71-ai-security-review.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts71-ai-security-review.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  audit serializer keeps safe summary | actual=true",
@@ -977,7 +753,7 @@
         "PASS  AI actions do not assign a developer | actual=null expected=null",
         "PASS  AI actions do not persist classification priority | actual=\"HIGH\" expected=\"HIGH\"",
         "PASS  AI actions do not persist classification severity | actual=\"MAJOR\" expected=\"MAJOR\"",
-        "PASS  AI actions do not touch modifiedAt | actual=\"2026-09-04T06:23:30.652Z\" expected=\"2026-09-04T06:23:30.652Z\"",
+        "PASS  AI actions do not touch modifiedAt | actual=\"2026-09-04T10:43:33.228Z\" expected=\"2026-09-04T10:43:33.228Z\"",
         "PASS  source-linked AI actions write audit rows | actual=true",
         "PASS  AI audit rows contain no raw prompt, SQL, token, or provider secret | no unsafe detail detected",
         "PASS  AI audit rows are review records only | actual=true",
@@ -986,21 +762,15 @@
       "totals": [
         "TOTAL: 31 PASS  |  0 FAIL  |  31 checks"
       ],
-      "outputSha256": "9bdbe1b58b735eedb18126bb29a761baffe3730117c885f119ab71db82781a63"
+      "outputSha256": "051f3166f51dd398ab740ed8cac39686123b82ab9c4b35cbbc78ab3d5a66cfc5"
     },
     "audit": {
-      "commands": [
-        [
-          "C:\\Program Files\\nodejs\\node.exe",
-          "scripts\\qa\\test-idts65-ai-suggestion-audit.js"
-        ]
+      "command": [
+        "C:\\Program Files\\nodejs\\node.exe",
+        "scripts\\qa\\test-idts65-ai-suggestion-audit.js"
       ],
-      "exitCodes": [
-        0
-      ],
-      "signals": [
-        null
-      ],
+      "exitCode": 0,
+      "signal": null,
       "passed": true,
       "assertions": [
         "PASS  AI feature type seed count | actual=4 expected=4",
@@ -1011,7 +781,7 @@
         "PASS  serialized payload drops rawPrompt key | actual=false expected=false",
         "PASS  serialized payload drops messages key | actual=false expected=false",
         "PASS  serialized payload redacts provider-like secrets | actual=false expected=false",
-        "PASS  backend writer creates audit row ID | actual=\"9f2613d5-6ce9-4f76-aaf0-3c00b895de1e\"",
+        "PASS  backend writer creates audit row ID | actual=\"b97834e0-5f14-40d4-b7e5-446aaa1d24ae\"",
         "PASS  backend writer normalizes feature type | actual=\"DUPLICATE_DETECTION\" expected=\"DUPLICATE_DETECTION\"",
         "PASS  backend writer defaults review state to PENDING | actual=\"PENDING\" expected=\"PENDING\"",
         "PASS  backend writer clamps confidence to four decimals | actual=0.8765 expected=0.8765",
@@ -1027,1364 +797,1229 @@
       "totals": [
         "TOTAL: 19 PASS  |  0 FAIL  |  19 checks"
       ],
-      "outputSha256": "35ac5940b5d27b5bc2c90eeac2dd46f1a586a7ad75773f57296c7b08fe84b704"
+      "outputSha256": "46919664d3bbbf8030b5f47105cff9c8d3f0ea5d431a796b537f3af9b0ae93df"
     }
   },
   "caseResults": [
     {
       "caseId": "UT-AUTH-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AUTH-008",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AUTH-009",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AUTH-010",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-003",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-004",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-005",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-006",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-008",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-009",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-010",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-BUG-011",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-VAL-PAIR-VALID",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-VAL-PAIR-NOMAP",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-VAL-PAIR-CHANGE",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-VAL-PAIR-PARTIAL",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-003",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-004",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-005",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-006",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-008",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-009",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-010",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ASN-011",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "assignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-01A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-01B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-01C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-01D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-02A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-02B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-02C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-03A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-03B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-03C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-03D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-04A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-04B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-04C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-04D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-04E",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-05A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-05B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-05C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-05D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-05E",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-06A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-06B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-06C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-06D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-06E",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-07A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-07B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-07C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-07D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-08A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-08B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-08C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-08D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-08E",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-09A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-09B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-09C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-10A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-10B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-10C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-11A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-11B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-11C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-LC-11D",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "lifecycle"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-CMT-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-CMT-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-CMT-003",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-CMT-006",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-CMT-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ATT-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-ATT-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "collaboration"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-HIS-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-HIS-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-HIS-003",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-HIS-004",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-HIS-005",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-HIS-006",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-HIS-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-003",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-004",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-005",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-006",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-008",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-NTF-012",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "notification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-MON-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-MON-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-MON-003",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-MON-004",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-MON-005",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-MON-006",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "monitoring"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-MON-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiMetrics"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-008",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicate"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-009",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicate"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-010",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiClassification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-011",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiClassification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-012",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiSummary"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-013",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiSummary"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-014",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiAssignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-015",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiAssignment"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-016",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-017",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-018",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-019A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-019B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-019C",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-020",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiReview"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-021",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiApply"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-022",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiApply"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-023",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-024",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-025A",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-025B",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiDuplicateConfirm"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-AI-026",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "aiMetrics"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-001",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-002",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-003",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "classification"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-004",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "audit"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-005",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "auth"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-006",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "bug"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-007",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "securityAi"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     },
     {
       "caseId": "UT-SEC-008",
-      "status": "PASS",
+      "status": "MAPPING_ONLY_CANDIDATE",
       "suiteKeys": [
         "history"
       ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-USR-001",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-USR-002",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-USR-003",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-USR-004",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-USR-005",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-CAT-001",
-      "status": "PASS",
-      "suiteKeys": [
-        "classification"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-CAT-002",
-      "status": "PASS",
-      "suiteKeys": [
-        "classification"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-CAT-003",
-      "status": "PASS",
-      "suiteKeys": [
-        "classification"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-CAT-004",
-      "status": "PASS",
-      "suiteKeys": [
-        "classification"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-CAT-005",
-      "status": "PASS",
-      "suiteKeys": [
-        "classification"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-OPS-001",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-OPS-002",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-OPS-003",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-OPS-004",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
-    },
-    {
-      "caseId": "UT-OPS-005",
-      "status": "PASS",
-      "suiteKeys": [
-        "monitoring"
-      ],
-      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
-      "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312"
+      "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
+      "baselineSha": "744ee6ec46e8499bdc93bd69e3bdd002a5da81ab"
     }
   ],
   "totals": {
-    "total": 150,
-    "mappingOnly": 0,
+    "total": 135,
+    "mappingOnly": 135,
     "failedMappings": 0
   }
 }
