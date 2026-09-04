@@ -6972,8 +6972,12 @@
       "expectedResult": "No binary is uploaded before SAVE; after activation metadata and binary are linked to the active Bug.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "srv/bug-service/content.js",
@@ -7030,8 +7034,12 @@
       "expectedResult": "Metadata and bytes persist with the recorded size and safe filename.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "srv/bug-service/content.js",
@@ -7151,8 +7159,12 @@
       "expectedResult": "The downloaded hash matches the sanitized source evidence hash.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7213,8 +7225,12 @@
       "expectedResult": "Metadata and byte hash remain unchanged.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7280,8 +7296,12 @@
           "symbol": "prepareAttachmentWrite"
         },
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7342,8 +7362,12 @@
       "expectedResult": "The UI rejects the selection before upload and shows the safe supported-type message.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         }
       ],
       "evidenceRequirements": [
@@ -7392,8 +7416,12 @@
       "expectedResult": "The UI rejects the selection before upload and shows the safe 10 MB message.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         }
       ],
       "evidenceRequirements": [
@@ -7560,8 +7588,12 @@
       "expectedResult": "A safe error is returned and Bug status/history/notification remain unchanged.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7627,8 +7659,12 @@
           "symbol": "prepareAttachmentWrite"
         },
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",

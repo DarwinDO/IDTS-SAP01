@@ -43,3 +43,10 @@
 - `docs/pm/evidence/idts-110/cases/`
 
 No Unit Test VI is created. No command-only, script-only, generated-card-only, shared-account, or unsanitized evidence is accepted as final execution proof.
+
+## 2026-09-04 PR #372 integration boundary
+
+- The review index remains limited to the approved 188-case catalog and links the existing canonical case evidence instead of duplicating generated summary cards.
+- Reviewer truth remains 38 accepted candidate, 2 held, 135 mapping-only, and 13 blocked. Mapping-only and blocked rows are not represented as PASS.
+- The index is not the official SAP490 workbook and does not change the task's In Progress status, workbook, or Drive artifact.
+- Attachment source traces now follow the current metadata-driven `@cap-js/attachments` contract through `@Validation.Maximum` and `@Core.AcceptableMediaTypes`; the removed custom UI constant is no longer referenced.
