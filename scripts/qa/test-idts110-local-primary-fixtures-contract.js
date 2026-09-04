@@ -47,6 +47,11 @@ assert.match(
   'the shared fixture helper must persist ACTIVE identity access'
 )
 assert.match(
+  read('scripts/qa/idts-test-users.js'),
+  /SELECT\.one\.from\('idts\.cap\.UserOnboardingRequests'\)/,
+  'the shared fixture helper must be safe to call twice on the same database'
+)
+assert.match(
   read('scripts/qa/test-idts6-programmatic.js'),
   /eventType_code === 'RESUBMITTED'/,
   'the lifecycle suite must assert the current resubmit notification event type'
@@ -56,5 +61,11 @@ const runner = read('scripts/qa/test-idts110-local-primary-suites.js')
 assert.match(runner, /bug:\s*\[\s*\[/, 'bug mapping must declare independent commands')
 assert.match(runner, /lifecycle:\s*\[\s*\[/, 'lifecycle mapping must declare independent commands')
 assert.match(runner, /for \(const command of commands\)/, 'every declared suite command must execute')
+assert.match(runner, /--baseline=/, 'evidence generation must accept an explicit source baseline')
+assert.match(runner, /outputPath && !baselineArg/, 'evidence generation must reject an implicit current HEAD baseline')
+assert.match(runner, /'diff', '--quiet', baselineSha/, 'evidence generation must reject source drift from its declared baseline')
+
+const remediationGenerator = read('scripts/qa/generate-idts110-remediation-evidence.js')
+assert.match(remediationGenerator, /--local-primary-only/, 'manifest refresh must support a HYBRID_BTP-only mode')
 
 console.log('IDTS-110 local-primary fixture contract: PASS')

@@ -13,7 +13,13 @@ const path = require('node:path')
 const catalog = require('../../docs/qa/idts-110-unit-test-catalog.json')
 const outputArg = process.argv.find(argument => argument.startsWith('--output='))
 const outputPath = outputArg ? path.resolve(outputArg.slice('--output='.length)) : null
-const baselineSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
+const baselineArg = process.argv.find(argument => argument.startsWith('--baseline='))
+if (outputPath && !baselineArg) throw new Error('Evidence output requires --baseline=<source commit>.')
+const baselineRef = baselineArg ? baselineArg.slice('--baseline='.length) : 'HEAD'
+const baselineSha = execFileSync('git', ['rev-parse', `${baselineRef}^{commit}`], { encoding: 'utf8' }).trim()
+if (baselineArg) {
+  execFileSync('git', ['diff', '--quiet', baselineSha, '--', 'scripts/qa', 'srv', 'db', 'package.json', 'package-lock.json'])
+}
 
 const suites = {
   auth: [['test-auth-foundation-programmatic.js']],

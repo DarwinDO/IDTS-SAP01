@@ -413,6 +413,7 @@ async function main() {
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
   await seedActiveDeveloperIdentityAccess(cds, db, ['DatDT', 'SangVN'], 'idts6')
+  await seedActiveDeveloperIdentityAccess(cds, db, ['DatDT', 'SangVN'], 'idts6')
 
   const srv = await cds.serve('BugService').from(csn)
 

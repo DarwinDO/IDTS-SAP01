@@ -13,12 +13,18 @@ function fixtureUser (cds, memberOrIdentity, roles) {
 }
 
 async function seedActiveDeveloperIdentityAccess (cds, db, members, noncePrefix) {
-  const { INSERT, UPDATE } = cds.ql
+  const { INSERT, SELECT, UPDATE } = cds.ql
   for (const member of members) {
     const user = FIXTURE_USERS[member]
     if (!user) throw new Error(`Unknown fixture member: ${member}`)
     const identityHash = member.toLowerCase().slice(0, 1).repeat(64)
     await db.run(UPDATE('idts.cap.Users').set({ externalIdentityKeyHash: identityHash }).where({ ID: user.ID }))
+    const existing = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({
+      activeUser_ID: user.ID,
+      identityKeyHash: identityHash,
+      status_code: 'ACTIVE'
+    }))
+    if (existing) continue
     await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({
       ID: cds.utils.uuid(),
       targetEmailNormalized: user.email,
