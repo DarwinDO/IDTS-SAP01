@@ -16,25 +16,25 @@ const outputPath = outputArg ? path.resolve(outputArg.slice('--output='.length))
 const baselineSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
 
 const suites = {
-  auth: ['test-auth-foundation-programmatic.js'],
-  bug: ['test-idts6-programmatic.js', 'test-idts23-regression.js'],
-  classification: ['test-idts41-code-list-validation.js'],
-  assignment: ['test-idts56-smart-assign.js'],
-  lifecycle: ['test-idts6-programmatic.js', 'test-idts23-regression.js', 'test-history-events-programmatic.js', 'all'],
-  collaboration: ['test-comments-attachments-programmatic.js'],
-  history: ['test-history-events-programmatic.js', 'all'],
-  notification: ['test-email-outbox-programmatic.js'],
-  monitoring: ['test-pm-monitoring-programmatic.js'],
-  aiDuplicate: ['test-idts66-duplicate-detection.js'],
-  aiClassification: ['test-idts67-classification-suggestion.js'],
-  aiSummary: ['test-idts68-bug-summary.js'],
-  aiAssignment: ['test-idts69-assignment-explanation.js'],
-  aiReview: ['test-idts91-ai-review-actions.js'],
-  aiApply: ['test-idts93-apply-classification.js'],
-  aiDuplicateConfirm: ['test-idts95-confirm-duplicate-suggestion.js'],
-  aiMetrics: ['test-idts97-ai-operational-metrics.js'],
-  securityAi: ['test-idts71-ai-security-review.js'],
-  audit: ['test-idts65-ai-suggestion-audit.js']
+  auth: [['test-auth-foundation-programmatic.js']],
+  bug: [['test-idts6-programmatic.js'], ['test-idts23-regression.js']],
+  classification: [['test-idts41-code-list-validation.js']],
+  assignment: [['test-idts56-smart-assign.js']],
+  lifecycle: [['test-idts6-programmatic.js'], ['test-idts23-regression.js'], ['test-history-events-programmatic.js', 'all']],
+  collaboration: [['test-comments-attachments-programmatic.js']],
+  history: [['test-history-events-programmatic.js', 'all']],
+  notification: [['test-email-outbox-programmatic.js']],
+  monitoring: [['test-pm-monitoring-programmatic.js']],
+  aiDuplicate: [['test-idts66-duplicate-detection.js']],
+  aiClassification: [['test-idts67-classification-suggestion.js']],
+  aiSummary: [['test-idts68-bug-summary.js']],
+  aiAssignment: [['test-idts69-assignment-explanation.js']],
+  aiReview: [['test-idts91-ai-review-actions.js']],
+  aiApply: [['test-idts93-apply-classification.js']],
+  aiDuplicateConfirm: [['test-idts95-confirm-duplicate-suggestion.js']],
+  aiMetrics: [['test-idts97-ai-operational-metrics.js']],
+  securityAi: [['test-idts71-ai-security-review.js']],
+  audit: [['test-idts65-ai-suggestion-audit.js']]
 }
 
 function suiteKeysForCase (testCase) {
@@ -75,23 +75,26 @@ function sanitizeLine (line) {
 }
 
 const executions = {}
-for (const [suiteKey, command] of Object.entries(suites)) {
-  const [script, ...args] = command
-  const result = spawnSync(process.execPath, [path.join(__dirname, script), ...args], {
-    cwd: process.cwd(),
-    encoding: 'utf8',
-    env: process.env,
-    timeout: 120000,
-    maxBuffer: 16 * 1024 * 1024
-  })
-  const combined = `${result.stdout || ''}\n${result.stderr || ''}`
+for (const [suiteKey, commands] of Object.entries(suites)) {
+  const results = []
+  for (const command of commands) {
+    const [script, ...args] = command
+    results.push(spawnSync(process.execPath, [path.join(__dirname, script), ...args], {
+      cwd: process.cwd(),
+      encoding: 'utf8',
+      env: process.env,
+      timeout: 120000,
+      maxBuffer: 16 * 1024 * 1024
+    }))
+  }
+  const combined = results.map(result => `${result.stdout || ''}\n${result.stderr || ''}`).join('\n')
   const assertions = combined.split(/\r?\n/).map(sanitizeLine).filter(line => /\bPASS\b/.test(line))
   const totals = combined.split(/\r?\n/).map(sanitizeLine).filter(line => /TOTAL:|PASS.*FAIL|checks$/.test(line)).slice(-3)
   executions[suiteKey] = {
-    command: [process.execPath, path.join('scripts', 'qa', script), ...args],
-    exitCode: result.status,
-    signal: result.signal,
-    passed: result.status === 0,
+    commands: commands.map(([script, ...args]) => [process.execPath, path.join('scripts', 'qa', script), ...args]),
+    exitCodes: results.map(result => result.status),
+    signals: results.map(result => result.signal),
+    passed: results.every(result => result.status === 0),
     assertions,
     totals,
     outputSha256: crypto.createHash('sha256').update(combined).digest('hex')

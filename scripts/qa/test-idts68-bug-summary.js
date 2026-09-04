@@ -13,6 +13,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
+const { fixtureUser } = require('./idts-test-users')
 const { INSERT, SELECT } = cds.ql
 
 const RESULTS = []
@@ -79,13 +80,13 @@ function aiConfig (mockStructuredOutput, overrides = {}) {
 
 async function invoke (service, sourceBugID) {
   return service.tx({
-    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+    user: fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user'])
   }, tx => tx.send('summarizeBugHandoff', { sourceBugID }))
 }
 
 async function reviewSuggestion (service, suggestionID, action = 'acceptAiSuggestion') {
   return service.tx({
-    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+    user: fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user'])
   }, tx => tx.send(action, { suggestionID }))
 }
 

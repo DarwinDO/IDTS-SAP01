@@ -21,6 +21,7 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
+const { fixtureUser, seedActiveDeveloperIdentityAccess } = require('./idts-test-users')
 
 const RESULTS = []
 let PASS = 0, FAIL = 0
@@ -74,7 +75,7 @@ async function runSrv(srv) {
       query: UPDATE.entity(srv.entities.Bugs).set(patch).where({ ID: bugID }),
       params: [{ ID: bugID, IsActiveEntity: true }],
       data: { ID: bugID, ...patch },
-      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
+      user: fixtureUser(cds, 'NhanT', ['TESTER', 'authenticated-user'])
     })
     return srv.dispatch(req)
   }
@@ -101,7 +102,7 @@ async function runSrv(srv) {
       target: srv.entities.Bugs,
       query: INSERT.into(srv.entities.Bugs).entries(createData),
       data: createData,
-      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
+      user: fixtureUser(cds, 'NhanT', ['TESTER', 'authenticated-user'])
     })
     const createdBug = await srv.dispatch(req1a)
     rec(
@@ -128,7 +129,7 @@ async function runSrv(srv) {
       target: srv.entities.Bugs,
       query: INSERT.into(srv.entities.Bugs).entries(missingTitleData),
       data: missingTitleData,
-      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
+      user: fixtureUser(cds, 'NhanT', ['TESTER', 'authenticated-user'])
     })
     await srv.dispatch(req1b)
     rec('SC-01b Create missing title -> 400', false, 200, 400, 'Should have rejected')
@@ -159,7 +160,7 @@ async function runSrv(srv) {
       target: srv.entities.Bugs,
       query: INSERT.into(srv.entities.Bugs).entries(createAssignedData),
       data: createAssignedData,
-      user: new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
+      user: fixtureUser(cds, 'NhanT', ['TESTER', 'authenticated-user'])
     })
     const createdAssignedBug = await srv.dispatch(req1c)
     rec(
@@ -187,13 +188,10 @@ async function runSrv(srv) {
       const coordinatorActions = new Set(['resubmitToDeveloper', 'sendToRetest', 'closeBug', 'reopenBug'])
       const pmActions = new Set(['assignToDeveloper', 'moveToPendingAssignment'])
       const user = coordinatorActions.has(actionName)
-        ? new cds.User({ id: 'NhanT', roles: ['TESTER', 'authenticated-user'] })
+        ? fixtureUser(cds, 'NhanT', ['TESTER', 'authenticated-user'])
         : pmActions.has(actionName)
-          ? new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
-          : new cds.User({
-              id: bugID === BUG1 ? 'DatDT' : 'SangVN',
-              roles: ['DEVELOPER', 'authenticated-user']
-            })
+          ? fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user'])
+          : fixtureUser(cds, bugID === BUG1 ? 'DatDT' : 'SangVN', ['DEVELOPER', 'authenticated-user'])
       const req = new cds.Request({
         method: 'POST',
         event: actionName,
@@ -269,7 +267,7 @@ async function runSrv(srv) {
     SELECT.from(srv.entities.Notifications).where({ bug_ID: BUG1 }).orderBy('createdAt desc').limit(2)
   ))
   const resubmitNotification = bug1Notifications.find(notification =>
-    notification.eventType_code === 'UPDATED' &&
+    notification.eventType_code === 'RESUBMITTED' &&
     notification.message?.includes('resubmitted with additional information')
   )
   rec(
@@ -414,6 +412,7 @@ async function main() {
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
+  await seedActiveDeveloperIdentityAccess(cds, db, ['DatDT', 'SangVN'], 'idts6')
 
   const srv = await cds.serve('BugService').from(csn)
 

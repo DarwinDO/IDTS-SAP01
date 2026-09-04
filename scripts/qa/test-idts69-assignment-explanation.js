@@ -15,6 +15,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
+const { fixtureUser, seedActiveDeveloperIdentityAccess } = require('./idts-test-users')
 const { INSERT, SELECT } = cds.ql
 const {
   SMART_ASSIGNMENT_PROVIDER_DEADLINE_MS,
@@ -52,13 +53,13 @@ function aiConfig (mockStructuredOutput, overrides = {}) {
 
 async function invokeExplanation (service, payload) {
   return service.tx({
-    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+    user: fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user'])
   }, tx => tx.send('explainSmartAssignment', payload))
 }
 
 async function reviewSuggestion (service, suggestionID, action = 'acceptAiSuggestion') {
   return service.tx({
-    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+    user: fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user'])
   }, tx => tx.send(action, { suggestionID }))
 }
 
@@ -69,7 +70,7 @@ async function callAssignAction (service, assigneeID) {
     target: service.entities.Bugs,
     params: [{ ID: BUG_ID, IsActiveEntity: true }],
     data: { assigneeID, note: 'IDTS-69 QA validation guard' },
-    user: new cds.User({ id: 'DonHV', roles: ['authenticated-user'] })
+    user: fixtureUser(cds, 'DonHV', ['authenticated-user'])
   })
   return service.dispatch(req)
 }
@@ -87,6 +88,7 @@ async function main () {
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
+  await seedActiveDeveloperIdentityAccess(cds, db, ['DatDT'], 'idts69')
   const service = await cds.serve('BugService').from(csn)
 
   await db.run(INSERT.into('idts.cap.Bugs').entries({

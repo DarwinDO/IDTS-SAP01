@@ -26,6 +26,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
+const { fixtureUser, seedActiveDeveloperIdentityAccess } = require('./idts-test-users')
 const { INSERT, SELECT } = cds.ql
 
 const {
@@ -79,9 +80,9 @@ const USER_SANG  = '10000000-0000-0000-0000-000000000002'  // User SangVN
 
 /* ── Mock users ── */
 
-function tester ()   { return new cds.User({ id: 'NhanT', roles: ['TESTER',    'authenticated-user'] }) }
-function developer (name) { return new cds.User({ id: name || 'SangVN', roles: ['DEVELOPER', 'authenticated-user'] }) }
-function pm ()       { return new cds.User({ id: 'DonHV', roles: ['PM',        'authenticated-user'] }) }
+function tester () { return fixtureUser(cds, 'NhanT', ['TESTER', 'authenticated-user']) }
+function developer (name) { return fixtureUser(cds, name || 'SangVN', ['DEVELOPER', 'authenticated-user']) }
+function pm () { return fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user']) }
 
 /* ── Helpers ── */
 
@@ -205,6 +206,7 @@ async function main () {
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
+  await seedActiveDeveloperIdentityAccess(cds, db, ['DatDT', 'SangVN'], 'idts23')
   const srv = await cds.serve('BugService').from(csn)
   const entities = srv.entities
 

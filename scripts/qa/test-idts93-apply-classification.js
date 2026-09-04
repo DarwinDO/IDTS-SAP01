@@ -13,6 +13,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
+const { fixtureUser } = require('./idts-test-users')
 const { INSERT, SELECT, UPDATE } = cds.ql
 const { createAiSuggestion } = require('../../srv/ai')
 
@@ -67,7 +68,7 @@ async function expectRejected (label, action, expectedStatus) {
 }
 
 function requestUser (id, role) {
-  return new cds.User({ id, roles: [role, 'authenticated-user'] })
+  return fixtureUser(cds, id, [role, 'authenticated-user'])
 }
 
 async function invoke (service, action, suggestionID, id = 'DonHV', role = 'PM') {
