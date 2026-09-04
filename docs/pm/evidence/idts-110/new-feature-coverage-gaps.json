@@ -1130,9 +1130,15 @@
             "The drill-down requests only the selected profile’s non-Closed Bugs, keeps technical assignee and current action owner distinct, and creates a deep link only for a valid active entity UUID."
           ],
           "roleBoundary": "The UI is read-only and the backend remains authoritative for assigned Bug visibility; no UI control changes Bug ownership.",
-          "executionBoundary": "Run the existing UI/controller contract with deterministic responses; no browser submission, Bug mutation, BTP, or live data.",
+          "executionBoundary": "The existing controller/UI contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the workload drill-down; no Bug mutation, BTP, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         }
       ]
     },
@@ -1832,9 +1838,15 @@
             "A Bug notification row displays bugNumber — bugTitle as the primary line with unread state and timestamp, without a category icon or Bug description region, and with horizontalScrolling false."
           ],
           "roleBoundary": "The shell displays only the safe NotificationSummary returned for the current caller; it does not fetch raw Bug detail.",
-          "executionBoundary": "Run the native-control shell contract with deterministic rows; no browser write, service mutation, email, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the compact notification row; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         },
         {
           "proposedSequence": 247,
@@ -1858,9 +1870,15 @@
             "An empty inbox response shows the localized empty text without stale rows or horizontal overflow."
           ],
           "roleBoundary": "The UI state is a read-only presentation of the current caller's request result and never fabricates notification rows.",
-          "executionBoundary": "Use deterministic shell client responses and native controls; no service write, email, provider, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the empty notification state; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         },
         {
           "proposedSequence": 248,
@@ -1884,9 +1902,15 @@
             "A failed inbox search shows the localized error and retry control while preserving no stale result rows."
           ],
           "roleBoundary": "The UI state is a read-only presentation of the current caller's request result and never fabricates notification rows.",
-          "executionBoundary": "Use deterministic shell client responses and native controls; no service write, email, provider, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the notification error/retry state; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         },
         {
           "proposedSequence": 249,
@@ -1906,9 +1930,15 @@
             "While an inbox request is pending, loading is visible and empty/error/retry controls are hidden."
           ],
           "roleBoundary": "The UI state is a read-only presentation of the current caller's request result and never fabricates notification rows.",
-          "executionBoundary": "Use deterministic shell client responses and native controls; no service write, email, provider, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the notification loading state; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         },
         {
           "proposedSequence": 250,
@@ -1928,9 +1958,15 @@
             "A visible notification-change signal refreshes the unread count once through the shell listener."
           ],
           "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
-          "executionBoundary": "Use the deterministic native-control shell harness; no browser backend write, email, provider, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the visible change-signal state; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         },
         {
           "proposedSequence": 251,
@@ -1950,9 +1986,15 @@
             "The visible shell starts one 30-second polling timer that refreshes the unread count."
           ],
           "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
-          "executionBoundary": "Use the deterministic native-control shell harness; no browser backend write, email, provider, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the visible polling state; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         },
         {
           "proposedSequence": 252,
@@ -1976,9 +2018,15 @@
             "A hidden document prevents notification polling until visibility returns."
           ],
           "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
-          "executionBoundary": "Use the deterministic native-control shell harness; no browser backend write, email, provider, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the hidden-document state; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         },
         {
           "proposedSequence": 253,
@@ -1998,9 +2046,15 @@
             "Destroy clears the polling timer and registered listeners exactly once."
           ],
           "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
-          "executionBoundary": "Use the deterministic native-control shell harness; no browser backend write, email, provider, or live data.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the destroyed-shell state; no service write, email, or live data.",
           "existingCaseKeys": [],
-          "retainedProposalKeys": []
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
         }
       ]
     },

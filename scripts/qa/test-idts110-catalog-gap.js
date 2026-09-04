@@ -422,6 +422,29 @@ for (const feature of featureCoverage.features) {
     }
   }
 }
+const visualCandidateKeys = new Set([
+  'IDTS110-F224',
+  'IDTS110-F237',
+  'IDTS110-F238',
+  'IDTS110-F238E',
+  'IDTS110-F238L',
+  'IDTS110-F239',
+  'IDTS110-F239P',
+  'IDTS110-F239H',
+  'IDTS110-F239D'
+])
+for (const proposal of allProposedCases) {
+  if (!visualCandidateKeys.has(proposal.internalProposalKey)) continue
+  assert.equal(proposal.acceptanceMode, 'UI_RUNTIME_VISUAL')
+  assert.equal(Array.isArray(proposal.evidenceRequirements), true)
+  const evidenceText = proposal.evidenceRequirements.join(' ')
+  assert.match(proposal.executionBoundary, /browser\/runtime rendered UI/i)
+  assert.match(proposal.executionBoundary, /screenshot/i)
+  assert.match(evidenceText, /programmatic.*precheck/i)
+  assert.match(evidenceText, /browser\/runtime.*rendered UI/i)
+  assert.match(evidenceText, /screenshot/i)
+  assert.doesNotMatch(JSON.stringify(proposal), /FakeControl|static-only|static controller.*(?:acceptance|evidence)/i)
+}
 assert.deepEqual(
   [...proposedSequences].sort((left, right) => left - right),
   Array.from({ length: proposedSequences.length }, (_, index) => 204 + index)
