@@ -9,6 +9,7 @@ const suiteResultsPath = path.join(repoRoot, 'docs', 'pm', 'evidence', 'idts-110
 const suiteResults = JSON.parse(fs.readFileSync(suiteResultsPath, 'utf8'))
 const evidenceRoot = path.join(repoRoot, 'docs', 'pm', 'evidence', 'idts-110', 'cases')
 const resultById = new Map(suiteResults.caseResults.map(result => [result.caseId, result]))
+const localPrimaryOnly = process.argv.includes('--local-primary-only')
 
 function xml (value) {
   return String(value ?? '').replace(/[&<>"']/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[character])
@@ -53,14 +54,15 @@ for (const testCase of catalog.cases.filter(testCase => testCase.environment ===
   const mappedAssertions = result.suiteKeys.flatMap(key => suiteResults.executions[key].assertions.map(assertion => `${key}: ${assertion}`))
   Object.assign(manifest, {
     title: testCase.title,
+    executor: 'DonHV (supporting NhanT)',
     candidateExecutionStatus: 'MAPPING_ONLY_CANDIDATE',
     reviewStatus: 'PENDING_DONHV_REVIEW',
     executedAt: suiteResults.completedAt,
     baselineSha: suiteResults.baselineSha,
     deploySha: null,
     environment: 'HYBRID_BTP',
-    runtime: 'Node.js v22.23.1, win32 x64',
-    testCommand: 'node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json',
+    runtime: `${process.release.name} ${process.version}, ${process.platform} ${process.arch}`,
+    testCommand: `node scripts/qa/test-idts110-local-primary-suites.js --baseline=${suiteResults.baselineSha} --output=docs/pm/evidence/idts-110/local-primary-suite-results.json`,
     sourceAssertions: testCase.sourceTrace.map(trace => `${trace.file}#${trace.symbol}`),
     actualResult: result.actualResult,
     assertions: mappedAssertions,
@@ -76,6 +78,8 @@ for (const testCase of catalog.cases.filter(testCase => testCase.environment ===
 }
 
 console.log(`Updated ${updated} HYBRID_BTP case packages with local-primary candidate evidence.`)
+
+if (localPrimaryOnly) process.exit(0)
 
 for (const testCase of catalog.cases) {
   const manifestPath = path.join(evidenceRoot, testCase.caseId, 'case-manifest.json')

@@ -17,6 +17,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
+const { fixtureUser, seedActiveDeveloperIdentityAccess } = require('./idts-test-users')
 const { INSERT, SELECT } = cds.ql
 
 const {
@@ -90,7 +91,7 @@ function aiConfig (mockStructuredOutput, overrides = {}) {
 
 async function invoke (service, event, data) {
   return service.tx({
-    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+    user: fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user'])
   }, tx => tx.send(event, data))
 }
 
@@ -152,6 +153,7 @@ async function main () {
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
+  await seedActiveDeveloperIdentityAccess(cds, db, ['DatDT'], 'idts71')
   const service = await cds.serve('BugService').from(csn)
   await seedBugContext(db)
 
