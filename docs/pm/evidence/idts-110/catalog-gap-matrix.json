@@ -1,0 +1,280 @@
+{
+  "schemaVersion": "1.0",
+  "baseSha": "9d5aad699662bde65a747de4c0d631678de639e4",
+  "approvedCatalogCount": 188,
+  "mentorNumbering": "SEQUENTIAL_ONLY",
+  "proposals": [
+    {
+      "sourceNumber": 189,
+      "internalProposalKey": "IDTS110-P189",
+      "decision": "KEEP",
+      "rationale": "Implemented PM/UserAdmin profile read returns active Developer availability, and no approved case covers this profile-detail contract; retain as a new atomic read case.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin.js", "symbol": "readDeveloperProfile" },
+        { "file": "srv/user-admin.js", "symbol": "readDeveloperTarget" },
+        { "file": "srv/user-admin/active-users.js", "symbol": "buildReadModel" }
+      ],
+      "roleBoundary": "Only an active PM with UserAdmin reads an active Developer profile; the profile exposes availability and readiness fields.",
+      "executionBoundary": "Run against an isolated CAP SQLite fixture; assert the returned profile and no live catalog, BTP, or HANA mutation.",
+      "plannedTestFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+      "plannedAssertions": [
+        "Read an active Developer and assert availabilityStatusCode, workloadLimit, readiness, and active responsibility count.",
+        "Assert the returned profile has no identity secret or unrelated user administration fields."
+      ],
+      "mentorLabel": "Case 189"
+    },
+    {
+      "sourceNumber": 190,
+      "internalProposalKey": "IDTS110-P190",
+      "decision": "KEEP",
+      "rationale": "Active Developer targeting filters user.active=true and returns a safe not-found boundary; assignment denial does not prove profile-read secrecy, so retain a new negative case.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin.js", "symbol": "readDeveloperProfile" },
+        { "file": "srv/user-admin.js", "symbol": "readDeveloperTarget" }
+      ],
+      "roleBoundary": "Only an active PM with UserAdmin may request the profile read; an inactive Developer target must not yield profile data.",
+      "executionBoundary": "Use an isolated in-memory CAP fixture with an inactive Developer; verify the safe rejection and unchanged database state.",
+      "plannedTestFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+      "plannedAssertions": [
+        "Read an inactive Developer and assert the documented not-found status and error code.",
+        "Read back the fixture and assert no profile payload was exposed or changed."
+      ],
+      "mentorLabel": "Case 190"
+    },
+    {
+      "sourceNumber": 191,
+      "internalProposalKey": "IDTS110-P191",
+      "decision": "REWRITE",
+      "rationale": "The allowlist is implemented inside request validation, but no standalone role-check API returns a boolean; rewrite this row into one request-boundary matrix covering all allowed roles.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin/invitations.js", "symbol": "assertRequestedAccess" },
+        { "file": "srv/user-admin.js", "symbol": "requestOnboarding" }
+      ],
+      "roleBoundary": "Exercise the request validator with TESTER, DEVELOPER, and PM; UserAdmin overlay remains valid only for PM.",
+      "executionBoundary": "Pure local contract invocation with no onboarding persistence, provider call, email, or live data mutation.",
+      "plannedTestFile": "scripts/qa/test-user-admin-role-contract.js",
+      "plannedAssertions": [
+        "Assert all three business roles normalize and pass the request-access validator.",
+        "Assert an unknown role and a non-PM UserAdmin overlay are rejected with stable safe codes."
+      ],
+      "mentorLabel": "Case 191"
+    },
+    {
+      "sourceNumber": 192,
+      "internalProposalKey": "IDTS110-P192",
+      "decision": "DROP",
+      "rationale": "This is the same unbound role-allowlist branch as proposal 191, not a distinct Developer behavior; drop the duplicate row after the rewritten matrix covers the role set.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin/invitations.js", "symbol": "assertRequestedAccess" },
+        { "file": "srv/user-admin.js", "symbol": "requestOnboarding" }
+      ],
+      "roleBoundary": "No separate role boundary is retained; Developer remains covered by the single rewritten role matrix in Case 191.",
+      "executionBoundary": "No new execution; preserve the source-only decision package and do not mutate onboarding or identity state.",
+      "plannedTestFile": null,
+      "plannedAssertions": [],
+      "mentorLabel": "Case 192"
+    },
+    {
+      "sourceNumber": 193,
+      "internalProposalKey": "IDTS110-P193",
+      "decision": "DROP",
+      "rationale": "This is the same unbound role-allowlist branch as proposal 191, not a distinct PM behavior; drop the duplicate row after the rewritten matrix covers the role set.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin/invitations.js", "symbol": "assertRequestedAccess" },
+        { "file": "srv/user-admin.js", "symbol": "requestOnboarding" }
+      ],
+      "roleBoundary": "No separate role boundary is retained; PM remains covered by the single rewritten role matrix in Case 191.",
+      "executionBoundary": "No new execution; preserve the source-only decision package and do not mutate onboarding or identity state.",
+      "plannedTestFile": null,
+      "plannedAssertions": [],
+      "mentorLabel": "Case 193"
+    },
+    {
+      "sourceNumber": 194,
+      "internalProposalKey": "IDTS110-P194",
+      "decision": "KEEP",
+      "rationale": "Catalog CREATE is implemented for ApplicationComponents behind the active PM/UserAdmin gate, while the approved catalog has no atomic component-create case; keep.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin/catalogs.js", "symbol": "prepareCatalogCreate" },
+        { "file": "srv/user-admin.js", "symbol": "requireActiveUserAdministrator" }
+      ],
+      "roleBoundary": "Only an active PM carrying UserAdmin may create an Application Component; non-PM callers are rejected before persistence.",
+      "executionBoundary": "Use an isolated CAP SQLite catalog fixture; assert normalized persistence and audit without touching canonical, BTP, or live data.",
+      "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+      "plannedAssertions": [
+        "Create an Application Component as PM/UserAdmin and assert normalized code, name, active state, and audit.",
+        "Attempt the same create as a non-PM and assert HTTP 403 with no catalog row."
+      ],
+      "mentorLabel": "Case 194"
+    },
+    {
+      "sourceNumber": 195,
+      "internalProposalKey": "IDTS110-P195",
+      "decision": "KEEP",
+      "rationale": "Catalog CREATE is implemented for DefectCategories behind the active PM/UserAdmin gate, while the approved catalog has no atomic category-create case; keep.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin/catalogs.js", "symbol": "prepareCatalogCreate" },
+        { "file": "srv/user-admin.js", "symbol": "requireActiveUserAdministrator" }
+      ],
+      "roleBoundary": "Only an active PM carrying UserAdmin may create a Defect Category; non-PM callers are rejected before persistence.",
+      "executionBoundary": "Use an isolated CAP SQLite catalog fixture; assert normalized persistence and audit without touching canonical, BTP, or live data.",
+      "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+      "plannedAssertions": [
+        "Create a Defect Category as PM/UserAdmin and assert normalized code, name, active state, and audit.",
+        "Attempt the same create as a non-PM and assert HTTP 403 with no catalog row."
+      ],
+      "mentorLabel": "Case 195"
+    },
+    {
+      "sourceNumber": 196,
+      "internalProposalKey": "IDTS110-P196",
+      "decision": "KEEP",
+      "rationale": "The catalog handler rejects non-PM callers before writes and the QA test exercises a TESTER rejection, but no approved case records this catalog authorization boundary; keep.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/user-admin/catalogs.js", "symbol": "prepareCatalogCreate" },
+        { "file": "srv/user-admin.js", "symbol": "requireActiveUserAdministrator" }
+      ],
+      "roleBoundary": "TESTER, DEVELOPER, and other non-PM callers cannot create or update catalog entities; PM plus UserAdmin is required.",
+      "executionBoundary": "Run an isolated catalog authorization test and verify no row or audit success event is created by a rejected call.",
+      "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+      "plannedAssertions": [
+        "Attempt CREATE and UPDATE as TESTER and DEVELOPER and assert HTTP 403.",
+        "Read back catalog and audit fixtures to prove rejected calls did not mutate business state."
+      ],
+      "mentorLabel": "Case 196"
+    },
+    {
+      "sourceNumber": 197,
+      "internalProposalKey": "IDTS110-P197",
+      "decision": "REWRITE",
+      "rationale": "Source has two related boundaries: catalog parent activity and Bug classification bridge validation. The broad across-entities wording lacks a single assertion, so rewrite into explicit catalog versus classification cases.",
+      "overlaps": ["UT-VAL-PAIR-VALID", "UT-VAL-PAIR-NOMAP"],
+      "sourceTrace": [
+        { "file": "srv/user-admin/catalogs.js", "symbol": "assertActivePairParents" },
+        { "file": "srv/user-admin/catalogs.js", "symbol": "prepareCatalogCreate" },
+        { "file": "srv/bug-service/bug-write.js", "symbol": "deriveOrValidateComponentCategory" }
+      ],
+      "roleBoundary": "PM/UserAdmin catalog administration and authenticated Bug classification retain separate actor and entity boundaries.",
+      "executionBoundary": "Use isolated CAP fixtures for a catalog pair create and a Bug classification read/write; do not alter shared catalog or live data.",
+      "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+      "plannedAssertions": [
+        "Assert a component-category create requires both active parents and rejects an inactive parent.",
+        "Assert Bug classification derives only an active bridge and rejects a missing or inactive bridge."
+      ],
+      "mentorLabel": "Case 197"
+    },
+    {
+      "sourceNumber": 198,
+      "internalProposalKey": "IDTS110-P198",
+      "decision": "MERGE",
+      "rationale": "Inactive catalog values already follow the approved code-list rejection contract with HTTP 400 and no write; merge into the existing inactive-code case.",
+      "overlaps": ["UT-VAL-CODE-INACTIVE"],
+      "sourceTrace": [
+        { "file": "srv/bug-service/bug-write.js", "symbol": "validateActiveCodeLists" },
+        { "file": "srv/bug-service/bug-write.js", "symbol": "deriveOrValidateComponentCategory" }
+      ],
+      "roleBoundary": "The existing Bug classification validation boundary applies to every authenticated business role permitted to submit a Bug.",
+      "executionBoundary": "Reuse the approved isolated validation fixture and assert HTTP 400 with no business write or side effect.",
+      "plannedTestFile": null,
+      "plannedAssertions": [],
+      "mentorLabel": "Case 198"
+    },
+    {
+      "sourceNumber": 199,
+      "internalProposalKey": "IDTS110-P199",
+      "decision": "MERGE",
+      "rationale": "DeveloperWorkloads already counts non-Closed assigned Bugs per developer, exactly matching the active-bug dashboard assertion; merge into the open-count monitoring case.",
+      "overlaps": ["UT-MON-003"],
+      "sourceTrace": [
+        { "file": "srv/bug-service/monitoring.js", "symbol": "readDeveloperWorkloads" },
+        { "file": "srv/bug-service/monitoring.js", "symbol": "buildDeveloperWorkloadRows" }
+      ],
+      "roleBoundary": "PM reads all workload rows; an active Developer is scoped to the row resolved from that Developer identity.",
+      "executionBoundary": "Reuse the deterministic local workload fixture and assert aggregate counts without persistence or live dashboard mutation.",
+      "plannedTestFile": null,
+      "plannedAssertions": [],
+      "mentorLabel": "Case 199"
+    },
+    {
+      "sourceNumber": 200,
+      "internalProposalKey": "IDTS110-P200",
+      "decision": "REWRITE",
+      "rationale": "Monitoring computes overdue only from stored dueDate and today's UTC date; no configurable SLA threshold calculation is implemented, so rewrite the claim to a due-date boundary.",
+      "overlaps": ["UT-MON-001"],
+      "sourceTrace": [
+        { "file": "srv/bug-service/monitoring.js", "symbol": "isOverdueBug" },
+        { "file": "srv/bug-service/monitoring.js", "symbol": "buildDeveloperWorkloadRows" }
+      ],
+      "roleBoundary": "PM monitoring may read the derived overdue flag; the test must not imply a separate configurable SLA service or Developer access.",
+      "executionBoundary": "Use an isolated local fixture with due dates before, on, and after today; do not call external SLA or live monitoring systems.",
+      "plannedTestFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+      "plannedAssertions": [
+        "Assert an open Bug before today is overdue while a Bug due today is not overdue.",
+        "Assert a CLOSED Bug remains not overdue and no SLA threshold calculation is claimed."
+      ],
+      "mentorLabel": "Case 200"
+    },
+    {
+      "sourceNumber": 201,
+      "internalProposalKey": "IDTS110-P201",
+      "decision": "MERGE",
+      "rationale": "The workload reducer skips CLOSED rows and the approved monitoring cases already cover both overdue exclusion and open counts; merge into those exact cases.",
+      "overlaps": ["UT-MON-001", "UT-MON-003"],
+      "sourceTrace": [
+        { "file": "srv/bug-service/monitoring.js", "symbol": "buildDeveloperWorkloadRows" },
+        { "file": "srv/bug-service/monitoring.js", "symbol": "isOverdueBug" }
+      ],
+      "roleBoundary": "PM workload aggregation excludes CLOSED Bugs for every Developer row, while role authorization remains the existing monitoring boundary.",
+      "executionBoundary": "Reuse isolated monitoring data and compare open counts before and after a closed row; no live Bug mutation is permitted.",
+      "plannedTestFile": null,
+      "plannedAssertions": [],
+      "mentorLabel": "Case 201"
+    },
+    {
+      "sourceNumber": 202,
+      "internalProposalKey": "IDTS110-P202",
+      "decision": "KEEP",
+      "rationale": "DeveloperWorkloads scopes the actor before filters and the QA test proves own-row, profile-filter, search, and paging isolation; this authorization/read-model gap is not in the approved catalog, so keep.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/bug-service/monitoring.js", "symbol": "authorizeDeveloperWorkloadRead" },
+        { "file": "srv/bug-service/monitoring.js", "symbol": "readDeveloperWorkloads" }
+      ],
+      "roleBoundary": "An active Developer can read only the server-resolved own workload row; PM can read the full workload model.",
+      "executionBoundary": "Use deterministic local CAP workload fixtures and assert filter attempts cannot widen scope; no write or external access is involved.",
+      "plannedTestFile": "scripts/qa/test-developer-workload-programmatic.js",
+      "plannedAssertions": [
+        "Assert a Developer receives only the own row even with another-profile filter, search, offset, or count request.",
+        "Assert PM still receives the full ordered workload set."
+      ],
+      "mentorLabel": "Case 202"
+    },
+    {
+      "sourceNumber": 203,
+      "internalProposalKey": "IDTS110-P203",
+      "decision": "KEEP",
+      "rationale": "The PM-only readBugStatusMetrics function is exposed with a PM requirement, but no approved case checks this function's Developer denial and sanitized no-payload boundary; keep.",
+      "overlaps": [],
+      "sourceTrace": [
+        { "file": "srv/service.cds", "symbol": "readBugStatusMetrics" },
+        { "file": "srv/bug-service/status-metrics.js", "symbol": "readBugStatusMetrics" }
+      ],
+      "roleBoundary": "PM may call the status-metrics function; Developer and Tester calls must fail at the PM authorization boundary without metric payload.",
+      "executionBoundary": "Run a local OData/CAP authorization contract with isolated status rows; do not query or mutate live monitoring data.",
+      "plannedTestFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+      "plannedAssertions": [
+        "Assert PM receives the full current status metric set with zero-count rows preserved.",
+        "Assert Developer and Tester receive HTTP 403 and no status metric payload."
+      ],
+      "mentorLabel": "Case 203"
+    }
+  ]
+}
