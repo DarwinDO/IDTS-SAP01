@@ -6972,8 +6972,12 @@
       "expectedResult": "No binary is uploaded before SAVE; after activation metadata and binary are linked to the active Bug.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "srv/bug-service/content.js",
@@ -7030,8 +7034,12 @@
       "expectedResult": "Metadata and bytes persist with the recorded size and safe filename.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "srv/bug-service/content.js",
@@ -7151,8 +7159,12 @@
       "expectedResult": "The downloaded hash matches the sanitized source evidence hash.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7213,8 +7225,12 @@
       "expectedResult": "Metadata and byte hash remain unchanged.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7280,8 +7296,12 @@
           "symbol": "prepareAttachmentWrite"
         },
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7342,8 +7362,12 @@
       "expectedResult": "The UI rejects the selection before upload and shows the safe supported-type message.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         }
       ],
       "evidenceRequirements": [
@@ -7392,8 +7416,12 @@
       "expectedResult": "The UI rejects the selection before upload and shows the safe 10 MB message.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         }
       ],
       "evidenceRequirements": [
@@ -7560,8 +7588,12 @@
       "expectedResult": "A safe error is returned and Bug status/history/notification remain unchanged.",
       "sourceTrace": [
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -7627,8 +7659,12 @@
           "symbol": "prepareAttachmentWrite"
         },
         {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js",
-          "symbol": "MAX_ATTACHMENT_BYTES"
+          "file": "db/schema.cds",
+          "symbol": "@Validation.Maximum"
+        },
+        {
+          "file": "db/schema.cds",
+          "symbol": "@Core.AcceptableMediaTypes"
         },
         {
           "file": "db/schema.cds",
@@ -11516,190 +11552,6 @@
         "evidenceIds": []
       },
       "limitations": null
-    },
-    {
-      "domain": "User Administration",
-      "title": "Invite New Developer",
-      "preconditions": [
-        "PM is logged in with UserAdmin capability."
-      ],
-      "steps": [
-        "1. Navigate to User Administration > Invite User.",
-        "2. Submit email and assign DEVELOPER role."
-      ],
-      "expectedResult": "System creates a draft invitation and queues onboarding email.",
-      "caseId": "UT-USR-001"
-    },
-    {
-      "domain": "User Administration",
-      "title": "Onboarding Token Generation",
-      "preconditions": [
-        "Invitation draft is saved."
-      ],
-      "steps": [
-        "1. Trigger Provisioning Broker."
-      ],
-      "expectedResult": "System generates a secure 32-character token for the new user.",
-      "caseId": "UT-USR-002"
-    },
-    {
-      "domain": "User Administration",
-      "title": "Developer Workload View",
-      "preconditions": [
-        "Developer has active assigned bugs."
-      ],
-      "steps": [
-        "1. PM navigates to Active Users.",
-        "2. Select Developer profile."
-      ],
-      "expectedResult": "Workload tab displays count of open bugs assigned to Developer.",
-      "caseId": "UT-USR-003"
-    },
-    {
-      "domain": "User Administration",
-      "title": "Non-Admin Authorization Check",
-      "preconditions": [
-        "User is logged in as TESTER without UserAdmin role."
-      ],
-      "steps": [
-        "1. Attempt to access /user-admin endpoint."
-      ],
-      "expectedResult": "System returns 403 Forbidden.",
-      "caseId": "UT-USR-004"
-    },
-    {
-      "domain": "User Administration",
-      "title": "Deactivate Active User",
-      "preconditions": [
-        "User profile is Active."
-      ],
-      "steps": [
-        "1. PM clicks Deactivate on user profile."
-      ],
-      "expectedResult": "User status becomes INACTIVE and current sessions are invalidated.",
-      "caseId": "UT-USR-005"
-    },
-    {
-      "domain": "Catalog Administration",
-      "title": "Create SAP Module",
-      "preconditions": [
-        "PM is logged in."
-      ],
-      "steps": [
-        "1. Navigate to Business Catalogs > SAP Modules.",
-        "2. Create draft and fill valid code."
-      ],
-      "expectedResult": "New SAP Module is saved successfully.",
-      "caseId": "UT-CAT-001"
-    },
-    {
-      "domain": "Catalog Administration",
-      "title": "Activate Draft Component",
-      "preconditions": [
-        "Application Component exists in DRAFT state."
-      ],
-      "steps": [
-        "1. Click Save/Activate."
-      ],
-      "expectedResult": "Component state changes to ACTIVE and is available in value helps.",
-      "caseId": "UT-CAT-002"
-    },
-    {
-      "domain": "Catalog Administration",
-      "title": "Prevent In-Use Deactivation",
-      "preconditions": [
-        "Defect Category is currently assigned to an OPEN bug."
-      ],
-      "steps": [
-        "1. PM attempts to deactivate the Defect Category."
-      ],
-      "expectedResult": "System rejects action with a dependency error.",
-      "caseId": "UT-CAT-003"
-    },
-    {
-      "domain": "Catalog Administration",
-      "title": "Component-Category Pair Integrity",
-      "preconditions": [
-        "PM creates a new valid pair."
-      ],
-      "steps": [
-        "1. Select an ACTIVE Component.",
-        "2. Select an ACTIVE Defect Category."
-      ],
-      "expectedResult": "Pair is saved. System rejects if either parent is inactive.",
-      "caseId": "UT-CAT-004"
-    },
-    {
-      "domain": "Catalog Administration",
-      "title": "Catalog Authorization Barrier",
-      "preconditions": [
-        "User is a DEVELOPER."
-      ],
-      "steps": [
-        "1. Attempt to POST new Catalog row."
-      ],
-      "expectedResult": "System returns 403 Forbidden.",
-      "caseId": "UT-CAT-005"
-    },
-    {
-      "domain": "Operations and Audit",
-      "title": "Append-Only Audit Log",
-      "preconditions": [
-        "PM performs a catalog deletion."
-      ],
-      "steps": [
-        "1. Read Audit Log table."
-      ],
-      "expectedResult": "Action is permanently recorded with timestamp and PM identity.",
-      "caseId": "UT-OPS-001"
-    },
-    {
-      "domain": "Operations and Audit",
-      "title": "Delivery Operations View",
-      "preconditions": [
-        "Onboarding email was triggered."
-      ],
-      "steps": [
-        "1. PM navigates to Operations > Delivery."
-      ],
-      "expectedResult": "Email delivery status is displayed (PENDING/SENT/FAILED).",
-      "caseId": "UT-OPS-002"
-    },
-    {
-      "domain": "Operations and Audit",
-      "title": "Retry Failed Delivery",
-      "preconditions": [
-        "Email delivery is in FAILED state."
-      ],
-      "steps": [
-        "1. PM clicks Retry button."
-      ],
-      "expectedResult": "Delivery resets to PENDING and attempt count increments.",
-      "caseId": "UT-OPS-003"
-    },
-    {
-      "domain": "Operations and Audit",
-      "title": "Mask Sensitive Operations Data",
-      "preconditions": [
-        "PM views Operations list."
-      ],
-      "steps": [
-        "1. Inspect API response payload."
-      ],
-      "expectedResult": "Provider tokens, identity hashes, and raw errors are excluded from DTO.",
-      "caseId": "UT-OPS-004"
-    },
-    {
-      "domain": "Operations and Audit",
-      "title": "Ambiguous Outcome Reconcile",
-      "preconditions": [
-        "Access outcome is ambiguous."
-      ],
-      "steps": [
-        "1. PM views operations details."
-      ],
-      "expectedResult": "System surfaces Reconcile action instead of generic Retry.",
-      "caseId": "UT-OPS-005"
     }
   ]
 }

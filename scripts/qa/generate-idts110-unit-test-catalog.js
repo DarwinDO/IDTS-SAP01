@@ -28,7 +28,10 @@ const source = {
   permissions: [{ file: 'srv/bug-service/permissions.js', symbol: 'enforceActionPermission' }, { file: 'srv/bug-service/permissions.js', symbol: 'enforceBugWritePermission' }],
   comments: [{ file: 'srv/bug-service/content.js', symbol: 'prepareCommentCreate' }, { file: 'srv/bug-service/actions.js', symbol: 'addComment' }],
   attachmentBackend: [{ file: 'srv/bug-service/content.js', symbol: 'prepareAttachmentWrite' }],
-  attachmentUi: [{ file: 'app/bug-management-ui/webapp/ext/sections/BugCollaboration.js', symbol: 'MAX_ATTACHMENT_BYTES' }],
+  attachmentUi: [
+    { file: 'db/schema.cds', symbol: '@Validation.Maximum' },
+    { file: 'db/schema.cds', symbol: '@Core.AcceptableMediaTypes' }
+  ],
   attachmentStorage: [{ file: 'db/schema.cds', symbol: 'BugAttachments' }, { file: 'package.json', symbol: '@cap-js/attachments' }],
   history: [{ file: 'srv/bug-service/history.js', symbol: 'writeHistoryEvent' }, { file: 'srv/bug-service/history.js', symbol: 'recordBugChangeSideEffects' }],
   email: [{ file: 'srv/email/outbox.js', symbol: 'processEmailDeliveries' }, { file: 'srv/email/worker.js', symbol: 'processEmailOutboxBatch' }],
