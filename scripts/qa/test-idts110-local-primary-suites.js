@@ -11,9 +11,8 @@ const fs = require('node:fs')
 const path = require('node:path')
 
 const catalog = require('../../docs/qa/idts-110-unit-test-catalog.json')
-const defaultOutputPath = path.resolve(__dirname, '../../docs/pm/evidence/idts-110/local-primary-suite-results.json')
 const outputArg = process.argv.find(argument => argument.startsWith('--output='))
-const outputPath = outputArg ? path.resolve(outputArg.slice('--output='.length)) : defaultOutputPath
+const outputPath = outputArg ? path.resolve(outputArg.slice('--output='.length)) : null
 const baselineSha = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim()
 
 const suites = {
