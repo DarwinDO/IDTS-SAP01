@@ -1,60 +1,20 @@
 {
   "caseId": "UT-AUTH-009",
   "title": "revoked bearer token is rejected",
-  "candidateExecutionStatus": "MAPPING_ONLY_CANDIDATE",
+  "candidateExecutionStatus": "PASS",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:45.802Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
+  "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312",
   "deploySha": null,
-  "environment": "HYBRID_BTP",
-  "runtime": "Node.js v22.23.1, win32 x64",
-  "testCommand": "node scripts/qa/test-idts110-local-primary-suites.js --output=docs/pm/evidence/idts-110/local-primary-suite-results.json",
-  "sourceAssertions": [
-    "srv/auth.js#login",
-    "srv/auth.js#me"
-  ],
-  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0. This is broad suite-to-case traceability only, not an atomic case execution or candidate PASS.",
-  "assertions": [
-    "auth: PASS  active login token type | actual=\"Bearer\" expected=\"Bearer\"",
-    "auth: PASS  active login returns token | actual=\"RrOOyJG5bk6ETJbE0V872KdkNLFIel4L52NCgbqcH-s\"",
-    "auth: PASS  active login maps user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-    "auth: PASS  active login maps role | actual=\"PM\" expected=\"PM\"",
-    "auth: PASS  active login returns expiry | actual=\"2026-08-04T17:15:17.236Z\"",
-    "auth: PASS  wrong password is denied safely | code=401 message=Invalid email or password.",
-    "auth: PASS  inactive user is denied safely | code=401 message=Invalid email or password.",
-    "auth: PASS  unexpected login diagnostic excludes raw SQL details | no unsafe detail detected",
-    "auth: PASS  unexpected login error response is sanitized | code=500 message=Sign-in is temporarily unavailable. Please try again later.",
-    "auth: PASS  session row created | actual=\"8473736e-0764-45bc-aefc-cc597d77d7f2\"",
-    "auth: PASS  raw token is not stored | actual=false expected=false",
-    "auth: PASS  stored hash matches token | actual=\"6c42674e9f58f3da551a684adbd824357c2cdae329de05d32735be827304206c\" expected=\"6c42674e9f58f3da551a684adbd824357c2cdae329de05d32735be827304206c\"",
-    "auth: PASS  session starts unrevoked | actual=null expected=null",
-    "auth: PASS  middleware accepts valid token | actual=null expected=null",
-    "auth: PASS  middleware maps user id to email | actual=\"donhv@example.local\" expected=\"donhv@example.local\"",
-    "auth: PASS  middleware maps authenticated-user role | actual=true expected=true",
-    "auth: PASS  middleware maps business role | actual=true expected=true",
-    "auth: PASS  middleware maps IDTS user attribute | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-    "auth: PASS  middleware maps session attribute | actual=\"8473736e-0764-45bc-aefc-cc597d77d7f2\" expected=\"8473736e-0764-45bc-aefc-cc597d77d7f2\"",
-    "auth: PASS  me returns current user ID | actual=\"10000000-0000-0000-0000-000000000001\" expected=\"10000000-0000-0000-0000-000000000001\"",
-    "auth: PASS  me returns current user email | actual=\"donhv@example.local\" expected=\"donhv@example.local\"",
-    "auth: PASS  me returns current user role | actual=\"PM\" expected=\"PM\"",
-    "auth: PASS  logout returns true for active session | actual=true expected=true",
-    "auth: PASS  logout sets revokedAt | actual=\"2026-08-04T09:15:17.283Z\"",
-    "auth: PASS  middleware rejects revoked token | actual=401 expected=401",
-    "auth: PASS  middleware internal auth error status is generic | actual=500 expected=500",
-    "auth: PASS  middleware internal auth error code is generic | actual=\"AUTHENTICATION_UNAVAILABLE\" expected=\"AUTHENTICATION_UNAVAILABLE\"",
-    "auth: PASS  middleware internal auth error response excludes raw SQL details | no unsafe detail detected",
-    "auth: TOTAL: 28 PASS  |  0 FAIL  |  28 checks"
-  ],
+  "environment": "LOCAL",
+  "runtime": "Node.js v24.11.0, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
   "evidenceIds": [
-    "IDTS110-UT-AUTH-009-LOCAL-PRIMARY-RESULT"
+    "IDTS110-UT-AUTH-009-RESULT"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.",
-  "suiteKeys": [
-    "auth"
-  ],
-  "structuredEvidenceFile": "../../local-primary-suite-results.json"
+  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
 }

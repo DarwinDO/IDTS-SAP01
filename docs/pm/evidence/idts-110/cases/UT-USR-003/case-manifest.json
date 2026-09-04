@@ -1,0 +1,20 @@
+{
+  "caseId": "UT-USR-003",
+  "title": "user role check strictly validates TESTER",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "executor": "NhanT (agent-assisted)",
+  "baselineSha": "b5734b3c200ae2ceaa004c60b7fb26232d613312",
+  "deploySha": null,
+  "environment": "LOCAL",
+  "runtime": "Node.js v24.11.0, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
+  "actualResult": "The mapped local-primary domain suite(s) completed with exit code 0 and all required atomic assertions passed.",
+  "evidenceIds": [
+    "IDTS110-UT-USR-003-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png"
+  ],
+  "limitations": "Uses isolated deterministic local fixtures. No BTP acceptance is claimed. Final catalog/workbook integration belongs to DonHV."
+}

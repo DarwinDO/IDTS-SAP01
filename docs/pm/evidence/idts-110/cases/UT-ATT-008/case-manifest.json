@@ -1,33 +1,29 @@
 {
   "caseId": "UT-ATT-008",
   "title": "file above ten megabytes is blocked by the UI limit",
-  "candidateExecutionStatus": "PASS",
+  "candidateExecutionStatus": "BLOCKED",
   "reviewStatus": "PENDING_DONHV_REVIEW",
   "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T16:42:00+07:00",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "environment": "SAP BTP UAT generated Fiori attachment control",
-  "runtime": "Codex in-app browser, authenticated as NhanT (Tester)",
-  "testCommand": "Manual generated-control runtime check on controlled BUG-0025",
+  "executedAt": "2026-09-02T06:05:02.441Z",
+  "baselineSha": "c73681b1e81a99f3c5ca905b2894d13aed9c2a74",
+  "deploySha": null,
+  "environment": "LOCAL",
+  "runtime": "Node.js v24.11.0, win32 x64",
+  "testCommand": "node scripts/qa/test-idts110-local-exact.js --output docs/pm/evidence/idts-110/local-execution-results.json",
   "sourceAssertions": [
-    "db/schema.cds:170-180 (@Validation.Maximum: 10MB)"
+    "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js#MAX_ATTACHMENT_BYTES"
   ],
-  "actualResult": "Selecting a controlled 10 MB + 1 byte text fixture displayed the safe error token 'AttachmentSizeExceeded'. The oversized filename never appeared in the attachment grid; the existing controlled supported row count remained unchanged.",
+  "actualResult": "Latest dev replaced the approved custom 10 MB handler with the SAP-standard attachment facet and a Validation.Maximum 10MB contract. Static metadata passes, but the generated control rejection/message has no fresh runtime proof; DonHV must rebaseline or rerun before PASS.",
   "assertions": [
     "latest dev uses the SAP-standard generated attachment facet",
     "retired custom 10 MB selection handler is absent",
-    "replacement Validation.Maximum contract is declared",
-    "generated control rejects 10 MB + 1 byte",
-    "no oversized attachment row is created"
+    "replacement Validation.Maximum contract is declared"
   ],
   "evidenceIds": [
     "IDTS110-UT-ATT-008-RESULT"
   ],
   "evidenceFiles": [
-    "result.png",
-    "runtime-generated-control.png"
+    "result.png"
   ],
-  "runtimeEvidenceSha256": "1F1D0CBC4B0602D97F7382B44A32607A2AC58550F889A58C929330DDC5478A49",
-  "limitations": "The runtime proof covers generated-control rejection and no UI metadata row. The message is a safe localization key rather than friendly end-user copy; direct HANA/S3 inspection is not claimed."
+  "limitations": "Static UI guards were verified, but browser runtime evidence is unavailable because the approved browser surface could not start. No runtime UI PASS is claimed."
 }
