@@ -185,6 +185,7 @@ const gapMatrixFields = [
   'mentorLabel'
 ]
 const sourceTraceFields = ['file', 'symbol']
+const futurePlannedTestFiles = new Set(['scripts/qa/test-user-admin-role-contract.js'])
 
 assert.deepEqual(Object.keys(gapMatrix).sort(), [
   'schemaVersion',
@@ -238,6 +239,11 @@ for (const row of gapMatrix.proposals) {
     assert.ok(row.executionBoundary)
     assert.ok(row.plannedTestFile)
     assert(row.plannedAssertions.length > 0)
+    const plannedTestPath = path.join(root, row.plannedTestFile)
+    if (!fs.existsSync(plannedTestPath)) {
+      assert.equal(futurePlannedTestFiles.has(row.plannedTestFile), true)
+      assert.match(row.executionBoundary, /future|not yet/i)
+    }
   }
   if (row.decision === 'MERGE') {
     assert.ok(row.overlaps.length > 0)
@@ -245,21 +251,52 @@ for (const row of gapMatrix.proposals) {
     assert.equal(fs.existsSync(path.join(root, row.plannedTestFile)), true)
     assert.ok(row.plannedAssertions.length > 0)
     const inheritedBoundary = row.plannedAssertions.join(' ')
-    assert.match(inheritedBoundary, /atomic/i)
     assert.match(inheritedBoundary, /evidence/i)
     assert.match(row.executionBoundary, /inherit|reuse/i)
+    const manifests = row.overlaps.map(overlap => {
+      const manifestPath = path.join(root, 'docs/pm/evidence/idts-110/cases', overlap, 'case-manifest.json')
+      assert.equal(fs.existsSync(manifestPath), true)
+      const manifest = readJson(path.relative(root, manifestPath))
+      assert.equal(['PASS', 'MAPPING_ONLY_CANDIDATE'].includes(manifest.candidateExecutionStatus), true)
+      if (overlap === 'UT-MON-001' || overlap === 'UT-MON-003') {
+        assert.equal(manifest.candidateExecutionStatus, 'MAPPING_ONLY_CANDIDATE')
+      }
+      return manifest
+    })
+    const mappingOnlyEvidence = manifests.some(manifest => manifest.candidateExecutionStatus === 'MAPPING_ONLY_CANDIDATE')
+    if (mappingOnlyEvidence) {
+      assert.match(inheritedBoundary, /mapping[- ]only/i)
+      assert.match(row.executionBoundary, /mapping[- ]only/i)
+      assert.doesNotMatch(inheritedBoundary, /atomic/i)
+    } else {
+      assert.match(inheritedBoundary, /atomic/i)
+    }
     for (const overlap of row.overlaps) {
       assert.match(inheritedBoundary, new RegExp(overlap.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
-      assert.equal(
-        fs.existsSync(path.join(root, 'docs/pm/evidence/idts-110/cases', overlap, 'case-manifest.json')),
-        true
-      )
     }
   }
   if (row.sourceNumber === 197) {
     assert.equal(row.decision, 'REWRITE')
     assert.equal(row.plannedAssertions.length, 1)
     assert.doesNotMatch(row.plannedAssertions[0], /Bug classification/i)
+  }
+  if (row.sourceNumber === 198) {
+    assert.equal(row.decision, 'MERGE')
+    assert.equal(row.plannedTestFile, 'scripts/qa/test-idts110-local-exact.js')
+    assert.match(JSON.stringify(row), /PriorityValues\.code.*LOW/i)
+    assert.match(JSON.stringify(row), /Bugs\.priority_code.*LOW/i)
+  }
+  if (row.sourceNumber === 191 && !fs.existsSync(path.join(root, row.plannedTestFile))) {
+    assert.equal(futurePlannedTestFiles.has(row.plannedTestFile), true)
+    assert.match(row.executionBoundary, /future|not yet/i)
+  }
+  if (row.sourceNumber === 199 || row.sourceNumber === 201) {
+    assert.equal(row.decision, 'MERGE')
+    assert.equal(row.plannedTestFile, 'scripts/qa/test-developer-workload-programmatic.js')
+    assert.equal(row.sourceTrace.some(trace => trace.file === row.plannedTestFile), true)
+    assert.doesNotMatch(JSON.stringify(row), /test-pm-monitoring-programmatic\.js/i)
+    assert.match(JSON.stringify(row), /MAPPING_ONLY_CANDIDATE|mapping-only/i)
+    assert.doesNotMatch(JSON.stringify(row), /atomic/i)
   }
 }
 
