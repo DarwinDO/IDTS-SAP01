@@ -47,7 +47,7 @@ async function main() {
   const manifest = JSON.parse(read(path.join('webapp', 'manifest.json')))
   const appPackage = JSON.parse(read('package.json'))
   const appPackageLock = JSON.parse(read('package-lock.json'))
-  assert.strictEqual(appPackage.version, '0.0.10', 'My Notifications compact Bug title fix must advance the Bug Management HTML5 cache identity')
+  assert.strictEqual(appPackage.version, '0.0.11', 'Tester Dashboard role-fetch fix must advance the Bug Management HTML5 cache identity')
   assert.strictEqual(manifest['sap.app'].applicationVersion.version, appPackage.version)
   assert.strictEqual(appPackageLock.version, appPackage.version)
   assert.strictEqual(appPackageLock.packages[''].version, appPackage.version)

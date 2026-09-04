@@ -4,6 +4,7 @@
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
+const vm = require('node:vm')
 
 const ROOT = path.resolve(__dirname, '../..')
 const read = file => fs.readFileSync(path.join(ROOT, file), 'utf8')
@@ -89,4 +90,93 @@ check('dashboard no longer collapses every failure into unavailable', () => {
   }
 })
 
-console.log('TOTAL: 7 PASS / 7 checks')
+async function checkTesterDashboardDoesNotRequestDeveloperWorkloads () {
+  const calls = []
+  const testerID = '10000000-0000-0000-0000-000000000004'
+  let dashboardModel
+
+  class Control {
+    constructor (settings) { this.settings = settings || {} }
+    addStyleClass () { return this }
+    setModel () { return this }
+    placeAt () { return this }
+    setBusy () { return this }
+    addDependent () { return this }
+    open () { return this }
+    close () { return this }
+    destroy () { return this }
+  }
+  Control.show = () => {}
+
+  class JSONModel extends Control {
+    constructor (data) {
+      super()
+      this.data = data
+      dashboardModel = this
+    }
+    setData (data) { this.data = data }
+    setProperty () {}
+  }
+
+  class ResourceModel extends Control {
+    getResourceBundle () { return Promise.resolve({ getText: key => key }) }
+  }
+
+  const loginSession = {
+    getUser: () => ({ ID: testerID, role_code: 'TESTER', displayName: 'NhanT' }),
+    getToken: () => 'test-token'
+  }
+  const bugResponse = {
+    value: [{
+      ID: '20000000-0000-0000-0000-000000000001',
+      IsActiveEntity: true,
+      bugNumber: 'BUG-TEST',
+      title: 'Tester dashboard regression',
+      status_code: 'RETEST_REQUIRED',
+      reporter_ID: testerID,
+      nextProcessorUser_ID: testerID,
+      isRetestRequired: true
+    }]
+  }
+
+  const sandbox = {
+    Promise,
+    URLSearchParams,
+    window: { location: { href: '' } },
+    fetch: async url => {
+      calls.push(url)
+      if (url.includes('/DeveloperWorkloads')) {
+        return { ok: false, json: async () => ({ error: { code: '403' } }) }
+      }
+      return { ok: true, json: async () => bugResponse }
+    },
+    sap: {
+      ui: {
+        require: (dependencies, callback) => callback(...dependencies.map(name => {
+          if (name === 'sap/ui/model/json/JSONModel') return JSONModel
+          if (name === 'sap/ui/model/resource/ResourceModel') return ResourceModel
+          if (name.endsWith('/ProfileShell')) return { createHeaderButton: () => null }
+          if (name.endsWith('/LoginController')) return loginSession
+          if (name === 'sap/ui/Device') return { system: { phone: false } }
+          return Control
+        }))
+      }
+    }
+  }
+
+  vm.runInNewContext(dashboard, sandbox, { filename: 'dashboard-page.js' })
+  await new Promise(resolve => setImmediate(resolve))
+
+  assert.equal(calls.some(url => url.includes('/DeveloperWorkloads')), false)
+  assert.equal(dashboardModel.data.roleMessage, 'Track bugs you reported and items waiting for your next action.')
+  assert.equal(dashboardModel.data.tiles.length, 3)
+  assert.equal(dashboardModel.data.focusBugs.length, 1)
+  console.log('PASS Tester dashboard skips DeveloperWorkloads and still renders Bugs')
+}
+
+checkTesterDashboardDoesNotRequestDeveloperWorkloads()
+  .then(() => console.log('TOTAL: 8 PASS / 8 checks'))
+  .catch(error => {
+    console.error(error.stack || error.message)
+    process.exitCode = 1
+  })
