@@ -73,7 +73,7 @@ for (const testCase of catalog.cases.filter(testCase => testCase.environment ===
     limitations: 'This is broad suite-to-case traceability only. It is not an atomic case execution, browser proof, BTP acceptance evidence, or candidate PASS. DonHV owns final case-level review and workbook integration.'
   })
   fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
-  if (!localPrimaryOnly) fs.writeFileSync(path.join(caseDir, 'result.svg'), resultSvg(testCase, result), 'utf8')
+  fs.writeFileSync(path.join(caseDir, 'result.svg'), resultSvg(testCase, result), 'utf8')
   updated++
 }
 
