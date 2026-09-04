@@ -65,5 +65,5 @@ No Unit Test VI is created. No command-only, script-only, generated-card-only, s
 - The affected suites now identify seeded users by exact fixture email instead of mutable display name, and assignment fixtures include the active identity-access state required by the current authorization contract.
 - The runner now executes every declared script independently; previously, additional script names in the Bug and Lifecycle mappings were passed as command-line arguments to only the first script.
 - The resubmit notification assertion now uses the current `RESUBMITTED` event type.
-- Fresh evidence at source commit `18f1ac3057cfbc1a240f06eed0f6b407977fa4c0` reports 135 mapping-only candidates and 0 failed mappings. This remains suite-to-case traceability, not 135 atomic case PASS results.
+- Fresh evidence at final source commit `f468aa7605e86025a6d7de3e3bea4b09b2234e48` reports 135 mapping-only candidates and 0 failed mappings. Its command pins and verifies that source SHA before writing evidence. This remains suite-to-case traceability, not 135 atomic case PASS results.
 - The accepted reviewer truth remains 38 accepted, 2 held, 135 mapping-only, and 13 blocked. The rejected 15-case expansion is not restored.
