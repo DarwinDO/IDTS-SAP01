@@ -540,4 +540,43 @@ assert.equal(proposedJson.includes('UT-NTF-008'), false)
 assert.equal(proposedJson.includes('UT-NTF-009'), false)
 assert.equal(proposedJson.includes('UT-NTF-010'), false)
 assert.equal(proposedJson.includes('UT-NTF-011'), false)
+
+const retained = gapMatrix.proposals.filter(row => row.decision === 'KEEP' || row.decision === 'REWRITE')
+const proposed = featureCoverage.features.flatMap(row => row.proposedCases)
+const finalCount = 188 + retained.length + proposed.length
+const decisionCounts = gapMatrix.proposals.reduce((counts, row) => {
+  counts[row.decision] = (counts[row.decision] || 0) + 1
+  return counts
+}, {})
+assert.equal(decisionCounts.KEEP + decisionCounts.REWRITE + decisionCounts.MERGE + decisionCounts.DROP, 15)
+assert.equal(featureCoverage.summary.proposedCaseCount, proposed.length)
+assert.equal(featureCoverage.summary.proposedFinalCatalogCount, finalCount)
+assert.equal(retained.length, 10)
+assert.equal(proposed.length, 80)
+assert.equal(finalCount, 278)
+
+const reportPath = path.join(root, 'docs/pm/evidence/idts-110/catalog-gap-review.md')
+const report = fs.readFileSync(reportPath, 'utf8')
+assert.match(report, /# IDTS-110 Catalog Gap Review/)
+assert.match(report, new RegExp(gapMatrix.baseSha))
+for (const sourceNumber of proposalInput.proposals.map(row => row.sourceNumber)) {
+  assert.match(report, new RegExp(`\\|\\s*${sourceNumber}\\s*\\|`))
+}
+for (const family of requiredFamilies) assert.match(report, new RegExp(`\\b${family}\\b`))
+assert.match(report, /KEEP\s*\|\s*7/)
+assert.match(report, /REWRITE\s*\|\s*3/)
+assert.match(report, /MERGE\s*\|\s*3/)
+assert.match(report, /DROP\s*\|\s*2/)
+assert.match(report, /Retained Task 2 candidates\s*\|\s*10/)
+assert.match(report, /Task 3 candidate cases\s*\|\s*80/)
+assert.match(report, /Candidate final catalog count\s*\|\s*278/)
+const previewStart = report.indexOf('## Mentor-facing preview')
+assert.ok(previewStart >= 0)
+const previewEnd = report.indexOf('\n## ', previewStart + 4)
+const mentorPreview = report.slice(previewStart, previewEnd < 0 ? report.length : previewEnd)
+assert.doesNotMatch(mentorPreview, /UT-/)
+assert.match(mentorPreview, /Case 1/)
+assert.match(mentorPreview, /Case 188/)
+assert.match(mentorPreview, /Case 204/)
+assert.match(mentorPreview, /Case 283/)
 console.log('IDTS-110 catalog gap contract: PASS')
