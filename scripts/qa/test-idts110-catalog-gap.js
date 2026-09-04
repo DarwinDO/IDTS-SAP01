@@ -198,6 +198,9 @@ assert.equal(gapMatrix.mentorNumbering, 'SEQUENTIAL_ONLY')
 assert.equal(gapMatrix.approvedCatalogCount, 188)
 assert.equal(catalog.cases.length, 188)
 assert.equal(gapMatrix.baseSha, '9d5aad699662bde65a747de4c0d631678de639e4')
+for (const catalogCase of catalog.cases) {
+  assert.equal(catalogCase.execution?.status, 'NOT_RUN')
+}
 assert.equal(gapMatrix.proposals.length, 15)
 assert.deepEqual(gapMatrix.proposals.map(row => row.sourceNumber), proposalInput.proposals.map(row => row.sourceNumber))
 for (const row of gapMatrix.proposals) {
@@ -300,6 +303,8 @@ for (const feature of featureCoverage.features) {
     assert.equal(Array.isArray(behavior.proposedInternalKeys), true)
     assert.equal(Array.isArray(behavior.retainedProposalKeys), true)
     assert.equal(behavior.proposedInternalKeys.some(key => behavior.retainedProposalKeys.includes(key)), false)
+    if (behavior.coverageStatus === 'IMPLEMENTED_MISSING_ATOMIC_CASE') assert.ok(behavior.proposedInternalKeys.length > 0)
+    if (behavior.coverageStatus === 'RETAINED_TASK_2_PROPOSAL') assert.ok(behavior.retainedProposalKeys.length > 0)
     for (const key of behavior.existingCaseKeys) assert.equal(catalogCaseKeys.has(key), true)
     for (const key of behavior.proposedInternalKeys) {
       assert.equal(feature.proposedCases.some(proposal => proposal.internalProposalKey === key), true)
@@ -357,6 +362,7 @@ assert.deepEqual(
   Array.from({ length: proposedSequences.length }, (_, index) => 204 + index)
 )
 assert.equal(featureCoverage.summary.featureCount, requiredFamilies.size)
+assert.equal(featureCoverage.summary.proposedCaseCount, 79)
 assert.equal(featureCoverage.summary.proposedCaseCount, allProposedCases.length)
 const retainedTask2Proposals = gapMatrix.proposals.filter(row => row.decision === 'KEEP' || row.decision === 'REWRITE')
 assert.equal(featureCoverage.summary.retainedProposalCount, retainedTask2Proposals.length)
@@ -371,8 +377,74 @@ assert.deepEqual(
 )
 
 const proposedJson = JSON.stringify(allProposedCases)
+const proposalByKey = key => {
+  const proposal = allProposedCases.find(row => row.internalProposalKey === key)
+  assert.ok(proposal, `missing corrected proposal ${key}`)
+  return proposal
+}
+const behaviorByKey = key => {
+  for (const feature of featureCoverage.features) {
+    const behavior = (feature.implementedBehaviors || []).find(row => row.behaviorKey === key)
+    if (behavior) return behavior
+  }
+  assert.fail(`missing implemented behavior ${key}`)
+}
+const expectedProposalReferences = {
+  USER_ACCESS_ADMIN_GATE: ['IDTS110-F204'],
+  USER_ACCESS_APPROVAL: ['IDTS110-F210', 'IDTS110-F210S'],
+  USER_ACCESS_OPERATION_RECOVERY: ['IDTS110-F216', 'IDTS110-F216R'],
+  USER_PROFILE_INPUT_RULES: ['IDTS110-F220', 'IDTS110-F220D', 'IDTS110-F220R', 'IDTS110-F220N'],
+  BUSINESS_CATALOG_CRUD_GAPS: ['IDTS110-F225', 'IDTS110-F226', 'IDTS110-F227', 'IDTS110-F228', 'IDTS110-F228E', 'IDTS110-F229', 'IDTS110-F230', 'IDTS110-F231', 'IDTS110-F231R'],
+  MY_NOTIFICATIONS_INBOX_READ_MODEL: ['IDTS110-F232', 'IDTS110-F233', 'IDTS110-F234', 'IDTS110-F235', 'IDTS110-F235I', 'IDTS110-F235C', 'IDTS110-F236'],
+  MY_NOTIFICATIONS_UI: ['IDTS110-F237', 'IDTS110-F238', 'IDTS110-F238E', 'IDTS110-F238L', 'IDTS110-F239', 'IDTS110-F239P', 'IDTS110-F239H', 'IDTS110-F239D'],
+  ACCESS_EMAIL_COMPLETION: ['IDTS110-F240'],
+  ACCESS_EMAIL_SAFE_SKIP: ['IDTS110-F241'],
+  ACCESS_EMAIL_WORKER: [],
+  ACCESS_EMAIL_INVITATION_AND_KICK: ['IDTS110-F243', 'IDTS110-F243M', 'IDTS110-F244', 'IDTS110-F245', 'IDTS110-F246', 'IDTS110-F246R', 'IDTS110-F246B'],
+  ACCESS_EMAIL_REVOKE_DELIVERY: ['IDTS110-F240R'],
+  BUG_EMAIL_SCHEDULED_DISCOVERY: ['IDTS110-F247', 'IDTS110-F247S', 'IDTS110-F247SS', 'IDTS110-F248', 'IDTS110-F248C', 'IDTS110-F249', 'IDTS110-F249K', 'IDTS110-F249T'],
+  BUG_EMAIL_DIGEST: ['IDTS110-F250', 'IDTS110-F250L', 'IDTS110-F250M', 'IDTS110-F250Q', 'IDTS110-F250R', 'IDTS110-F251', 'IDTS110-F251R', 'IDTS110-F252', 'IDTS110-F252R', 'IDTS110-F252P', 'IDTS110-F253']
+}
+for (const [behaviorKey, expected] of Object.entries(expectedProposalReferences)) {
+  assert.deepEqual(behaviorByKey(behaviorKey).proposedInternalKeys, expected)
+}
+const accessEmailWorker = behaviorByKey('ACCESS_EMAIL_WORKER')
+assert.equal(accessEmailWorker.proposedInternalKeys.includes('IDTS110-F243'), false)
+const accessEmailFeature = featureCoverage.features.find(feature => feature.family === 'ACCESS_EMAIL')
+assert.equal(accessEmailFeature.sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js' && trace.symbol === 'processUserAccessDeliveries'), true)
+assert.equal(accessEmailFeature.sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js' && trace.symbol === 'skippedAccessDeliveryReason'), true)
+for (const key of accessEmailWorker.proposedInternalKeys) {
+  assert.equal(proposalByKey(key).sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js'), true)
+}
+assert.equal(proposalByKey('IDTS110-F241').sourceTrace.every(trace => trace.file === 'srv/user-admin/access-delivery.js'), true)
+assert.equal(proposalByKey('IDTS110-F241').sourceTrace.some(trace => /Onboarding/i.test(trace.symbol)), false)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F240R')), /REVOKE/)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F212')), /SUSPEND|ACCESS_SUSPENDED|delivery/i)
+assert.match(proposalByKey('IDTS110-F232').plannedAssertions[0], /occurredAt desc.*ID desc|ID desc.*occurredAt desc/i)
+for (const key of ['IDTS110-F239', 'IDTS110-F239P', 'IDTS110-F239H', 'IDTS110-F239D']) {
+  assert.doesNotMatch(JSON.stringify(proposalByKey(key)), /inbox(?: page)? refresh|refresh(?:es|ing)? the inbox/i)
+}
+assert.match(proposalByKey('IDTS110-F239').plannedAssertions[0], /unread count/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F243')), /cancel/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F245')), /cancel/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F253')), /digest (?:delivery|row|snapshot)|NotificationDigestDeliveries/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F210')), /stale/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F210S')), /stale/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F246')), /repeat|rollback|failed CAP/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F246R')), /repeat/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F246B')), /rollback/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F247S')), /Critical|Blocker|four hours/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F247SS')), /standard|24 hours/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250L')), /order/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250M')), /limit/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250Q')), /link/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250R')), /raw/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F252')), /inactive/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F252R')), /role/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F252P')), /Profile/i)
 const requiredCorrectionKeys = [
   'IDTS110-F216R',
+  'IDTS110-F210S',
   'IDTS110-F220D',
   'IDTS110-F220R',
   'IDTS110-F220N',
@@ -387,14 +459,24 @@ const requiredCorrectionKeys = [
   'IDTS110-F239D',
   'IDTS110-F243M',
   'IDTS110-F247S',
+  'IDTS110-F247SS',
   'IDTS110-F248C',
   'IDTS110-F249K',
   'IDTS110-F249T',
   'IDTS110-F250L',
-  'IDTS110-F251R'
+  'IDTS110-F250M',
+  'IDTS110-F250Q',
+  'IDTS110-F250R',
+  'IDTS110-F251R',
+  'IDTS110-F240R',
+  'IDTS110-F241',
+  'IDTS110-F246R',
+  'IDTS110-F246B',
+  'IDTS110-F252R',
+  'IDTS110-F252P'
 ]
 for (const key of requiredCorrectionKeys) assert.equal(proposedKeys.has(key), true)
-assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F241'), false)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F241'), true)
 assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F242'), false)
 assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F240' && /SUSPEND/i.test(JSON.stringify(proposal))), false)
 const correctedDeactivation = allProposedCases.find(proposal => proposal.internalProposalKey === 'IDTS110-F229')
