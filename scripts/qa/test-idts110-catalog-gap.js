@@ -280,13 +280,36 @@ assert.deepEqual(new Set(featureCoverage.features.map(row => row.family)), requi
 
 const featureSourceTraceFields = ['file', 'symbol']
 const catalogCaseKeys = new Set(catalog.cases.map(row => row.caseId))
+const task2ProposalKeys = new Set(gapMatrix.proposals.map(row => row.internalProposalKey))
 const proposedKeys = new Set()
 const proposedSequences = []
+const allProposedCases = []
+const referencedProposalKeys = new Set()
+const referencedRetainedKeys = new Set()
 for (const feature of featureCoverage.features) {
   assert.ok(feature.sourceTrace.length > 0)
   assert.ok(feature.currentTests.length > 0)
   assert.equal(Array.isArray(feature.existingCaseKeys), true)
   assert.equal(Array.isArray(feature.proposedCases), true)
+  for (const currentTest of feature.currentTests) {
+    assert.equal(fs.existsSync(path.join(root, currentTest)), true)
+  }
+  for (const behavior of feature.implementedBehaviors || []) {
+    assert.equal(typeof behavior.coverageStatus, 'string')
+    assert.equal(Array.isArray(behavior.existingCaseKeys), true)
+    assert.equal(Array.isArray(behavior.proposedInternalKeys), true)
+    assert.equal(Array.isArray(behavior.retainedProposalKeys), true)
+    assert.equal(behavior.proposedInternalKeys.some(key => behavior.retainedProposalKeys.includes(key)), false)
+    for (const key of behavior.existingCaseKeys) assert.equal(catalogCaseKeys.has(key), true)
+    for (const key of behavior.proposedInternalKeys) {
+      assert.equal(feature.proposedCases.some(proposal => proposal.internalProposalKey === key), true)
+      referencedProposalKeys.add(key)
+    }
+    for (const key of behavior.retainedProposalKeys) {
+      assert.equal(task2ProposalKeys.has(key), true)
+      referencedRetainedKeys.add(key)
+    }
+  }
   for (const existingCaseKey of feature.existingCaseKeys) {
     assert.equal(catalogCaseKeys.has(existingCaseKey), true)
   }
@@ -299,6 +322,7 @@ for (const feature of featureCoverage.features) {
     assert.equal(fs.readFileSync(sourcePath, 'utf8').includes(trace.symbol), true)
   }
   for (const proposal of feature.proposedCases) {
+    allProposedCases.push(proposal)
     assert.equal(Number.isInteger(proposal.proposedSequence), true)
     proposedSequences.push(proposal.proposedSequence)
     assert.equal(proposal.proposedSequence > 203, true)
@@ -310,9 +334,13 @@ for (const feature of featureCoverage.features) {
     assert.equal(proposedKeys.has(proposal.internalProposalKey), false)
     proposedKeys.add(proposal.internalProposalKey)
     assert.equal(proposal.candidateStatus, 'NOT_RUN')
+    assert.equal(proposal.coverageStatus, 'IMPLEMENTED_MISSING_ATOMIC_CASE')
+    assert.deepEqual(proposal.existingCaseKeys, [])
+    assert.deepEqual(proposal.retainedProposalKeys, [])
     assert.ok(proposal.plannedTestFile)
     assert.equal(fs.existsSync(path.join(root, proposal.plannedTestFile)), true)
     assert.ok(proposal.plannedAssertions.length > 0)
+    assert.equal(proposal.plannedAssertions.length, 1)
     assert.ok(proposal.roleBoundary)
     assert.ok(proposal.executionBoundary)
     assert.equal(Array.isArray(proposal.sourceTrace), true)
@@ -328,4 +356,64 @@ assert.deepEqual(
   [...proposedSequences].sort((left, right) => left - right),
   Array.from({ length: proposedSequences.length }, (_, index) => 204 + index)
 )
+assert.equal(featureCoverage.summary.featureCount, requiredFamilies.size)
+assert.equal(featureCoverage.summary.proposedCaseCount, allProposedCases.length)
+const retainedTask2Proposals = gapMatrix.proposals.filter(row => row.decision === 'KEEP' || row.decision === 'REWRITE')
+assert.equal(featureCoverage.summary.retainedProposalCount, retainedTask2Proposals.length)
+assert.equal(
+  featureCoverage.summary.proposedFinalCatalogCount,
+  catalog.cases.length + retainedTask2Proposals.length + allProposedCases.length
+)
+assert.deepEqual([...referencedProposalKeys].sort(), [...proposedKeys].sort())
+assert.deepEqual(
+  [...referencedRetainedKeys].sort(),
+  retainedTask2Proposals.map(row => row.internalProposalKey).sort()
+)
+
+const proposedJson = JSON.stringify(allProposedCases)
+const requiredCorrectionKeys = [
+  'IDTS110-F216R',
+  'IDTS110-F220D',
+  'IDTS110-F220R',
+  'IDTS110-F220N',
+  'IDTS110-F228E',
+  'IDTS110-F231R',
+  'IDTS110-F235I',
+  'IDTS110-F235C',
+  'IDTS110-F238E',
+  'IDTS110-F238L',
+  'IDTS110-F239P',
+  'IDTS110-F239H',
+  'IDTS110-F239D',
+  'IDTS110-F243M',
+  'IDTS110-F247S',
+  'IDTS110-F248C',
+  'IDTS110-F249K',
+  'IDTS110-F249T',
+  'IDTS110-F250L',
+  'IDTS110-F251R'
+]
+for (const key of requiredCorrectionKeys) assert.equal(proposedKeys.has(key), true)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F241'), false)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F242'), false)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F240' && /SUSPEND/i.test(JSON.stringify(proposal))), false)
+const correctedDeactivation = allProposedCases.find(proposal => proposal.internalProposalKey === 'IDTS110-F229')
+assert.ok(correctedDeactivation)
+assert.match(correctedDeactivation.plannedAssertions[0], /active responsibility|child-reference/i)
+assert.match(correctedDeactivation.plannedAssertions[0], /bugReferenceCount.*informational/i)
+assert.doesNotMatch(correctedDeactivation.plannedAssertions[0], /bug\s+(?:depend|dependency)/i)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F243' && /token.?mismatch/i.test(JSON.stringify(proposal))), false)
+const correctedTokenMismatch = allProposedCases.find(proposal => /token.?mismatch/i.test(JSON.stringify(proposal)))
+assert.ok(correctedTokenMismatch)
+assert.match(JSON.stringify(correctedTokenMismatch), /FAILED/i)
+assert.match(JSON.stringify(correctedTokenMismatch), /retry/i)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F227' && proposal.plannedTestFile === 'scripts/qa/test-user-admin-catalogs.js'), true)
+assert.equal(proposedJson.includes('UT-NTF-004'), false)
+assert.equal(proposedJson.includes('UT-NTF-005'), false)
+assert.equal(proposedJson.includes('UT-NTF-006'), false)
+assert.equal(proposedJson.includes('UT-NTF-007'), false)
+assert.equal(proposedJson.includes('UT-NTF-008'), false)
+assert.equal(proposedJson.includes('UT-NTF-009'), false)
+assert.equal(proposedJson.includes('UT-NTF-010'), false)
+assert.equal(proposedJson.includes('UT-NTF-011'), false)
 console.log('IDTS-110 catalog gap contract: PASS')
