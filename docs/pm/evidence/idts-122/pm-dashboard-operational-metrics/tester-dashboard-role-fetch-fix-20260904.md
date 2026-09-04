@@ -14,6 +14,8 @@ Signed-in Browser Control reproduced the defect with NhanT as `TESTER`. `AuthSer
 
 The focused VM regression executes the real dashboard script with a Tester session, a successful Bugs response, and a 403 workload response if that endpoint is called. RED failed because the workload URL was called. GREEN passes with no workload call, the normal Tester role message, three tiles, and one focus row. Dashboard static/runtime suites, My Notifications UI, User Administration UI, IDTS-43 Fiori UX, direct JavaScript syntax/lint, configured Bug UI lint, and UI5 build pass. Release/rollout evidence is appended only after its actual boundary.
 
+Codex Security diff scan `3690e042-d1bf-401d-8f46-823c1bbf60aa` reviewed exact source range `ed61ad7c6993bc667045ec370221b1fcc8ea10e5..ece1e039522a2d18bf13cac1eac7832b36220ade` and completed with zero findings across seven security surfaces. It confirms the client branch only suppresses a forbidden request and does not replace the unchanged CAP authorization. TAC was unavailable and session policy required the documented parent-only review fallback. The scanner's measured usage coverage is partial because rollout accounting was unavailable; security surface coverage is complete.
+
 ## Tiếng Việt
 
 ### Lỗi và nguyên nhân gốc
@@ -27,3 +29,5 @@ Browser Control đã đăng nhập tái hiện lỗi bằng NhanT role `TESTER`.
 ### TDD và kiểm định
 
 Regression VM focused chạy script Dashboard thật với session Tester, response Bugs thành công và response workload 403 nếu endpoint đó bị gọi. RED fail vì workload URL đã bị gọi. GREEN pass khi không gọi workload, có role message Tester bình thường, ba tile và một focus row. Suite Dashboard static/runtime, My Notifications UI, User Administration UI, IDTS-43 Fiori UX, syntax/lint JavaScript trực tiếp, lint Bug UI theo config và UI5 build đều pass. Evidence release/rollout chỉ được bổ sung sau boundary thực tế.
+
+Codex Security diff scan `3690e042-d1bf-401d-8f46-823c1bbf60aa` review exact source range `ed61ad7c6993bc667045ec370221b1fcc8ea10e5..ece1e039522a2d18bf13cac1eac7832b36220ade` và hoàn tất với zero finding trên bảy security surface. Scan xác nhận client branch chỉ bỏ request bị cấm và không thay thế authorization CAP không đổi. TAC không khả dụng và policy session yêu cầu fallback review parent-only đã document. Coverage thống kê usage của scanner là partial vì rollout accounting không khả dụng; coverage security surface là complete.
