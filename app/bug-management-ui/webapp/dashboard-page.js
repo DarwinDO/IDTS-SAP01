@@ -221,7 +221,7 @@
         app.placeAt("dashboardContent");
         loadDashboard();
 
-        // Sau khi session/profile sẵn sàng, gọi song song Bugs và DeveloperWorkloads rồi chọn dashboard theo role.
+        // Sau khi session/profile sẵn sàng, gọi Bugs cho mọi role; workload chỉ dành cho PM/Developer.
         // Breakpoint đầu tiên khi KPI/list trống hoặc sai.
         function loadDashboard() {
             var user = LoginSession.getUser();
@@ -231,7 +231,9 @@
 
             Promise.all([
                 fetchOData("/odata/v4/bug/Bugs?$top=200&$orderby=modifiedAt%20desc&$select=ID,IsActiveEntity,bugNumber,title,status_code,reporter_ID,assignee_ID,nextProcessorUser_ID,nextProcessorRole_code,isOverdue,isPendingAssignment,isRejectedFollowUp,isRetestRequired,reporterDisplayName,assigneeDisplayName,nextProcessorUserDisplayName,currentActionOwnerDisplayName"),
-                fetchOData("/odata/v4/bug/DeveloperWorkloads?$top=100&$orderby=developerName%20asc"),
+                roleCode === "PM" || roleCode === "DEVELOPER"
+                    ? fetchOData("/odata/v4/bug/DeveloperWorkloads?$top=100&$orderby=developerName%20asc")
+                    : Promise.resolve({ value: [] }),
                 roleCode === "PM"
                     ? fetchOData("/odata/v4/bug/readBugStatusMetrics()")
                     : Promise.resolve({ value: [] })
