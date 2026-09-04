@@ -13,8 +13,8 @@ This file renders the IDTS role-based dashboard. It builds a read-only SAPUI5 pa
 
 The dashboard does not introduce a new backend service. It reads:
 
-- `BugService.Bugs`
-- `BugService.DeveloperWorkloads`
+- `BugService.Bugs` for every role.
+- `BugService.DeveloperWorkloads` only for PM and Developer. Tester intentionally receives an empty local workload result because the backend correctly rejects Tester workload reads.
 
 Then it calculates what each role should see:
 
@@ -28,7 +28,7 @@ Then it calculates what each role should see:
 2. The script creates a SAPUI5 `App` and `Page`.
 3. It creates dashboard header actions, including `Refresh` and the signed-in profile action.
 4. It reads the safe login session through `LoginController`.
-5. It calls existing protected OData endpoints with the current Bearer token.
+5. It calls Bugs for every role; only PM/Developer call DeveloperWorkloads with the current Bearer token.
 6. It fills a JSON model named `dashboard`.
 7. SAPUI5 bindings render KPI tiles, "Needs attention", and PM workload.
 
@@ -36,7 +36,7 @@ Then it calculates what each role should see:
 
 - Location: `fetchOData(...)`
   - IDTS concept: protected read-only dashboard data access.
-  - Impact if broken: dashboard cannot read Bugs or DeveloperWorkloads.
+  - Impact if broken: dashboard cannot read Bugs or an allowed PM/Developer workload. Do not place a PM/Developer-only request unconditionally in the shared `Promise.all`, because its expected Tester 403 would erase otherwise valid Tester Bug data.
   - Must check together: `auth-guard.js`, `srv/service.cds`, and `srv/auth.js`.
 
 - Location: `testerDashboard(...)`
@@ -104,8 +104,8 @@ File này render dashboard theo role cho IDTS. Nó dựng một SAPUI5 page ch�
 
 Dashboard không tạo backend service mới. Nó đọc:
 
-- `BugService.Bugs`
-- `BugService.DeveloperWorkloads`
+- `BugService.Bugs` cho mọi role.
+- `BugService.DeveloperWorkloads` chỉ cho PM và Developer. Tester chủ ý nhận workload rỗng cục bộ vì backend từ chối đúng các workload read của Tester.
 
 Sau đó nó tính mỗi role nên thấy gì:
 
@@ -119,7 +119,7 @@ Sau đó nó tính mỗi role nên thấy gì:
 2. Script tạo SAPUI5 `App` và `Page`.
 3. Nó khởi tạo signed-in profile shell.
 4. Nó đọc session an toàn qua `LoginController`.
-5. Nó gọi các OData endpoint protected hiện có bằng Bearer token hiện tại.
+5. Nó gọi Bugs cho mọi role; chỉ PM/Developer mới gọi DeveloperWorkloads bằng Bearer token hiện tại.
 6. Nó fill JSON model tên `dashboard`.
 7. SAPUI5 binding render KPI tile, "Needs attention", và workload cho PM.
 
@@ -127,7 +127,7 @@ Sau đó nó tính mỗi role nên thấy gì:
 
 - Vị trí: `fetchOData(...)`
   - Khái niệm IDTS: đọc dữ liệu dashboard protected và chỉ đọc.
-  - Ảnh hưởng nếu sai: dashboard không đọc được Bugs hoặc DeveloperWorkloads.
+  - Ảnh hưởng nếu sai: dashboard không đọc được Bugs hoặc workload hợp lệ của PM/Developer. Không đặt request chỉ dành cho PM/Developer vô điều kiện trong `Promise.all` chung, vì 403 đúng của Tester sẽ xóa dữ liệu Bug Tester vốn hợp lệ.
   - Phải kiểm tra cùng: `auth-guard.js`, `srv/service.cds`, và `srv/auth.js`.
 
 - Vị trí: `testerDashboard(...)`
@@ -167,9 +167,9 @@ Sau đó nó tính mỗi role nên thấy gì:
 
 ## Symbol walkthrough and breakpoint order / Walkthrough theo symbol và thứ tự breakpoint (2026-07-18)
 
-**English.** Page startup → `loadDashboard()` reads `LoginSession` → two `fetchOData()` calls load `Bugs` and `DeveloperWorkloads` → normalization converts OData values → `buildDashboardModel()` routes to Tester/Developer/PM builders → JSONModel refreshes tiles/lists. `focusList()` limits/deduplicates rows; `openBugList()` and `openBug()` only navigate. Breakpoints: `loadDashboard`, each fetch response, `buildDashboardModel`, then the role builder. Wrong source counts belong in backend read models; correct data but wrong grouping belongs here.
+**English.** Page startup → `loadDashboard()` reads `LoginSession` → `fetchOData()` always loads `Bugs`, while only PM/Developer load `DeveloperWorkloads` → normalization converts OData values → `buildDashboardModel()` routes to Tester/Developer/PM builders → JSONModel refreshes tiles/lists. `focusList()` limits/deduplicates rows; `openBugList()` and `openBug()` only navigate. Breakpoints: `loadDashboard`, each allowed fetch response, `buildDashboardModel`, then the role builder. Wrong source counts belong in backend read models; correct data but wrong grouping belongs here.
 
-**Tiếng Việt.** Page start → `loadDashboard()` đọc `LoginSession` → hai `fetchOData()` lấy `Bugs` và `DeveloperWorkloads` → normalize chuyển kiểu OData → `buildDashboardModel()` chọn builder Tester/Developer/PM → JSONModel refresh tile/list. `focusList()` giới hạn và loại trùng row; `openBugList()`/`openBug()` chỉ điều hướng. Breakpoint: `loadDashboard` → response từng fetch → `buildDashboardModel` → builder theo role. Count nguồn sai thì debug backend read model; dữ liệu đúng nhưng nhóm sai thì debug file này.
+**Tiếng Việt.** Page start → `loadDashboard()` đọc `LoginSession` → `fetchOData()` luôn lấy `Bugs`, còn chỉ PM/Developer mới lấy `DeveloperWorkloads` → normalize chuyển kiểu OData → `buildDashboardModel()` chọn builder Tester/Developer/PM → JSONModel refresh tile/list. `focusList()` giới hạn và loại trùng row; `openBugList()`/`openBug()` chỉ điều hướng. Breakpoint: `loadDashboard` → response từng fetch được phép → `buildDashboardModel` → builder theo role. Count nguồn sai thì debug backend read model; dữ liệu đúng nhưng nhóm sai thì debug file này.
 ## IDTS-115 — PM-only AI Activity
 
 The dashboard header exposes one PM-only `AI Activity` button. `openAiActivity()` calls the existing `readAiOperationalMetrics(windowDays=30)` function, opens a responsive SAPUI5 dialog/table, and `aggregateAiMetrics()` combines backend rows by capability while hiding provider/model aliases, prompts, responses, and raw diagnostics. The dialog uses `Device.system.phone` with the supported `stretch` property instead of deprecated `stretchOnPhone`. Non-PM direct calls remain protected by CAP and must return 403.

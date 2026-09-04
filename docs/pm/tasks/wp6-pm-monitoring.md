@@ -1,5 +1,11 @@
 # WP6 - PM Monitoring
 
+## 2026-09-04 Tester Dashboard role-fetch correction
+
+- A signed-in Tester received valid Bug data but the Dashboard erased it after an expected 403 from the PM/Developer-only `DeveloperWorkloads` endpoint.
+- The approved narrow fix keeps server authorization unchanged and skips the workload request for Tester while preserving the existing Tester tiles and focus list.
+- Focused behavioral RED/GREEN and cross-app regression evidence is recorded in `docs/pm/evidence/idts-122/pm-dashboard-operational-metrics/tester-dashboard-role-fetch-fix-20260904.md`. Source review, merge and content-only rollout remain the next boundaries.
+
 ## 2026-08-08 Effective developer capacity
 
 - `DeveloperWorkloads` and `AssignableDevelopers` now derive the same effective availability: 0-1 Available, 2 Busy, 3+ Unavailable.
