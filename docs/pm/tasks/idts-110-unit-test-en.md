@@ -55,7 +55,6 @@ No Unit Test VI is created. No command-only, script-only, generated-card-only, s
 
 - `mappingOnlyIsAtomicExecution` remains `false`; all 135 mapped cases remain `MAPPING_ONLY_CANDIDATE`.
 - The approved catalog remains 188 cases, with DonHV review truth unchanged at 38 accepted, 2 held, 135 mapping-only, and 13 blocked.
-- `docs/pm/evidence/idts-110/local-primary-suite-results.json` remains the single structured local-primary evidence file.
-- The runner records real start, completion, and duration metadata, but writes an evidence file only when `--output` is explicitly supplied.
+- `docs/pm/evidence/idts-110/local-primary-suite-results.json` and its runner remain unchanged from the accepted `dev` baseline; the failed fresh rerun was not committed as new evidence.
 - DonHV did not approve the proposed 15-case expansion. It contained existing-case overlap and requirements that do not yet define User Administration catalog CRUD or the proposed operational calculations.
 - Any future expansion must be handled separately with an exact gap matrix against the 188 cases, a source-backed implemented behavior, a valid approved requirement, the complete role/capability boundary, and an atomic test/evidence plan.

@@ -74,8 +74,6 @@ function sanitizeLine (line) {
     .slice(0, 1000)
 }
 
-const startedAt = new Date().toISOString()
-const startTimeMs = Date.now()
 const executions = {}
 for (const [suiteKey, command] of Object.entries(suites)) {
   const [script, ...args] = command
@@ -99,8 +97,6 @@ for (const [suiteKey, command] of Object.entries(suites)) {
     outputSha256: crypto.createHash('sha256').update(combined).digest('hex')
   }
 }
-const completedAt = new Date().toISOString()
-const durationMs = Date.now() - startTimeMs
 
 const hybridCases = catalog.cases.filter(testCase => testCase.environment === 'HYBRID_BTP')
 const caseResults = hybridCases.map(testCase => {
@@ -122,10 +118,8 @@ const output = {
   schemaVersion: '1.0',
   jiraKey: 'IDTS-110',
   purpose: 'Fresh local-primary domain-suite rerun evidence for the 135 HYBRID_BTP cases corrected by DonHV.',
-  startedAt,
-  completedAt,
-  durationMs,
-  recordedAt: completedAt,
+  startedAt: new Date().toISOString(),
+  completedAt: new Date().toISOString(),
   baselineSha,
   policy: {
     mappingOnlyIsAtomicExecution: false,
