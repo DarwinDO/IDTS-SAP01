@@ -96,3 +96,11 @@ Give PM users enough visibility to monitor workload, overdue bugs, pending assig
 - The metadata-only change does not alter dashboard navigation, OData filter semantics, HANA schema, seed data or master data.
 - Focused EDMX validation covers 11 key-backed SelectionFields; PM/Tester dashboard regression remains part of the release gate.
 - Current state: implementation and local gates complete; BTP deployment and signed-in browser acceptance are pending the normal PR/merge process.
+
+## 2026-09-04 Tester Dashboard Role-Aware Fetch Closure
+
+- PR #384 fixes the Tester Dashboard failure caused by an unconditional request to the PM/Developer-only `DeveloperWorkloads` endpoint.
+- Tester now builds its existing metrics and attention list from authorized Bug rows without weakening the CAP workload authorization boundary.
+- Focused static/runtime tests, the behavioral VM regression, UI lint/build, auth and security gates passed.
+- The source merged to `dev` at `764320e59a429f5a222f238d9577db2e548a75de` and a dedicated content-only rollout completed without changing the CAP droplet, schema, or data.
+- Signed-in Tester NhanT live acceptance passed with counts `13 / 1 / 1`, eight attention rows, and no unavailable message.
