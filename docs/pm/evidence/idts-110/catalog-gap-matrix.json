@@ -13,7 +13,7 @@
       "sourceTrace": [
         { "file": "srv/user-admin.js", "symbol": "readDeveloperProfile" },
         { "file": "srv/user-admin.js", "symbol": "readDeveloperTarget" },
-        { "file": "srv/user-admin/active-users.js", "symbol": "buildReadModel" }
+        { "file": "srv/user-admin.js", "symbol": "developerProfileResult" }
       ],
       "roleBoundary": "Only an active PM with UserAdmin reads an active Developer profile; the profile exposes availability and readiness fields.",
       "executionBoundary": "Run against an isolated CAP SQLite fixture; assert the returned profile and no live catalog, BTP, or HANA mutation.",
@@ -32,7 +32,8 @@
       "overlaps": [],
       "sourceTrace": [
         { "file": "srv/user-admin.js", "symbol": "readDeveloperProfile" },
-        { "file": "srv/user-admin.js", "symbol": "readDeveloperTarget" }
+        { "file": "srv/user-admin.js", "symbol": "readDeveloperTarget" },
+        { "file": "srv/user-admin.js", "symbol": "developerProfileResult" }
       ],
       "roleBoundary": "Only an active PM with UserAdmin may request the profile read; an inactive Developer target must not yield profile data.",
       "executionBoundary": "Use an isolated in-memory CAP fixture with an inactive Developer; verify the safe rejection and unchanged database state.",
@@ -162,12 +163,11 @@
         { "file": "srv/user-admin/catalogs.js", "symbol": "prepareCatalogCreate" },
         { "file": "srv/bug-service/bug-write.js", "symbol": "deriveOrValidateComponentCategory" }
       ],
-      "roleBoundary": "PM/UserAdmin catalog administration and authenticated Bug classification retain separate actor and entity boundaries.",
-      "executionBoundary": "Use isolated CAP fixtures for a catalog pair create and a Bug classification read/write; do not alter shared catalog or live data.",
+      "roleBoundary": "Only an active PM with UserAdmin may create a Component Category; Bug classification is not retained in this case.",
+      "executionBoundary": "Use one isolated CAP catalog fixture for the pair-parent check; do not execute or mutate Bug classification in this case.",
       "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
       "plannedAssertions": [
-        "Assert a component-category create requires both active parents and rejects an inactive parent.",
-        "Assert Bug classification derives only an active bridge and rejects a missing or inactive bridge."
+        "Assert CatalogComponentCategories CREATE rejects an inactive component or defect-category parent with INACTIVE_CATALOG_PARENT before persistence."
       ],
       "mentorLabel": "Case 197"
     },
@@ -175,16 +175,21 @@
       "sourceNumber": 198,
       "internalProposalKey": "IDTS110-P198",
       "decision": "MERGE",
-      "rationale": "Inactive catalog values already follow the approved code-list rejection contract with HTTP 400 and no write; merge into the existing inactive-code case.",
+      "rationale": "The existing atomic case specifically deactivates idts.cap.PriorityValues.code='LOW', submits Bugs.priority_code='LOW', and asserts HTTP 400 with no Bug row; merge is exact.",
       "overlaps": ["UT-VAL-CODE-INACTIVE"],
       "sourceTrace": [
         { "file": "srv/bug-service/bug-write.js", "symbol": "validateActiveCodeLists" },
-        { "file": "srv/bug-service/bug-write.js", "symbol": "deriveOrValidateComponentCategory" }
+        { "file": "srv/bug-service/bug-write.js", "symbol": "deriveOrValidateComponentCategory" },
+        { "file": "db/schema.cds", "symbol": "entity PriorityValues" },
+        { "file": "scripts/qa/test-idts110-local-exact.js", "symbol": "UT-VAL-CODE-INACTIVE" }
       ],
-      "roleBoundary": "The existing Bug classification validation boundary applies to every authenticated business role permitted to submit a Bug.",
-      "executionBoundary": "Reuse the approved isolated validation fixture and assert HTTP 400 with no business write or side effect.",
-      "plannedTestFile": null,
-      "plannedAssertions": [],
+      "roleBoundary": "The existing Bug CREATE validation applies to the authenticated business roles permitted to submit Bugs; this merge is specifically for priority_code.",
+      "executionBoundary": "MERGE inherits the existing local atomic test and four-artifact evidence boundary for inactive idts.cap.PriorityValues.code, with no new case or live mutation.",
+      "plannedTestFile": "scripts/qa/test-idts110-local-exact.js",
+      "plannedAssertions": [
+        "Reuse UT-VAL-CODE-INACTIVE atomic assertion: deactivate idts.cap.PriorityValues.code='LOW', submit Bugs.priority_code='LOW', and assert HTTP 400 with no Bug row inserted.",
+        "Reuse UT-VAL-CODE-INACTIVE evidence boundary from docs/pm/evidence/idts-110/cases/UT-VAL-CODE-INACTIVE/case-manifest.json: result.png, before-database.png, after-database.png, and reload-readback.png; do not create a new case."
+      ],
       "mentorLabel": "Case 198"
     },
     {
@@ -198,9 +203,12 @@
         { "file": "srv/bug-service/monitoring.js", "symbol": "buildDeveloperWorkloadRows" }
       ],
       "roleBoundary": "PM reads all workload rows; an active Developer is scoped to the row resolved from that Developer identity.",
-      "executionBoundary": "Reuse the deterministic local workload fixture and assert aggregate counts without persistence or live dashboard mutation.",
-      "plannedTestFile": null,
-      "plannedAssertions": [],
+      "executionBoundary": "MERGE inherits the existing UT-MON-003 local atomic test and result evidence boundary; no new case, browser, BTP, or live dashboard mutation is added.",
+      "plannedTestFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+      "plannedAssertions": [
+        "Reuse UT-MON-003 atomic assertion in test-pm-monitoring-programmatic.js: aggregate non-Closed assigned Bugs into the correct developer open-status count.",
+        "Reuse UT-MON-003 evidence boundary from docs/pm/evidence/idts-110/cases/UT-MON-003/case-manifest.json and its result.png; keep this proposal merged with the existing case."
+      ],
       "mentorLabel": "Case 199"
     },
     {
@@ -233,9 +241,13 @@
         { "file": "srv/bug-service/monitoring.js", "symbol": "isOverdueBug" }
       ],
       "roleBoundary": "PM workload aggregation excludes CLOSED Bugs for every Developer row, while role authorization remains the existing monitoring boundary.",
-      "executionBoundary": "Reuse isolated monitoring data and compare open counts before and after a closed row; no live Bug mutation is permitted.",
-      "plannedTestFile": null,
-      "plannedAssertions": [],
+      "executionBoundary": "MERGE inherits the existing UT-MON-001 and UT-MON-003 local atomic test/evidence boundaries; no new case or live Bug mutation is added.",
+      "plannedTestFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+      "plannedAssertions": [
+        "Reuse UT-MON-001 atomic assertion in test-pm-monitoring-programmatic.js: a CLOSED Bug is not overdue.",
+        "Reuse UT-MON-003 atomic assertion in test-pm-monitoring-programmatic.js: CLOSED Bugs are excluded from each developer open-status count.",
+        "Reuse UT-MON-001 and UT-MON-003 evidence boundaries from their case-manifest.json files and result.png artifacts; keep this proposal merged with both existing cases."
+      ],
       "mentorLabel": "Case 201"
     },
     {

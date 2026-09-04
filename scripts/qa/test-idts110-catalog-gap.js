@@ -149,6 +149,8 @@ const expectedProposalSnapshots = [
 
 assert.deepEqual(Object.keys(proposalInput).sort(), proposalInputFields.sort())
 assert.equal(proposalInput.schemaVersion, '1.0')
+assert.equal(proposalInput.workbookClaimedCaseCount, 203)
+assert.equal(proposalInput.approvedCatalogCaseCount, 188)
 assert.deepEqual(proposalInput.proposals, expectedProposalSnapshots)
 
 assert.equal(proposalInput.sourceWorkbook, 'SU26SAP01_GSU26SAP01_Unit_Test (1).xlsx')
@@ -234,6 +236,27 @@ for (const row of gapMatrix.proposals) {
     assert.ok(row.plannedTestFile)
     assert(row.plannedAssertions.length > 0)
   }
-  if (row.decision === 'MERGE') assert.ok(row.overlaps.length > 0)
+  if (row.decision === 'MERGE') {
+    assert.ok(row.overlaps.length > 0)
+    assert.ok(row.plannedTestFile)
+    assert.equal(fs.existsSync(path.join(root, row.plannedTestFile)), true)
+    assert.ok(row.plannedAssertions.length > 0)
+    const inheritedBoundary = row.plannedAssertions.join(' ')
+    assert.match(inheritedBoundary, /atomic/i)
+    assert.match(inheritedBoundary, /evidence/i)
+    assert.match(row.executionBoundary, /inherit|reuse/i)
+    for (const overlap of row.overlaps) {
+      assert.match(inheritedBoundary, new RegExp(overlap.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+      assert.equal(
+        fs.existsSync(path.join(root, 'docs/pm/evidence/idts-110/cases', overlap, 'case-manifest.json')),
+        true
+      )
+    }
+  }
+  if (row.sourceNumber === 197) {
+    assert.equal(row.decision, 'REWRITE')
+    assert.equal(row.plannedAssertions.length, 1)
+    assert.doesNotMatch(row.plannedAssertions[0], /Bug classification/i)
+  }
 }
 console.log('IDTS-110 catalog gap contract: PASS')
