@@ -259,4 +259,73 @@ for (const row of gapMatrix.proposals) {
     assert.doesNotMatch(row.plannedAssertions[0], /Bug classification/i)
   }
 }
+
+const featureCoverage = readJson('docs/pm/evidence/idts-110/new-feature-coverage-gaps.json')
+const requiredFamilies = new Set([
+  'USER_ACCESS',
+  'USER_PROFILE',
+  'DEVELOPER_WORKLOAD',
+  'BUSINESS_CATALOGS',
+  'MY_NOTIFICATIONS',
+  'ACCESS_EMAIL',
+  'BUG_EMAIL'
+])
+
+assert.equal(featureCoverage.schemaVersion, '1.0')
+assert.equal(featureCoverage.baseSha, '9d5aad699662bde65a747de4c0d631678de639e4')
+assert.equal(featureCoverage.approvedCatalogCount, 188)
+assert.equal(featureCoverage.mentorNumbering, 'SEQUENTIAL_ONLY')
+assert.equal(Array.isArray(featureCoverage.features), true)
+assert.deepEqual(new Set(featureCoverage.features.map(row => row.family)), requiredFamilies)
+
+const featureSourceTraceFields = ['file', 'symbol']
+const catalogCaseKeys = new Set(catalog.cases.map(row => row.caseId))
+const proposedKeys = new Set()
+const proposedSequences = []
+for (const feature of featureCoverage.features) {
+  assert.ok(feature.sourceTrace.length > 0)
+  assert.ok(feature.currentTests.length > 0)
+  assert.equal(Array.isArray(feature.existingCaseKeys), true)
+  assert.equal(Array.isArray(feature.proposedCases), true)
+  for (const existingCaseKey of feature.existingCaseKeys) {
+    assert.equal(catalogCaseKeys.has(existingCaseKey), true)
+  }
+  for (const trace of feature.sourceTrace) {
+    assert.deepEqual(Object.keys(trace).sort(), featureSourceTraceFields.sort())
+    assert.equal(typeof trace.file, 'string')
+    assert.equal(typeof trace.symbol, 'string')
+    const sourcePath = path.join(root, trace.file)
+    assert.equal(fs.existsSync(sourcePath), true)
+    assert.equal(fs.readFileSync(sourcePath, 'utf8').includes(trace.symbol), true)
+  }
+  for (const proposal of feature.proposedCases) {
+    assert.equal(Number.isInteger(proposal.proposedSequence), true)
+    proposedSequences.push(proposal.proposedSequence)
+    assert.equal(proposal.proposedSequence > 203, true)
+    assert.equal(/^Case \d+$/.test(proposal.mentorLabel), true)
+    assert.doesNotMatch(proposal.mentorLabel, /UT-/)
+    assert.equal(proposal.mentorLabel, `Case ${proposal.proposedSequence}`)
+    assert.equal(typeof proposal.internalProposalKey, 'string')
+    assert.doesNotMatch(proposal.internalProposalKey, /^Case /)
+    assert.equal(proposedKeys.has(proposal.internalProposalKey), false)
+    proposedKeys.add(proposal.internalProposalKey)
+    assert.equal(proposal.candidateStatus, 'NOT_RUN')
+    assert.ok(proposal.plannedTestFile)
+    assert.equal(fs.existsSync(path.join(root, proposal.plannedTestFile)), true)
+    assert.ok(proposal.plannedAssertions.length > 0)
+    assert.ok(proposal.roleBoundary)
+    assert.ok(proposal.executionBoundary)
+    assert.equal(Array.isArray(proposal.sourceTrace), true)
+    assert.ok(proposal.sourceTrace.length > 0)
+    for (const trace of proposal.sourceTrace) {
+      assert.deepEqual(Object.keys(trace).sort(), featureSourceTraceFields.sort())
+      assert.equal(fs.existsSync(path.join(root, trace.file)), true)
+      assert.equal(fs.readFileSync(path.join(root, trace.file), 'utf8').includes(trace.symbol), true)
+    }
+  }
+}
+assert.deepEqual(
+  [...proposedSequences].sort((left, right) => left - right),
+  Array.from({ length: proposedSequences.length }, (_, index) => 204 + index)
+)
 console.log('IDTS-110 catalog gap contract: PASS')
