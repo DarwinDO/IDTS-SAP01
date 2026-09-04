@@ -284,11 +284,14 @@ assert.deepEqual(new Set(featureCoverage.features.map(row => row.family)), requi
 const featureSourceTraceFields = ['file', 'symbol']
 const catalogCaseKeys = new Set(catalog.cases.map(row => row.caseId))
 const task2ProposalKeys = new Set(gapMatrix.proposals.map(row => row.internalProposalKey))
+const allowedCoverageModes = new Set(['EXISTING_188_CASE', 'RETAINED_TASK_2_PROPOSAL', 'SHARED_EXISTING_CASE', 'IMPLEMENTED_MISSING_ATOMIC_CASE'])
 const proposedKeys = new Set()
 const proposedSequences = []
 const allProposedCases = []
 const referencedProposalKeys = new Set()
 const referencedRetainedKeys = new Set()
+const proposalReferenceCounts = new Map()
+const normalizedBehaviorDescriptions = new Set()
 for (const feature of featureCoverage.features) {
   assert.ok(feature.sourceTrace.length > 0)
   assert.ok(feature.currentTests.length > 0)
@@ -299,16 +302,39 @@ for (const feature of featureCoverage.features) {
   }
   for (const behavior of feature.implementedBehaviors || []) {
     assert.equal(typeof behavior.coverageStatus, 'string')
+    assert.equal(allowedCoverageModes.has(behavior.coverageStatus), true)
+    assert.equal(typeof behavior.description, 'string')
+    const normalizedDescription = behavior.description.trim().toLowerCase().replace(/\s+/g, ' ')
+    assert.equal(normalizedBehaviorDescriptions.has(normalizedDescription), false)
+    normalizedBehaviorDescriptions.add(normalizedDescription)
     assert.equal(Array.isArray(behavior.existingCaseKeys), true)
     assert.equal(Array.isArray(behavior.proposedInternalKeys), true)
     assert.equal(Array.isArray(behavior.retainedProposalKeys), true)
     assert.equal(behavior.proposedInternalKeys.some(key => behavior.retainedProposalKeys.includes(key)), false)
+    if (behavior.coverageStatus === 'SHARED_EXISTING_CASE') {
+      assert.ok(behavior.existingCaseKeys.length > 0)
+      assert.equal(behavior.proposedInternalKeys.length, 0)
+      assert.equal(behavior.retainedProposalKeys.length, 0)
+    }
+    if (behavior.sourceTrace !== undefined) {
+      assert.equal(Array.isArray(behavior.sourceTrace), true)
+      for (const trace of behavior.sourceTrace) {
+        assert.deepEqual(Object.keys(trace).sort(), featureSourceTraceFields.sort())
+        assert.equal(fs.existsSync(path.join(root, trace.file)), true)
+        assert.equal(fs.readFileSync(path.join(root, trace.file), 'utf8').includes(trace.symbol), true)
+      }
+    }
+    if (behavior.currentTests !== undefined) {
+      assert.equal(Array.isArray(behavior.currentTests), true)
+      for (const currentTest of behavior.currentTests) assert.equal(fs.existsSync(path.join(root, currentTest)), true)
+    }
     if (behavior.coverageStatus === 'IMPLEMENTED_MISSING_ATOMIC_CASE') assert.ok(behavior.proposedInternalKeys.length > 0)
     if (behavior.coverageStatus === 'RETAINED_TASK_2_PROPOSAL') assert.ok(behavior.retainedProposalKeys.length > 0)
     for (const key of behavior.existingCaseKeys) assert.equal(catalogCaseKeys.has(key), true)
     for (const key of behavior.proposedInternalKeys) {
       assert.equal(feature.proposedCases.some(proposal => proposal.internalProposalKey === key), true)
       referencedProposalKeys.add(key)
+      proposalReferenceCounts.set(key, (proposalReferenceCounts.get(key) || 0) + 1)
     }
     for (const key of behavior.retainedProposalKeys) {
       assert.equal(task2ProposalKeys.has(key), true)
@@ -318,6 +344,8 @@ for (const feature of featureCoverage.features) {
   for (const existingCaseKey of feature.existingCaseKeys) {
     assert.equal(catalogCaseKeys.has(existingCaseKey), true)
   }
+  const assignedFeatureExistingKeys = new Set((feature.implementedBehaviors || []).flatMap(behavior => behavior.existingCaseKeys))
+  assert.deepEqual([...assignedFeatureExistingKeys].sort(), [...feature.existingCaseKeys].sort())
   for (const trace of feature.sourceTrace) {
     assert.deepEqual(Object.keys(trace).sort(), featureSourceTraceFields.sort())
     assert.equal(typeof trace.file, 'string')
@@ -362,7 +390,7 @@ assert.deepEqual(
   Array.from({ length: proposedSequences.length }, (_, index) => 204 + index)
 )
 assert.equal(featureCoverage.summary.featureCount, requiredFamilies.size)
-assert.equal(featureCoverage.summary.proposedCaseCount, 79)
+assert.equal(featureCoverage.summary.proposedCaseCount, 80)
 assert.equal(featureCoverage.summary.proposedCaseCount, allProposedCases.length)
 const retainedTask2Proposals = gapMatrix.proposals.filter(row => row.decision === 'KEEP' || row.decision === 'REWRITE')
 assert.equal(featureCoverage.summary.retainedProposalCount, retainedTask2Proposals.length)
@@ -371,6 +399,7 @@ assert.equal(
   catalog.cases.length + retainedTask2Proposals.length + allProposedCases.length
 )
 assert.deepEqual([...referencedProposalKeys].sort(), [...proposedKeys].sort())
+for (const key of proposedKeys) assert.equal(proposalReferenceCounts.get(key), 1)
 assert.deepEqual(
   [...referencedRetainedKeys].sort(),
   retainedTask2Proposals.map(row => row.internalProposalKey).sort()
@@ -402,7 +431,7 @@ const expectedProposalReferences = {
   ACCESS_EMAIL_WORKER: [],
   ACCESS_EMAIL_INVITATION_AND_KICK: ['IDTS110-F243', 'IDTS110-F243M', 'IDTS110-F244', 'IDTS110-F245', 'IDTS110-F246', 'IDTS110-F246R', 'IDTS110-F246B'],
   ACCESS_EMAIL_REVOKE_DELIVERY: ['IDTS110-F240R'],
-  BUG_EMAIL_SCHEDULED_DISCOVERY: ['IDTS110-F247', 'IDTS110-F247S', 'IDTS110-F247SS', 'IDTS110-F248', 'IDTS110-F248C', 'IDTS110-F249', 'IDTS110-F249K', 'IDTS110-F249T'],
+  BUG_EMAIL_SCHEDULED_DISCOVERY: ['IDTS110-F247', 'IDTS110-F247S', 'IDTS110-F247SS', 'IDTS110-F248', 'IDTS110-F248C', 'IDTS110-F248N', 'IDTS110-F249', 'IDTS110-F249K', 'IDTS110-F249T'],
   BUG_EMAIL_DIGEST: ['IDTS110-F250', 'IDTS110-F250L', 'IDTS110-F250M', 'IDTS110-F250Q', 'IDTS110-F250R', 'IDTS110-F251', 'IDTS110-F251R', 'IDTS110-F252', 'IDTS110-F252R', 'IDTS110-F252P', 'IDTS110-F253']
 }
 for (const [behaviorKey, expected] of Object.entries(expectedProposalReferences)) {
@@ -413,12 +442,18 @@ assert.equal(accessEmailWorker.proposedInternalKeys.includes('IDTS110-F243'), fa
 const accessEmailFeature = featureCoverage.features.find(feature => feature.family === 'ACCESS_EMAIL')
 assert.equal(accessEmailFeature.sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js' && trace.symbol === 'processUserAccessDeliveries'), true)
 assert.equal(accessEmailFeature.sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js' && trace.symbol === 'skippedAccessDeliveryReason'), true)
+const accessSharedExistingKeys = ['UT-NTF-003', 'UT-NTF-004', 'UT-NTF-005', 'UT-NTF-006', 'UT-NTF-007', 'UT-NTF-008', 'UT-NTF-009', 'UT-NTF-010', 'UT-NTF-011', 'UT-NTF-012']
+assert.deepEqual(behaviorByKey('ACCESS_EMAIL_SHARED_OUTBOX').existingCaseKeys, accessSharedExistingKeys)
+assert.deepEqual(accessEmailWorker.existingCaseKeys, accessSharedExistingKeys)
 for (const key of accessEmailWorker.proposedInternalKeys) {
   assert.equal(proposalByKey(key).sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js'), true)
 }
 assert.equal(proposalByKey('IDTS110-F241').sourceTrace.every(trace => trace.file === 'srv/user-admin/access-delivery.js'), true)
 assert.equal(proposalByKey('IDTS110-F241').sourceTrace.some(trace => /Onboarding/i.test(trace.symbol)), false)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F240R')), /REVOKE/)
+assert.doesNotMatch(JSON.stringify(behaviorByKey('ACCESS_EMAIL_COMPLETION')), /REVOKE/i)
+assert.deepEqual(behaviorByKey('ACCESS_EMAIL_REVOKE_DELIVERY').proposedInternalKeys, ['IDTS110-F240R'])
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F240')), /REVOKE/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F212')), /SUSPEND|ACCESS_SUSPENDED|delivery/i)
 assert.match(proposalByKey('IDTS110-F232').plannedAssertions[0], /occurredAt desc.*ID desc|ID desc.*occurredAt desc/i)
 for (const key of ['IDTS110-F239', 'IDTS110-F239P', 'IDTS110-F239H', 'IDTS110-F239D']) {
@@ -435,6 +470,9 @@ assert.match(JSON.stringify(proposalByKey('IDTS110-F246R')), /repeat/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F246B')), /rollback/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F247S')), /Critical|Blocker|four hours/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F247SS')), /standard|24 hours/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F248C')), /idempotent|same.*source key/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F248C')), /new due-date|new cycle|distinct source key/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F248N')), /new due-date|new cycle|distinct source key/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F250L')), /order/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F250M')), /limit/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F250Q')), /link/i)
@@ -442,6 +480,9 @@ assert.match(JSON.stringify(proposalByKey('IDTS110-F250R')), /raw/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F252')), /inactive/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F252R')), /role/i)
 assert.match(JSON.stringify(proposalByKey('IDTS110-F252P')), /Profile/i)
+assert.match(behaviorByKey('DEVELOPER_WORKLOAD_RETAINED_SLA').description, /due-date boundary/i)
+assert.doesNotMatch(behaviorByKey('DEVELOPER_WORKLOAD_RETAINED_SLA').description, /SLA/i)
+assert.match(behaviorByKey('USER_ACCESS_RETAINED_ROLE_CHECK').description, /allowed-role matrix/i)
 const requiredCorrectionKeys = [
   'IDTS110-F216R',
   'IDTS110-F210S',
@@ -461,6 +502,7 @@ const requiredCorrectionKeys = [
   'IDTS110-F247S',
   'IDTS110-F247SS',
   'IDTS110-F248C',
+  'IDTS110-F248N',
   'IDTS110-F249K',
   'IDTS110-F249T',
   'IDTS110-F250L',
