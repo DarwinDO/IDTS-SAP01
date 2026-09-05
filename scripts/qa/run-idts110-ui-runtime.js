@@ -368,33 +368,94 @@ async function notificationScenario (page, caseKey, timeout) {
   throw new Error(`IDTS-110 UI runtime: unsupported notification scenario ${caseKey}`)
 }
 
-async function workloadScenario (page, timeout) {
-  await page.waitForFunction(() => window.__IDTS110_WORKLOAD_READY__ === true, null, { timeout })
+async function exerciseProductionWorkloadNavigation (page, timeout) {
+  const navigationPage = await page.context().newPage()
+  let evaluationError = null
+  try {
+    await navigationPage.goto(page.url(), { waitUntil: 'domcontentloaded', timeout })
+    await navigationPage.waitForFunction(() => window.__IDTS110_WORKLOAD_PRODUCTION__?.loaded === true, null, { timeout })
+    const expectedPath = await navigationPage.evaluate(() => {
+      const production = window.__IDTS110_WORKLOAD_PRODUCTION__
+      if (!production?.controller || !production.normalizedBug) throw new Error('Production workload controller evidence is unavailable for navigation')
+      return production.normalizedBug.objectPageUrl
+    })
+    if (typeof expectedPath !== 'string' || !expectedPath) throw new Error('Production Bug object-page URL is unavailable for navigation')
+    const navigation = navigationPage.waitForURL(url => `${url.pathname}${url.hash}` === expectedPath, { timeout })
+    try {
+      await navigationPage.evaluate(() => {
+        const production = window.__IDTS110_WORKLOAD_PRODUCTION__
+        const row = production.normalizedBug
+        production.controller.openBugInManagement({
+          getSource: () => ({
+            getBindingContext: name => {
+              if (name !== 'workload') throw new Error(`Unexpected binding model: ${name}`)
+              return { getObject: () => row }
+            }
+          })
+        })
+      })
+    } catch (error) {
+      evaluationError = error
+    }
+    await navigation
+    if (evaluationError && !/execution context|navigation|destroyed/i.test(String(evaluationError.message || evaluationError))) throw evaluationError
+    const actualPath = await navigationPage.evaluate(() => `${window.location.pathname}${window.location.hash}`)
+    return { expectedPath, actualPath }
+  } finally {
+    await navigationPage.close().catch(() => {})
+  }
+}
+
+async function workloadScenario (page, timeout, diagnostics) {
+  await page.waitForFunction(() => window.__IDTS110_WORKLOAD_READY__ === true || typeof window.__IDTS110_WORKLOAD_BOOT_ERROR__ === 'string', null, { timeout })
+  const bootError = await page.evaluate(() => window.__IDTS110_WORKLOAD_BOOT_ERROR__ || '')
+  if (bootError) throw new Error(`F224 production fixture could not render: ${bootError}`)
   await page.getByText('Technical Developer', { exact: true }).first().waitFor({ state: 'visible', timeout })
   await page.getByText('Current Action Owner', { exact: true }).first().waitFor({ state: 'visible', timeout })
-  await page.getByText('Open Bug', { exact: true }).first().click()
-  await page.waitForFunction(() => typeof window.__IDTS110_WORKLOAD_LAST_LINK__ === 'string', null, { timeout })
-  const dom = await page.evaluate(() => {
+  await page.getByText('Open Bug', { exact: true }).first().waitFor({ state: 'visible', timeout })
+  const navigation = await exerciseProductionWorkloadNavigation(page, timeout)
+  const dom = await page.evaluate(navigationEvidence => {
     const bodyText = document.body.innerText || ''
     const fixture = window.__IDTS110_WORKLOAD_FIXTURE__ || {}
+    const production = window.__IDTS110_WORKLOAD_PRODUCTION__ || {}
+    const request = production.request || {}
     const links = Array.isArray(window.__IDTS110_WORKLOAD_LINKS__) ? window.__IDTS110_WORKLOAD_LINKS__ : []
     const validLink = value => /^\/idtsbugmanagementui\/index\.html#\/Bugs\(ID=[0-9a-f-]{36},IsActiveEntity=true\)$/i.test(value)
-    const deepLinksValid = links.length > 0 && links.every(validLink) && validLink(window.__IDTS110_WORKLOAD_LAST_LINK__)
+    const methods = ['_loadDeveloperWorkloadBugs', '_bugObjectPageUrl', 'openBugInManagement']
+    const controllerMethodsPresent = methods.every(name => typeof production.controller?.[name] === 'function')
+    const normalizedUrl = production.normalizedBug?.objectPageUrl || ''
+    const deepLinksValid = links.length > 0 && links.every(validLink) && validLink(normalizedUrl) && validLink(navigationEvidence.actualPath) && normalizedUrl === navigationEvidence.actualPath
     return {
       workloadRendered: bodyText.includes('Technical Developer'),
       actionOwnerRendered: bodyText.includes('Current Action Owner'),
       nonClosedRendered: !bodyText.includes('Closed fixture row'),
       openBugActionRendered: bodyText.includes('Open Bug'),
-      requestFilter: fixture.requestFilter || '',
+      productionModule: production.module || '',
+      productionControllerLoaded: production.loaded === true && controllerMethodsPresent,
+      productionMethods: Array.isArray(production.methods) ? production.methods.join(',') : '',
+      productionLoaderCalled: production.methodEvidence?.loadDeveloperWorkloadBugs === true,
+      productionUrlHelperCalled: production.methodEvidence?.bugObjectPageUrl === true,
+      productionNavigationPending: production.methodEvidence?.navigationPending === true,
+      odataEntitySet: request.entitySet || '',
+      requestFilter: request.filter || '',
+      requestOrderBy: request.orderby || '',
+      requestSelect: request.select || '',
+      requestGroupId: request.groupId || '',
+      requestSkip: Number(request.skip),
+      requestLength: Number(request.length),
       selectedProfile: fixture.selectedProfile || '',
       deepLinksValid,
-      clickedDeepLink: window.__IDTS110_WORKLOAD_LAST_LINK__ || '',
+      normalizedDeepLink: normalizedUrl,
+      expectedNavigationPath: navigationEvidence.expectedPath,
+      actualNavigationPath: navigationEvidence.actualPath,
       sourceClosedRows: Number(fixture.sourceClosedRows || 0),
       renderedBugRows: Number(fixture.renderedBugRows || 0),
       documentOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1
     }
-  })
-  const passed = dom.workloadRendered && dom.actionOwnerRendered && dom.nonClosedRendered && dom.openBugActionRendered && dom.requestFilter.includes("status_code ne 'CLOSED'") && dom.selectedProfile && dom.deepLinksValid && dom.sourceClosedRows >= 1 && dom.renderedBugRows === 1 && !dom.documentOverflow
+  }, navigation)
+  const expectedFilter = `assignee_ID eq ${dom.selectedProfile} and status_code ne 'CLOSED'`
+  const expectedMethods = ['_loadDeveloperWorkloadBugs', '_bugObjectPageUrl', 'openBugInManagement']
+  const passed = dom.workloadRendered && dom.actionOwnerRendered && dom.nonClosedRendered && dom.openBugActionRendered && dom.productionModule === 'idts/useradministrationui/controller/Main.controller' && dom.productionControllerLoaded && dom.productionMethods === expectedMethods.join(',') && dom.productionLoaderCalled && dom.productionUrlHelperCalled && dom.productionNavigationPending && dom.odataEntitySet === '/Bugs' && dom.requestFilter === expectedFilter && dom.requestOrderBy === 'dueDate asc,bugNumber asc' && dom.requestSelect.includes('assigneeDisplayName') && dom.requestSelect.includes('currentActionOwnerDisplayName') && dom.requestGroupId === '$direct' && dom.requestSkip === 0 && dom.requestLength === 100 && dom.selectedProfile && dom.deepLinksValid && dom.sourceClosedRows >= 1 && dom.renderedBugRows === 1 && !dom.documentOverflow
   return { passed, dom, before: { dialog: 'opening', selectedProfile: dom.selectedProfile }, after: dom, reload: { route: '/idtsuseradministrationui/index.html', fixture: 'workload-drilldown' } }
 }
 
@@ -485,7 +546,7 @@ async function runVisualCase ({ caseKey, options, outputRoot, browser, precheck 
         attachDiagnostics(page, diagnostics)
         await page.goto(caseUrl(options.url, caseKey, options), { waitUntil: 'domcontentloaded', timeout: options.timeoutMs })
         const scenarioResult = caseKey === 'IDTS110-F224'
-          ? await workloadScenario(page, options.timeoutMs)
+          ? await workloadScenario(page, options.timeoutMs, diagnostics)
           : await notificationScenario(page, caseKey, options.timeoutMs)
         scenarioResult.precheck = { runner: precheck.runner, status: precheck.status }
         const runtimeEvidence = await captureRuntimeEvidence(page, caseDirectory, caseKey, options, definition, scenarioResult, diagnostics)

@@ -65,17 +65,40 @@ window.__IDTS110_FIXTURE_SHELL__=Shell.init(component);
 }
 
 function workloadBootScript () {
-  return `sap.ui.require(["sap/ui/model/json/JSONModel","sap/ui/model/resource/ResourceModel","sap/ui/core/Fragment"],function(JSONModel,ResourceModel,Fragment){
+  return `sap.ui.require(["sap/ui/model/json/JSONModel","sap/ui/model/resource/ResourceModel","sap/ui/core/Fragment","idts/useradministrationui/controller/Main.controller"],function(JSONModel,ResourceModel,Fragment,MainController){
 "use strict";
 var profileID="20000000-0000-0000-0000-000000000001";
 var bugID="30000000-0000-0000-0000-000000000001";
-var workloadModel=new JSONModel({selectedDeveloper:{developerProfileID:profileID,developerName:"Demo Developer",openOwnedBugCount:1,currentActionItemCount:1,overdueOwnedBugCount:0,workloadLimit:3},bugs:[{ID:bugID,bugNumber:"BUG-4001",title:"Workload follow-up required",status_code:"IN_PROGRESS",priority_code:"HIGH",severity_code:"MEDIUM",dueDate:"2026-09-20",estimatedEffortHours:2.5,assigneeDisplayName:"Technical Developer",currentActionOwnerDisplayName:"Current Action Owner",overdue:false,objectPageUrl:"/idtsbugmanagementui/index.html#/Bugs(ID="+bugID+",IsActiveEntity=true)"}],bugsBusy:false,bugsError:false});
+var selectedDeveloper={developerProfileID:profileID,developerName:"Demo Developer",openOwnedBugCount:1,currentActionItemCount:1,overdueOwnedBugCount:0,workloadLimit:3};
+var workloadModel=new JSONModel({selectedDeveloper:selectedDeveloper,bugs:[],bugsBusy:false,bugsError:false,pageSize:100});
 var i18nModel=new ResourceModel({bundleUrl:"/idtsuseradministrationui/i18n/i18n.properties"});
-window.__IDTS110_WORKLOAD_FIXTURE__={requestFilter:"assignee_ID eq "+profileID+" and status_code ne 'CLOSED'",selectedProfile:profileID,sourceClosedRows:1,renderedBugRows:1};
-window.__IDTS110_WORKLOAD_LINKS__=["/idtsbugmanagementui/index.html#/Bugs(ID="+bugID+",IsActiveEntity=true)"];
-window.__IDTS110_WORKLOAD_LAST_LINK__=null;
-var controller={openBugInManagement:function(event){var row=event&&event.getSource&&event.getSource().getBindingContext("workload")&&event.getSource().getBindingContext("workload").getObject();var id=row&&(row.bugID||row.ID);if(/^[0-9a-f-]{36}$/i.test(String(id||"")))window.__IDTS110_WORKLOAD_LAST_LINK__="/idtsbugmanagementui/index.html#/Bugs(ID="+id+",IsActiveEntity=true)";}};
-Fragment.load({id:"idts110-workload",name:"idts.useradministrationui.fragment.DeveloperWorkloadDetails",controller:controller}).then(function(dialog){dialog.setModel(workloadModel,"workload");dialog.setModel(i18nModel,"i18n");dialog.placeAt("idtsWorkloadFixtureHost");dialog.open();window.__IDTS110_WORKLOAD_READY__=true;});
+var sourceClosedRows=1;
+var openBug={ID:bugID,bugNumber:"BUG-4001",title:"Workload follow-up required",status_code:"IN_PROGRESS",priority_code:"HIGH",severity_code:"MEDIUM",dueDate:"2026-09-20",estimatedEffortHours:2.5,assigneeDisplayName:"Technical Developer",currentActionOwnerDisplayName:"Current Action Owner"};
+var requestCapture={entitySet:null,parameters:null,skip:null,length:null};
+var bugApi={bindList:function(entitySet,_context,_sorters,_filters,parameters){requestCapture.entitySet=entitySet;requestCapture.parameters=parameters||{};return{requestContexts:function(skip,length){requestCapture.skip=skip;requestCapture.length=length;return Promise.resolve([{getObject:function(){return openBug;}}]);}};}};
+var fixtureView={getId:function(){return "idts110-workload-view";},getModel:function(name){return name==="bugApi"?bugApi:null;}};
+var controller=new MainController();
+controller.getModel=function(name){return name==="workload"?workloadModel:null;};
+controller.getView=function(){return fixtureView;};
+var productionMethodNames=["_loadDeveloperWorkloadBugs","_bugObjectPageUrl","openBugInManagement"];
+var missingMethods=productionMethodNames.filter(function(name){return typeof controller[name]!=="function";});
+if(missingMethods.length){window.__IDTS110_WORKLOAD_BOOT_ERROR__="Production User Administration controller methods unavailable: "+missingMethods.join(",");return;}
+Promise.resolve(controller._loadDeveloperWorkloadBugs(selectedDeveloper)).then(function(){
+  var bugs=workloadModel.getProperty("/bugs")||[];
+  var helperUrl=controller._bugObjectPageUrl(bugID);
+  if(!bugs.length||!bugs[0].objectPageUrl||helperUrl!==bugs[0].objectPageUrl)throw new Error("Production workload normalization did not produce a Bug object-page URL");
+  var request={entitySet:requestCapture.entitySet,filter:requestCapture.parameters&&requestCapture.parameters.$filter,orderby:requestCapture.parameters&&requestCapture.parameters.$orderby,select:requestCapture.parameters&&requestCapture.parameters.$select,groupId:requestCapture.parameters&&requestCapture.parameters.$$groupId,skip:requestCapture.skip,length:requestCapture.length};
+  window.__IDTS110_WORKLOAD_PRODUCTION__={loaded:true,module:"idts/useradministrationui/controller/Main.controller",controller:controller,methods:productionMethodNames.slice(),methodEvidence:{loadDeveloperWorkloadBugs:true,bugObjectPageUrl:true,navigationPending:true},request:request,normalizedBug:bugs[0],sourceClosedRows:sourceClosedRows,returnedRows:bugs.length};
+  window.__IDTS110_WORKLOAD_FIXTURE__={selectedProfile:profileID,sourceClosedRows:sourceClosedRows,renderedBugRows:bugs.length,requestFilter:request.filter,requestOrderBy:request.orderby,requestSelect:request.select};
+  window.__IDTS110_WORKLOAD_LINKS__=bugs.map(function(row){return row.objectPageUrl;}).filter(Boolean);
+  return Fragment.load({id:"idts110-workload",name:"idts.useradministrationui.fragment.DeveloperWorkloadDetails",controller:controller});
+}).then(function(dialog){
+  dialog.setModel(workloadModel,"workload");
+  dialog.setModel(i18nModel,"i18n");
+  dialog.placeAt("idtsWorkloadFixtureHost");
+  dialog.open();
+  window.__IDTS110_WORKLOAD_READY__=true;
+}).catch(function(error){window.__IDTS110_WORKLOAD_BOOT_ERROR__=String(error&&error.stack||error);});
 });`
 }
 

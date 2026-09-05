@@ -1,6 +1,8 @@
 'use strict'
 
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
 
 // This contract is intentionally independent of a live CAP/BTP target.  The
 // implementation must drive a real browser page for every case listed here;
@@ -61,5 +63,20 @@ assert.throws(
 assert.equal(uiRuntime.isVisualCase('IDTS110-F224'), true)
 assert.equal(uiRuntime.isVisualCase('IDTS110-F232'), false)
 assert.equal(typeof uiRuntime.formatCaseOutput, 'function')
+
+const workloadFixtureSource = fs.readFileSync(path.join(__dirname, 'serve-my-notifications-ui.js'), 'utf8')
+const productionWorkloadControllerSource = fs.readFileSync(path.join(__dirname, '..', '..', 'app', 'user-administration-ui', 'webapp', 'controller', 'Main.controller.js'), 'utf8')
+assert.match(workloadFixtureSource, /idts\/useradministrationui\/controller\/Main\.controller/, 'F224 fixture must load the production User Administration controller module')
+assert.match(workloadFixtureSource, /_loadDeveloperWorkloadBugs/, 'F224 fixture must invoke the production workload loader')
+assert.match(workloadFixtureSource, /_bugObjectPageUrl/, 'F224 fixture must exercise the production Bug object-page URL helper')
+assert.match(workloadFixtureSource, /openBugInManagement/, 'F224 fixture must exercise the production navigation method')
+assert.match(workloadFixtureSource, /bindList/, 'F224 fixture must observe the OData list binding used by production')
+assert.match(workloadFixtureSource, /__IDTS110_WORKLOAD_PRODUCTION__/, 'F224 fixture must publish production-path runtime evidence')
+assert.doesNotMatch(workloadFixtureSource, /requestFilter\s*:\s*["'`]assignee_ID/, 'F224 fixture must not preload a copied request filter')
+assert.match(productionWorkloadControllerSource, /_loadDeveloperWorkloadBugs\s*:/, 'production workload loader method is required')
+assert.match(productionWorkloadControllerSource, /_bugObjectPageUrl\s*:/, 'production Bug object-page URL helper is required')
+assert.match(productionWorkloadControllerSource, /window\.location\.assign\s*\(/, 'production navigation must remain observable')
+assert.match(productionWorkloadControllerSource, /assignee_ID eq \$\{sProfileID\} and status_code ne 'CLOSED'/, 'production non-Closed workload filter is required')
+assert.match(productionWorkloadControllerSource, /idtsbugmanagementui\/index\.html#\/Bugs\(ID=/, 'production Bug Management route is required')
 
 console.log('IDTS-110 UI runtime contract PASS: visual case set, scenario map, options, and boundaries')
