@@ -101,3 +101,35 @@ IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batc
 - External/BTP/provider-live modes remain `BLOCKED` until `authorizedFixture: true`, a valid deployed SHA, and matching runtime evidence are present.
 - The orchestrator binds markers to canonical catalog definitions and planned assertion metadata, binds catalog/extension/number-map/approval hashes and the DonHV PR/merge receipt to repository files, and exits zero only when every result is `PASS`.
 - Runner/output paths are real-path checked within `scripts/qa` and repository `.tmp`; child processes receive only a small non-secret environment allowlist. Invalid cases use a fixed sanitized FAIL skeleton so later cases still run.
+
+## Fix round 2 — adversarial RED → GREEN
+
+Fix round parent head: `5e71a254d80ea592faef1553e4d371580a080bd4`.
+
+The covering contract was extended before the fixes. The first run was intentionally RED at the new bounded-schema assertion:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract FAIL
+AssertionError: actual undefined - 2000
+    at .../scripts/qa/test-idts110-atomic-runner.js:81:10
+```
+
+The round-2 adversarial cases cover forged PASS evidence for required persistence snapshots and UI screenshots, forged external/BTP authorization and deployed proof, unknown/null case definitions, mixed-case sensitive keys, string/array/object/depth limits, direct batch output escape, and far-future marker timestamps. Minimal fixes now:
+
+- Require catalog-defined evidence independently in the orchestrator, including persistence/readback state and a case-specific screenshot plus SHA-256 for visual cases.
+- Require external/BTP/provider-live PASS markers to carry `authorizedFixture: true`, an exact 40-character deployed SHA, and matching runtime evidence; invalid external markers become `BLOCKED`.
+- Bind requested cases to the approved hashed 90-row set, reject unknown/null/duplicate keys, and preserve sanitized FAIL fallback/continuation for malformed approved-key definitions.
+- Align runtime and draft-07 schema bounds at 2,000-character strings, 64-item arrays, 32 object properties, and finite maximum depth four; mixed-case sensitive/PII keys are rejected.
+- Restrict `writeAtomicBatch` itself to the real-path-contained `.tmp/idts-110` root and bind PASS timestamps to the child invocation window with a documented five-second clock tolerance.
+
+GREEN evidence:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batch, and orchestrator continuation.
+node -e "const Ajv=require('ajv'); new Ajv().compile(require('./docs/qa/idts-110-atomic-result.schema.json')); console.log('Ajv schema compile PASS')"
+Ajv schema compile PASS
+```
+
+The protocol remains scoped to Task 3 files only. No business runners were integrated and no product/catalog/workbook/BTP/provider/external state was changed.

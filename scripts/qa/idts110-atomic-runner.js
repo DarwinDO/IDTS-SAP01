@@ -7,9 +7,13 @@ const BASELINE_SHA = '6eb6f73840d7150598a993f8656d2b44e5b0cd4b'
 const MARKER_PREFIX = 'IDTS110_ATOMIC_RESULT '
 const RESULT_STATUSES = ['PASS', 'FAIL', 'BLOCKED', 'HELD', 'NOT_RUN']
 const EVIDENCE_KINDS = ['LOCAL_ATOMIC', 'UI_RUNTIME', 'BTP_INTEGRATION']
+const MAX_SAFE_STRING_LENGTH = 2000
+const MAX_SAFE_ARRAY_ITEMS = 64
+const MAX_SAFE_OBJECT_PROPERTIES = 32
+const MAX_SAFE_DEPTH = 4
 const REQUIRED_RESULT_FIELDS = [
   'schemaVersion', 'jiraKey', 'caseKey', 'mentorNumber', 'assertionId', 'title',
-  'status', 'assertionPassed', 'evidenceKind', 'executor', 'startedAt', 'completedAt',
+  'status', 'assertionPassed', 'authorizedFixture', 'evidenceKind', 'executor', 'startedAt', 'completedAt',
   'sourceBaselineSha', 'deployedSha', 'testFile', 'testCommand', 'preconditions',
   'input', 'expectedResult', 'actualResult', 'sourceTrace', 'beforeState',
   'afterState', 'reloadState', 'runtimeEvidence', 'evidenceIds', 'limitation',
@@ -73,10 +77,14 @@ function assertNoUndefined (value, location = 'value', seen = new Set()) {
   seen.delete(value)
 }
 
-function sanitizeValue (value, location = 'value', seen = new Set()) {
+function sanitizeValue (value, location = 'value', seen = new Set(), depth = 0) {
   assertNoUndefined(value, location)
   if (value === null) return null
-  if (typeof value === 'string') return redactText(value)
+  if (typeof value === 'string') {
+    const sanitized = redactText(value)
+    if (sanitized.length > MAX_SAFE_STRING_LENGTH) fail(`string length exceeds ${MAX_SAFE_STRING_LENGTH} characters at ${location}`)
+    return sanitized
+  }
   if (typeof value === 'number') {
     if (!Number.isFinite(value)) fail(`non-finite number at ${location}`)
     return value
@@ -88,38 +96,45 @@ function sanitizeValue (value, location = 'value', seen = new Set()) {
     return value.toISOString()
   }
   if (seen.has(value)) fail(`cyclic value at ${location}`)
+  if (depth > MAX_SAFE_DEPTH) fail(`value exceeds depth ${MAX_SAFE_DEPTH} at ${location}`)
   seen.add(value)
   let output
   if (Array.isArray(value)) {
-    output = value.map((item, index) => sanitizeValue(item, `${location}[${index}]`, seen))
+    if (value.length > MAX_SAFE_ARRAY_ITEMS) fail(`array length exceeds ${MAX_SAFE_ARRAY_ITEMS} items at ${location}`)
+    output = value.map((item, index) => sanitizeValue(item, `${location}[${index}]`, seen, depth + 1))
   } else {
+    if (Object.keys(value).length > MAX_SAFE_OBJECT_PROPERTIES) fail(`object exceeds ${MAX_SAFE_OBJECT_PROPERTIES} properties at ${location}`)
     output = {}
     for (const [key, item] of Object.entries(value)) {
       if (isSensitiveKey(key) || isPiiKey(key) || key.toLowerCase() === 'stack') continue
-      output[key] = sanitizeValue(item, `${location}.${key}`, seen)
+      output[key] = sanitizeValue(item, `${location}.${key}`, seen, depth + 1)
     }
   }
   seen.delete(value)
   return output
 }
 
-function assertSafeValue (value, location = 'value', seen = new Set()) {
+function assertSafeValue (value, location = 'value', seen = new Set(), depth = 0) {
   if (value === undefined) fail(`undefined value at ${location}`)
   if (typeof value === 'string') {
     if (hasRawSecret(value)) fail(`unsanitized secret, PII, or private endpoint at ${location}`)
     if (hasPlaceholder(value)) fail(`unresolved placeholder at ${location}`)
+    if (value.length > MAX_SAFE_STRING_LENGTH) fail(`string length exceeds ${MAX_SAFE_STRING_LENGTH} characters at ${location}`)
     return
   }
   if (value === null || typeof value !== 'object') return
   if (seen.has(value)) fail(`cyclic value at ${location}`)
+  if (depth > MAX_SAFE_DEPTH) fail(`value exceeds depth ${MAX_SAFE_DEPTH} at ${location}`)
   seen.add(value)
   if (Array.isArray(value)) {
-    for (let index = 0; index < value.length; index += 1) assertSafeValue(value[index], `${location}[${index}]`, seen)
+    if (value.length > MAX_SAFE_ARRAY_ITEMS) fail(`array length exceeds ${MAX_SAFE_ARRAY_ITEMS} items at ${location}`)
+    for (let index = 0; index < value.length; index += 1) assertSafeValue(value[index], `${location}[${index}]`, seen, depth + 1)
   } else {
+    if (Object.keys(value).length > MAX_SAFE_OBJECT_PROPERTIES) fail(`object exceeds ${MAX_SAFE_OBJECT_PROPERTIES} properties at ${location}`)
     for (const [key, item] of Object.entries(value)) {
       if (isSensitiveKey(key) || isPiiKey(key) || key.toLowerCase() === 'stack') fail(`sensitive or PII key at ${location}.${key}`)
       assertSafeValue(key, `${location}.<key>`, seen)
-      assertSafeValue(item, `${location}.${key}`, seen)
+      assertSafeValue(item, `${location}.${key}`, seen, depth + 1)
     }
   }
   seen.delete(value)
@@ -321,6 +336,7 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
     title: textResult(definition.title, 'definition.title'),
     status: finalStatus,
     assertionPassed: finalStatus === 'PASS',
+    authorizedFixture: authorizedExternal,
     evidenceKind,
     executor: textResult(executor, 'executor'),
     startedAt,
@@ -402,6 +418,7 @@ function validateAtomicResult (result) {
   }
   if (!RESULT_STATUSES.includes(result.status) || result.status === 'MAPPING_ONLY') fail('result status is invalid; MAPPING_ONLY is forbidden')
   if (typeof result.assertionPassed !== 'boolean') fail('result assertionPassed must be boolean')
+  if (typeof result.authorizedFixture !== 'boolean') fail('result authorizedFixture must be boolean')
   if (result.status === 'PASS' && result.assertionPassed !== true) fail('PASS requires explicit assertionPassed=true')
   if (result.status !== 'PASS' && result.assertionPassed !== false) fail('non-PASS results require assertionPassed=false')
   if (!EVIDENCE_KINDS.includes(result.evidenceKind)) fail('result evidenceKind is invalid')
@@ -410,10 +427,13 @@ function validateAtomicResult (result) {
   if (Date.parse(result.completedAt) < Date.parse(result.startedAt)) fail('completedAt cannot precede startedAt')
   if (result.sourceBaselineSha !== BASELINE_SHA) fail(`result sourceBaselineSha must equal ${BASELINE_SHA}`)
   if (result.deployedSha !== null && (typeof result.deployedSha !== 'string' || !/^[a-f0-9]{40}$/i.test(result.deployedSha))) fail('result deployedSha must be null or a 40-character SHA-1')
+  if (result.authorizedFixture && result.deployedSha === null) fail('authorizedFixture requires a deployedSha')
+  if (!result.authorizedFixture && result.deployedSha !== null) fail('deployedSha requires authorizedFixture=true')
   if (typeof result.testFile !== 'string' || !/^scripts\/qa\/[^\s]+\.m?js$/.test(result.testFile) || result.testFile.includes('..')) fail('result testFile must be a repository QA runner path')
   if (!Array.isArray(result.sourceTrace) || result.sourceTrace.length === 0 || result.sourceTrace.some(trace => !isObject(trace) || typeof trace.file !== 'string' || typeof trace.symbol !== 'string' || !trace.file.trim() || !trace.symbol.trim())) fail('result sourceTrace must contain file and symbol entries')
   for (const state of ['beforeState', 'afterState', 'reloadState', 'runtimeEvidence']) if (state !== 'runtimeEvidence' && result[state] !== null && !isObject(result[state])) fail(`result ${state} must be an object or null`)
   if (result.runtimeEvidence !== null && !isObject(result.runtimeEvidence)) fail('result runtimeEvidence must be an object or null')
+  if (result.authorizedFixture && (!isObject(result.runtimeEvidence) || result.runtimeEvidence.deployedSha !== result.deployedSha)) fail('authorizedFixture requires runtimeEvidence.deployedSha to match deployedSha')
   if (!Array.isArray(result.evidenceIds) || result.evidenceIds.length === 0 || result.evidenceIds.some(id => typeof id !== 'string' || !id.trim())) fail('result evidenceIds must be a non-empty string array')
   const serialized = JSON.stringify(result)
   if (/MAPPING_ONLY|\bundefined\b/i.test(serialized)) fail('result contains forbidden MAPPING_ONLY or undefined text')
@@ -441,6 +461,43 @@ function formatAtomicMarker (result) {
   const sanitized = sanitizeValue(result, 'result')
   validateAtomicResult(sanitized)
   return `${MARKER_PREFIX}${JSON.stringify(sanitized)}`
+}
+
+const PROJECT_ROOT = path.resolve(__dirname, '../..')
+
+function realPathWithMissingTail (target) {
+  let current = path.resolve(target)
+  const missing = []
+  while (!fs.existsSync(current)) {
+    const parent = path.dirname(current)
+    if (parent === current) return current
+    missing.unshift(path.basename(current))
+    current = parent
+  }
+  return path.join(fs.realpathSync.native(current), ...missing)
+}
+
+function isWithin (target, parent) {
+  const resolvedTarget = path.resolve(target)
+  const resolvedParent = path.resolve(parent)
+  return resolvedTarget === resolvedParent || resolvedTarget.startsWith(`${resolvedParent}${path.sep}`)
+}
+
+function atomicOutputPath (outputPath) {
+  if (typeof outputPath !== 'string' || !outputPath.trim()) fail('outputPath is required')
+  const safeRoot = fs.realpathSync.native(PROJECT_ROOT)
+  const outputRoot = path.join(safeRoot, '.tmp', 'idts-110')
+  const actualOutputRoot = realPathWithMissingTail(outputRoot)
+  if (!isWithin(actualOutputRoot, safeRoot)) fail('atomic output root has a symlink escape')
+  const lexical = path.resolve(outputPath)
+  if (!isWithin(lexical, outputRoot)) fail('outputPath must stay inside the approved .tmp/idts-110 boundary')
+  if (fs.existsSync(lexical) && fs.lstatSync(lexical).isSymbolicLink()) fail('outputPath cannot be a symlink')
+  fs.mkdirSync(path.dirname(lexical), { recursive: true })
+  const actualParent = fs.realpathSync.native(path.dirname(lexical))
+  if (!isWithin(actualParent, actualOutputRoot)) fail('outputPath parent has a symlink escape outside .tmp/idts-110')
+  const actual = realPathWithMissingTail(lexical)
+  if (!isWithin(actual, actualOutputRoot)) fail('outputPath has a symlink escape outside .tmp/idts-110')
+  return actual
 }
 
 function writeAtomicBatch ({ runId, sourceBaselineSha, catalogSha, approvalReference, results }, outputPath) {
@@ -471,9 +528,7 @@ function writeAtomicBatch ({ runId, sourceBaselineSha, catalogSha, approvalRefer
   }
   assertNoUndefined(batch)
   assertSafeValue(batch)
-  const target = path.resolve(String(outputPath || ''))
-  if (!outputPath || !target) fail('outputPath is required')
-  fs.mkdirSync(path.dirname(target), { recursive: true })
+  const target = atomicOutputPath(outputPath)
   fs.writeFileSync(target, `${JSON.stringify(batch, null, 2)}\n`, 'utf8')
   return batch
 }
@@ -482,6 +537,10 @@ module.exports = {
   BASELINE_SHA,
   MARKER_PREFIX,
   RESULT_STATUSES,
+  MAX_SAFE_STRING_LENGTH,
+  MAX_SAFE_ARRAY_ITEMS,
+  MAX_SAFE_OBJECT_PROPERTIES,
+  MAX_SAFE_DEPTH,
   redactText,
   parseAtomicMarker,
   readAtomicOptions,

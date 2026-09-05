@@ -22,6 +22,8 @@ const DEFAULT_APPROVAL = path.join(ROOT, 'docs/pm/evidence/idts-110/catalog-appr
 const EXISTING_CASE_COUNT = 188
 const NEW_CASE_COUNT = 90
 const DEFAULT_TIMEOUT_MS = 120000
+// Allow only small scheduler/child-clock skew around this invocation window.
+const CLOCK_TOLERANCE_MS = 5000
 const CHILD_ENV_KEYS = [
   'PATH', 'Path', 'PATHEXT', 'SystemRoot', 'SYSTEMROOT', 'WINDIR', 'TEMP', 'TMP',
   'NODE_ENV', 'CDS_ENV', 'CDS_LOG_LEVEL', 'CDS_TEST_FAKE', 'CDS_PLUGIN_UI5_ACTIVE',
@@ -38,6 +40,53 @@ const VISUAL_CASES = new Set([
   'IDTS110-F238L', 'IDTS110-F239', 'IDTS110-F239P', 'IDTS110-F239H',
   'IDTS110-F239D'
 ])
+
+function definitionRequiresExternal (definition) {
+  const executionModes = [definition.environment, definition.testLevel, definition.acceptanceMode, definition.providerMode, definition.provider, definition.executionMode]
+    .filter(value => typeof value === 'string')
+    .map(value => value.toUpperCase())
+  return executionModes.some(value => /BTP|PROVIDER[_-]?LIVE|LIVE(?:[_-]|$)|EXTERNAL/.test(value)) || definition.providerLive === true || definition.live === true
+}
+
+function hasScreenshotProof (value) {
+  if (!value || typeof value !== 'object') return false
+  let screenshotPath = false
+  let screenshotHash = false
+  const visit = current => {
+    for (const [key, item] of Object.entries(current || {})) {
+      if (/screenshot|runtime(?:Image|Evidence)|imagePath/i.test(key)) {
+        if (typeof item === 'string' && item.trim()) {
+          if (/sha|hash/i.test(key) && /^[a-f0-9]{64}$/i.test(item.trim())) screenshotHash = true
+          else screenshotPath = true
+        } else if (item && typeof item === 'object') visit(item)
+      } else if (item && typeof item === 'object') visit(item)
+    }
+  }
+  visit(value)
+  return screenshotPath && screenshotHash
+}
+
+function assertDefinitionEvidence (marker, definition) {
+  if (marker.status !== 'PASS') return
+  const requirements = Array.isArray(definition.evidenceRequirements) ? definition.evidenceRequirements.join(' ') : ''
+  const required = {
+    beforeState: /before(?:[-/ ]state|[-/ ]database)/i.test(requirements),
+    afterState: /after(?:[-/ ]state|[-/ ]database)/i.test(requirements),
+    reloadState: /reload|readback|persistence/i.test(requirements)
+  }
+  for (const [field, isRequired] of Object.entries(required)) {
+    if (isRequired && marker[field] === null) fail(`${field} evidence is required for ${definition.caseId}`)
+  }
+  const visual = definition.acceptanceMode === 'UI_RUNTIME_VISUAL' || /browser\/runtime|rendered UI|screenshot|UI runtime/i.test(requirements)
+  if (visual && !hasScreenshotProof(marker.runtimeEvidence)) fail(`rendered screenshot proof is required for ${definition.caseId}`)
+}
+
+function assertExternalProof (marker, definition) {
+  if (!definitionRequiresExternal(definition) || marker.status !== 'PASS') return
+  if (marker.authorizedFixture !== true) fail(`external execution is not authorized for ${definition.caseId}`)
+  if (typeof marker.deployedSha !== 'string' || !/^[a-f0-9]{40}$/i.test(marker.deployedSha)) fail(`external execution has no exact deployed SHA for ${definition.caseId}`)
+  if (!marker.runtimeEvidence || typeof marker.runtimeEvidence !== 'object' || marker.runtimeEvidence.deployedSha !== marker.deployedSha || Object.keys(marker.runtimeEvidence).length < 2) fail(`external execution runtime proof does not match deployed SHA for ${definition.caseId}`)
+}
 
 function fail (message) {
   throw new Error(`IDTS-110 new-case orchestrator: ${message}`)
@@ -120,6 +169,10 @@ function isUsableDefinition (definition) {
     Array.isArray(definition.sourceTrace) && definition.sourceTrace.length > 0
 }
 
+function isExactApprovedDefinition (definition, approvedDefinition) {
+  return isUsableDefinition(definition) && JSON.stringify(definition) === JSON.stringify(approvedDefinition)
+}
+
 function filterDefinitions (definitions, scope = 'ALL') {
   if (!Array.isArray(definitions)) fail('definitions must be an array')
   const normalized = String(scope || 'ALL').toUpperCase()
@@ -172,8 +225,11 @@ function resolveOutputPath (outputPath, root = ROOT) {
   const tmpRoot = path.join(safeRoot, '.tmp')
   const lexical = path.resolve(safeRoot, outputPath)
   if (!isWithin(lexical, tmpRoot)) fail('output path must stay inside the repository .tmp boundary')
-  fs.mkdirSync(path.dirname(lexical), { recursive: true })
   const actualTmpRoot = realPathWithMissingTail(tmpRoot)
+  if (!isWithin(actualTmpRoot, safeRoot)) fail('repository .tmp resolves outside the repository root')
+  const existingParent = realPathWithMissingTail(path.dirname(lexical))
+  if (!isWithin(existingParent, actualTmpRoot)) fail('output path parent has a symlink escape outside the repository .tmp boundary')
+  fs.mkdirSync(path.dirname(lexical), { recursive: true })
   const actual = realPathWithMissingTail(lexical)
   if (!isWithin(actualTmpRoot, safeRoot) || !isWithin(actual, actualTmpRoot)) fail('output path has a symlink escape outside the repository .tmp boundary')
   if (fs.existsSync(lexical) && fs.lstatSync(lexical).isSymbolicLink()) fail('output path cannot be a symlink')
@@ -253,7 +309,7 @@ function markerOutput (child) {
   return `${child?.stdout || ''}\n${child?.stderr || ''}`
 }
 
-function assertMarkerMatches (marker, definition, baselineSha) {
+function assertMarkerMatches (marker, definition, baselineSha, invocationWindow = null) {
   validateAtomicResult(marker)
   if (marker.caseKey !== definition.caseId) fail(`marker case key mismatch for ${definition.caseId}`)
   if (definition.assertionId !== `${definition.caseId}-A1` || marker.assertionId !== definition.assertionId) fail(`marker assertion ID mismatch for ${definition.caseId}`)
@@ -268,6 +324,13 @@ function assertMarkerMatches (marker, definition, baselineSha) {
   if (marker.status === 'PASS' && (!marker.testCommand.includes(`--idts110-case=${definition.caseId}`) || !marker.testCommand.includes(`--baseline=${baselineSha}`))) fail(`marker command proof mismatch for ${definition.caseId}`)
   if (marker.reviewStatus !== 'PENDING_DONHV_REVIEW') fail(`marker review status must remain pending for ${definition.caseId}`)
   if (marker.status === 'NOT_RUN') fail(`marker cannot report NOT_RUN after invoking ${definition.caseId}`)
+  assertDefinitionEvidence(marker, definition)
+  assertExternalProof(marker, definition)
+  if (invocationWindow && marker.status === 'PASS') {
+    const startedAt = Date.parse(marker.startedAt)
+    const completedAt = Date.parse(marker.completedAt)
+    if (startedAt < invocationWindow.startedAt - CLOCK_TOLERANCE_MS || completedAt > invocationWindow.completedAt + CLOCK_TOLERANCE_MS) fail(`marker timestamp is outside the invocation window for ${definition.caseId}`)
+  }
   return marker
 }
 
@@ -281,6 +344,7 @@ async function runOneCase (definition, options) {
     `--output=${perCaseOutputPath(options.outputPath, definition.caseId)}`
   ]
   let child
+  const invocationStartedAt = Date.now()
   try {
     child = options.spawnSync(process.execPath, childArgs, {
       cwd: options.root,
@@ -293,6 +357,7 @@ async function runOneCase (definition, options) {
   } catch (error) {
     return fallbackResult(definition, options, 'BLOCKED', 'Atomic child process could not start; the runner is unavailable.', options.index)
   }
+  const invocationCompletedAt = Date.now()
 
   const commandFailure = commandStatus(child)
   if (commandFailure) {
@@ -305,12 +370,12 @@ async function runOneCase (definition, options) {
   let marker
   try {
     marker = parseAtomicMarker(markerOutput(child))
-    assertMarkerMatches(marker, definition, options.baselineSha)
+    assertMarkerMatches(marker, definition, options.baselineSha, { startedAt: invocationStartedAt, completedAt: invocationCompletedAt })
   } catch (error) {
     const detail = error.message.includes('exactly one')
       ? `Atomic child did not emit exactly one case marker for ${definition.caseId}; suite-only output is not atomic evidence.`
       : `Atomic child emitted an invalid result for ${definition.caseId}; no PASS was inferred from its exit code.`
-    return fallbackResult(definition, options, 'FAIL', detail, options.index)
+    return fallbackResult(definition, options, definitionRequiresExternal(definition) ? 'BLOCKED' : 'FAIL', detail, options.index)
   }
 
   if (child.status !== 0 && marker.status === 'PASS') {
@@ -345,11 +410,15 @@ async function runNewCases ({
   if (definitions !== null && !Array.isArray(definitions)) fail('definitions must be an array')
   const requestedDefinitions = definitions === null ? approvedDefinitions : definitions
   const approvedByKey = new Map(approvedDefinitions.map(definition => [definition.caseId, definition]))
+  for (const definition of requestedDefinitions) {
+    if (!definition || typeof definition !== 'object' || typeof definition.caseId !== 'string' || !approvedByKey.has(definition.caseId)) fail('definitions may contain only approved IDTS-110 case definitions')
+  }
   const selectedDefinitions = filterDefinitions(requestedDefinitions, scope).map(definition => {
     const approvedDefinition = approvedByKey.get(definition?.caseId)
-    return approvedDefinition && isUsableDefinition(definition) ? approvedDefinition : definition
+    return approvedDefinition && isExactApprovedDefinition(definition, approvedDefinition) ? approvedDefinition : definition
   })
   if (!selectedDefinitions.length) fail('scope selected no new cases')
+  if (new Set(selectedDefinitions.map(definition => definition.caseId)).size !== selectedDefinitions.length) fail('definitions contain a duplicate approved case key')
   const actualCatalogSha = catalogSha(catalogPath)
   if (suppliedCatalogSha !== undefined && suppliedCatalogSha !== actualCatalogSha) fail('caller catalogSha does not match the approved catalog file')
   if (approvalReference !== undefined && JSON.stringify(approvalReference) !== JSON.stringify(approved.approval.approvalReference)) fail('caller approvalReference does not match the approved receipt file')

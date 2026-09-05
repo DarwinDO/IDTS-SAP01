@@ -77,6 +77,10 @@ async function main () {
   const stateSchema = schema.$defs.safeObject
   assert.equal(typeof stateSchema.maxProperties, 'number')
   assert.equal(typeof stateSchema.propertyNames, 'object')
+  assert.equal(stateSchema.maxProperties, 32)
+  assert.equal(schema.$defs.safeValue.maxLength, 2000)
+  assert.equal(schema.$defs.safeArray.maxItems, 64)
+  assert.match(schema.$defs.safeObject.$comment, /maxDepth=4/)
   assert.deepEqual(parseAtomicMarker([
     'noise',
     `${MARKER_PREFIX}{"caseKey":"IDTS110-F232","assertionId":"IDTS110-F232-A1","status":"PASS"}`
@@ -255,7 +259,7 @@ async function main () {
   assert.throws(() => validateAtomicResult({ ...result, sourceBaselineSha: '0'.repeat(40) }), /baseline/i)
 
   const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'idts110-atomic-contract-'))
-  const batchPath = path.join(tempDirectory, 'batch.json')
+  const batchPath = path.join(process.cwd(), '.tmp', 'idts-110', 'batch-contract.json')
   const batch = writeAtomicBatch({
     runId: 'idts110-contract-run',
     sourceBaselineSha: BASELINE_SHA,
@@ -265,6 +269,13 @@ async function main () {
   }, batchPath)
   assert.equal(batch.results.length, 1)
   assert.deepEqual(JSON.parse(fs.readFileSync(batchPath, 'utf8')), batch)
+  assert.throws(() => writeAtomicBatch({
+    runId: 'idts110-contract-run',
+    sourceBaselineSha: BASELINE_SHA,
+    catalogSha: crypto.createHash('sha256').update('catalog').digest('hex'),
+    approvalReference: { pullRequest: 388, mergeSha: BASELINE_SHA },
+    results: [result]
+  }, path.join(os.tmpdir(), 'idts110-outside-batch.json')), /boundary/i)
   assert.throws(() => writeAtomicBatch({
     runId: 'idts110-contract-run',
     sourceBaselineSha: BASELINE_SHA,
@@ -285,7 +296,7 @@ async function main () {
     executor: 'Codex-agent-assisted', execute: async () => ({ assertionPassed: true, actualResult: 'different', beforeState: { rows: 1 }, afterState: { rows: 2 }, reloadState: { rows: 2 }, evidenceIds: ['IDTS110-F233-RESULT'] })
   })
   const calls = []
-  const orchestratedPath = path.join(process.cwd(), '.tmp', 'idts-110-contract-orchestrated.json')
+  const orchestratedPath = path.join(process.cwd(), '.tmp', 'idts-110', 'orchestrated-contract.json')
   const orchestrated = await orchestrator.runNewCases({
     definitions,
     baselineSha: BASELINE_SHA,
@@ -356,8 +367,6 @@ async function main () {
   assert.equal(Object.hasOwn(childEnv, secretName), false, 'child environment must not inherit arbitrary process secrets')
 
   const malformedDefinitions = [
-    definition({ caseId: 'IDTS110-BAD1', plannedTestFile: undefined, title: undefined, sourceTrace: undefined }),
-    null,
     definition({ caseId: 'IDTS110-F232', title: undefined }),
     definition({ caseId: 'IDTS110-F233', mentorNumber: 235, title: 'safe second case' })
   ]
@@ -369,11 +378,103 @@ async function main () {
       ? { status: 0, stdout: `${formatAtomicMarker(childPass)}\n`, stderr: '' }
       : { status: 0, stdout: 'suite PASS', stderr: '' }
   })
-  assert.equal(malformedBatch.results.length, 4)
+  assert.equal(malformedBatch.results.length, 2)
   assert.equal(malformedBatch.results[0].status, 'FAIL')
   assert.equal(malformedBatch.results[1].status, 'FAIL')
-  assert.equal(malformedBatch.results[2].status, 'FAIL')
-  assert.equal(malformedBatch.results[3].status, 'FAIL')
+
+  await assert.rejects(() => orchestrator.runNewCases({
+    definitions: [definition({ caseId: 'IDTS110-CUSTOM1' })],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: 'suite PASS', stderr: '' })
+  }), /approved|unknown/i, 'custom or unknown case keys must be rejected')
+  await assert.rejects(() => orchestrator.runNewCases({
+    definitions: [null],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: 'suite PASS', stderr: '' })
+  }), /approved|unknown|definition/i, 'null definitions must be rejected')
+
+  const missingSnapshots = { ...childPass, beforeState: null, afterState: null, reloadState: null }
+  const snapshotBatch = await orchestrator.runNewCases({
+    definitions: [definitions[0]],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: `${formatAtomicMarker(missingSnapshots)}\n`, stderr: '' })
+  })
+  assert.equal(snapshotBatch.results[0].status, 'FAIL', 'orchestrator must independently require catalog persistence snapshots')
+
+  const visualDefinition = approvedDefinitions.find(current => current.caseId === 'IDTS110-F224')
+  const visualResult = await runAtomicCase({
+    definition: visualDefinition,
+    assertionId: visualDefinition.assertionId,
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: visualDefinition.expectedResult,
+      runtimeEvidence: { screenshotPath: 'F224.png', screenshotSha256: 'b'.repeat(64) },
+      evidenceIds: ['IDTS110-F224-RESULT']
+    })
+  })
+  const visualBatch = await orchestrator.runNewCases({
+    definitions: [visualDefinition],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: `${formatAtomicMarker({ ...visualResult, runtimeEvidence: null })}\n`, stderr: '' })
+  })
+  assert.equal(visualBatch.results[0].status, 'FAIL', 'orchestrator must independently require rendered screenshot proof')
+
+  const externalDefinition = definition({ environment: 'BTP' })
+  const externalMarker = await runAtomicCase({
+    definition: externalDefinition,
+    assertionId: externalDefinition.assertionId,
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({ assertionPassed: true, actualResult: externalDefinition.expectedResult, evidenceIds: ['IDTS110-F232-RESULT'] })
+  })
+  const forgedExternalMarker = {
+    ...externalMarker,
+    status: 'PASS',
+    assertionPassed: true,
+    actualResult: externalDefinition.expectedResult,
+    authorizedFixture: false,
+    deployedSha: null,
+    runtimeEvidence: null
+  }
+  const externalRun = await orchestrator.runOneCase(externalDefinition, {
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    outputPath: null,
+    root: process.cwd(),
+    timeoutMs: 1000,
+    spawnSync: () => ({ status: 0, stdout: `${formatAtomicMarker(forgedExternalMarker)}\n`, stderr: '' })
+  })
+  assert.equal(externalRun.status, 'BLOCKED', 'orchestrator must not accept external PASS without marker authorization proof')
+
+  await assert.rejects(() => runAtomicCase({
+    definition: definition(), assertionId: 'IDTS110-F232-A1', baselineSha: BASELINE_SHA, executor: 'Codex-agent-assisted',
+    execute: async () => ({ assertionPassed: true, actualResult: 'expected result', beforeState: { tooLong: 'x'.repeat(2001) }, afterState: { rows: 1 }, reloadState: { rows: 1 }, evidenceIds: ['IDTS110-F232-RESULT'] })
+  }), /length|bounded/i)
+  await assert.rejects(() => runAtomicCase({
+    definition: definition(), assertionId: 'IDTS110-F232-A1', baselineSha: BASELINE_SHA, executor: 'Codex-agent-assisted',
+    execute: async () => ({ assertionPassed: true, actualResult: 'expected result', beforeState: { tooMany: Array.from({ length: 65 }, () => 'x') }, afterState: { rows: 1 }, reloadState: { rows: 1 }, evidenceIds: ['IDTS110-F232-RESULT'] })
+  }), /length|bounded/i)
+  await assert.rejects(() => runAtomicCase({
+    definition: definition(), assertionId: 'IDTS110-F232-A1', baselineSha: BASELINE_SHA, executor: 'Codex-agent-assisted',
+    execute: async () => ({ assertionPassed: true, actualResult: 'expected result', beforeState: { a: { b: { c: { d: { e: 1 } } } } }, afterState: { rows: 1 }, reloadState: { rows: 1 }, evidenceIds: ['IDTS110-F232-RESULT'] })
+  }), /depth|bounded/i)
+  assert.throws(() => validateAtomicResult({ ...result, beforeState: { PaSsWoRd: 'secret' } }), /sensitive|PII/i)
+
+  const futureStart = new Date(Date.now() + 60000).toISOString()
+  const futureMarker = { ...childPass, startedAt: futureStart, completedAt: futureStart }
+  const futureBatch = await orchestrator.runNewCases({
+    definitions: [definitions[0]],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: `${formatAtomicMarker(futureMarker)}\n`, stderr: '' })
+  })
+  assert.equal(futureBatch.results[0].status, 'FAIL', 'far-future marker timestamps must be rejected')
 
   const escapeName = 'idts110-contract-escape.js'
   const escapePath = path.join(process.cwd(), 'scripts/qa', escapeName)

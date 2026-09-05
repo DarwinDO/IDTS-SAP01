@@ -7,27 +7,92 @@
   "additionalProperties": false,
   "$defs": {
     "safeValue": {
+      "maxLength": 2000,
       "anyOf": [
         { "type": "null" },
         { "type": "boolean" },
         { "type": "number" },
-        { "type": "string", "maxLength": 2000 },
+        { "type": "string" },
         { "$ref": "#/$defs/safeObject" },
-        {
-          "type": "array",
-          "maxItems": 64,
-          "items": { "$ref": "#/$defs/safeValue" }
-        }
+        { "$ref": "#/$defs/safeArray" }
+      ]
+    },
+    "safeArray": {
+      "type": "array",
+      "maxItems": 64,
+      "items": { "$ref": "#/$defs/safeValueDepth1" }
+    },
+    "safePropertyName": {
+      "type": "string",
+      "pattern": "^(?!.*(?:[Pp][Aa][Ss][Ss][Ww][Oo][Rr][Dd]|[Pp][Aa][Ss][Ss][Ww][Dd]|[Pp][Ww][Dd]|[Tt][Oo][Kk][Ee][Nn]|[Aa][Cc][Cc][Ee][Ss][Ss][_-]?[Tt][Oo][Kk][Ee][Nn]|[Aa][Pp][Ii][_-]?[Kk][Ee][Yy]|[Ss][Ee][Cc][Rr][Ee][Tt]|[Aa][Uu][Tt][Hh][Oo][Rr][Ii][Zz][Aa][Tt][Ii][Oo][Nn]|[Cc][Oo][Oo][Kk][Ii][Ee]|[Pp][Rr][Ii][Vv][Aa][Tt][Ee][_-]?[Kk][Ee][Yy]|[Ee][Nn][Dd][Pp][Oo][Ii][Nn][Tt]|[Dd][Aa][Tt][Aa][Bb][Aa][Ss][Ee][_-]?[Uu][Rr][Ll]|[Cc][Oo][Nn][Nn][Ee][Cc][Tt][Ii][Oo][Nn][_-]?[Ss][Tt][Rr][Ii][Nn][Gg]|[Ee][Mm][Aa][Ii][Ll]|[Mm][Aa][Ii][Ll]|[Pp][Hh][Oo][Nn][Ee]|[Tt][Ee][Ll][Ee][Pp][Hh][Oo][Nn][Ee]|[Mm][Oo][Bb][Ii][Ll][Ee]|[Dd][Ii][Ss][Pp][Ll][Aa][Yy][_-]?[Nn][Aa][Mm][Ee]|[Uu][Ss][Ee][Rr][_-]?[Nn][Aa][Mm][Ee]|[Rr][Ee][Cc][Ii][Pp][Ii][Ee][Nn][Tt]|[Aa][Dd][Dd][Rr][Ee][Ss][Ss]|[Ss][Tt][Aa][Cc][Kk])).{1,80}$"
+    },
+    "safeValueDepth1": {
+      "anyOf": [
+        { "type": "null" }, { "type": "boolean" }, { "type": "number" }, { "type": "string", "maxLength": 2000 },
+        { "$ref": "#/$defs/safeObjectDepth1" }, { "$ref": "#/$defs/safeArrayDepth1" }
+      ]
+    },
+    "safeValueDepth2": {
+      "anyOf": [
+        { "type": "null" }, { "type": "boolean" }, { "type": "number" }, { "type": "string", "maxLength": 2000 },
+        { "$ref": "#/$defs/safeObjectDepth2" }, { "$ref": "#/$defs/safeArrayDepth2" }
+      ]
+    },
+    "safeValueDepth3": {
+      "anyOf": [
+        { "type": "null" }, { "type": "boolean" }, { "type": "number" }, { "type": "string", "maxLength": 2000 },
+        { "$ref": "#/$defs/safeObjectDepth3" }, { "$ref": "#/$defs/safeArrayDepth3" }
+      ]
+    },
+    "safeValueDepth4": {
+      "anyOf": [
+        { "type": "null" }, { "type": "boolean" }, { "type": "number" }, { "type": "string", "maxLength": 2000 },
+        { "$ref": "#/$defs/safeObjectDepth4" }, { "$ref": "#/$defs/safeArrayDepth4" }
+      ]
+    },
+    "safeValueLeaf": {
+      "anyOf": [
+        { "type": "null" }, { "type": "boolean" }, { "type": "number" }, { "type": "string", "maxLength": 2000 }
       ]
     },
     "safeObject": {
       "type": "object",
       "maxProperties": 32,
-      "propertyNames": {
-        "type": "string",
-        "pattern": "^(?!.*(?:password|passwd|pwd|token|access[_-]?token|api[_-]?key|secret|authorization|cookie|private[_-]?key|endpoint|database[_-]?url|connection[_-]?string|email|mail|phone|display[_-]?name|user[_-]?name|recipient|address)).{1,80}$"
-      },
-      "additionalProperties": { "$ref": "#/$defs/safeValue" }
+      "$comment": "Safe object values are bounded to maxDepth=4 by the finite depth definitions.",
+      "propertyNames": { "$ref": "#/$defs/safePropertyName" },
+      "additionalProperties": { "$ref": "#/$defs/safeValueDepth1" }
+    },
+    "safeObjectDepth1": {
+      "type": "object", "maxProperties": 32,
+      "propertyNames": { "$ref": "#/$defs/safePropertyName" },
+      "additionalProperties": { "$ref": "#/$defs/safeValueDepth2" }
+    },
+    "safeObjectDepth2": {
+      "type": "object", "maxProperties": 32,
+      "propertyNames": { "$ref": "#/$defs/safePropertyName" },
+      "additionalProperties": { "$ref": "#/$defs/safeValueDepth3" }
+    },
+    "safeObjectDepth3": {
+      "type": "object", "maxProperties": 32,
+      "propertyNames": { "$ref": "#/$defs/safePropertyName" },
+      "additionalProperties": { "$ref": "#/$defs/safeValueDepth4" }
+    },
+    "safeObjectDepth4": {
+      "type": "object", "maxProperties": 32,
+      "propertyNames": { "$ref": "#/$defs/safePropertyName" },
+      "additionalProperties": { "$ref": "#/$defs/safeValueLeaf" }
+    },
+    "safeArrayDepth1": {
+      "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/safeValueDepth2" }
+    },
+    "safeArrayDepth2": {
+      "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/safeValueDepth3" }
+    },
+    "safeArrayDepth3": {
+      "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/safeValueDepth4" }
+    },
+    "safeArrayDepth4": {
+      "type": "array", "maxItems": 64, "items": { "$ref": "#/$defs/safeValueLeaf" }
     }
   },
   "required": [
@@ -39,6 +104,7 @@
     "title",
     "status",
     "assertionPassed",
+    "authorizedFixture",
     "evidenceKind",
     "executor",
     "startedAt",
@@ -89,6 +155,9 @@
       "enum": ["PASS", "FAIL", "BLOCKED", "HELD", "NOT_RUN"]
     },
     "assertionPassed": {
+      "type": "boolean"
+    },
+    "authorizedFixture": {
       "type": "boolean"
     },
     "evidenceKind": {
