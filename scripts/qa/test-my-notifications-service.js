@@ -23,8 +23,15 @@ assert.ok(fs.existsSync(servicePath), 'NotificationService CDS contract exists')
 const USER_A = 'd1000000-0000-4000-8000-000000000001'
 const USER_B = 'd1000000-0000-4000-8000-000000000002'
 const INACTIVE = 'd1000000-0000-4000-8000-000000000003'
+const PM_USER = 'd1000000-0000-4000-8000-000000000004'
+const USER_ADMIN = 'd1000000-0000-4000-8000-000000000005'
 const BUG_ID = '90000000-0000-0000-0000-000000000001'
 const ACCESS_AUDIT = 'd2000000-0000-4000-8000-000000000001'
+const NOTIFICATION_DTO_FIELDS = [
+  'notificationID', 'category', 'eventType', 'title', 'summary', 'bugNumber',
+  'bugTitle', 'priority', 'actionRequired', 'occurredAt', 'readAt', 'targetPath',
+  'modifiedAt'
+]
 
 const atomicCases = new Map([
   ['IDTS110-F232', runAtomicSearchCase],
@@ -71,12 +78,30 @@ async function runAtomicSelector (options) {
 }
 
 function user (email, role = 'TESTER') {
-  return new cds.User({ id: email, roles: ['authenticated-user', role] })
+  const roles = Array.isArray(role) ? role : [role]
+  return new cds.User({ id: email, roles: ['authenticated-user', ...roles] })
 }
 
 async function expectRejected (promise, status, code) {
   await assert.rejects(promise, error =>
     Number(error?.status || error?.statusCode || error?.code) === status && (!code || error?.code === code))
+}
+
+async function expectSafeDenied (promise, statuses, code) {
+  const allowed = new Set(Array.isArray(statuses) ? statuses : [statuses])
+  let captured
+  await assert.rejects(promise, error => {
+    captured = error
+    return allowed.has(Number(error?.status || error?.statusCode || error?.code)) && (!code || error?.code === code)
+  })
+  assert.ok(captured)
+  assert.equal(captured.data, undefined)
+  assert.equal(captured.payload, undefined)
+  assert.equal(captured.details, undefined)
+  assert.equal(captured.target, undefined)
+  assert.equal(captured.args, undefined)
+  assert.doesNotMatch(JSON.stringify(captured), /@example\.invalid|recipientEmail|detailsSummary|password|token|provider/i)
+  return Number(captured.status || captured.statusCode || captured.code)
 }
 
 function atomicID (prefix, index) {
@@ -128,7 +153,9 @@ async function createAtomicFixture ({ notifications = [], inboxEntries = [], aud
   await db.run(INSERT.into('idts.cap.Users').entries([
     { ID: USER_A, displayName: 'Notification User A', email: 'notification.a@example.invalid', role_code: 'TESTER', active: true },
     { ID: USER_B, displayName: 'Notification User B', email: 'notification.b@example.invalid', role_code: 'DEVELOPER', active: true },
-    { ID: INACTIVE, displayName: 'Inactive Notification User', email: 'notification.inactive@example.invalid', role_code: 'TESTER', active: false }
+    { ID: INACTIVE, displayName: 'Inactive Notification User', email: 'notification.inactive@example.invalid', role_code: 'TESTER', active: false },
+    { ID: PM_USER, displayName: 'Notification PM', email: 'notification.pm@example.invalid', role_code: 'PM', active: true },
+    { ID: USER_ADMIN, displayName: 'Notification User Admin', email: 'notification.useradmin@example.invalid', role_code: 'PM', active: true }
   ]))
   if (audits.length) await db.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries(audits))
   if (notifications.length) await db.run(INSERT.into('idts.cap.Notifications').entries(notifications))
@@ -139,7 +166,9 @@ async function createAtomicFixture ({ notifications = [], inboxEntries = [], aud
     service,
     actorA: user('notification.a@example.invalid'),
     actorB: user('notification.b@example.invalid', 'DEVELOPER'),
-    inactiveActor: user('notification.inactive@example.invalid')
+    inactiveActor: user('notification.inactive@example.invalid'),
+    pmActor: user('notification.pm@example.invalid', 'PM'),
+    userAdminActor: user('notification.useradmin@example.invalid', ['PM', 'UserAdmin'])
   }
 }
 
@@ -156,6 +185,16 @@ function rowsSnapshot (rows) {
   }
 }
 
+function inboxSnapshot (rows) {
+  return rows.map(row => ({
+    ID: row.ID,
+    owner: row.recipient_ID,
+    occurredAt: row.occurredAt,
+    readAt: row.readAt || null,
+    modifiedAt: row.modifiedAt
+  }))
+}
+
 async function runAtomicSearchCase () {
   const notifications = [1, 2, 3, 4, 5].map(index => atomicNotification(index, {
     recipient_ID: index === 5 ? USER_B : USER_A
@@ -168,6 +207,18 @@ async function runAtomicSearchCase () {
     atomicInbox(5, { recipient_ID: USER_B })
   ]
   const fixture = await createAtomicFixture({ notifications, inboxEntries })
+  const beforeCallerRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_A }).orderBy('ID asc')
+  )
+  const beforeOtherCallerRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_B }).orderBy('ID asc')
+  )
+  const beforePmRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: PM_USER }).orderBy('ID asc')
+  )
+  const beforeUserAdminRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_ADMIN }).orderBy('ID asc')
+  )
   const page1 = await fixture.service.send({
     event: 'searchMyNotifications',
     data: { category: 'BUG', readState: 'ALL', skip: 0, top: 2 },
@@ -196,11 +247,30 @@ async function runAtomicSearchCase () {
     user: fixture.actorB
   })
   assert.deepEqual(userBRows.map(row => row.notificationID), [atomicID('d4', 5)])
-  assert.equal((await fixture.db.run(SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_B }))).length, 1)
+  const pmRows = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'ALL', readState: 'ALL', skip: 0, top: 100 },
+    user: fixture.pmActor
+  })
+  assert.deepEqual(pmRows, [], 'a PM without owned inbox rows cannot read another caller\'s rows')
+  const userAdminRows = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'ALL', readState: 'ALL', skip: 0, top: 100 },
+    user: fixture.userAdminActor
+  })
+  assert.deepEqual(userAdminRows, [], 'a UserAdmin overlay without owned inbox rows cannot read another caller\'s rows')
+  const reloadedCallerRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_A }).orderBy('ID asc')
+  )
+  const reloadedOtherCallerRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_B }).orderBy('ID asc')
+  )
+  assert.deepEqual(inboxSnapshot(reloadedCallerRows), inboxSnapshot(beforeCallerRows))
+  assert.deepEqual(inboxSnapshot(reloadedOtherCallerRows), inboxSnapshot(beforeOtherCallerRows))
   return {
-    beforeState: { callerRows: 4, otherCallerRows: 1 },
+    beforeState: { callerRows: beforeCallerRows.length, otherCallerRows: beforeOtherCallerRows.length, pmRows: beforePmRows.length, userAdminRows: beforeUserAdminRows.length },
     afterState: { firstPageIDs: page1.map(row => row.notificationID), secondPageIDs: page2.map(row => row.notificationID), unreadRows: unread.length },
-    reloadState: { uniquePagedRows: new Set(pagedIDs).size, callerBRows: userBRows.length }
+    reloadState: { uniquePagedRows: new Set(pagedIDs).size, callerBRows: userBRows.length, callerPMRows: pmRows.length, callerUserAdminRows: userAdminRows.length }
   }
 }
 
@@ -226,11 +296,23 @@ async function runAtomicHydrationCase () {
     atomicInbox(16, { bugNotification_ID: missingNotificationID })
   ]
   const fixture = await createAtomicFixture({ notifications, inboxEntries, audits })
+  const rawInboxRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_A }).orderBy('ID asc')
+  )
+  const bugSourceIDs = [...new Set(rawInboxRows.map(row => row.bugNotification_ID).filter(Boolean))]
+  const accessSourceIDs = [...new Set(rawInboxRows.map(row => row.accessAuditEvent_ID).filter(Boolean))]
+  const bugSourceRows = bugSourceIDs.length
+    ? await fixture.db.run(SELECT.from('idts.cap.Notifications').where({ ID: { in: bugSourceIDs } }))
+    : []
+  const accessSourceRows = accessSourceIDs.length
+    ? await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ ID: { in: accessSourceIDs } }))
+    : []
   const rows = await fixture.service.send({
     event: 'searchMyNotifications',
     data: { category: 'ALL', readState: 'ALL', skip: 0, top: 100 },
     user: fixture.actorA
   })
+  assert.equal(rows.length, rawInboxRows.length, 'the DTO cardinality matches the caller query cardinality')
   const byID = new Map(rows.map(row => [row.notificationID, row]))
   const validBug = byID.get(atomicID('d4', 11))
   assert.equal(validBug.category, 'BUG')
@@ -252,14 +334,19 @@ async function runAtomicHydrationCase () {
     assert.equal(unavailable.targetPath, null)
   }
   for (const row of rows) {
+    assert.deepEqual(Object.keys(row).sort(), [...NOTIFICATION_DTO_FIELDS].sort(), 'DTO exposes only the documented safe fields')
     for (const forbidden of ['recipientEmail', 'detailsSummary', 'providerMessageId', 'lockToken', 'sourceAuditEvent']) {
       assert.equal(Object.hasOwn(row, forbidden), false, `DTO omits ${forbidden}`)
     }
   }
+  const reloadedInboxRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_A }).orderBy('ID asc')
+  )
+  assert.deepEqual(inboxSnapshot(reloadedInboxRows), inboxSnapshot(rawInboxRows))
   return {
-    beforeState: { sourceRows: 6, validBugSources: 2, validAccessSources: 1 },
+    beforeState: { sourceRows: rawInboxRows.length, bugSourceRows: bugSourceRows.length, accessSourceRows: accessSourceRows.length },
     afterState: { dtoRows: rows.length, unavailableRows: rows.filter(row => row.eventType === 'UNAVAILABLE').length },
-    reloadState: { safeProjectionRows: rows.length, privateFieldsExposed: false }
+    reloadState: { rawRows: reloadedInboxRows.length, safeProjectionRows: rows.length, dtoFieldsExact: true, privateFieldsExposed: false }
   }
 }
 
@@ -275,22 +362,53 @@ async function runAtomicUnreadCountCase () {
     atomicInbox(25, { recipient_ID: USER_B })
   ]
   const fixture = await createAtomicFixture({ notifications, inboxEntries })
-  assert.deepEqual(await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.actorA }), { count: 2 })
-  assert.deepEqual(await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.actorB }), { count: 2 })
-  await expectRejected(
+  const beforeRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').columns('ID', 'recipient_ID', 'occurredAt', 'readAt', 'modifiedAt').orderBy('ID asc')
+  )
+  const unreadCount = recipientID => beforeRows.filter(row => row.recipient_ID === recipientID && !row.readAt).length
+  const callerAUnread = unreadCount(USER_A)
+  const callerBUnread = unreadCount(USER_B)
+  const inactiveRows = beforeRows.filter(row => row.recipient_ID === INACTIVE).length
+  const pmRows = beforeRows.filter(row => row.recipient_ID === PM_USER).length
+  const userAdminRows = beforeRows.filter(row => row.recipient_ID === USER_ADMIN).length
+  const callerACount = await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.actorA })
+  const callerBCount = await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.actorB })
+  assert.deepEqual(callerACount, { count: callerAUnread })
+  assert.deepEqual(callerBCount, { count: callerBUnread })
+  const anonymousStatus = await expectSafeDenied(
+    fixture.service.send({ event: 'getMyUnreadNotificationCount', user: new cds.User.Anonymous() }),
+    401
+  )
+  const anonymousPrincipalStatus = await expectSafeDenied(
+    fixture.service.send({ event: 'getMyUnreadNotificationCount', user: user('anonymous.notification@example.invalid') }),
+    403,
+    'NOTIFICATION_ACTOR_REQUIRED'
+  )
+  const inactiveStatus = await expectSafeDenied(
     fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.inactiveActor }),
     403,
     'NOTIFICATION_ACTOR_REQUIRED'
   )
-  await expectRejected(
+  const unmappedStatus = await expectSafeDenied(
     fixture.service.send({ event: 'getMyUnreadNotificationCount', user: user('unmapped.notification@example.invalid') }),
     403,
     'NOTIFICATION_ACTOR_REQUIRED'
   )
+  const pmCount = await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.pmActor })
+  const userAdminCount = await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.userAdminActor })
+  assert.deepEqual(pmCount, { count: pmRows })
+  assert.deepEqual(userAdminCount, { count: userAdminRows })
+  assert.equal(pmCount.count, 0, 'PM without recipient-owned rows cannot count another caller\'s inbox')
+  assert.equal(userAdminCount.count, 0, 'UserAdmin overlay without recipient-owned rows cannot count another caller\'s inbox')
+  assert.ok(callerACount.count > pmCount.count)
+  const afterRows = await fixture.db.run(
+    SELECT.from('idts.cap.UserNotificationInboxEntries').columns('ID', 'recipient_ID', 'occurredAt', 'readAt', 'modifiedAt').orderBy('ID asc')
+  )
+  assert.deepEqual(inboxSnapshot(afterRows), inboxSnapshot(beforeRows), 'unauthorized calls do not mutate inbox state')
   return {
-    beforeState: { callerAUnread: 2, callerBUnread: 2, inactiveCallerRows: 0 },
-    afterState: { callerAUnread: 2, callerBUnread: 2, crossCallerRead: false },
-    reloadState: { activeCallerCountsStable: true, inactiveDenied: true, unmappedDenied: true }
+    beforeState: { inboxRows: beforeRows.length, callerAUnread, callerBUnread, inactiveRows, pmRows, userAdminRows },
+    afterState: { callerAUnread: callerACount.count, callerBUnread: callerBCount.count, pmUnread: pmCount.count, userAdminUnread: userAdminCount.count },
+    reloadState: { rowsUnchanged: true, deniedStatuses: [anonymousStatus, anonymousPrincipalStatus, inactiveStatus, unmappedStatus], safeNoPayload: true }
   }
 }
 
@@ -328,30 +446,38 @@ async function runAtomicIdempotentReadCase () {
     notifications: [atomicNotification(32)],
     inboxEntries: [atomicInbox(32)]
   })
+  const before = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: atomicID('d4', 32) }))
   const [current] = await fixture.service.send({
     event: 'searchMyNotifications',
     data: { category: 'BUG', readState: 'UNREAD', skip: 0, top: 1 },
     user: fixture.actorA
   })
+  assert.equal(current.readAt, null, 'the first read starts from an unread DTO')
   const first = await fixture.service.send({
     event: 'markMyNotificationRead',
     data: { notificationID: current.notificationID, expectedModifiedAt: current.modifiedAt },
     user: fixture.actorA
   })
+  assert.ok(first.readAt, 'the first mark-read call transitions the DTO to read')
   const afterFirst = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  assert.ok(afterFirst.readAt, 'the first mark-read call persists readAt')
+  const firstReload = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  assert.ok(firstReload.readAt, 'the persisted first read remains read after reload before retry')
+  assert.equal(firstReload.readAt, first.readAt)
   const repeated = await fixture.service.send({
     event: 'markMyNotificationRead',
     data: { notificationID: current.notificationID, expectedModifiedAt: first.modifiedAt },
     user: fixture.actorA
   })
   const afterRepeat = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  assert.ok(repeated.readAt, 'the repeated call still returns a read DTO')
   assert.equal(repeated.readAt, first.readAt)
   assert.equal(repeated.modifiedAt, first.modifiedAt)
-  assert.equal(afterRepeat.readAt, afterFirst.readAt)
-  assert.equal(afterRepeat.modifiedAt, afterFirst.modifiedAt)
+  assert.equal(afterRepeat.readAt, firstReload.readAt)
+  assert.equal(afterRepeat.modifiedAt, firstReload.modifiedAt)
   return {
-    beforeState: { ID: current.notificationID, unread: true, modifiedAtPresent: Boolean(current.modifiedAt) },
-    afterState: rowSnapshot(afterFirst),
+    beforeState: rowSnapshot(before),
+    afterState: rowSnapshot(firstReload),
     reloadState: rowSnapshot(afterRepeat)
   }
 }
@@ -412,12 +538,26 @@ async function runAtomicMarkAllCase () {
   assert.ok(byID.get(atomicID('d4', 42)).readAt)
   assert.equal(byID.get(atomicID('d4', 43)).readAt, null)
   assert.equal(byID.get(atomicID('d4', 44)).readAt, null)
+  const pmMarked = await fixture.service.send({
+    event: 'markAllMyNotificationsRead',
+    data: { throughOccurredAt: '2026-08-27T23:00:00.000Z' },
+    user: fixture.pmActor
+  })
+  const userAdminMarked = await fixture.service.send({
+    event: 'markAllMyNotificationsRead',
+    data: { throughOccurredAt: '2026-08-27T23:00:00.000Z' },
+    user: fixture.userAdminActor
+  })
+  assert.deepEqual(pmMarked, { count: 0 }, 'PM mark-all cannot update another caller\'s inbox')
+  assert.deepEqual(userAdminMarked, { count: 0 }, 'UserAdmin mark-all cannot update another caller\'s inbox')
   const reloadRows = await fixture.db.run(SELECT.from('idts.cap.UserNotificationInboxEntries').orderBy('ID asc'))
   assert.deepEqual(reloadRows.map(row => row.readAt), afterRows.map(row => row.readAt))
+  const beforeByID = new Map(beforeRows.map(row => [row.ID, row]))
+  const updatedBeforeSnapshot = afterRows.filter(row => !beforeByID.get(row.ID)?.readAt && row.readAt).length
   return {
     beforeState: rowsSnapshot(beforeRows),
     afterState: rowsSnapshot(afterRows),
-    reloadState: { updatedBeforeSnapshot: 2, laterUnread: byID.get(atomicID('d4', 43)).readAt === null, otherCallerUnread: byID.get(atomicID('d4', 44)).readAt === null }
+    reloadState: { updatedBeforeSnapshot, laterUnread: reloadRows.find(row => row.ID === atomicID('d4', 43)).readAt === null, otherCallerUnread: reloadRows.find(row => row.ID === atomicID('d4', 44)).readAt === null, pmCount: pmMarked.count, userAdminCount: userAdminMarked.count }
   }
 }
 

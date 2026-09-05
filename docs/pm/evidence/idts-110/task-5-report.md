@@ -4,7 +4,7 @@
 
 - Parent/source starting head: `95586d87cee19f3dd3e39d07d72c25ac70857b9d`.
 - Required execution baseline: `6eb6f73840d7150598a993f8656d2b44e5b0cd4b`.
-- Authoritative service batch: `idts110-1788603775617-7016ef0d415244e2c77d2134086e47a8`.
+- Authoritative service batch: `idts110-1788605529048-b10e4ed483f1b188966f9114a25a9dc3`.
 - Matrix: **7 total — 7 PASS, 0 FAIL, 0 BLOCKED**.
 - All seven results are `LOCAL_ATOMIC`, retain `PENDING_DONHV_REVIEW`, and have
   exactly one case-bound `*-RESULT` evidence ID.
@@ -51,7 +51,7 @@ live data path is used.
 
 ```text
 node scripts/qa/run-idts110-new-cases.js --scope=MY_NOTIFICATIONS_SERVICE --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/notification-service-results.json
-runId: idts110-1788603775617-7016ef0d415244e2c77d2134086e47a8
+runId: idts110-1788605529048-b10e4ed483f1b188966f9114a25a9dc3
 total: 7
 PASS: 7
 FAIL: 0
@@ -63,6 +63,44 @@ NOT_RUN: 0
 The batch verifies one result per selected key, exact `*-A1` assertion IDs,
 the exact source baseline, canonical title/test-file/source-trace bindings,
 required before/after/reload snapshots, and no broad-suite exit promotion.
+
+## Fix round 1/5 — review-gap RED → GREEN
+
+The review gaps were verified against the service code before changing the
+runner: F235I did not prove the first read transition before its repeat;
+F234 lacked the anonymous, PM/UserAdmin non-owner, and safe-error matrix; F233
+did not enforce the complete public DTO allowlist; and F232–F234 emitted
+hard-coded snapshot summaries.
+
+### RED mutation checks
+
+Three temporary test-only mutations failed at the new assertions, then were
+restored before the authoritative rerun:
+
+| Mutation | Observed failure |
+| --- | --- |
+| Remove F235I's first `markMyNotificationRead` call | Exit 1, atomic `FAIL`: `the first mark-read call transitions the DTO to read` |
+| Add an `unsafeField` to an F233 DTO row | Exit 1, atomic `FAIL`: exact safe-field allowlist reported `unsafeField` |
+| Route the F234 PM count through caller A instead of the PM fixture | Exit 1, atomic `FAIL`: expected PM-owned count `0`, observed caller-A count `2` |
+
+### GREEN corrections
+
+- F235I now proves the initial DTO is unread, the first result and persisted
+  row are read, a separate reload remains read before the repeat, and the
+  repeated result/reload preserve both `readAt` and `modifiedAt`.
+- F234 now covers service-level anonymous `401`, an authenticated unmapped
+  anonymous principal `403`, inactive `403`, unmapped `403`, PM-only scope,
+  and PM+UserAdmin overlay scope with no recipient-owned rows. Denied errors
+  have no payload/PII fields, and a full inbox readback is unchanged.
+- F233 now requires exactly the 13 documented `NotificationSummary` fields
+  and derives expected DTO cardinality and source counts from actual SQLite
+  queries/readback.
+- F232 covers both PM and PM+UserAdmin overlay readers without recipient-owned
+  rows, and F232/F234 derive before/reload counts and row snapshots from the
+  fixture database; F236 also proves PM/UserAdmin mark-all counts are zero.
+
+The fresh authoritative batch after these corrections is the 7/7 PASS run
+recorded above. No product source or external state changed.
 
 ## Unknown-selector boundary
 
@@ -104,6 +142,9 @@ treated as a broad service-suite result.
   Task 6 rendered UI evidence.
 - CAP deployment prints the known attachment-data initialization lines; this
   is local fixture setup and did not alter tracked or external state.
+- The service-level anonymous guard correctly returns `401`; the internal
+  caller-resolution boundary returns sanitized `403` for authenticated but
+  unmapped/inactive identities. This distinction is intentional and covered.
 
 Task 5 stops at the committed service adapter and candidate report. It does not
 push, merge, deploy, update Drive/Jira, send email, mutate BTP/HANA, or remove
