@@ -26,6 +26,7 @@ const PNG_BIT_DEPTHS = {
   4: [8, 16],
   6: [8, 16]
 }
+const KNOWN_CRITICAL_PNG_CHUNKS = new Set(['IHDR', 'PLTE', 'IDAT', 'IEND'])
 const REQUIRED_RESULT_FIELDS = [
   'schemaVersion', 'jiraKey', 'caseKey', 'mentorNumber', 'assertionId', 'title',
   'status', 'assertionPassed', 'authorizedFixture', 'evidenceKind', 'executor', 'startedAt', 'completedAt',
@@ -260,6 +261,13 @@ function needsAuthorizedExternal (definition) {
   return executionModes.some(value => /BTP|PROVIDER[_-]?LIVE|LIVE(?:[_-]|$)|EXTERNAL/.test(value)) || definition.providerLive === true || definition.live === true
 }
 
+function claimsExternalEvidence (outcome) {
+  return outcome.authorizedFixture === true ||
+    (Object.hasOwn(outcome, 'deployedSha') && outcome.deployedSha !== null && outcome.deployedSha !== undefined) ||
+    outcome.evidenceKind === 'BTP_INTEGRATION' ||
+    (isObject(outcome.runtimeEvidence) && Object.hasOwn(outcome.runtimeEvidence, 'deployedSha'))
+}
+
 function hasAuthorizedExternal (outcome) {
   const deployedSha = outcome.deployedSha
   return outcome.authorizedFixture === true &&
@@ -285,6 +293,8 @@ function isDecodablePng (buffer) {
   let sawHeader = false
   let sawData = false
   let sawEnd = false
+  let sawPalette = false
+  let indexedColor = false
   let idat = []
   let expectedScanlineBytes = null
   let expectedOutputBytes = null
@@ -303,6 +313,7 @@ function isDecodablePng (buffer) {
     if (crc32(buffer.subarray(typeStart, dataEnd)) !== suppliedCrc) return false
     if (sawEnd) return false
     if (!sawHeader && type !== 'IHDR') return false
+    if (type[0] >= 'A' && type[0] <= 'Z' && !KNOWN_CRITICAL_PNG_CHUNKS.has(type)) return false
     if (type === 'IHDR') {
       if (sawHeader || length !== 13) return false
       const width = chunkData.readUInt32BE(0)
@@ -317,7 +328,11 @@ function isDecodablePng (buffer) {
       if (!Number.isSafeInteger(rowBytes) || !Number.isSafeInteger(outputBytes) || outputBytes < 1 || outputBytes > MAX_PNG_BYTES) return false
       expectedScanlineBytes = rowBytes + 1
       expectedOutputBytes = outputBytes
+      indexedColor = colorType === 3
       sawHeader = true
+    } else if (type === 'PLTE') {
+      if (!sawHeader || sawData || sawPalette || length === 0 || length > 768 || length % 3 !== 0) return false
+      sawPalette = true
     } else if (type === 'IDAT') {
       if (!sawHeader || sawEnd) return false
       sawData = true
@@ -329,7 +344,7 @@ function isDecodablePng (buffer) {
     offset = chunkEnd
     if (sawEnd) break
   }
-  if (!sawHeader || !sawData || !sawEnd || offset !== buffer.length) return false
+  if (!sawHeader || !sawData || !sawEnd || offset !== buffer.length || (indexedColor && !sawPalette)) return false
   try {
     const inflated = zlib.inflateSync(Buffer.concat(idat), { maxOutputLength: expectedOutputBytes })
     if (inflated.length !== expectedOutputBytes) return false
@@ -488,23 +503,28 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
   let finalStatus = resultStatus
   let finalActual = actual
   let authorizedExternal = false
-  if (needsAuthorizedExternal(definition)) {
+  const definitionRequiresExternalEvidence = needsAuthorizedExternal(definition)
+  const externalEvidenceClaim = claimsExternalEvidence(outcome)
+  if (definitionRequiresExternalEvidence) {
     authorizedExternal = hasAuthorizedExternal(outcome)
     if (!authorizedExternal) {
       finalStatus = 'BLOCKED'
       finalActual = 'BTP, provider-live, or other external execution requires authorizedFixture=true, an exact deployed SHA, and matching runtime evidence.'
     }
+  } else if (externalEvidenceClaim) {
+    finalStatus = 'BLOCKED'
+    finalActual = 'BTP or provider-live evidence is not permitted for a LOCAL or UI case definition.'
   }
   const evidenceKind = authorizedExternal
     ? 'BTP_INTEGRATION'
-    : definition.acceptanceMode === 'UI_RUNTIME_VISUAL'
+    : needsVisualEvidence(definition)
       ? 'UI_RUNTIME'
       : 'LOCAL_ATOMIC'
   const safeBeforeState = sanitizeValue(beforeState, 'beforeState')
   const safeAfterState = sanitizeValue(afterState, 'afterState')
   const safeReloadState = sanitizeValue(reloadState, 'reloadState')
   const safeRuntimeEvidence = sanitizeValue(runtimeEvidence, 'runtimeEvidence')
-  if (!authorizedExternal && needsAuthorizedExternal(definition) && isObject(safeRuntimeEvidence)) delete safeRuntimeEvidence.deployedSha
+  if (!authorizedExternal && isObject(safeRuntimeEvidence)) delete safeRuntimeEvidence.deployedSha
   const requiredEvidenceIds = [`${caseKey}-RESULT`]
   if (evidenceKind === 'UI_RUNTIME') requiredEvidenceIds.push(`${caseKey}-VISUAL`)
   const suppliedEvidenceIds = Object.hasOwn(outcome, 'evidenceIds') ? outcome.evidenceIds : requiredEvidenceIds

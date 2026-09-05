@@ -43,7 +43,7 @@ function pngChunk (type, data) {
   return chunk
 }
 
-function makePng ({ width = 1, height = 1, bitDepth = 8, colorType = 6, scanlines = [0, 0, 0, 0, 0], interlace = 0 }) {
+function makePng ({ width = 1, height = 1, bitDepth = 8, colorType = 6, scanlines = [0, 0, 0, 0, 0], interlace = 0, extraChunks = [] }) {
   const ihdr = Buffer.alloc(13)
   ihdr.writeUInt32BE(width, 0)
   ihdr.writeUInt32BE(height, 4)
@@ -55,6 +55,7 @@ function makePng ({ width = 1, height = 1, bitDepth = 8, colorType = 6, scanline
   return Buffer.concat([
     Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
     pngChunk('IHDR', ihdr),
+    ...extraChunks,
     pngChunk('IDAT', zlib.deflateSync(Buffer.from(scanlines))),
     pngChunk('IEND', Buffer.alloc(0))
   ])
@@ -312,6 +313,29 @@ async function main () {
   })
   assert.equal(authorizedExternal.status, 'PASS')
 
+  const localSelfLabeledExternal = await runAtomicCase({
+    definition: definition({ environment: 'LOCAL', acceptanceMode: 'PROGRAMMATIC_ATOMIC' }),
+    assertionId: 'IDTS110-F232-A1',
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: 'expected result',
+      authorizedFixture: true,
+      deployedSha: externalSha,
+      evidenceKind: 'BTP_INTEGRATION',
+      beforeState: { rows: 1 },
+      afterState: { rows: 1 },
+      reloadState: { rows: 1 },
+      runtimeEvidence: { deployedSha: externalSha, checked: true },
+      evidenceIds: ['IDTS110-F232-RESULT']
+    })
+  })
+  assert.equal(localSelfLabeledExternal.status, 'BLOCKED', 'a LOCAL definition must not self-label BTP evidence')
+  assert.equal(localSelfLabeledExternal.evidenceKind, 'LOCAL_ATOMIC', 'evidenceKind must be derived from the case definition')
+  assert.equal(localSelfLabeledExternal.authorizedFixture, false, 'LOCAL definitions cannot claim an authorized external fixture')
+  assert.equal(localSelfLabeledExternal.deployedSha, null, 'LOCAL definitions cannot carry a deployed SHA')
+
   await assert.rejects(() => runAtomicCase({
     definition: definition(),
     assertionId: 'IDTS110-F232-A1',
@@ -475,6 +499,23 @@ async function main () {
     definition: definitions[0], assertionId: 'IDTS110-F232-A1', baselineSha: BASELINE_SHA,
     executor: 'Codex-agent-assisted', execute: async () => ({ assertionPassed: true, actualResult: definitions[0].expectedResult, beforeState: { rows: 1 }, afterState: { rows: 1 }, reloadState: { rows: 1 }, evidenceIds: ['IDTS110-F232-RESULT'] })
   })
+  const localBtpMarker = {
+    ...childPass,
+    evidenceKind: 'BTP_INTEGRATION',
+    authorizedFixture: true,
+    deployedSha: 'a'.repeat(40),
+    runtimeEvidence: { deployedSha: 'a'.repeat(40), checked: true }
+  }
+  const localBtpRun = await orchestrator.runOneCase(definitions[0], {
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    outputPath: null,
+    root: process.cwd(),
+    timeoutMs: 1000,
+    spawnSync: () => ({ status: 0, stdout: `${formatAtomicMarker(localBtpMarker)}\n`, stderr: '' })
+  })
+  assert.equal(localBtpRun.status, 'FAIL', 'orchestrator must reject BTP evidence for a LOCAL definition')
+  assert.equal(localBtpRun.evidenceKind, 'LOCAL_ATOMIC', 'rejected local BTP evidence must not be relabeled as BTP')
   const childFail = await runAtomicCase({
     definition: definitions[1], assertionId: 'IDTS110-F233-A1', baselineSha: BASELINE_SHA,
     executor: 'Codex-agent-assisted', execute: async () => ({ assertionPassed: true, actualResult: 'different', beforeState: { rows: 1 }, afterState: { rows: 2 }, reloadState: { rows: 2 }, evidenceIds: ['IDTS110-F233-RESULT'] })
@@ -647,6 +688,12 @@ async function main () {
   assert.equal(illegalColorDepth.status, 'FAIL', 'PNG must reject illegal color-type/bit-depth combinations')
   const invalidFilter = await runVisualBytes(makePng({ colorType: 6, scanlines: [5, 0, 0, 0, 0] }))
   assert.equal(invalidFilter.status, 'FAIL', 'PNG must reject filter bytes outside 0 through 4')
+  const indexedWithoutPalette = await runVisualBytes(makePng({ colorType: 3, scanlines: [0, 0] }))
+  assert.equal(indexedWithoutPalette.status, 'FAIL', 'indexed PNG must include a PLTE chunk')
+  const indexedWithPalette = await runVisualBytes(makePng({ colorType: 3, scanlines: [0, 0], extraChunks: [pngChunk('PLTE', Buffer.from([0, 0, 0]))] }))
+  assert.equal(indexedWithPalette.status, 'PASS', 'indexed PNG with a valid PLTE chunk must be accepted')
+  const unknownCriticalChunk = await runVisualBytes(makePng({ extraChunks: [pngChunk('ABCD', Buffer.from([0]))] }))
+  assert.equal(unknownCriticalChunk.status, 'FAIL', 'PNG must reject unknown critical chunks')
   const truncatedScanline = await runVisualBytes(makePng({ colorType: 6, scanlines: [0, 0, 0, 0] }))
   assert.equal(truncatedScanline.status, 'FAIL', 'PNG must reject truncated scanline data')
   const extraScanline = await runVisualBytes(makePng({ colorType: 6, scanlines: [0, 0, 0, 0, 0, 0] }))

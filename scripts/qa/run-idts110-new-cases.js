@@ -80,6 +80,12 @@ function definitionRequiresVisual (definition) {
   return definition.acceptanceMode === 'UI_RUNTIME_VISUAL' || /browser\/runtime|rendered UI|screenshot|UI runtime/i.test(requirements)
 }
 
+function expectedEvidenceKind (definition, marker) {
+  if (definitionRequiresVisual(definition)) return 'UI_RUNTIME'
+  if (definitionRequiresExternal(definition) && marker.authorizedFixture === true) return 'BTP_INTEGRATION'
+  return 'LOCAL_ATOMIC'
+}
+
 function assertExternalProof (marker, definition) {
   if (!definitionRequiresExternal(definition) || marker.status !== 'PASS') return
   if (marker.authorizedFixture !== true) fail(`external execution is not authorized for ${definition.caseId}`)
@@ -398,6 +404,8 @@ function assertMarkerMatches (marker, definition, baselineSha, invocationWindow 
   if (marker.title !== definition.title) fail(`marker title mismatch for ${definition.caseId}`)
   if (marker.testFile !== definition.plannedTestFile) fail(`marker test file mismatch for ${definition.caseId}`)
   if (JSON.stringify(marker.sourceTrace) !== JSON.stringify(definition.sourceTrace)) fail(`marker source trace mismatch for ${definition.caseId}`)
+  if (marker.evidenceKind !== expectedEvidenceKind(definition, marker)) fail(`marker evidence kind is not permitted by the case definition for ${definition.caseId}`)
+  if (!definitionRequiresExternal(definition) && (marker.authorizedFixture !== false || marker.deployedSha !== null)) fail(`LOCAL or UI case cannot claim an authorized fixture or deployed SHA for ${definition.caseId}`)
   if (marker.expectedResult.trim().replace(/\s+/g, ' ') !== String(definition.expectedResult).trim().replace(/\s+/g, ' ')) fail(`marker expected result mismatch for ${definition.caseId}`)
   if (marker.status === 'PASS' && (marker.assertionPassed !== true || marker.actualResult.trim().replace(/\s+/g, ' ') !== marker.expectedResult.trim().replace(/\s+/g, ' '))) fail(`marker PASS proof mismatch for ${definition.caseId}`)
   const requiredEvidenceIds = [`${definition.caseId}-RESULT`]
