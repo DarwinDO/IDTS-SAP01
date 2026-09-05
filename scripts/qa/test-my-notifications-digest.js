@@ -945,6 +945,28 @@ async function runAtomicDigestLimitCase () {
   }
 }
 
+function assertAllowlistedDigestQueueLink (link, recipientID) {
+  assert.equal(typeof link, 'string', 'digest queue link is a string')
+  const normalizedLink = link.replace(/&amp;/g, '&')
+  assert.doesNotMatch(normalizedLink, /^javascript:/i, 'digest queue link is not executable')
+  assert.doesNotMatch(normalizedLink, /^https?:\/\//i, 'digest queue link is not an external absolute URL')
+  assert.match(normalizedLink, /^\//, 'digest queue link is relative to the production application')
+  const parsed = new URL(normalizedLink, 'https://idts.example.test')
+  assert.equal(parsed.origin, 'https://idts.example.test', 'digest queue link resolves only against the expected local app origin')
+  assert.equal(parsed.pathname, '/idtsbugmanagementui/index.html', 'digest queue link uses the production Bug Management app path')
+  assert.equal(parsed.search, '', 'digest queue link has no outer URL query parameters')
+  assert.match(parsed.hash, /^#\/Bugs\?/, 'digest queue link uses the production Bugs queue hash route')
+  const queryText = parsed.hash.slice('#/Bugs?'.length)
+  const params = new URLSearchParams(queryText)
+  assert.deepEqual([...params.keys()], ['exclude_closed', 'nextProcessorUser_ID'],
+    'digest queue hash contains only the allowlisted filters')
+  assert.equal(params.get('exclude_closed'), 'true', 'digest queue excludes Closed Bugs')
+  assert.equal(params.get('nextProcessorUser_ID'), recipientID, 'digest queue is filtered to the expected developer')
+  assert.equal(params.toString(), `exclude_closed=true&nextProcessorUser_ID=${encodeURIComponent(recipientID)}`,
+    'digest queue filters have the exact production ordering and encoding')
+  return parsed
+}
+
 async function runAtomicDigestLinkCase () {
   const db = await createDigestAtomicFixture()
   try {
@@ -967,7 +989,17 @@ async function runAtomicDigestLinkCase () {
     })
     const queueLinks = [...snapshot.htmlBody.matchAll(/href="([^"]*exclude_closed=true[^"]*)"/g)].map(match => match[1])
     assert.equal(queueLinks.length, 1, 'the remainder has one allowlisted queue link')
-    assert.match(queueLinks[0], new RegExp(`nextProcessorUser_ID=${IDS.developer}`))
+    assertAllowlistedDigestQueueLink(queueLinks[0], IDS.developer)
+    for (const [unsafeLink, reason] of [
+      ['/other-route#/Bugs?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer, 'unexpected path'],
+      ['/idtsbugmanagementui/index.html#/Other?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer, 'unexpected hash route'],
+      ['/idtsbugmanagementui/index.html#/Bugs?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer + '&unexpected=true', 'unexpected query parameter'],
+      ['javascript:alert(1)', 'javascript scheme'],
+      ['https://evil.example.test/idtsbugmanagementui/index.html#/Bugs?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer, 'external origin']
+    ]) {
+      assert.throws(() => assertAllowlistedDigestQueueLink(unsafeLink, IDS.developer), /production|relative|allowlisted|unexpected|external|executable/i,
+        `queue link rejects ${reason}`)
+    }
     assert.doesNotMatch(snapshot.htmlBody, /javascript:|https?:\/\//i, 'digest links contain no external or script URL')
     const afterSnapshotSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
     const reloaded = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })

@@ -168,3 +168,40 @@ Batch SHA-256: D80E3068E2A17454BF46D150EA85DD73A5EEEACB73E7985FB381AFF98CEAB405
 No-argument scheduled and digest suites remain `PASS`. No product source or
 external state changed; all provider behavior remains locally injected and is
 not live-delivery evidence.
+
+## Fix round 2/5 — review findings addressed
+
+The round2 RED contract failed against the prior implementation because F247S
+had no BLOCKER-severity urgent branch and F250Q had no parsed queue-route
+allowlist. GREEN focused execution passed:
+
+```text
+IDTS110-F247S  PASS — CRITICAL priority and BLOCKER severity both stay absent at 03:59:59.999, emit one 4h SLA at 04:00, and the nonurgent control does not
+IDTS110-F250Q  PASS — exact production queue path/hash/filter accepted; /other-route, alternate hash/query, javascript, and external variants rejected
+```
+
+F247S keeps one SLA invariant across both urgent source branches and verifies
+one durable local prompt outbox row per urgent SLA without invoking a provider.
+F250Q HTML-decodes the rendered href, parses it with `URL`/`URLSearchParams`,
+requires `/idtsbugmanagementui/index.html#/Bugs`, no outer query, exactly
+`exclude_closed=true` and `nextProcessorUser_ID=<developer>`, and rejects
+unexpected paths, hash routes, query parameters, schemes, and origins.
+
+Fresh authoritative batch after round2:
+
+```text
+runId: idts110-1788623538840-bdaded98df6c590ffb01b49eefdb6eff
+scope: BUG_EMAIL
+total: 20
+PASS: 20
+FAIL: 0
+BLOCKED: 0
+HELD: 0
+NOT_RUN: 0
+Batch SHA-256: 1C62C19E9C02C7D9522C084A44B733FAFC9025480216C6E049879323B80FAE21
+```
+
+Both no-argument runners, the atomic protocol contract, Node syntax checks,
+and `git diff --check` pass. No product or external state changed; the route
+and urgent-branch evidence remains local candidate evidence pending DonHV
+review.

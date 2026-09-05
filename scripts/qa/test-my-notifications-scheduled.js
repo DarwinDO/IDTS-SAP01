@@ -46,6 +46,8 @@ const IDS = Object.freeze({
   staleRecipient: 'a3000000-0000-4000-8000-000000000009',
   staleProfile: 'a3000000-0000-4000-8000-000000000010',
   cutoffOverdue: 'a3000000-0000-4000-8000-000000000011',
+  urgentBlocker: 'a3000000-0000-4000-8000-000000000012',
+  urgentControl: 'a3000000-0000-4000-8000-000000000013',
   inactiveOverdueOwner: 'a1100000-0000-4000-8000-000000000001',
   staleOverdueOwner: 'a1100000-0000-4000-8000-000000000002',
   unmappedOverdueOwner: 'a1100000-0000-4000-8000-000000000003',
@@ -652,20 +654,38 @@ async function runAtomicPendingAssignmentCase () {
 async function runAtomicUrgentSlaCase () {
   const createdAt = new Date('2026-08-27T00:00:00.000Z')
   const db = await createScheduledAtomicFixture({
-    bugs: [bug(IDS.urgent, 'BUG-ATOMIC-URGENT-SLA', 'CRITICAL', 'MAJOR', createdAt.toISOString(), null, null, null)]
+    bugs: [
+      bug(IDS.urgent, 'BUG-ATOMIC-URGENT-SLA-PRIORITY', 'CRITICAL', 'MAJOR', createdAt.toISOString(), null, null, null),
+      bug(IDS.urgentBlocker, 'BUG-ATOMIC-URGENT-SLA-SEVERITY', 'HIGH', 'BLOCKER', createdAt.toISOString(), null, null, null),
+      bug(IDS.urgentControl, 'BUG-ATOMIC-URGENT-SLA-CONTROL', 'HIGH', 'MAJOR', createdAt.toISOString(), null, null, null)
+    ]
   })
   try {
     const beforeState = await scheduledState(db)
+    const urgentCases = [IDS.urgent, IDS.urgentBlocker]
+    const urgentSlaKeys = urgentCases.map(ID => `SLA:${ID}:4h:${IDS.pm}`)
+    const controlSlaKey = `SLA:${IDS.urgentControl}:4h:${IDS.pm}`
     await discoverScheduledNotifications({ tx: db, now: new Date('2026-08-27T03:59:59.999Z'), discoveryFrom: createdAt, emailConfig: emailConfig() })
-    assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: `SLA:${IDS.urgent}:4h:${IDS.pm}` }), 0,
-      'Critical SLA is absent immediately before four hours')
+    for (const sourceKey of [...urgentSlaKeys, controlSlaKey]) {
+      assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey }), 0,
+        `SLA is absent immediately before four hours for ${sourceKey}`)
+    }
     await discoverScheduledNotifications({ tx: db, now: BASE_NOW, discoveryFrom: createdAt, emailConfig: emailConfig() })
-    const sla = await notificationBySource(db, `SLA:${IDS.urgent}:4h:${IDS.pm}`)
-    assert.ok(sla?.ID, 'Critical Pending Assignment emits its SLA event at four hours')
-    assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: sla.ID }), 1,
-      'urgent SLA creates one durable prompt outbox row without sending email')
+    const slaRows = await db.run(SELECT.from('idts.cap.Notifications')
+      .columns('ID', 'sourceKey', 'bug_ID')
+      .where({ eventType_code: 'PENDING_ASSIGNMENT' })
+      .orderBy('sourceKey asc'))
+    const actualUrgentSlaRows = slaRows.filter(row => urgentSlaKeys.includes(row.sourceKey))
+    assert.deepEqual(actualUrgentSlaRows.map(row => row.sourceKey).sort(), urgentSlaKeys.slice().sort(),
+      'both CRITICAL-priority and BLOCKER-severity branches emit the same four-hour SLA invariant')
+    for (const sla of actualUrgentSlaRows) {
+      assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: sla.ID }), 1,
+        'each urgent SLA creates one durable prompt outbox row without sending email')
+    }
+    assert.equal(slaRows.some(row => row.sourceKey === controlSlaKey), false,
+      'the nonurgent control does not enter the four-hour urgent SLA branch')
     const afterState = await scheduledState(db)
-    assert.deepEqual(afterState.sourceKeys.filter(key => key.includes(`SLA:${IDS.urgent}:4h`)), [`SLA:${IDS.urgent}:4h:${IDS.pm}`])
+    assert.deepEqual(afterState.sourceKeys.filter(key => urgentSlaKeys.includes(key)).sort(), urgentSlaKeys.slice().sort())
     const reloadState = await scheduledState(db)
     assert.deepEqual(reloadState, afterState)
     return { beforeState, afterState, reloadState }
