@@ -130,10 +130,16 @@ async function runAtomicExistingLinkCase () {
     const originalSpawn = cds.spawn
     cds.spawn = () => ({ on () { return this } })
     let created
+    let testerCreated
     try {
       created = await service.send({
         event: 'requestExistingUserIdentityLink',
         data: { userID: IDS.targetDeveloper, email: TARGET_EMAIL },
+        user: administrator
+      })
+      testerCreated = await service.send({
+        event: 'requestExistingUserIdentityLink',
+        data: { userID: IDS.testerTarget, email: 'linked.tester@example.invalid' },
         user: administrator
       })
     } finally {
@@ -148,8 +154,32 @@ async function runAtomicExistingLinkCase () {
     assert.equal(request.linkSourceEmailNormalized, 'legacy.developer@example.local')
     assert.equal(request.requestedRole_code, 'DEVELOPER')
     assert.equal(deliveries.length, 1)
+    assert.equal(deliveries[0].status_code, 'PENDING')
     assert.equal(deliveries[0].templateKey, 'IDTS_EXISTING_USER_IDENTITY_LINK_V1')
-    return { linkedTarget: true, sourceEmailSnapshotted: true, deliveries: deliveries.length }
+    assert.equal(testerCreated.status, 'INVITED')
+    assert.equal(testerCreated.requestedRole, 'TESTER')
+    const testerRequest = await db.run(cds.ql.SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: testerCreated.ID }))
+    const testerDeliveries = await db.run(cds.ql.SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: testerCreated.ID }))
+    assert.equal(testerRequest.linkTargetUser_ID, IDS.testerTarget)
+    assert.equal(testerRequest.linkSourceEmailNormalized, 'legacy.tester@example.local')
+    assert.equal(testerRequest.requestedRole_code, 'TESTER')
+    assert.equal(testerDeliveries.length, 1)
+    assert.equal(testerDeliveries[0].status_code, 'PENDING')
+    await assert.rejects(
+      () => service.send({
+        event: 'requestExistingUserIdentityLink',
+        data: { userID: IDS.pmTarget, email: 'linked.pm@example.invalid' },
+        user: administrator
+      }),
+      error => error?.code === 'IDENTITY_LINK_TARGET_ROLE_INVALID',
+      'PM targets must remain outside the existing-user link role matrix'
+    )
+    return {
+      linkedRoles: [request.requestedRole_code, testerRequest.requestedRole_code],
+      sourceEmailsSnapshotted: [request.linkSourceEmailNormalized, testerRequest.linkSourceEmailNormalized],
+      pendingDeliveries: deliveries.length + testerDeliveries.length,
+      pmTargetRejected: true
+    }
   } finally {
     cds.env.idts = previousIdts
     if (previousDb === undefined) delete cds.db
@@ -1258,14 +1288,21 @@ async function runAtomicSelector (options) {
     assertionId: `${options.caseKey}-A1`,
     baselineSha: options.baselineSha,
     executor: options.executor,
-    execute: async () => ({
-      assertionPassed: true,
-      actualResult: definition.expectedResult,
-      beforeState: { fixture: 'isolated-sqlite' },
-      afterState: await runAtomicExistingLinkCase(),
-      reloadState: { requestHistoryPreserved: true },
-      evidenceIds: [`${options.caseKey}-RESULT`]
-    })
+    execute: async () => {
+      const afterState = await runAtomicExistingLinkCase()
+      return {
+        assertionPassed: true,
+        actualResult: definition.expectedResult,
+        beforeState: { fixture: 'isolated-sqlite' },
+        afterState,
+        reloadState: {
+          linkedRoles: afterState.linkedRoles,
+          pendingDeliveries: afterState.pendingDeliveries,
+          pmTargetRejected: afterState.pmTargetRejected
+        },
+        evidenceIds: [`${options.caseKey}-RESULT`]
+      }
+    }
   })
   console.log(formatAtomicMarker(result))
   process.exitCode = result.status === 'PASS' ? 0 : 1

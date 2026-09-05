@@ -88,6 +88,14 @@ async function runAtomicProfileActionCase (caseKey) {
     assert.equal(profile.workloadLimit, 3)
     assert.equal(profile.ready, true)
     assert.equal(profile.activeResponsibilityCount, 1)
+    assert.deepEqual(Object.keys(profile).sort(), [
+      'activeResponsibilityCount', 'administrationVersion', 'availabilityStatusCode',
+      'developerProfileID', 'openBugImpactCount', 'ready', 'responsibilities',
+      'userID', 'workloadLimit'
+    ])
+    assert.deepEqual(Object.keys(profile.responsibilities[0]).sort(), [
+      'ID', 'active', 'componentCategoryID', 'responsibilityLevelCode', 'sapModuleID'
+    ])
     assert.equal(Object.hasOwn(profile, 'identitySubject'), false)
     return { readiness: profile.ready, activeResponsibilities: profile.activeResponsibilityCount }
   }
@@ -100,12 +108,19 @@ async function runAtomicProfileActionCase (caseKey) {
       role_code: 'DEVELOPER',
       active: false
     }))
+    const beforeInactive = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: inactiveID }))
+    let notFoundError
     await assert.rejects(
       service.send({ event: 'readDeveloperProfile', data: { userID: inactiveID }, user: administrator }),
-      error => Number(error?.status || error?.statusCode) === 404 && error?.code === 'ACTIVE_DEVELOPER_NOT_FOUND'
+      error => {
+        notFoundError = error
+        return Number(error?.status || error?.statusCode) === 404 && error?.code === 'ACTIVE_DEVELOPER_NOT_FOUND'
+      }
     )
     const reloaded = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: inactiveID }))
-    assert.equal(reloaded.active, false)
+    assert.deepEqual(reloaded, beforeInactive)
+    assert.ok(notFoundError)
+    assert.doesNotMatch(notFoundError.message, /inactive\.atomic@example\.invalid/i)
     return { inactiveUserFound: true, profilePayloadExposed: false }
   }
   const beforeRows = await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: PROFILE_ID }))

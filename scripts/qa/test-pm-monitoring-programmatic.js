@@ -33,6 +33,7 @@ const {
   enrichBugDisplayFields,
   ensureCapabilitySelectDependencies
 } = require('../../srv/bug-service/read-models')
+const { PM_DASHBOARD_STATUSES } = require('../../srv/bug-service/status-metrics')
 
 const RESULTS = []
 let PASS = 0
@@ -131,13 +132,19 @@ async function runAtomicMonitoringCase (caseKey) {
   const metrics = await service.send({ event: 'readBugStatusMetrics', data: {}, user: pm })
   assert.equal(metrics.length, 10)
   assert.equal(new Set(metrics.map(row => row.statusCode)).size, 10)
+  assert.deepEqual(metrics.map(row => row.statusCode), PM_DASHBOARD_STATUSES)
   assert.equal(metrics.find(row => row.statusCode === 'PENDING_ASSIGNMENT')?.bugCount, 1)
   assert.ok(metrics.some(row => row.bugCount === 0), 'zero-count statuses must remain in the metric set')
   for (const role of ['DEVELOPER', 'TESTER']) {
+    let deniedPayload
     await assert.rejects(
-      service.send({ event: 'readBugStatusMetrics', data: {}, user: new cds.User({ id: `${role.toLowerCase()}.monitoring@example.invalid`, roles: [role, 'authenticated-user'] }) }),
+      service.send({ event: 'readBugStatusMetrics', data: {}, user: new cds.User({ id: `${role.toLowerCase()}.monitoring@example.invalid`, roles: [role, 'authenticated-user'] }) }).then(value => {
+        deniedPayload = value
+        return Promise.reject(new Error('unexpected status metric payload'))
+      }),
       error => Number(error?.code || error?.status || error?.statusCode) === 403
     )
+    assert.equal(deniedPayload, undefined)
   }
   return { metricRows: metrics.length, zeroCountRows: metrics.filter(row => row.bugCount === 0).length, unauthorizedRoles: 2 }
 }

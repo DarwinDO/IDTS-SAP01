@@ -70,15 +70,18 @@ function runRegressionChecks () {
 
 const atomicCases = new Map([
   ['IDTS110-F220', () => {
-    assert.throws(
-      () => normalizeDeveloperProfileInput({
-        availabilityStatusCode: 'AVAILABLE',
-        workloadLimit: -1,
-        responsibilities: []
-      }),
-      error => error?.code === 'INVALID_DEVELOPER_WORKLOAD_LIMIT'
-    )
-    return { rejectedWorkloadLimit: true }
+    const rejected = [0, -1].map(workloadLimit => {
+      assert.throws(
+        () => normalizeDeveloperProfileInput({
+          availabilityStatusCode: 'AVAILABLE',
+          workloadLimit,
+          responsibilities: []
+        }),
+        error => error?.code === 'INVALID_DEVELOPER_WORKLOAD_LIMIT'
+      )
+      return workloadLimit
+    })
+    return { rejectedWorkloadLimits: rejected }
   }],
   ['IDTS110-F220D', () => {
     const responsibility = {

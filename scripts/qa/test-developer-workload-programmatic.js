@@ -129,6 +129,11 @@ async function runAtomicWorkloadCase (caseKey) {
     const ownRows = await runAs(developerUser, SELECT.from('BugService.DeveloperWorkloads').orderBy('developerName'))
     assert.deepEqual(ownRows.map(row => row.developerName), ['SangVN'])
     assert.equal(ownRows[0]?.developerUserID, USERS.SANG)
+    assert.deepEqual(ownRows.map(row => ({
+      developerUserID: row.developerUserID,
+      developerName: row.developerName,
+      openOwnedBugCount: row.openOwnedBugCount
+    })), [{ developerUserID: USERS.SANG, developerName: 'SangVN', openOwnedBugCount: 6 }])
     assert.deepEqual(
       await runAs(developerUser, SELECT.from('BugService.DeveloperWorkloads').columns('developerName').where({ developerProfileID: PROFILES.DAT })),
       []
@@ -144,7 +149,18 @@ async function runAtomicWorkloadCase (caseKey) {
     count.SELECT.count = true
     assert.equal((await runAs(developerUser, count)).$count, 1)
     assert.equal(allRows.length, 5)
-    return { developerRows: ownRows.length, pmRows: allRows.length }
+    assert.deepEqual(allRows.map(row => ({
+      developerUserID: row.developerUserID,
+      developerName: row.developerName,
+      openOwnedBugCount: row.openOwnedBugCount
+    })), [
+      { developerUserID: USERS.DAT, developerName: 'DatDT', openOwnedBugCount: 1 },
+      { developerUserID: USERS.LEGACY, developerName: 'LegacyDev', openOwnedBugCount: 1 },
+      { developerUserID: USERS.SANG, developerName: 'SangVN', openOwnedBugCount: 6 },
+      { developerUserID: null, developerName: 'Unknown Developer', openOwnedBugCount: 1 },
+      { developerUserID: USERS.ZERO, developerName: 'ZeroDev', openOwnedBugCount: 0 }
+    ])
+    return { developerRows: ownRows.length, pmRows: allRows.length, orderedRows: allRows.map(row => row.developerName) }
   }
   if (caseKey === 'IDTS110-F221') {
     const identityAccessByUser = await readActiveIdentityAccessByUser({ run: (...args) => db.run(...args) }, [USERS.SANG, USERS.DAT, USERS.ZERO, USERS.LEGACY])
@@ -179,10 +195,13 @@ async function runAtomicWorkloadCase (caseKey) {
     const beforeEffort = await db.run(SELECT.from('idts.cap.Bugs').columns('ID', 'estimatedEffortHours').where({ assignee_ID: PROFILES.SANG }).orderBy('ID'))
     const rows = await runAs(pmUser, SELECT.from('BugService.DeveloperWorkloads').where({ developerUserID: USERS.SANG }))
     assert.equal(rows.length, 1)
-    assert.equal(Number(rows[0].estimatedEffortHoursTotal), 19.5)
+    const total = rows[0].estimatedEffortHoursTotal
+    assert.equal(typeof total, 'number')
+    assert.equal(JSON.stringify({ estimatedEffortHoursTotal: total }), '{"estimatedEffortHoursTotal":19.5}')
+    assert.equal(total.toFixed(2), '19.50')
     const afterEffort = await db.run(SELECT.from('idts.cap.Bugs').columns('ID', 'estimatedEffortHours').where({ assignee_ID: PROFILES.SANG }).orderBy('ID'))
     assert.deepEqual(afterEffort, beforeEffort)
-    return { estimatedEffortHoursTotal: 19.5, persistedEffortUnchanged: true }
+    return { estimatedEffortHoursTotal: total, formattedEstimatedEffortHoursTotal: total.toFixed(2), persistedEffortUnchanged: true }
   }
   throw new Error(`Unknown IDTS-110 case ${caseKey}`)
 }

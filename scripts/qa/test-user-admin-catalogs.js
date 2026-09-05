@@ -64,6 +64,7 @@ function updateCatalog (service, entity, ID, data, administrator, headers) {
 }
 
 const root = path.resolve(__dirname, '../..')
+const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
 function readDefinition (caseKey) {
   const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
@@ -169,9 +170,10 @@ async function runAtomicCatalogCase (caseKey) {
     }
     if (caseKey === 'IDTS110-F225') {
       const created = await createCatalog(service, 'CatalogSAPModules', { code: '  atomic-module  ', name: '  Atomic Module Created  ', active: true }, administrator)
-      assert.notEqual(created.ID, undefined)
+      assert.match(created.ID, UUID_V4)
       assert.equal(created.code, 'ATOMIC-MODULE')
       const persisted = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))
+      assert.equal(persisted.ID, created.ID)
       assert.equal(persisted.name, 'Atomic Module Created')
       const audit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'CREATE', result: 'SUCCEEDED' }))
       assert.equal(persisted.active, true)
@@ -186,7 +188,12 @@ async function runAtomicCatalogCase (caseKey) {
       const before = (await db.run(SELECT.from('idts.cap.ComponentCategories'))).length
       const created = await createCatalog(service, 'CatalogComponentCategories', { component_ID: componentID, defectCategory_ID: defectID, active: true }, administrator)
       assert.equal((await db.run(SELECT.from('idts.cap.ComponentCategories'))).length, before + 1)
-      assert.notEqual(created.ID, undefined)
+      assert.match(created.ID, UUID_V4)
+      const persisted = await db.run(SELECT.one.from('idts.cap.ComponentCategories').where({ ID: created.ID }))
+      assert.equal(persisted.ID, created.ID)
+      assert.equal(persisted.component_ID, componentID)
+      assert.equal(persisted.defectCategory_ID, defectID)
+      assert.equal(persisted.active, true)
       const audits = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'CREATE', result: 'SUCCEEDED' }))
       assert.equal(audits.length, 1)
       assert.equal(audits[0].reason, null)

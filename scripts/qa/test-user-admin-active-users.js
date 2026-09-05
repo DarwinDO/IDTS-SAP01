@@ -189,7 +189,13 @@ async function runAtomicActiveUserCase (caseKey) {
       assert.equal(auditsAfter.length, 1)
       assert.equal(auditsAfter[0].beforeDisplayName, 'Atomic Alice')
       assert.equal(auditsAfter[0].afterDisplayName, 'Atomic Alice Updated')
-      return { normalizedName: afterUser.displayName, identityPreserved: true, appliedAudits: auditsAfter.length }
+      assert.equal(auditsAfter[0].profileChangeReason, 'Correct the controlled display name.')
+      return {
+        normalizedName: afterUser.displayName,
+        identityPreserved: afterUser.externalIdentityKeyHash === beforeUser.externalIdentityKeyHash,
+        appliedAudits: auditsAfter.length,
+        auditReason: auditsAfter[0].profileChangeReason
+      }
     }
     await expectRejected(service.send({
       event: 'updateActiveUserDisplayName',

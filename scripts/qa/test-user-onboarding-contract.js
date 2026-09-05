@@ -67,6 +67,9 @@ async function runAtomicAccessContractCase (caseKey) {
       signingKey,
       nonce: 'atomic-contract-nonce'
     })
+    invitation.persisted.status_code = 'INVITED'
+    assert.equal(invitation.persisted.status_code, 'INVITED')
+    assert.equal(invitation.persisted.consumedAt, null)
     const before = JSON.stringify(invitation.persisted)
     if (caseKey === 'IDTS110-F207') {
       expectCode(() => verifyInvitationToken({

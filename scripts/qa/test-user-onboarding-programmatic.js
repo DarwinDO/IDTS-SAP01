@@ -1020,43 +1020,93 @@ async function runAtomicOnboardingCase (caseKey) {
       assert.equal(invitation.created.targetEmail, 'atomic.desired.developer@example.invalid')
       assert.equal(invitation.created.status, 'INVITED')
       assert.equal(Object.hasOwn(invitation.created, 'tokenHash'), false)
+      assert.equal(Object.hasOwn(invitation.created, 'tokenNonce'), false)
+      assert.equal(Object.hasOwn(invitation.created, 'token'), false)
       assert.equal(invitation.row.requestedDisplayName, 'Atomic Desired Developer')
       assert.equal(invitation.row.requestedRole_code, 'DEVELOPER')
       assert.equal(invitation.row.tokenHash.length, 64)
       const desired = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingDeveloperProfiles').where({ onboardingRequest_ID: invitation.row.ID }))
       const responsibilities = await fixture.db.run(SELECT.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: invitation.row.ID }))
-      const delivery = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: invitation.row.ID }))
+      const deliveries = await fixture.db.run(SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: invitation.row.ID }))
       assert.equal(desired.workloadLimit, 3)
       assert.equal(desired.availabilityStatus_code, 'AVAILABLE')
       assert.equal(responsibilities.length, 1)
-      assert.equal(delivery.status_code, 'PENDING')
-      return { normalizedEmail: invitation.row.targetEmailNormalized, normalizedDisplayName: invitation.row.requestedDisplayName, tokenHashLength: invitation.row.tokenHash.length, desiredProfilePersisted: true, pendingDeliveries: 1 }
+      assert.equal(deliveries.length, 1)
+      assert.equal(deliveries[0].status_code, 'PENDING')
+      assert.equal(deliveries[0].recipientEmail, invitation.row.targetEmailNormalized)
+      return { normalizedEmail: invitation.row.targetEmailNormalized, normalizedDisplayName: invitation.row.requestedDisplayName, tokenHashLength: invitation.row.tokenHash.length, desiredProfilePersisted: true, pendingDeliveries: deliveries.length }
     }
     if (caseKey === 'IDTS110-F206') {
       const invitation = await createStandardInvitation(fixture, { email: 'atomic.identity@example.invalid' })
       const verified = await verifyStandardInvitation(fixture, invitation, { userUuid: 'atomic-matching-subject' })
       assert.equal(verified.status, 'PROVISION_QUEUED')
       assert.equal(Object.hasOwn(verified, 'identitySubject'), false)
+      assert.equal(Object.hasOwn(verified, 'identityOrigin'), false)
+      assert.equal(Object.hasOwn(verified, 'identityIssuer'), false)
+      assert.equal(Object.hasOwn(verified, 'identityPlatformUserId'), false)
+      assert.equal(Object.hasOwn(verified, 'identityKeyHash'), false)
       const request = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.row.ID }))
-      const operation = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: request.ID }))
+      const operations = await fixture.db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: request.ID }))
+      const deliveries = await fixture.db.run(SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: request.ID }))
       const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: request.ID, action: 'AUTO_APPROVE_PROVISIONING', result: 'QUEUED' }))
       assert.ok(request.consumedAt)
       assert.ok(request.verifiedAt)
       assert.equal(request.status_code, 'PROVISION_QUEUED')
-      assert.equal(operation.operationType, 'PROVISION')
-      assert.equal(operation.state, 'PENDING')
+      assert.equal(operations.length, 1)
+      assert.equal(operations[0].operationType, 'PROVISION')
+      assert.equal(operations[0].state, 'PENDING')
+      assert.equal(deliveries.length, 1)
+      await expectRejected(verifyStandardInvitation(fixture, invitation, { userUuid: 'atomic-matching-subject' }), 409, 'INVITATION_ALREADY_USED')
+      const replayRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: request.ID }))
+      const replayOperations = await fixture.db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: request.ID }))
+      assert.equal(replayRequest.status_code, 'PROVISION_QUEUED')
+      assert.equal(replayOperations.length, 1)
       assert.equal(audits.length, 1)
-      return { consumed: true, operationState: operation.state, auditRows: audits.length, identityFieldsOmitted: true }
+      return { consumed: true, operationState: operations[0].state, operationRows: operations.length, deliveryRows: deliveries.length, replayRejected: true, auditRows: audits.length, identityFieldsOmitted: true }
     }
     if (caseKey === 'IDTS110-F209') {
-      const invitation = await createStandardInvitation(fixture, { email: 'atomic.search@example.invalid' })
-      const rows = await fixture.service.send({ event: 'searchOnboarding', data: { query: 'ATOMIC.SEARCH' }, user: fixture.administrator })
-      assert.equal(rows.length, 1)
-      assert.equal(rows[0].targetEmailNormalized, invitation.row.targetEmailNormalized)
-      assert.equal(rows[0].status_code, 'INVITED')
-      assert.equal(rows[0].cancelEligible, true)
-      for (const forbidden of ['tokenHash', 'tokenNonce', 'identitySubject', 'identityIssuer', 'identityOrigin', 'identityPlatformUserId']) assert.equal(Object.hasOwn(rows[0], forbidden), false)
-      return { boundedRows: rows.length, cancelEligible: rows[0].cancelEligible, sensitiveFieldsOmitted: true }
+      const invitation = await createStandardInvitation(fixture, { email: 'atomic.cancel.invited@example.invalid' })
+      const negativeStates = ['IDENTITY_VERIFIED', 'PENDING_APPROVAL', 'PROVISION_QUEUED', 'ACTIVE', 'FAILED']
+      const negativeRequests = negativeStates.map((status, index) => ({
+        ID: `71000000-0000-4000-8000-${String(30 + index).padStart(12, '0')}`,
+        targetEmailNormalized: `atomic.cancel.${status.toLowerCase()}@example.invalid`,
+        requestedRole_code: 'TESTER',
+        userAdminRequested: false,
+        status_code: status,
+        requestedBy_ID: PM_ID,
+        expiresAt: '2026-10-01T00:00:00.000Z',
+        tokenNonce: `atomic-cancel-${index}`,
+        tokenHash: `${String(index + 1).repeat(64)}`.slice(0, 64),
+        provisioningVersion: 1,
+        correlationId: `71000000-0000-4000-8000-${String(40 + index).padStart(12, '0')}`,
+        consumedAt: null
+      }))
+      const consumedInvitation = {
+        ID: '71000000-0000-4000-8000-000000000035',
+        targetEmailNormalized: 'atomic.cancel.consumed@example.invalid',
+        requestedRole_code: 'TESTER',
+        userAdminRequested: false,
+        status_code: 'INVITED',
+        requestedBy_ID: PM_ID,
+        expiresAt: '2026-10-01T00:00:00.000Z',
+        tokenNonce: 'atomic-cancel-consumed',
+        tokenHash: 'f'.repeat(64),
+        provisioningVersion: 1,
+        correlationId: '71000000-0000-4000-8000-000000000045',
+        consumedAt: '2026-09-05T00:00:00.000Z'
+      }
+      await fixture.db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries([...negativeRequests, consumedInvitation]))
+      const rows = await fixture.service.send({ event: 'searchOnboarding', data: { query: 'atomic.cancel' }, user: fixture.administrator })
+      const allRows = [invitation.row, ...negativeRequests, consumedInvitation]
+      assert.equal(rows.length, allRows.length)
+      const invited = rows.find(row => row.ID === invitation.row.ID)
+      assert.equal(invited?.status_code, 'INVITED')
+      assert.equal(invited?.cancelEligible, true)
+      for (const row of rows.filter(candidate => candidate.ID !== invitation.row.ID)) assert.equal(row.cancelEligible, false)
+      for (const row of rows) {
+        for (const forbidden of ['tokenHash', 'tokenNonce', 'identitySubject', 'identityIssuer', 'identityOrigin', 'identityPlatformUserId']) assert.equal(Object.hasOwn(row, forbidden), false)
+      }
+      return { boundedRows: rows.length, cancelEligible: invited.cancelEligible, cancelEligibleNegativeStates: rows.length - 1, sensitiveFieldsOmitted: true }
     }
     if (caseKey === 'IDTS110-F210' || caseKey === 'IDTS110-F210S') {
       const invitation = await createStandardInvitation(fixture, { email: `atomic.approval.${caseKey.slice(-1).toLowerCase()}@example.invalid`, role: 'PM', userAdminRequested: true })
@@ -1128,7 +1178,20 @@ async function runAtomicOnboardingCase (caseKey) {
       assert.equal(afterDeliveries.length, beforeDeliveries.length)
       assert.equal(afterDeliveries[0].status_code, 'SKIPPED')
       assert.equal(audits.length, 1)
-      return { status: afterRequest.status_code, deliveryStatus: afterDeliveries[0].status_code, historyPreserved: true, auditRows: audits.length }
+      const requestHistoryPreserved = afterRequest.ID === beforeRequest.ID &&
+        afterRequest.linkTargetUser_ID === beforeRequest.linkTargetUser_ID &&
+        afterRequest.linkSourceEmailNormalized === beforeRequest.linkSourceEmailNormalized
+      const deliveryHistoryPreserved = afterDeliveries.length === beforeDeliveries.length &&
+        afterDeliveries.every(row => beforeDeliveries.some(before => before.ID === row.ID))
+      assert.equal(requestHistoryPreserved, true)
+      assert.equal(deliveryHistoryPreserved, true)
+      return {
+        status: afterRequest.status_code,
+        deliveryStatus: afterDeliveries[0].status_code,
+        requestHistoryPreserved,
+        deliveryHistoryPreserved,
+        auditRows: audits.length
+      }
     }
     if (caseKey === 'IDTS110-F216' || caseKey === 'IDTS110-F216R') {
       const invitation = await createStandardInvitation(fixture, { email: `atomic.recovery.${caseKey.slice(-1).toLowerCase()}@example.invalid` })
@@ -1137,15 +1200,34 @@ async function runAtomicOnboardingCase (caseKey) {
       const operationBefore = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: invitation.row.ID }))
       const failureState = caseKey === 'IDTS110-F216' ? 'RETRYABLE_FAILURE' : 'BLOCKED_MANUAL_REVIEW'
       const safeCode = caseKey === 'IDTS110-F216' ? 'PROVIDER_TEMPORARY_FAILURE' : 'AMBIGUOUS_PROVIDER_OUTCOME'
+      const event = caseKey === 'IDTS110-F216' ? 'retryAccessOperation' : 'reconcileAccessOperation'
+      const action = caseKey === 'IDTS110-F216' ? 'RETRY_ACCESS_OPERATION' : 'RECONCILE_ACCESS_OPERATION'
+      const invalidStateCode = caseKey === 'IDTS110-F216' ? 'ACCESS_OPERATION_NOT_RETRYABLE' : 'ACCESS_OPERATION_NOT_RECONCILABLE'
+      await expectRejected(
+        fixture.service.send({ event, data: { operationID: operationBefore.ID, expectedVersion: requestBefore.provisioningVersion }, user: fixture.administrator }),
+        409,
+        invalidStateCode
+      )
+      const afterInvalidStateRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: requestBefore.ID }))
+      const afterInvalidStateOperation = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: operationBefore.ID }))
+      assert.deepEqual(afterInvalidStateRequest, requestBefore)
+      assert.deepEqual(afterInvalidStateOperation, operationBefore)
+      await expectRejected(
+        fixture.service.send({ event, data: { operationID: operationBefore.ID, expectedVersion: requestBefore.provisioningVersion - 1 }, user: fixture.administrator }),
+        409,
+        'ONBOARDING_VERSION_CONFLICT'
+      )
+      const afterInvalidVersionRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: requestBefore.ID }))
+      const afterInvalidVersionOperation = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: operationBefore.ID }))
+      assert.deepEqual(afterInvalidVersionRequest, requestBefore)
+      assert.deepEqual(afterInvalidVersionOperation, operationBefore)
       await fixture.db.run(UPDATE('idts.cap.UserAccessOperations').set({ state: failureState, safeResultCode: safeCode, safeResultSummary: 'Controlled recovery fixture.', completedAt: '2026-09-05T00:00:00.000Z' }).where({ ID: operationBefore.ID }))
       await fixture.db.run(UPDATE('idts.cap.UserOnboardingRequests').set({ status_code: failureState, lastErrorCode: safeCode, lastErrorSummary: 'Controlled recovery fixture.' }).where({ ID: requestBefore.ID }))
-      const event = caseKey === 'IDTS110-F216' ? 'retryAccessOperation' : 'reconcileAccessOperation'
       const recovered = await fixture.service.send({ event, data: { operationID: operationBefore.ID, expectedVersion: requestBefore.provisioningVersion }, user: fixture.administrator })
       assert.equal(recovered.status, 'PROVISION_QUEUED')
       assert.equal(recovered.provisioningVersion, requestBefore.provisioningVersion + 1)
       const operationAfter = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: operationBefore.ID }))
       const requestAfter = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: requestBefore.ID }))
-      const action = caseKey === 'IDTS110-F216' ? 'RETRY_ACCESS_OPERATION' : 'RECONCILE_ACCESS_OPERATION'
       const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: requestBefore.ID, action, result: 'QUEUED' }))
       assert.equal(operationAfter.state, 'PENDING')
       assert.equal(operationAfter.safeResultCode, null)
@@ -1153,7 +1235,20 @@ async function runAtomicOnboardingCase (caseKey) {
       assert.notEqual(operationAfter.idempotencyKey, operationBefore.idempotencyKey)
       assert.equal(requestAfter.status_code, 'PROVISION_QUEUED')
       assert.equal(audits.length, 1)
-      return { recoveryAction: action, state: operationAfter.state, newCorrelation: true, auditRows: audits.length }
+      assert.equal(audits[0].fromState, failureState)
+      assert.equal(audits[0].toState, 'PROVISION_QUEUED')
+      assert.equal(audits[0].result, 'QUEUED')
+      assert.equal(audits[0].correlationId, operationAfter.correlationId)
+      return {
+        invalidStateRejected: true,
+        invalidVersionRejected: true,
+        recoveryAction: action,
+        state: operationAfter.state,
+        auditFromState: audits[0].fromState,
+        auditToState: audits[0].toState,
+        newCorrelation: operationAfter.correlationId !== operationBefore.correlationId,
+        auditRows: audits.length
+      }
     }
     throw new Error(`Unknown IDTS-110 case ${caseKey}`)
   } finally {
