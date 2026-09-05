@@ -1,15 +1,15 @@
 # IDTS-110 Task 4 report — User Administration atomic execution
 
-## Latest authoritative summary (Fix round 2/5)
+## Latest authoritative summary (Fix round 3/5)
 
 This is the sole current execution authority for Task 4. Sections explicitly
 marked historical below are retained for audit context only; their earlier
 counts and blocker lists are superseded by this summary.
 
 - Source/execution baseline: `6eb6f73840d7150598a993f8656d2b44e5b0cd4b`.
-- Fix-round starting head: `ca1605e08c70a52c3500c4fd0aab23f5e65b76b3`.
-- Final implementation commit: `730bffd2b72d7aa82d677912596b89908183451e` (`fix: complete IDTS-110 Task 4 evidence clauses`).
-- Latest authoritative run: `idts110-1788600936349-c8c3d52d17d135550138d70554ea86da`.
+- Fix-round starting head: `ca024e5569292c0b78a7716684e57d588e082d3f`.
+- Final implementation commit: `7ae319cf701b7ce7792c32cbb6e8eb2af07d4abf` (`test: close IDTS-110 Task 4 operation and impact clauses`).
+- Latest authoritative run: `idts110-1788602424166-7284300d26d54eb2b249a605908a06b2`.
 - Matrix: **45 total — 44 PASS, 0 FAIL, 1 BLOCKED** (`IDTS110-F224` only).
 - Missing/unimplemented selector keys: **none**.
 - BLOCKED boundary: `IDTS110-F224` programmatic/native-control precheck only;
@@ -256,7 +256,7 @@ screenshot and authoritative UI result. This remains
 programmatic results are PASS, but the 45-row batch is not an overall PASS until
 the UI lane replaces the precheck record.
 
-## Fix round 2/5 — clause-complete atomic evidence
+## Historical Fix round 2/5 — clause-complete atomic evidence (superseded)
 
 - Fix-round starting head: `ca1605e08c70a52c3500c4fd0aab23f5e65b76b3`.
 - Implementation commit: `730bffd2b72d7aa82d677912596b89908183451e`.
@@ -311,3 +311,46 @@ precheck preserved and the rendered screenshot/result explicitly owned by Task
 6. The current status is **DONE_WITH_CONCERNS — F224 BLOCKED FOR TASK 6 UI
 EVIDENCE**; this is not an overall release, merge, deployment, browser-
 acceptance, or DonHV approval claim.
+
+## Fix round 3/5 — final Important-gap assertions
+
+- Fix-round starting head: `ca024e5569292c0b78a7716684e57d588e082d3f`.
+- Implementation commit: `7ae319cf701b7ce7792c32cbb6e8eb2af07d4abf`.
+- Source/execution baseline: `6eb6f73840d7150598a993f8656d2b44e5b0cd4b`.
+
+### RED-first assertions
+
+The two remaining review gaps were converted into case-bound assertions before
+the focused rerun. F210 now reads all operations for the approved request and
+must fail if the result is not exactly one `PROVISION` operation in `PENDING`;
+the prior `SELECT.one` adapter could not detect duplicates. F230 now binds the
+returned impact object to the requested catalog type and UUID and returns the
+actual three counts; the prior adapter only returned a hardcoded
+`boundedCounts` flag. No product behavior contradicted either approved
+definition.
+
+### GREEN result
+
+Focused F210 and F230 selectors passed. The fresh authoritative orchestrator
+run is:
+
+```text
+node scripts/qa/run-idts110-new-cases.js --scope=USER_ADMIN_PROGRAMMATIC --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/user-admin-results-fix-round3-final.json
+runId: idts110-1788602424166-7284300d26d54eb2b249a605908a06b2
+total: 45
+PASS: 44
+FAIL: 0
+BLOCKED: 1 (IDTS110-F224 only; Task 6 UI-runtime ownership)
+```
+
+The 13 no-argument focused suites, P191 role runner, atomic protocol
+contract, syntax checks, and `git diff --check` all passed. The matrix has no
+missing or unimplemented selector keys and no duplicate case keys. No product
+source, catalog, workbook/template, dependency, database/schema/seed,
+BTP/HANA, provider, email, Drive, Jira, or other external state was changed.
+
+### Current status and handoff
+
+`IDTS110-F224` remains the only BLOCKED result because Task 6 owns its
+authoritative rendered UI screenshot/result. Current status remains
+**DONE_WITH_CONCERNS — F224 BLOCKED FOR TASK 6 UI EVIDENCE**.
