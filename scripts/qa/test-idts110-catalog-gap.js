@@ -1,0 +1,642 @@
+'use strict'
+
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
+
+const root = path.resolve(__dirname, '../..')
+const readJson = relativePath => JSON.parse(fs.readFileSync(path.join(root, relativePath), 'utf8'))
+const proposalInput = readJson('docs/pm/evidence/idts-110/catalog-gap-proposal-input.json')
+
+const proposalInputFields = [
+  'schemaVersion',
+  'sourceWorkbook',
+  'sourceBaseline',
+  'workbookClaimedCaseCount',
+  'approvedCatalogCaseCount',
+  'proposals'
+]
+const proposalFields = [
+  'sourceNumber',
+  'title',
+  'precondition',
+  'action',
+  'expectedResult',
+  'suppliedResult'
+]
+const expectedProposalSnapshots = [
+  {
+    sourceNumber: 189,
+    title: 'read active Developer profiles returns accurate availability',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Query active Developers.',
+    expectedResult: 'Active profiles and true availability statuses are returned.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 190,
+    title: 'read inactive user returns no profile data',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Query inactive users.',
+    expectedResult: 'No profile data is exposed.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 191,
+    title: 'user role check strictly validates TESTER',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Verify TESTER role.',
+    expectedResult: 'Only valid TESTER users return true.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 192,
+    title: 'user role check strictly validates DEVELOPER',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Verify DEVELOPER role.',
+    expectedResult: 'Only valid DEVELOPER users return true.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 193,
+    title: 'user role check strictly validates PM',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Verify PM role.',
+    expectedResult: 'Only valid PM users return true.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 194,
+    title: 'create Application Component requires PM role',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Create component as PM.',
+    expectedResult: 'Component is created successfully.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 195,
+    title: 'create Defect Category requires PM role',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Create category as PM.',
+    expectedResult: 'Category is created successfully.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 196,
+    title: 'non-PM role cannot modify catalog entities',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Create component as TESTER.',
+    expectedResult: 'HTTP 403 is returned.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 197,
+    title: 'active pair bridge validation applies across entities',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Validate active pair.',
+    expectedResult: 'Active pair bridge is strictly validated.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 198,
+    title: 'inactive catalog item blocks new classification',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Classify using inactive item.',
+    expectedResult: 'HTTP 400 is returned.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 199,
+    title: 'workload dashboard calculates active bugs correctly',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Read PM monitoring dashboard.',
+    expectedResult: 'Active bugs per developer are calculated correctly.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 200,
+    title: 'overdue bugs reflect accurate SLA thresholds',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Read SLA metrics.',
+    expectedResult: 'Overdue bugs reflect accurate SLA.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 201,
+    title: 'closed bugs are excluded from active workload',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Read PM monitoring dashboard.',
+    expectedResult: 'Closed bugs are excluded.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 202,
+    title: 'developer filter isolated accurately',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Filter dashboard by developer.',
+    expectedResult: 'Metrics correspond strictly to the developer.',
+    suppliedResult: 'O'
+  },
+  {
+    sourceNumber: 203,
+    title: 'PM operational metrics enforce access controls',
+    precondition: 'Use an isolated fixture at baseline bc0c47e522ae; capture the relevant before-state.',
+    action: 'Read monitoring as Developer.',
+    expectedResult: 'HTTP 403 is returned.',
+    suppliedResult: 'O'
+  }
+]
+
+assert.deepEqual(Object.keys(proposalInput).sort(), proposalInputFields.sort())
+assert.equal(proposalInput.schemaVersion, '1.0')
+assert.equal(proposalInput.workbookClaimedCaseCount, 203)
+assert.equal(proposalInput.approvedCatalogCaseCount, 188)
+assert.deepEqual(proposalInput.proposals, expectedProposalSnapshots)
+
+assert.equal(proposalInput.sourceWorkbook, 'SU26SAP01_GSU26SAP01_Unit_Test (1).xlsx')
+assert.equal(proposalInput.sourceBaseline, '9d5aad699662bde65a747de4c0d631678de639e4')
+assert.equal(proposalInput.proposals.length, 15)
+assert.deepEqual(proposalInput.proposals.map(row => row.sourceNumber), Array.from({ length: 15 }, (_, index) => index + 189))
+for (const proposal of proposalInput.proposals) {
+  assert.deepEqual(Object.keys(proposal).sort(), proposalFields.sort())
+  assert.equal(Number.isInteger(proposal.sourceNumber), true)
+  assert.equal(typeof proposal.title, 'string')
+  assert.equal(typeof proposal.precondition, 'string')
+  assert.equal(typeof proposal.action, 'string')
+  assert.equal(typeof proposal.expectedResult, 'string')
+  assert.equal(proposal.suppliedResult, 'O')
+}
+
+const catalog = readJson('docs/qa/idts-110-unit-test-catalog.json')
+const gapMatrix = readJson('docs/pm/evidence/idts-110/catalog-gap-matrix.json')
+const allowedDecisions = new Set(['KEEP', 'REWRITE', 'MERGE', 'DROP'])
+const catalogCaseIDs = new Set(catalog.cases.map(row => row.caseId))
+const gapMatrixFields = [
+  'sourceNumber',
+  'internalProposalKey',
+  'decision',
+  'rationale',
+  'overlaps',
+  'sourceTrace',
+  'roleBoundary',
+  'executionBoundary',
+  'plannedTestFile',
+  'plannedAssertions',
+  'mentorLabel'
+]
+const sourceTraceFields = ['file', 'symbol']
+const futurePlannedTestFiles = new Set(['scripts/qa/test-user-admin-role-contract.js'])
+
+assert.deepEqual(Object.keys(gapMatrix).sort(), [
+  'schemaVersion',
+  'baseSha',
+  'approvedCatalogCount',
+  'mentorNumbering',
+  'proposals'
+].sort())
+assert.equal(gapMatrix.schemaVersion, '1.0')
+assert.equal(gapMatrix.mentorNumbering, 'SEQUENTIAL_ONLY')
+assert.equal(gapMatrix.approvedCatalogCount, 188)
+assert.equal(catalog.cases.length, 188)
+assert.equal(gapMatrix.baseSha, '9d5aad699662bde65a747de4c0d631678de639e4')
+for (const catalogCase of catalog.cases) {
+  assert.equal(catalogCase.execution?.status, 'NOT_RUN')
+}
+assert.equal(gapMatrix.proposals.length, 15)
+assert.deepEqual(gapMatrix.proposals.map(row => row.sourceNumber), proposalInput.proposals.map(row => row.sourceNumber))
+for (const row of gapMatrix.proposals) {
+  assert.deepEqual(Object.keys(row).sort(), gapMatrixFields.sort())
+  assert.equal(row.internalProposalKey, `IDTS110-P${row.sourceNumber}`)
+  assert.equal(allowedDecisions.has(row.decision), true)
+  assert.equal(typeof row.rationale, 'string')
+  assert.ok(row.rationale.length >= 24)
+  assert.equal(Array.isArray(row.overlaps), true)
+  assert.equal(Array.isArray(row.sourceTrace), true)
+  for (const overlap of row.overlaps) {
+    assert.equal(typeof overlap, 'string')
+    assert.equal(catalogCaseIDs.has(overlap), true)
+  }
+  for (const trace of row.sourceTrace) {
+    assert.deepEqual(Object.keys(trace).sort(), sourceTraceFields.sort())
+    assert.equal(typeof trace.file, 'string')
+    assert.equal(typeof trace.symbol, 'string')
+    const sourcePath = path.join(root, trace.file)
+    assert.equal(fs.existsSync(sourcePath), true)
+    assert.equal(fs.readFileSync(sourcePath, 'utf8').includes(trace.symbol), true)
+  }
+  assert.equal(/^Case \d+$/.test(row.mentorLabel), true)
+  assert.doesNotMatch(row.mentorLabel, /UT-/)
+  assert.equal(row.mentorLabel, `Case ${row.sourceNumber}`)
+  assert.equal(typeof row.roleBoundary, 'string')
+  assert.equal(typeof row.executionBoundary, 'string')
+  assert.equal(row.plannedTestFile === null || typeof row.plannedTestFile === 'string', true)
+  assert.equal(Array.isArray(row.plannedAssertions), true)
+  assert.equal(JSON.stringify(row).includes('suppliedResult'), false)
+  assert.equal(JSON.stringify(row).includes('PASS'), false)
+  if (row.decision === 'KEEP' || row.decision === 'REWRITE') {
+    assert.ok(row.sourceTrace.length > 0)
+    assert.ok(row.roleBoundary)
+    assert.ok(row.executionBoundary)
+    assert.ok(row.plannedTestFile)
+    assert(row.plannedAssertions.length > 0)
+    const plannedTestPath = path.join(root, row.plannedTestFile)
+    if (!fs.existsSync(plannedTestPath)) {
+      assert.equal(futurePlannedTestFiles.has(row.plannedTestFile), true)
+      assert.match(row.executionBoundary, /future|not yet/i)
+    }
+  }
+  if (row.decision === 'MERGE') {
+    assert.ok(row.overlaps.length > 0)
+    assert.ok(row.plannedTestFile)
+    assert.equal(fs.existsSync(path.join(root, row.plannedTestFile)), true)
+    assert.ok(row.plannedAssertions.length > 0)
+    const inheritedBoundary = row.plannedAssertions.join(' ')
+    assert.match(inheritedBoundary, /evidence/i)
+    assert.match(row.executionBoundary, /inherit|reuse/i)
+    const manifests = row.overlaps.map(overlap => {
+      const manifestPath = path.join(root, 'docs/pm/evidence/idts-110/cases', overlap, 'case-manifest.json')
+      assert.equal(fs.existsSync(manifestPath), true)
+      const manifest = readJson(path.relative(root, manifestPath))
+      assert.equal(['PASS', 'MAPPING_ONLY_CANDIDATE'].includes(manifest.candidateExecutionStatus), true)
+      if (overlap === 'UT-MON-001' || overlap === 'UT-MON-003') {
+        assert.equal(manifest.candidateExecutionStatus, 'MAPPING_ONLY_CANDIDATE')
+      }
+      return manifest
+    })
+    const mappingOnlyEvidence = manifests.some(manifest => manifest.candidateExecutionStatus === 'MAPPING_ONLY_CANDIDATE')
+    if (mappingOnlyEvidence) {
+      assert.match(inheritedBoundary, /mapping[- ]only/i)
+      assert.match(row.executionBoundary, /mapping[- ]only/i)
+      assert.doesNotMatch(inheritedBoundary, /atomic/i)
+    } else {
+      assert.match(inheritedBoundary, /atomic/i)
+    }
+    for (const overlap of row.overlaps) {
+      assert.match(inheritedBoundary, new RegExp(overlap.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')))
+    }
+  }
+  if (row.sourceNumber === 197) {
+    assert.equal(row.decision, 'REWRITE')
+    assert.equal(row.plannedAssertions.length, 1)
+    assert.doesNotMatch(row.plannedAssertions[0], /Bug classification/i)
+  }
+  if (row.sourceNumber === 198) {
+    assert.equal(row.decision, 'MERGE')
+    assert.equal(row.plannedTestFile, 'scripts/qa/test-idts110-local-exact.js')
+    assert.match(JSON.stringify(row), /PriorityValues\.code.*LOW/i)
+    assert.match(JSON.stringify(row), /Bugs\.priority_code.*LOW/i)
+  }
+  if (row.sourceNumber === 191 && !fs.existsSync(path.join(root, row.plannedTestFile))) {
+    assert.equal(futurePlannedTestFiles.has(row.plannedTestFile), true)
+    assert.match(row.executionBoundary, /future|not yet/i)
+  }
+  if (row.sourceNumber === 199 || row.sourceNumber === 201) {
+    assert.equal(row.decision, 'MERGE')
+    assert.equal(row.plannedTestFile, 'scripts/qa/test-developer-workload-programmatic.js')
+    assert.equal(row.sourceTrace.some(trace => trace.file === row.plannedTestFile), true)
+    assert.doesNotMatch(JSON.stringify(row), /test-pm-monitoring-programmatic\.js/i)
+    assert.match(JSON.stringify(row), /MAPPING_ONLY_CANDIDATE|mapping-only/i)
+    assert.doesNotMatch(JSON.stringify(row), /atomic/i)
+  }
+}
+
+const featureCoverage = readJson('docs/pm/evidence/idts-110/new-feature-coverage-gaps.json')
+const requiredFamilies = new Set([
+  'USER_ACCESS',
+  'USER_PROFILE',
+  'DEVELOPER_WORKLOAD',
+  'BUSINESS_CATALOGS',
+  'MY_NOTIFICATIONS',
+  'ACCESS_EMAIL',
+  'BUG_EMAIL'
+])
+
+assert.equal(featureCoverage.schemaVersion, '1.0')
+assert.equal(featureCoverage.baseSha, '9d5aad699662bde65a747de4c0d631678de639e4')
+assert.equal(featureCoverage.approvedCatalogCount, 188)
+assert.equal(featureCoverage.mentorNumbering, 'SEQUENTIAL_ONLY')
+assert.equal(Array.isArray(featureCoverage.features), true)
+assert.deepEqual(new Set(featureCoverage.features.map(row => row.family)), requiredFamilies)
+
+const featureSourceTraceFields = ['file', 'symbol']
+const catalogCaseKeys = new Set(catalog.cases.map(row => row.caseId))
+const task2ProposalKeys = new Set(gapMatrix.proposals.map(row => row.internalProposalKey))
+const allowedCoverageModes = new Set(['EXISTING_188_CASE', 'RETAINED_TASK_2_PROPOSAL', 'SHARED_EXISTING_CASE', 'IMPLEMENTED_MISSING_ATOMIC_CASE'])
+const proposedKeys = new Set()
+const proposedSequences = []
+const allProposedCases = []
+const referencedProposalKeys = new Set()
+const referencedRetainedKeys = new Set()
+const proposalReferenceCounts = new Map()
+const normalizedBehaviorDescriptions = new Set()
+for (const feature of featureCoverage.features) {
+  assert.ok(feature.sourceTrace.length > 0)
+  assert.ok(feature.currentTests.length > 0)
+  assert.equal(Array.isArray(feature.existingCaseKeys), true)
+  assert.equal(Array.isArray(feature.proposedCases), true)
+  for (const currentTest of feature.currentTests) {
+    assert.equal(fs.existsSync(path.join(root, currentTest)), true)
+  }
+  for (const behavior of feature.implementedBehaviors || []) {
+    assert.equal(typeof behavior.coverageStatus, 'string')
+    assert.equal(allowedCoverageModes.has(behavior.coverageStatus), true)
+    assert.equal(typeof behavior.description, 'string')
+    const normalizedDescription = behavior.description.trim().toLowerCase().replace(/\s+/g, ' ')
+    assert.equal(normalizedBehaviorDescriptions.has(normalizedDescription), false)
+    normalizedBehaviorDescriptions.add(normalizedDescription)
+    assert.equal(Array.isArray(behavior.existingCaseKeys), true)
+    assert.equal(Array.isArray(behavior.proposedInternalKeys), true)
+    assert.equal(Array.isArray(behavior.retainedProposalKeys), true)
+    assert.equal(behavior.proposedInternalKeys.some(key => behavior.retainedProposalKeys.includes(key)), false)
+    if (behavior.coverageStatus === 'SHARED_EXISTING_CASE') {
+      assert.ok(behavior.existingCaseKeys.length > 0)
+      assert.equal(behavior.proposedInternalKeys.length, 0)
+      assert.equal(behavior.retainedProposalKeys.length, 0)
+    }
+    if (behavior.sourceTrace !== undefined) {
+      assert.equal(Array.isArray(behavior.sourceTrace), true)
+      for (const trace of behavior.sourceTrace) {
+        assert.deepEqual(Object.keys(trace).sort(), featureSourceTraceFields.sort())
+        assert.equal(fs.existsSync(path.join(root, trace.file)), true)
+        assert.equal(fs.readFileSync(path.join(root, trace.file), 'utf8').includes(trace.symbol), true)
+      }
+    }
+    if (behavior.currentTests !== undefined) {
+      assert.equal(Array.isArray(behavior.currentTests), true)
+      for (const currentTest of behavior.currentTests) assert.equal(fs.existsSync(path.join(root, currentTest)), true)
+    }
+    if (behavior.coverageStatus === 'IMPLEMENTED_MISSING_ATOMIC_CASE') assert.ok(behavior.proposedInternalKeys.length > 0)
+    if (behavior.coverageStatus === 'RETAINED_TASK_2_PROPOSAL') assert.ok(behavior.retainedProposalKeys.length > 0)
+    for (const key of behavior.existingCaseKeys) assert.equal(catalogCaseKeys.has(key), true)
+    for (const key of behavior.proposedInternalKeys) {
+      assert.equal(feature.proposedCases.some(proposal => proposal.internalProposalKey === key), true)
+      referencedProposalKeys.add(key)
+      proposalReferenceCounts.set(key, (proposalReferenceCounts.get(key) || 0) + 1)
+    }
+    for (const key of behavior.retainedProposalKeys) {
+      assert.equal(task2ProposalKeys.has(key), true)
+      referencedRetainedKeys.add(key)
+    }
+  }
+  for (const existingCaseKey of feature.existingCaseKeys) {
+    assert.equal(catalogCaseKeys.has(existingCaseKey), true)
+  }
+  const assignedFeatureExistingKeys = new Set((feature.implementedBehaviors || []).flatMap(behavior => behavior.existingCaseKeys))
+  assert.deepEqual([...assignedFeatureExistingKeys].sort(), [...feature.existingCaseKeys].sort())
+  for (const trace of feature.sourceTrace) {
+    assert.deepEqual(Object.keys(trace).sort(), featureSourceTraceFields.sort())
+    assert.equal(typeof trace.file, 'string')
+    assert.equal(typeof trace.symbol, 'string')
+    const sourcePath = path.join(root, trace.file)
+    assert.equal(fs.existsSync(sourcePath), true)
+    assert.equal(fs.readFileSync(sourcePath, 'utf8').includes(trace.symbol), true)
+  }
+  for (const proposal of feature.proposedCases) {
+    allProposedCases.push(proposal)
+    assert.equal(Number.isInteger(proposal.proposedSequence), true)
+    proposedSequences.push(proposal.proposedSequence)
+    assert.equal(proposal.proposedSequence > 203, true)
+    assert.equal(/^Case \d+$/.test(proposal.mentorLabel), true)
+    assert.doesNotMatch(proposal.mentorLabel, /UT-/)
+    assert.equal(proposal.mentorLabel, `Case ${proposal.proposedSequence}`)
+    assert.equal(typeof proposal.internalProposalKey, 'string')
+    assert.doesNotMatch(proposal.internalProposalKey, /^Case /)
+    assert.equal(proposedKeys.has(proposal.internalProposalKey), false)
+    proposedKeys.add(proposal.internalProposalKey)
+    assert.equal(proposal.candidateStatus, 'NOT_RUN')
+    assert.equal(proposal.coverageStatus, 'IMPLEMENTED_MISSING_ATOMIC_CASE')
+    assert.deepEqual(proposal.existingCaseKeys, [])
+    assert.deepEqual(proposal.retainedProposalKeys, [])
+    assert.ok(proposal.plannedTestFile)
+    assert.equal(fs.existsSync(path.join(root, proposal.plannedTestFile)), true)
+    assert.ok(proposal.plannedAssertions.length > 0)
+    assert.equal(proposal.plannedAssertions.length, 1)
+    assert.ok(proposal.roleBoundary)
+    assert.ok(proposal.executionBoundary)
+    assert.equal(Array.isArray(proposal.sourceTrace), true)
+    assert.ok(proposal.sourceTrace.length > 0)
+    for (const trace of proposal.sourceTrace) {
+      assert.deepEqual(Object.keys(trace).sort(), featureSourceTraceFields.sort())
+      assert.equal(fs.existsSync(path.join(root, trace.file)), true)
+      assert.equal(fs.readFileSync(path.join(root, trace.file), 'utf8').includes(trace.symbol), true)
+    }
+  }
+}
+const visualCandidateKeys = new Set([
+  'IDTS110-F224',
+  'IDTS110-F237',
+  'IDTS110-F238',
+  'IDTS110-F238E',
+  'IDTS110-F238L',
+  'IDTS110-F239',
+  'IDTS110-F239P',
+  'IDTS110-F239H',
+  'IDTS110-F239D'
+])
+for (const proposal of allProposedCases) {
+  if (!visualCandidateKeys.has(proposal.internalProposalKey)) continue
+  assert.equal(proposal.acceptanceMode, 'UI_RUNTIME_VISUAL')
+  assert.equal(Array.isArray(proposal.evidenceRequirements), true)
+  const evidenceText = proposal.evidenceRequirements.join(' ')
+  assert.match(proposal.executionBoundary, /browser\/runtime rendered UI/i)
+  assert.match(proposal.executionBoundary, /screenshot/i)
+  assert.match(evidenceText, /programmatic.*precheck/i)
+  assert.match(evidenceText, /browser\/runtime.*rendered UI/i)
+  assert.match(evidenceText, /screenshot/i)
+  assert.doesNotMatch(JSON.stringify(proposal), /FakeControl|static-only|static controller.*(?:acceptance|evidence)/i)
+}
+assert.deepEqual(
+  [...proposedSequences].sort((left, right) => left - right),
+  Array.from({ length: proposedSequences.length }, (_, index) => 204 + index)
+)
+assert.equal(featureCoverage.summary.featureCount, requiredFamilies.size)
+assert.equal(featureCoverage.summary.proposedCaseCount, 80)
+assert.equal(featureCoverage.summary.proposedCaseCount, allProposedCases.length)
+const retainedTask2Proposals = gapMatrix.proposals.filter(row => row.decision === 'KEEP' || row.decision === 'REWRITE')
+assert.equal(featureCoverage.summary.retainedProposalCount, retainedTask2Proposals.length)
+assert.equal(
+  featureCoverage.summary.proposedFinalCatalogCount,
+  catalog.cases.length + retainedTask2Proposals.length + allProposedCases.length
+)
+assert.deepEqual([...referencedProposalKeys].sort(), [...proposedKeys].sort())
+for (const key of proposedKeys) assert.equal(proposalReferenceCounts.get(key), 1)
+assert.deepEqual(
+  [...referencedRetainedKeys].sort(),
+  retainedTask2Proposals.map(row => row.internalProposalKey).sort()
+)
+
+const proposedJson = JSON.stringify(allProposedCases)
+const proposalByKey = key => {
+  const proposal = allProposedCases.find(row => row.internalProposalKey === key)
+  assert.ok(proposal, `missing corrected proposal ${key}`)
+  return proposal
+}
+const behaviorByKey = key => {
+  for (const feature of featureCoverage.features) {
+    const behavior = (feature.implementedBehaviors || []).find(row => row.behaviorKey === key)
+    if (behavior) return behavior
+  }
+  assert.fail(`missing implemented behavior ${key}`)
+}
+const expectedProposalReferences = {
+  USER_ACCESS_ADMIN_GATE: ['IDTS110-F204'],
+  USER_ACCESS_APPROVAL: ['IDTS110-F210', 'IDTS110-F210S'],
+  USER_ACCESS_OPERATION_RECOVERY: ['IDTS110-F216', 'IDTS110-F216R'],
+  USER_PROFILE_INPUT_RULES: ['IDTS110-F220', 'IDTS110-F220D', 'IDTS110-F220R', 'IDTS110-F220N'],
+  BUSINESS_CATALOG_CRUD_GAPS: ['IDTS110-F225', 'IDTS110-F226', 'IDTS110-F227', 'IDTS110-F228', 'IDTS110-F228E', 'IDTS110-F229', 'IDTS110-F230', 'IDTS110-F231', 'IDTS110-F231R'],
+  MY_NOTIFICATIONS_INBOX_READ_MODEL: ['IDTS110-F232', 'IDTS110-F233', 'IDTS110-F234', 'IDTS110-F235', 'IDTS110-F235I', 'IDTS110-F235C', 'IDTS110-F236'],
+  MY_NOTIFICATIONS_UI: ['IDTS110-F237', 'IDTS110-F238', 'IDTS110-F238E', 'IDTS110-F238L', 'IDTS110-F239', 'IDTS110-F239P', 'IDTS110-F239H', 'IDTS110-F239D'],
+  ACCESS_EMAIL_COMPLETION: ['IDTS110-F240'],
+  ACCESS_EMAIL_SAFE_SKIP: ['IDTS110-F241'],
+  ACCESS_EMAIL_WORKER: [],
+  ACCESS_EMAIL_INVITATION_AND_KICK: ['IDTS110-F243', 'IDTS110-F243M', 'IDTS110-F244', 'IDTS110-F245', 'IDTS110-F246', 'IDTS110-F246R', 'IDTS110-F246B'],
+  ACCESS_EMAIL_REVOKE_DELIVERY: ['IDTS110-F240R'],
+  BUG_EMAIL_SCHEDULED_DISCOVERY: ['IDTS110-F247', 'IDTS110-F247S', 'IDTS110-F247SS', 'IDTS110-F248', 'IDTS110-F248C', 'IDTS110-F248N', 'IDTS110-F249', 'IDTS110-F249K', 'IDTS110-F249T'],
+  BUG_EMAIL_DIGEST: ['IDTS110-F250', 'IDTS110-F250L', 'IDTS110-F250M', 'IDTS110-F250Q', 'IDTS110-F250R', 'IDTS110-F251', 'IDTS110-F251R', 'IDTS110-F252', 'IDTS110-F252R', 'IDTS110-F252P', 'IDTS110-F253']
+}
+for (const [behaviorKey, expected] of Object.entries(expectedProposalReferences)) {
+  assert.deepEqual(behaviorByKey(behaviorKey).proposedInternalKeys, expected)
+}
+const accessEmailWorker = behaviorByKey('ACCESS_EMAIL_WORKER')
+assert.equal(accessEmailWorker.proposedInternalKeys.includes('IDTS110-F243'), false)
+const accessEmailFeature = featureCoverage.features.find(feature => feature.family === 'ACCESS_EMAIL')
+assert.equal(accessEmailFeature.sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js' && trace.symbol === 'processUserAccessDeliveries'), true)
+assert.equal(accessEmailFeature.sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js' && trace.symbol === 'skippedAccessDeliveryReason'), true)
+const accessSharedExistingKeys = ['UT-NTF-003', 'UT-NTF-004', 'UT-NTF-005', 'UT-NTF-006', 'UT-NTF-007', 'UT-NTF-008', 'UT-NTF-009', 'UT-NTF-010', 'UT-NTF-011', 'UT-NTF-012']
+assert.deepEqual(behaviorByKey('ACCESS_EMAIL_SHARED_OUTBOX').existingCaseKeys, accessSharedExistingKeys)
+assert.deepEqual(accessEmailWorker.existingCaseKeys, accessSharedExistingKeys)
+for (const key of accessEmailWorker.proposedInternalKeys) {
+  assert.equal(proposalByKey(key).sourceTrace.some(trace => trace.file === 'srv/user-admin/access-delivery.js'), true)
+}
+assert.equal(proposalByKey('IDTS110-F241').sourceTrace.every(trace => trace.file === 'srv/user-admin/access-delivery.js'), true)
+assert.equal(proposalByKey('IDTS110-F241').sourceTrace.some(trace => /Onboarding/i.test(trace.symbol)), false)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F240R')), /REVOKE/)
+assert.doesNotMatch(JSON.stringify(behaviorByKey('ACCESS_EMAIL_COMPLETION')), /REVOKE/i)
+assert.deepEqual(behaviorByKey('ACCESS_EMAIL_REVOKE_DELIVERY').proposedInternalKeys, ['IDTS110-F240R'])
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F240')), /REVOKE/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F212')), /SUSPEND|ACCESS_SUSPENDED|delivery/i)
+assert.match(proposalByKey('IDTS110-F232').plannedAssertions[0], /occurredAt desc.*ID desc|ID desc.*occurredAt desc/i)
+for (const key of ['IDTS110-F239', 'IDTS110-F239P', 'IDTS110-F239H', 'IDTS110-F239D']) {
+  assert.doesNotMatch(JSON.stringify(proposalByKey(key)), /inbox(?: page)? refresh|refresh(?:es|ing)? the inbox/i)
+}
+assert.match(proposalByKey('IDTS110-F239').plannedAssertions[0], /unread count/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F243')), /cancel/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F245')), /cancel/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F253')), /digest (?:delivery|row|snapshot)|NotificationDigestDeliveries/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F210')), /stale/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F210S')), /stale/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F246')), /repeat|rollback|failed CAP/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F246R')), /repeat/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F246B')), /rollback/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F247S')), /Critical|Blocker|four hours/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F247SS')), /standard|24 hours/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F248C')), /idempotent|same.*source key/i)
+assert.doesNotMatch(JSON.stringify(proposalByKey('IDTS110-F248C')), /new due-date|new cycle|distinct source key/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F248N')), /new due-date|new cycle|distinct source key/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250L')), /order/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250M')), /limit/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250Q')), /link/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F250R')), /raw/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F252')), /inactive/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F252R')), /role/i)
+assert.match(JSON.stringify(proposalByKey('IDTS110-F252P')), /Profile/i)
+assert.match(behaviorByKey('DEVELOPER_WORKLOAD_RETAINED_SLA').description, /due-date boundary/i)
+assert.doesNotMatch(behaviorByKey('DEVELOPER_WORKLOAD_RETAINED_SLA').description, /SLA/i)
+assert.match(behaviorByKey('USER_ACCESS_RETAINED_ROLE_CHECK').description, /allowed-role matrix/i)
+const requiredCorrectionKeys = [
+  'IDTS110-F216R',
+  'IDTS110-F210S',
+  'IDTS110-F220D',
+  'IDTS110-F220R',
+  'IDTS110-F220N',
+  'IDTS110-F228E',
+  'IDTS110-F231R',
+  'IDTS110-F235I',
+  'IDTS110-F235C',
+  'IDTS110-F238E',
+  'IDTS110-F238L',
+  'IDTS110-F239P',
+  'IDTS110-F239H',
+  'IDTS110-F239D',
+  'IDTS110-F243M',
+  'IDTS110-F247S',
+  'IDTS110-F247SS',
+  'IDTS110-F248C',
+  'IDTS110-F248N',
+  'IDTS110-F249K',
+  'IDTS110-F249T',
+  'IDTS110-F250L',
+  'IDTS110-F250M',
+  'IDTS110-F250Q',
+  'IDTS110-F250R',
+  'IDTS110-F251R',
+  'IDTS110-F240R',
+  'IDTS110-F241',
+  'IDTS110-F246R',
+  'IDTS110-F246B',
+  'IDTS110-F252R',
+  'IDTS110-F252P'
+]
+for (const key of requiredCorrectionKeys) assert.equal(proposedKeys.has(key), true)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F241'), true)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F242'), false)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F240' && /SUSPEND/i.test(JSON.stringify(proposal))), false)
+const correctedDeactivation = allProposedCases.find(proposal => proposal.internalProposalKey === 'IDTS110-F229')
+assert.ok(correctedDeactivation)
+assert.match(correctedDeactivation.plannedAssertions[0], /active responsibility|child-reference/i)
+assert.match(correctedDeactivation.plannedAssertions[0], /bugReferenceCount.*informational/i)
+assert.doesNotMatch(correctedDeactivation.plannedAssertions[0], /bug\s+(?:depend|dependency)/i)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F243' && /token.?mismatch/i.test(JSON.stringify(proposal))), false)
+const correctedTokenMismatch = allProposedCases.find(proposal => /token.?mismatch/i.test(JSON.stringify(proposal)))
+assert.ok(correctedTokenMismatch)
+assert.match(JSON.stringify(correctedTokenMismatch), /FAILED/i)
+assert.match(JSON.stringify(correctedTokenMismatch), /retry/i)
+assert.equal(allProposedCases.some(proposal => proposal.internalProposalKey === 'IDTS110-F227' && proposal.plannedTestFile === 'scripts/qa/test-user-admin-catalogs.js'), true)
+assert.equal(proposedJson.includes('UT-NTF-004'), false)
+assert.equal(proposedJson.includes('UT-NTF-005'), false)
+assert.equal(proposedJson.includes('UT-NTF-006'), false)
+assert.equal(proposedJson.includes('UT-NTF-007'), false)
+assert.equal(proposedJson.includes('UT-NTF-008'), false)
+assert.equal(proposedJson.includes('UT-NTF-009'), false)
+assert.equal(proposedJson.includes('UT-NTF-010'), false)
+assert.equal(proposedJson.includes('UT-NTF-011'), false)
+
+const retained = gapMatrix.proposals.filter(row => row.decision === 'KEEP' || row.decision === 'REWRITE')
+const proposed = featureCoverage.features.flatMap(row => row.proposedCases)
+const finalCount = 188 + retained.length + proposed.length
+const decisionCounts = gapMatrix.proposals.reduce((counts, row) => {
+  counts[row.decision] = (counts[row.decision] || 0) + 1
+  return counts
+}, {})
+assert.equal(decisionCounts.KEEP + decisionCounts.REWRITE + decisionCounts.MERGE + decisionCounts.DROP, 15)
+assert.equal(featureCoverage.summary.proposedCaseCount, proposed.length)
+assert.equal(featureCoverage.summary.proposedFinalCatalogCount, finalCount)
+assert.equal(retained.length, 10)
+assert.equal(proposed.length, 80)
+assert.equal(finalCount, 278)
+
+const reportPath = path.join(root, 'docs/pm/evidence/idts-110/catalog-gap-review.md')
+const report = fs.readFileSync(reportPath, 'utf8')
+assert.match(report, /# IDTS-110 Catalog Gap Review/)
+assert.match(report, new RegExp(gapMatrix.baseSha))
+for (const sourceNumber of proposalInput.proposals.map(row => row.sourceNumber)) {
+  assert.match(report, new RegExp(`\\|\\s*${sourceNumber}\\s*\\|`))
+}
+for (const family of requiredFamilies) assert.match(report, new RegExp(`\\b${family}\\b`))
+assert.match(report, /KEEP\s*\|\s*7/)
+assert.match(report, /REWRITE\s*\|\s*3/)
+assert.match(report, /MERGE\s*\|\s*3/)
+assert.match(report, /DROP\s*\|\s*2/)
+assert.match(report, /Retained Task 2 candidates\s*\|\s*10/)
+assert.match(report, /Task 3 candidate cases\s*\|\s*80/)
+assert.match(report, /Candidate final catalog count\s*\|\s*278/)
+const previewStart = report.indexOf('## Mentor-facing preview')
+assert.ok(previewStart >= 0)
+const previewEnd = report.indexOf('\n## ', previewStart + 4)
+const mentorPreview = report.slice(previewStart, previewEnd < 0 ? report.length : previewEnd)
+assert.doesNotMatch(mentorPreview, /UT-/)
+assert.match(mentorPreview, /Case 1/)
+assert.match(mentorPreview, /Case 188/)
+assert.match(mentorPreview, /Case 204/)
+assert.match(mentorPreview, /Case 283/)
+console.log('IDTS-110 catalog gap contract: PASS')

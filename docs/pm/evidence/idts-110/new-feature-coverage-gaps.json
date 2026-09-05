@@ -1,0 +1,3145 @@
+{
+  "schemaVersion": "1.0",
+  "baseSha": "9d5aad699662bde65a747de4c0d631678de639e4",
+  "approvedCatalogCount": 188,
+  "mentorNumbering": "SEQUENTIAL_ONLY",
+  "scope": "Current merged User Administration, Developer Workload, Business Catalog, My Notifications, access email, and Bug email behavior. Existing catalog keys stay internal; every new proposal is a NOT_RUN candidate.",
+  "features": [
+    {
+      "family": "USER_ACCESS",
+      "objective": "Trace the active-PM/UserAdmin boundary, onboarding and SAP identity verification, access lifecycle, identity-link lifecycle, and operation recovery.",
+      "sourceTrace": [
+        {
+          "file": "srv/user-admin/invitations.js",
+          "symbol": "assertUserAdministrator"
+        },
+        {
+          "file": "srv/user-admin.js",
+          "symbol": "requestOnboarding"
+        },
+        {
+          "file": "srv/user-admin.js",
+          "symbol": "verifySapIdentity"
+        },
+        {
+          "file": "srv/user-admin.js",
+          "symbol": "approveProvisioning"
+        },
+        {
+          "file": "srv/user-admin/access-lifecycle.js",
+          "symbol": "requestSuspend"
+        },
+        {
+          "file": "srv/user-admin/existing-identity-link.js",
+          "symbol": "requestExistingUserIdentityLink"
+        },
+        {
+          "file": "srv/user-admin.js",
+          "symbol": "requeueAccessOperation"
+        }
+      ],
+      "currentTests": [
+        "scripts/qa/test-user-onboarding-contract.js",
+        "scripts/qa/test-user-onboarding-programmatic.js",
+        "scripts/qa/test-user-access-provisioning-contract.js",
+        "scripts/qa/test-user-access-broker-runtime.js",
+        "scripts/qa/test-existing-user-identity-link.js",
+        "scripts/qa/test-user-admin-active-users.js",
+        "scripts/qa/test-user-admin-access-lifecycle.js",
+        "scripts/qa/test-user-admin-operations-audit.js",
+        "scripts/qa/test-user-admin-ui.js"
+      ],
+      "existingCaseKeys": [
+        "UT-AUTH-012",
+        "UT-AUTH-013",
+        "UT-AUTH-014",
+        "UT-AUTH-015",
+        "UT-SEC-005",
+        "UT-SEC-006",
+        "UT-SEC-008"
+      ],
+      "implementedBehaviors": [
+        {
+          "behaviorKey": "USER_ACCESS_IDENTITY_MAPPING",
+          "description": "XSUAA origin, issuer, and subject map to one active IDTS user and reject unmapped, multi-role, or role-mismatched identities.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-AUTH-012",
+            "UT-AUTH-013",
+            "UT-AUTH-014",
+            "UT-AUTH-015"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_PUBLIC_BOUNDARY",
+          "description": "Existing security coverage maps public projections and sanitized errors to the User Administration boundary.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-SEC-005",
+            "UT-SEC-006"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": [],
+          "sourceTrace": [
+            {
+              "file": "srv/bug-service/guards.js",
+              "symbol": "registerReadOnlyEntityGuards"
+            }
+          ],
+          "currentTests": [
+            "scripts/qa/test-idts110-local-primary-suites.js"
+          ]
+        },
+        {
+          "behaviorKey": "USER_ACCESS_TRANSACTION_BOUNDARY",
+          "description": "Existing security coverage keeps failed User Administration operations free of partial mutation.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-SEC-008"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": [],
+          "sourceTrace": [
+            {
+              "file": "srv/bug-service/guards.js",
+              "symbol": "registerReadOnlyEntityGuards"
+            }
+          ],
+          "currentTests": [
+            "scripts/qa/test-idts110-local-primary-suites.js"
+          ]
+        },
+        {
+          "behaviorKey": "USER_ACCESS_RETAINED_ROLE_CHECK",
+          "description": "Task 2 retains the allowed-role matrix candidate covering TESTER, DEVELOPER, and PM checks.",
+          "coverageStatus": "RETAINED_TASK_2_PROPOSAL",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [
+            "IDTS110-P191"
+          ],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_ADMIN_GATE",
+          "description": "Every User Administration administrative read or action requires exactly one PM business role, the UserAdmin capability, and an active internal requester.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F204"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_ONBOARDING",
+          "description": "An authorized PM creates a normalized expiring invitation, persists only token material, stores the desired access/profile, and creates one pending delivery.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F205"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_IDENTITY_VERIFICATION",
+          "description": "A matching SAP identity consumes an invitation once and moves standard access to a queued operation while keeping identity internals out of the public result.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F206"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_INVITATION_REJECTION",
+          "description": "Tampered or mismatched invitation claims fail closed before request consumption or access-operation creation.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F207",
+            "IDTS110-F208"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_REQUEST_SEARCH",
+          "description": "Onboarding search returns bounded safe summaries with latest operation attempts and server-owned cancellation eligibility.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F209"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_APPROVAL",
+          "description": "PM/UserAdmin approval changes only the expected request version, queues provisioning, and appends an audit event.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F210",
+            "IDTS110-F210S"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_ROLE_CHANGE",
+          "description": "Role change suspends local access and sessions before provider reconciliation and records the desired operation without claiming provider completion.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F211"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_SUSPEND",
+          "description": "Local suspension moves ACTIVE access to SUSPENDED, revokes active sessions, writes applied audit, and leaves an access-delivery source.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F212"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_REACTIVATE",
+          "description": "Reactivation queues a read-only provider operation while the local user remains inactive until verified completion.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F213"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_IDENTITY_LINK",
+          "description": "A legacy TESTER or DEVELOPER link targets one explicit eligible row, snapshots its role/email, supports cancellation, and preserves request history.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F214",
+            "IDTS110-F215"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_ACCESS_OPERATION_RECOVERY",
+          "description": "Retry and reconcile are state-, result-, and optimistic-version-gated and rotate the operation correlation state safely.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F216",
+            "IDTS110-F216R"
+          ],
+          "retainedProposalKeys": []
+        }
+      ],
+      "proposedCases": [
+        {
+          "proposedSequence": 204,
+          "mentorLabel": "Case 204",
+          "internalProposalKey": "IDTS110-F204",
+          "title": "User Administration administrative reads require the full gate",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/invitations.js",
+              "symbol": "assertUserAdministrator"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "requireActiveUserAdministrator"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-contract.js",
+          "plannedAssertions": [
+            "An anonymous, non-PM, PM-without-UserAdmin, or inactive requester is rejected with USER_ADMIN_REQUIRED before an administrative read or action."
+          ],
+          "roleBoundary": "Exactly one PM business role plus UserAdmin and an active internal identity are required; UserAdmin is not a fourth business role.",
+          "executionBoundary": "Use pure authorization and isolated CAP request fixtures; do not call a provider or mutate onboarding, identity, catalog, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 205,
+          "mentorLabel": "Case 205",
+          "internalProposalKey": "IDTS110-F205",
+          "title": "authorized onboarding request persists normalized safe state",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "requestOnboarding"
+            },
+            {
+              "file": "srv/user-admin/invitations.js",
+              "symbol": "normalizeEmail"
+            },
+            {
+              "file": "srv/user-admin/developer-profile.js",
+              "symbol": "normalizeDeveloperProfileInput"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "A PM/UserAdmin onboarding request persists normalized email/display name, a token hash, the desired profile, and one PENDING delivery without exposing token internals."
+          ],
+          "roleBoundary": "Only an active PM UserAdmin may create an invitation; requested business role and Developer-profile rules are server validated.",
+          "executionBoundary": "Run in an isolated CAP SQLite fixture with deterministic signing configuration; no provider, email send, BTP, or live-data mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 206,
+          "mentorLabel": "Case 206",
+          "internalProposalKey": "IDTS110-F206",
+          "title": "matching SAP identity verifies one onboarding invitation",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "verifySapIdentity"
+            },
+            {
+              "file": "srv/user-admin/invitations.js",
+              "symbol": "verifyInvitationToken"
+            },
+            {
+              "file": "srv/user-admin/invitations.js",
+              "symbol": "identitySnapshotFrom"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "A valid invitation with a matching SAP identity is consumed once, queues standard access, records one operation/audit, and omits identity fields from the result."
+          ],
+          "roleBoundary": "The signed-in SAP identity must match the invitation email and immutable identity tuple; approval remains required for PM or UserAdmin access.",
+          "executionBoundary": "Use an isolated CAP fixture and deterministic signed token; do not invoke the broker or create a platform identity.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 207,
+          "mentorLabel": "Case 207",
+          "internalProposalKey": "IDTS110-F207",
+          "title": "tampered invitation is rejected before consumption",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/invitations.js",
+              "symbol": "verifyInvitationToken"
+            },
+            {
+              "file": "srv/user-admin/invitations.js",
+              "symbol": "invitationTokenSegments"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-contract.js",
+          "plannedAssertions": [
+            "A tampered invitation signature returns INVALID_INVITATION and leaves the invitation unconsumed with no access operation."
+          ],
+          "roleBoundary": "Invitation verification is claim-bound and does not grant access based on a client-supplied email or token fragment alone.",
+          "executionBoundary": "Use pure token fixtures and an isolated persistence readback; no SAP login, provider, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 208,
+          "mentorLabel": "Case 208",
+          "internalProposalKey": "IDTS110-F208",
+          "title": "mismatched SAP identity is denied without consuming invitation",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/invitations.js",
+              "symbol": "identitySnapshotFrom"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "INVITATION_IDENTITY_MISMATCH"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-contract.js",
+          "plannedAssertions": [
+            "A valid token used by a different normalized SAP email returns INVITATION_IDENTITY_MISMATCH and leaves the invitation INVITED with consumedAt null."
+          ],
+          "roleBoundary": "Identity email must match the invitation; the callback cannot choose another target user or bypass the immutable identity check.",
+          "executionBoundary": "Use isolated token and request fixtures; no broker, provider, email, or live identity mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 209,
+          "mentorLabel": "Case 209",
+          "internalProposalKey": "IDTS110-F209",
+          "title": "onboarding search returns safe status and cancellation eligibility",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "searchOnboarding"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "onboardingSummary"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "An authorized onboarding search returns bounded summaries and cancelEligible only for an unconsumed INVITED request, without identity or token fields."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may inspect onboarding summaries; returned rows exclude identity-link internals and token material.",
+          "executionBoundary": "Use deterministic local CAP rows and read-only queries; no invitation send, provider call, or live mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 210,
+          "mentorLabel": "Case 210",
+          "internalProposalKey": "IDTS110-F210",
+          "title": "provisioning approval succeeds at the current version",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "approveProvisioning"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "insertAccessOperation"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "Approval of one current-version PENDING_APPROVAL request queues provisioning, inserts one PENDING operation, and appends one audit."
+          ],
+          "roleBoundary": "Approval is a PM/UserAdmin action and never makes an operation ACTIVE without later provider readback.",
+          "executionBoundary": "Run with isolated CAP rows and transaction readback; do not contact the access broker or platform.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 211,
+          "mentorLabel": "Case 211",
+          "internalProposalKey": "IDTS110-F210S",
+          "title": "stale provisioning approval is rejected without mutation",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "approveProvisioning"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "assertExpectedVersion"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "Approval with a stale request version returns the safe version conflict and leaves request, operation, and audit state unchanged."
+          ],
+          "roleBoundary": "Approval is a PM/UserAdmin action and never makes an operation ACTIVE without later provider readback.",
+          "executionBoundary": "Run with isolated CAP rows and transaction readback; do not contact the access broker or platform.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 212,
+          "mentorLabel": "Case 212",
+          "internalProposalKey": "IDTS110-F211",
+          "title": "role change fails closed before provider reconciliation",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "requestRoleChange"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "queueFailClosedAccessChange"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "An authorized role change marks local access inactive, revokes active sessions, queues CHANGE_ROLE, and leaves provider completion unclaimed."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may request a role change; local authorization is reduced before any external reconciliation.",
+          "executionBoundary": "Use an isolated CAP fixture and inspect user/session/request/operation rows; no broker or live role-collection write.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 213,
+          "mentorLabel": "Case 213",
+          "internalProposalKey": "IDTS110-F212",
+          "title": "local suspension revokes sessions and creates its access delivery",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/access-lifecycle.js",
+              "symbol": "requestSuspend"
+            },
+            {
+              "file": "srv/user-admin/access-lifecycle.js",
+              "symbol": "revokeActiveSessions"
+            },
+            {
+              "file": "srv/user-admin/access-lifecycle.js",
+              "symbol": "writeUserAccessDelivery"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-access-lifecycle.js",
+          "plannedAssertions": [
+            "Suspending an ACTIVE user changes local state to SUSPENDED, revokes every unrevoked session, records QUEUED then APPLIED audit rows, and creates the APPLIED SUSPEND access delivery."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may suspend access; the final active UserAdmin remains protected.",
+          "executionBoundary": "Use a deterministic local CAP transaction and readback; do not call provider, send email, or mutate shared data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 214,
+          "mentorLabel": "Case 214",
+          "internalProposalKey": "IDTS110-F213",
+          "title": "reactivation stays inactive until queued operation completes",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/access-lifecycle.js",
+              "symbol": "requestReactivate"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "insertAccessOperation"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-access-lifecycle.js",
+          "plannedAssertions": [
+            "Reactivation increments the request version and queues REACTIVATE while the local user remains inactive until provider proof."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may request reactivation; the provider operation must later prove the immutable identity and desired role collections.",
+          "executionBoundary": "Use isolated suspended user/request/session rows; no provider, email, BTP, or live-data operation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 215,
+          "mentorLabel": "Case 215",
+          "internalProposalKey": "IDTS110-F214",
+          "title": "legacy identity link snapshots one eligible target",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/existing-identity-link.js",
+              "symbol": "requestExistingUserIdentityLink"
+            },
+            {
+              "file": "srv/user-admin/existing-identity-link.js",
+              "symbol": "assertEligibleLegacyTarget"
+            },
+            {
+              "file": "srv/user-admin/existing-identity-link.js",
+              "symbol": "createExistingLinkRequest"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-existing-user-identity-link.js",
+          "plannedAssertions": [
+            "An eligible legacy TESTER or DEVELOPER links exactly one selected Users.ID and snapshots its role and source email into one pending link request."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may link an active legacy TESTER/DEVELOPER row; already-linked, partial-identity, PM, inactive, and nonlegacy targets are rejected.",
+          "executionBoundary": "Use an isolated CAP SQLite fixture; do not verify a real SAP identity or create a provider account.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 216,
+          "mentorLabel": "Case 216",
+          "internalProposalKey": "IDTS110-F215",
+          "title": "cancelling an unverified invitation preserves history",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/existing-identity-link.js",
+              "symbol": "cancelExistingUserIdentityLink"
+            },
+            {
+              "file": "srv/user-admin/existing-identity-link.js",
+              "symbol": "INVITATION_CANCELLED"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "Cancelling an unconsumed INVITED request marks its delivery SKIPPED, releases its open-request key, appends one audit event, and preserves history rows."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may cancel and only before SAP identity verification; stale versions or consumed requests are rejected.",
+          "executionBoundary": "Use isolated request and delivery fixtures with transaction readback; no email send, provider, or live-data mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 217,
+          "mentorLabel": "Case 217",
+          "internalProposalKey": "IDTS110-F216",
+          "title": "retry accepts only a bounded retryable access failure",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "retryAccessOperation"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "assertExpectedVersion"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "Retry accepts only a bounded retryable access-operation failure with the expected version, resets it to PENDING with a new correlation, and appends one audit."
+          ],
+          "roleBoundary": "Only an authorized PM/UserAdmin may retry its own server-selected retryable access operation.",
+          "executionBoundary": "Use an isolated local operation fixture and transaction; no provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 218,
+          "mentorLabel": "Case 218",
+          "internalProposalKey": "IDTS110-F216R",
+          "title": "reconcile accepts only an ambiguous provider outcome",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "reconcileAccessOperation"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "assertExpectedVersion"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "Reconcile accepts only AMBIGUOUS_PROVIDER_OUTCOME with the expected version, creates a fresh correlation, and appends one audit without accepting an unrelated outcome."
+          ],
+          "roleBoundary": "Only an authorized PM/UserAdmin may reconcile the server-selected ambiguous access operation.",
+          "executionBoundary": "Use an isolated local operation fixture and transaction; no provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        }
+      ]
+    },
+    {
+      "family": "USER_PROFILE",
+      "objective": "Trace safe active-user display-name administration and Developer Profile validation, persistence, optimistic versioning, and audit.",
+      "sourceTrace": [
+        {
+          "file": "srv/user-admin/active-users.js",
+          "symbol": "updateActiveUserDisplayName"
+        },
+        {
+          "file": "srv/user-admin.js",
+          "symbol": "readDeveloperProfile"
+        },
+        {
+          "file": "srv/user-admin.js",
+          "symbol": "updateDeveloperProfile"
+        },
+        {
+          "file": "srv/user-admin/developer-profile.js",
+          "symbol": "assertDeveloperProfileForRole"
+        },
+        {
+          "file": "app/user-administration-ui/webapp/controller/Main.controller.js",
+          "symbol": "onConfirmDeveloperProfile"
+        }
+      ],
+      "currentTests": [
+        "scripts/qa/test-user-admin-active-users.js",
+        "scripts/qa/test-user-admin-developer-profile.js",
+        "scripts/qa/test-user-admin-developer-profile-actions.js",
+        "scripts/qa/test-user-admin-ui.js"
+      ],
+      "existingCaseKeys": [],
+      "implementedBehaviors": [
+        {
+          "behaviorKey": "USER_PROFILE_READ_RETAINED",
+          "description": "PM/UserAdmin can read the active Developer profile result with readiness, responsibility, and open-bug impact fields; inactive Developer targets fail safely.",
+          "coverageStatus": "RETAINED_TASK_2_PROPOSAL",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [
+            "IDTS110-P189",
+            "IDTS110-P190"
+          ],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "USER_PROFILE_DISPLAY_NAME",
+          "description": "PM/UserAdmin updates only displayName with a reason and expected modifiedAt, then records USER_PROFILE_UPDATED without changing email or identity fields.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F217",
+            "IDTS110-F218"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_PROFILE_DEVELOPER_ADMINISTRATION",
+          "description": "Developer Profile updates validate active catalogs, update availability/workload, deactivate removed responsibilities, reuse matching rows, and append bounded audit actions.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F219"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "USER_PROFILE_INPUT_RULES",
+          "description": "Developer profile input normalization requires a positive workload limit, nonduplicate component/module scope tuples, at least one responsibility for DEVELOPER access, and no profile for non-DEVELOPER access.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F220",
+            "IDTS110-F220D",
+            "IDTS110-F220R",
+            "IDTS110-F220N"
+          ],
+          "retainedProposalKeys": []
+        }
+      ],
+      "proposedCases": [
+        {
+          "proposedSequence": 219,
+          "mentorLabel": "Case 219",
+          "internalProposalKey": "IDTS110-F217",
+          "title": "active-user display name update preserves identity fields",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/active-users.js",
+              "symbol": "updateActiveUserDisplayName"
+            },
+            {
+              "file": "srv/user-admin/active-users.js",
+              "symbol": "USER_PROFILE_UPDATED"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-active-users.js",
+          "plannedAssertions": [
+            "A valid PM/UserAdmin display-name update persists the normalized name and one audit reason while email, role, active state, and identity fields remain unchanged after reload."
+          ],
+          "roleBoundary": "Only the active PM/UserAdmin administrator may update another active user profile; client identity or email fields are not accepted as mutation inputs.",
+          "executionBoundary": "Use the existing isolated CAP SQLite active-user fixture; no provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 220,
+          "mentorLabel": "Case 220",
+          "internalProposalKey": "IDTS110-F218",
+          "title": "stale display name version is rejected without mutation",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/active-users.js",
+              "symbol": "USER_PROFILE_VERSION_CONFLICT"
+            },
+            {
+              "file": "srv/user-admin/active-users.js",
+              "symbol": "expectedModifiedAt"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-active-users.js",
+          "plannedAssertions": [
+            "A display-name update with an old modifiedAt returns USER_PROFILE_VERSION_CONFLICT and leaves the stored user and audit count unchanged."
+          ],
+          "roleBoundary": "The PM/UserAdmin action uses server-owned optimistic concurrency; a stale dialog cannot overwrite a newer profile update.",
+          "executionBoundary": "Use an isolated CAP row with before/after readback; no external integration or live mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 221,
+          "mentorLabel": "Case 221",
+          "internalProposalKey": "IDTS110-F219",
+          "title": "Developer Profile update persists responsibility lifecycle",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "updateDeveloperProfile"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "persistDesiredDeveloperProfile"
+            },
+            {
+              "file": "srv/user-admin.js",
+              "symbol": "DEVELOPER_RESPONSIBILITY_DEACTIVATED"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+          "plannedAssertions": [
+            "A valid Developer Profile update persists availability/workload, deactivates removed responsibilities without deletion, and writes bounded administration audits after reload."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may administer an active Developer Profile; existing assigned Bugs are not reassigned by profile changes.",
+          "executionBoundary": "Use an isolated CAP SQLite fixture with catalog rows and persistence readback; no provider or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 222,
+          "mentorLabel": "Case 222",
+          "internalProposalKey": "IDTS110-F220",
+          "title": "profile workload limit rejects nonpositive input",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/developer-profile.js",
+              "symbol": "normalizeDeveloperProfileInput"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-developer-profile.js",
+          "plannedAssertions": [
+            "normalizeDeveloperProfileInput rejects a zero or negative workloadLimit with INVALID_DEVELOPER_WORKLOAD_LIMIT."
+          ],
+          "roleBoundary": "Only Developer access may carry a profile; responsibility levels and UUID references are allowlisted before catalog lookup.",
+          "executionBoundary": "Use pure local normalization fixtures; no CAP database, external service, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 223,
+          "mentorLabel": "Case 223",
+          "internalProposalKey": "IDTS110-F220D",
+          "title": "profile responsibilities reject duplicate scope tuples",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/developer-profile.js",
+              "symbol": "normalizeDeveloperProfileInput"
+            },
+            {
+              "file": "srv/user-admin/developer-profile.js",
+              "symbol": "DUPLICATE_DEVELOPER_RESPONSIBILITY"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-developer-profile.js",
+          "plannedAssertions": [
+            "normalizeDeveloperProfileInput rejects two responsibilities with the same componentCategoryID and sapModuleID scope, regardless of responsibility level, with DUPLICATE_DEVELOPER_RESPONSIBILITY."
+          ],
+          "roleBoundary": "Only Developer access may carry a profile; responsibility levels and UUID references are allowlisted before catalog lookup.",
+          "executionBoundary": "Use pure local normalization fixtures; no CAP database, external service, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 224,
+          "mentorLabel": "Case 224",
+          "internalProposalKey": "IDTS110-F220R",
+          "title": "Developer access requires one responsibility",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/developer-profile.js",
+              "symbol": "assertDeveloperProfileForRole"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-developer-profile.js",
+          "plannedAssertions": [
+            "assertDeveloperProfileForRole rejects a DEVELOPER role with no responsibility using DEVELOPER_PROFILE_REQUIRED."
+          ],
+          "roleBoundary": "Only Developer access may carry a profile; responsibility levels and UUID references are allowlisted before catalog lookup.",
+          "executionBoundary": "Use pure local normalization fixtures; no CAP database, external service, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 225,
+          "mentorLabel": "Case 225",
+          "internalProposalKey": "IDTS110-F220N",
+          "title": "non-Developer access cannot own a Developer Profile",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/developer-profile.js",
+              "symbol": "assertDeveloperProfileForRole"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-developer-profile.js",
+          "plannedAssertions": [
+            "assertDeveloperProfileForRole rejects a non-DEVELOPER role with a profile using DEVELOPER_PROFILE_NOT_ALLOWED."
+          ],
+          "roleBoundary": "Only Developer access may carry a profile; responsibility levels and UUID references are allowlisted before catalog lookup.",
+          "executionBoundary": "Use pure local normalization fixtures; no CAP database, external service, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        }
+      ]
+    },
+    {
+      "family": "DEVELOPER_WORKLOAD",
+      "objective": "Trace the read-only DeveloperWorkloads aggregate, identity readiness, server-authoritative scope, numeric derivation, and safe UI drill-down.",
+      "sourceTrace": [
+        {
+          "file": "srv/bug-service/monitoring.js",
+          "symbol": "authorizeDeveloperWorkloadRead"
+        },
+        {
+          "file": "srv/bug-service/monitoring.js",
+          "symbol": "readDeveloperWorkloads"
+        },
+        {
+          "file": "srv/bug-service/monitoring.js",
+          "symbol": "buildDeveloperWorkloadRows"
+        },
+        {
+          "file": "srv/service.cds",
+          "symbol": "entity DeveloperWorkloads"
+        },
+        {
+          "file": "app/user-administration-ui/webapp/controller/Main.controller.js",
+          "symbol": "_loadDeveloperWorkloadBugs"
+        },
+        {
+          "file": "app/user-administration-ui/webapp/fragment/DeveloperWorkloadDetails.fragment.xml",
+          "symbol": "developerWorkloadBugsTable"
+        }
+      ],
+      "currentTests": [
+        "scripts/qa/test-developer-workload-programmatic.js",
+        "scripts/qa/test-user-admin-workload.js",
+        "scripts/qa/test-user-admin-ui.js",
+        "scripts/qa/test-developer-capacity-programmatic.js",
+        "scripts/qa/test-pm-monitoring-programmatic.js"
+      ],
+      "existingCaseKeys": [
+        "UT-MON-001",
+        "UT-MON-003",
+        "UT-MON-004",
+        "UT-MON-005",
+        "UT-MON-006"
+      ],
+      "implementedBehaviors": [
+        {
+          "behaviorKey": "DEVELOPER_WORKLOAD_MONITORING",
+          "description": "Approved monitoring cases already cover due-date overdue boundaries, non-Closed open counts, threshold overload, current-action totals, and deterministic search/order.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-MON-001",
+            "UT-MON-003",
+            "UT-MON-004",
+            "UT-MON-005",
+            "UT-MON-006"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "DEVELOPER_WORKLOAD_FILTER_SCOPE",
+          "description": "The server resolves the actor before client search/filter/count/paging and a Developer cannot widen its own row scope.",
+          "coverageStatus": "RETAINED_TASK_2_PROPOSAL",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [
+            "IDTS110-P202"
+          ],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "DEVELOPER_WORKLOAD_RETAINED_SLA",
+          "description": "Task 2 retains the due-date boundary evaluation for workload monitoring.",
+          "coverageStatus": "RETAINED_TASK_2_PROPOSAL",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [
+            "IDTS110-P200"
+          ],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "DEVELOPER_WORKLOAD_IDENTITY_READINESS",
+          "description": "The aggregate exposes identityAccessReady from the bounded identity-readiness helper and fails closed for unmapped, inactive, or mismatched identities.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F221"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "DEVELOPER_WORKLOAD_EFFORT_AND_ZERO_ROWS",
+          "description": "The read model rounds decimal effort in memory, keeps an active zero-load Developer visible, and retains inactive/backlog rows without writing aggregate data.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F222",
+            "IDTS110-F223"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "DEVELOPER_WORKLOAD_UI_DRILLDOWN",
+          "description": "The UI loads only non-Closed assigned Bugs with technical assignee/current action owner fields, safe columns, and an allowlisted active Bug deep link.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F224"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "DEVELOPER_WORKLOAD_ADMIN_GATE",
+          "description": "Task 2 retains PM operational-metrics authorization as a separate approved candidate.",
+          "coverageStatus": "RETAINED_TASK_2_PROPOSAL",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [
+            "IDTS110-P203"
+          ],
+          "proposedInternalKeys": []
+        }
+      ],
+      "proposedCases": [
+        {
+          "proposedSequence": 226,
+          "mentorLabel": "Case 226",
+          "internalProposalKey": "IDTS110-F221",
+          "title": "Developer workload identity readiness fails closed",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/bug-service/monitoring.js",
+              "symbol": "identityAccessReady"
+            },
+            {
+              "file": "srv/bug-service/monitoring.js",
+              "symbol": "readActiveIdentityAccessByUser"
+            },
+            {
+              "file": "scripts/qa/test-developer-workload-programmatic.js",
+              "symbol": "Duplicate matching ACTIVE requests are not ready"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-developer-workload-programmatic.js",
+          "plannedAssertions": [
+            "A workload row is ready only for one exact linked active identity; unmapped, inactive, hash-mismatched, and duplicate-active-request identities are not ready."
+          ],
+          "roleBoundary": "PM may see all workload rows; Developer scope remains server-resolved and identity readiness is never inferred from client filters or platform role text.",
+          "executionBoundary": "Use deterministic local CAP fixtures and bounded identity helper reads; no identity provider, BTP, write, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 227,
+          "mentorLabel": "Case 227",
+          "internalProposalKey": "IDTS110-F222",
+          "title": "workload aggregates decimal effort without mutation",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/bug-service/monitoring.js",
+              "symbol": "estimatedEffortHoursTotal"
+            },
+            {
+              "file": "srv/bug-service/monitoring.js",
+              "symbol": "roundToTwoDecimals"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-developer-workload-programmatic.js",
+          "plannedAssertions": [
+            "The workload row sums Decimal/string effort to two decimals while persisted Bug effort values remain unchanged after the read."
+          ],
+          "roleBoundary": "This is a read-only aggregate for PM or the server-resolved Developer; no caller may update Bug ownership or effort through the workload endpoint.",
+          "executionBoundary": "Use isolated SQLite rows with decimal strings and before/after readback; no external integration or live mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 228,
+          "mentorLabel": "Case 228",
+          "internalProposalKey": "IDTS110-F223",
+          "title": "zero-load and inactive backlog workload rows remain truthful",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/bug-service/monitoring.js",
+              "symbol": "emptyDeveloperWorkloadRow"
+            },
+            {
+              "file": "srv/bug-service/monitoring.js",
+              "symbol": "filter(row => row.active || row.openOwnedBugCount > 0)"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-developer-workload-programmatic.js",
+          "plannedAssertions": [
+            "An active Developer with zero open Bugs remains visible, an inactive Developer with an open backlog remains visible, and an inactive zero-backlog row is omitted."
+          ],
+          "roleBoundary": "PM monitoring may show active and backlog-bearing inactive profiles; Developer reads remain limited to the active actor's server-resolved row.",
+          "executionBoundary": "Use isolated local profile/Bug fixtures and read-only aggregation; no reassignment, write, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 229,
+          "mentorLabel": "Case 229",
+          "internalProposalKey": "IDTS110-F224",
+          "title": "workload drill-down excludes Closed Bugs and uses safe deep links",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/user-administration-ui/webapp/controller/Main.controller.js",
+              "symbol": "_loadDeveloperWorkloadBugs"
+            },
+            {
+              "file": "app/user-administration-ui/webapp/controller/Main.controller.js",
+              "symbol": "_bugObjectPageUrl"
+            },
+            {
+              "file": "app/user-administration-ui/webapp/fragment/DeveloperWorkloadDetails.fragment.xml",
+              "symbol": "currentActionOwnerDisplayName"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-workload.js",
+          "plannedAssertions": [
+            "The drill-down requests only the selected profile’s non-Closed Bugs, keeps technical assignee and current action owner distinct, and creates a deep link only for a valid active entity UUID."
+          ],
+          "roleBoundary": "The UI is read-only and the backend remains authoritative for assigned Bug visibility; no UI control changes Bug ownership.",
+          "executionBoundary": "The existing controller/UI contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the workload drill-down; no Bug mutation, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        }
+      ]
+    },
+    {
+      "family": "BUSINESS_CATALOGS",
+      "objective": "Trace catalog projections, PM/UserAdmin authorization, normalized CRUD, immutable keys, impact checks, pair validation, audit, and safe UI controls.",
+      "sourceTrace": [
+        {
+          "file": "srv/user-admin.cds",
+          "symbol": "CatalogApplicationComponents"
+        },
+        {
+          "file": "srv/user-admin/catalogs.js",
+          "symbol": "prepareCatalogCreate"
+        },
+        {
+          "file": "srv/user-admin/catalogs.js",
+          "symbol": "prepareCatalogUpdate"
+        },
+        {
+          "file": "srv/user-admin/catalogs.js",
+          "symbol": "readCatalogImpact"
+        },
+        {
+          "file": "app/user-administration-ui/webapp/controller/Main.controller.js",
+          "symbol": "onConfirmCatalogEdit"
+        },
+        {
+          "file": "app/user-administration-ui/webapp/fragment/EditCatalogItem.fragment.xml",
+          "symbol": "catalog"
+        }
+      ],
+      "currentTests": [
+        "scripts/qa/test-user-admin-catalog-model.js",
+        "scripts/qa/test-user-admin-catalogs.js",
+        "scripts/qa/test-user-admin-ui.js",
+        "scripts/qa/test-user-admin-developer-profile-actions.js"
+      ],
+      "existingCaseKeys": [
+        "UT-VAL-CODE-UNKNOWN",
+        "UT-VAL-CODE-INACTIVE",
+        "UT-VAL-CODE-SPACES",
+        "UT-VAL-CODE-EMPTY",
+        "UT-VAL-CODE-TYPE",
+        "UT-VAL-PAIR-VALID",
+        "UT-VAL-PAIR-NOMAP",
+        "UT-VAL-PAIR-MISMATCH",
+        "UT-VAL-PAIR-CHANGE",
+        "UT-VAL-PAIR-PARTIAL",
+        "UT-SEC-003"
+      ],
+      "implementedBehaviors": [
+        {
+          "behaviorKey": "BUSINESS_CATALOG_VALIDATION",
+          "description": "The approved validation cases cover code-list unknown/inactive/type/format rejection and component-category derivation, mismatch, change, and partial classification boundaries.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-VAL-CODE-UNKNOWN",
+            "UT-VAL-CODE-INACTIVE",
+            "UT-VAL-CODE-SPACES",
+            "UT-VAL-CODE-EMPTY",
+            "UT-VAL-CODE-TYPE",
+            "UT-VAL-PAIR-VALID",
+            "UT-VAL-PAIR-NOMAP",
+            "UT-VAL-PAIR-MISMATCH",
+            "UT-VAL-PAIR-CHANGE",
+            "UT-VAL-PAIR-PARTIAL"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "BUSINESS_CATALOG_READ_ONLY_GUARD",
+          "description": "Existing security coverage rejects client writes to read-only catalog code-list entities.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-SEC-003"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": [],
+          "sourceTrace": [
+            {
+              "file": "srv/bug-service/guards.js",
+              "symbol": "registerReadOnlyEntityGuards"
+            }
+          ],
+          "currentTests": [
+            "scripts/qa/test-user-admin-catalogs.js"
+          ]
+        },
+        {
+          "behaviorKey": "BUSINESS_CATALOG_RETAINED_PROPOSALS",
+          "description": "Application Component/Defect Category create, non-PM authorization, active parent validation, and inactive priority classification were retained or rewritten in Task 2 rather than duplicated here.",
+          "coverageStatus": "RETAINED_TASK_2_PROPOSAL",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [
+            "IDTS110-P194",
+            "IDTS110-P195",
+            "IDTS110-P196",
+            "IDTS110-P197"
+          ],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "BUSINESS_CATALOG_CRUD_GAPS",
+          "description": "SAP Module and Component Category create, safe reads, immutable ID/ETag update, deactivation blocking for active responsibility or child references, impact readback, and no-delete behavior are implemented but not atomic in the approved catalog.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F225",
+            "IDTS110-F226",
+            "IDTS110-F227",
+            "IDTS110-F228",
+            "IDTS110-F228E",
+            "IDTS110-F229",
+            "IDTS110-F230",
+            "IDTS110-F231",
+            "IDTS110-F231R"
+          ],
+          "retainedProposalKeys": []
+        }
+      ],
+      "proposedCases": [
+        {
+          "proposedSequence": 230,
+          "mentorLabel": "Case 230",
+          "internalProposalKey": "IDTS110-F225",
+          "title": "PM creates normalized SAP Module catalog row",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "prepareCatalogCreate"
+            },
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "recordCatalogAudit"
+            },
+            {
+              "file": "srv/user-admin.cds",
+              "symbol": "CatalogSAPModules"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "PM/UserAdmin CREATE of CatalogSAPModules normalizes code/name, assigns a server UUID, persists active state, and records one safe CREATE audit after reload."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may create catalog rows; IDs and audit actor are server-owned.",
+          "executionBoundary": "Use isolated CAP SQLite catalog fixtures; no canonical catalog, dependency, BTP, or live-data mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 231,
+          "mentorLabel": "Case 231",
+          "internalProposalKey": "IDTS110-F226",
+          "title": "PM creates one valid Component Category pair",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "assertActivePairParents"
+            },
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "CATALOG_PAIR_EXISTS"
+            },
+            {
+              "file": "srv/user-admin.cds",
+              "symbol": "CatalogComponentCategories"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "CREATE of one nonduplicate Component Category with two active parents persists one pair with a server UUID and a safe audit."
+          ],
+          "roleBoundary": "Only active PM/UserAdmin may create pair catalog rows; parent activity and pair uniqueness are server checks.",
+          "executionBoundary": "Use isolated local ApplicationComponent, DefectCategory, and ComponentCategory rows; no Bug or live catalog mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 232,
+          "mentorLabel": "Case 232",
+          "internalProposalKey": "IDTS110-F227",
+          "title": "catalog read exposes safe rows only to PM UserAdmin",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "registerCatalogHandlers"
+            },
+            {
+              "file": "srv/user-admin.cds",
+              "symbol": "@Capabilities.DeleteRestrictions.Deletable"
+            },
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "CATALOG_ENTITIES"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "PM/UserAdmin receives only the declared catalog projection fields, while unauthorized callers receive 403 before a catalog table read."
+          ],
+          "roleBoundary": "Catalog administration requires active PM plus UserAdmin; business roles cannot be widened by an extra or mixed role.",
+          "executionBoundary": "Use CDS metadata and isolated read fixtures only; no write, seed, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 233,
+          "mentorLabel": "Case 233",
+          "internalProposalKey": "IDTS110-F228",
+          "title": "catalog update rejects route and payload ID conflict",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "assertCatalogTargetIdentity"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "An update whose route ID differs from its payload ID returns the documented safe identity conflict and leaves the catalog row unchanged."
+          ],
+          "roleBoundary": "Only PM/UserAdmin may update; the route key and server ETag, not client payload identity, select the target.",
+          "executionBoundary": "Use isolated SQLite catalog row with before/after/audit readback; no live catalog or dependency mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 234,
+          "mentorLabel": "Case 234",
+          "internalProposalKey": "IDTS110-F228E",
+          "title": "catalog update rejects a stale ETag",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "assertCurrentEtag"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "An update with a stale If-Match returns the documented optimistic conflict and leaves the catalog row and audit unchanged."
+          ],
+          "roleBoundary": "Only PM/UserAdmin may update; the route key and server ETag, not client payload identity, select the target.",
+          "executionBoundary": "Use isolated SQLite catalog row with before/after/audit readback; no live catalog or dependency mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 235,
+          "mentorLabel": "Case 235",
+          "internalProposalKey": "IDTS110-F229",
+          "title": "catalog deactivation blocks active responsibility or child references",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "CATALOG_HAS_ACTIVE_DEPENDENCIES"
+            },
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "readCatalogImpactCounts"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "A deactivation with an approved reason returns CATALOG_HAS_ACTIVE_DEPENDENCIES when active responsibility or child-reference counts are nonzero, while bugReferenceCount remains informational and the row is unchanged."
+          ],
+          "roleBoundary": "Only a PM/UserAdmin administrative action may request catalog deactivation; server-read active responsibility and child-reference counts decide the block.",
+          "executionBoundary": "Use isolated local catalog, responsibility, child-reference, and Bug-reference fixtures; no canonical catalog or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 236,
+          "mentorLabel": "Case 236",
+          "internalProposalKey": "IDTS110-F230",
+          "title": "catalog impact returns bounded counts",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "readCatalogImpact"
+            },
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "readCatalogImpactCounts"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "readCatalogImpact returns catalogType/catalogID plus Bug, active responsibility, and active child-reference counts for a supported target and rejects invalid targets safely."
+          ],
+          "roleBoundary": "Only PM/UserAdmin may read catalog impact; the operation is diagnostic and does not change dependency state.",
+          "executionBoundary": "Use isolated CAP rows and read-only aggregate queries; no deactivation, write, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 237,
+          "mentorLabel": "Case 237",
+          "internalProposalKey": "IDTS110-F231",
+          "title": "catalog DELETE is forbidden",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "CATALOG_DELETE_FORBIDDEN"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "DELETE returns CATALOG_DELETE_FORBIDDEN and leaves the catalog row present and unchanged."
+          ],
+          "roleBoundary": "Only PM/UserAdmin may request catalog updates; no caller may hard-delete historical catalog rows.",
+          "executionBoundary": "Use isolated catalog fixtures and transaction readback; no canonical catalog, Bug, or live-data mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 238,
+          "mentorLabel": "Case 238",
+          "internalProposalKey": "IDTS110-F231R",
+          "title": "catalog reactivation is audited",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "REACTIVATE"
+            },
+            {
+              "file": "srv/user-admin/catalogs.js",
+              "symbol": "recordCatalogAudit"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-admin-catalogs.js",
+          "plannedAssertions": [
+            "A valid inactive-to-active update persists REACTIVATE and exactly one safe audit event after reload."
+          ],
+          "roleBoundary": "Only PM/UserAdmin may request catalog updates; no caller may hard-delete historical catalog rows.",
+          "executionBoundary": "Use isolated catalog fixtures and transaction readback; no canonical catalog, Bug, or live-data mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        }
+      ]
+    },
+    {
+      "family": "MY_NOTIFICATIONS",
+      "objective": "Trace caller-only inbox search, hydration, read-state mutation, source isolation, safe deep links, and native shell loading/error/empty behavior.",
+      "sourceTrace": [
+        {
+          "file": "srv/notification.cds",
+          "symbol": "searchMyNotifications"
+        },
+        {
+          "file": "srv/notification/inbox.js",
+          "symbol": "resolveNotificationActor"
+        },
+        {
+          "file": "srv/notification/inbox.js",
+          "symbol": "readInboxPage"
+        },
+        {
+          "file": "srv/notification/inbox.js",
+          "symbol": "hydrateNotificationPage"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/notification/NotificationClient.js",
+          "symbol": "safeTargetPath"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+          "symbol": "setStateVisibility"
+        }
+      ],
+      "currentTests": [
+        "scripts/qa/test-my-notifications-model.js",
+        "scripts/qa/test-my-notifications-service.js",
+        "scripts/qa/test-my-notifications-ui.js",
+        "scripts/qa/test-my-notifications-shell.js",
+        "scripts/qa/test-my-notifications-events.js",
+        "scripts/qa/test-user-access-notifications.js"
+      ],
+      "existingCaseKeys": [
+        "UT-NTF-001",
+        "UT-NTF-002",
+        "UT-SEC-005",
+        "UT-SEC-008"
+      ],
+      "implementedBehaviors": [
+        {
+          "behaviorKey": "MY_NOTIFICATIONS_SOURCE_EVENTS",
+          "description": "Eligible Bug workflow events create in-app notifications and rejected workflow actions create no notification or delivery.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-NTF-001",
+            "UT-NTF-002"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "MY_NOTIFICATIONS_PUBLIC_BOUNDARY",
+          "description": "Existing security coverage keeps public notification projections free of credential and lock fields.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-SEC-005"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": [],
+          "sourceTrace": [
+            {
+              "file": "srv/bug-service/guards.js",
+              "symbol": "registerReadOnlyEntityGuards"
+            }
+          ],
+          "currentTests": [
+            "scripts/qa/test-my-notifications-service.js"
+          ]
+        },
+        {
+          "behaviorKey": "MY_NOTIFICATIONS_TRANSACTION_BOUNDARY",
+          "description": "Existing security coverage keeps failed notification operations free of cross-entity partial mutation.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-SEC-008"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": [],
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "markAllMyNotificationsRead"
+            }
+          ],
+          "currentTests": [
+            "scripts/qa/test-my-notifications-service.js"
+          ]
+        },
+        {
+          "behaviorKey": "MY_NOTIFICATIONS_INBOX_READ_MODEL",
+          "description": "The NotificationService exposes caller-only category/read-state paging with stable ordering and a safe Bug/access DTO, but the approved catalog has no atomic inbox case.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F232",
+            "IDTS110-F233",
+            "IDTS110-F234",
+            "IDTS110-F235",
+            "IDTS110-F235I",
+            "IDTS110-F235C",
+            "IDTS110-F236"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "MY_NOTIFICATIONS_UI",
+          "description": "The native shell renders compact Bug-title rows without a redundant icon/description, freezes mark-all snapshots, and exposes loading/empty/error/retry states without horizontal scrolling.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F237",
+            "IDTS110-F238",
+            "IDTS110-F238E",
+            "IDTS110-F238L",
+            "IDTS110-F239",
+            "IDTS110-F239P",
+            "IDTS110-F239H",
+            "IDTS110-F239D"
+          ],
+          "retainedProposalKeys": []
+        }
+      ],
+      "proposedCases": [
+        {
+          "proposedSequence": 239,
+          "mentorLabel": "Case 239",
+          "internalProposalKey": "IDTS110-F232",
+          "title": "My Notifications search is caller-scoped and stably ordered",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "searchMyNotifications"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "readInboxPage"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-service.js",
+          "plannedAssertions": [
+            "The inbox returns only the authenticated caller’s rows, applies bounded filters and paging, and orders rows by occurredAt desc then ID desc for equal timestamps."
+          ],
+          "roleBoundary": "An active identity may read only its own inbox; PM/UserAdmin does not grant access to another user's personal notifications.",
+          "executionBoundary": "Use isolated CAP inbox/source fixtures and OData service calls; no notification delivery, email, provider, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 240,
+          "mentorLabel": "Case 240",
+          "internalProposalKey": "IDTS110-F233",
+          "title": "My Notifications hydration isolates source summaries",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "hydrateNotificationPage"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "bugSummary"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "accessSummary"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "unavailableSummary"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-service.js",
+          "plannedAssertions": [
+            "A mixed page hydrates Bug and applied-access sources into the safe DTO, with UNAVAILABLE and null targetPath for wrong-recipient, dual-source, unsupported, or missing sources."
+          ],
+          "roleBoundary": "Hydration binds each source to the inbox recipient; raw audit details, recipient email, identity, and provider fields never enter the DTO.",
+          "executionBoundary": "Use isolated source rows and read-only hydration; no mark-read, email, provider, or live mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 241,
+          "mentorLabel": "Case 241",
+          "internalProposalKey": "IDTS110-F234",
+          "title": "unread count is isolated to the active caller",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "getMyUnreadNotificationCount"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "recipient_ID: actor.ID"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-service.js",
+          "plannedAssertions": [
+            "getMyUnreadNotificationCount counts only unread rows for the resolved active caller and denies inactive, unmapped, or unauthorized identities."
+          ],
+          "roleBoundary": "Caller identity comes from the authenticated request and cannot be supplied as a recipient parameter.",
+          "executionBoundary": "Use isolated CAP inbox rows and service calls; no write, email, provider, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 242,
+          "mentorLabel": "Case 242",
+          "internalProposalKey": "IDTS110-F235",
+          "title": "single notification read succeeds with current version",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "markMyNotificationRead"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "NOTIFICATION_VERSION_CONFLICT"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-service.js",
+          "plannedAssertions": [
+            "A caller marks its own unread row read with the exact current modifiedAt and the persisted row is read after reload."
+          ],
+          "roleBoundary": "Only the inbox owner may mark a row read; notification ID and modifiedAt are validated server-side.",
+          "executionBoundary": "Use isolated CAP row with before/after/reload readback; no provider, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 243,
+          "mentorLabel": "Case 243",
+          "internalProposalKey": "IDTS110-F235I",
+          "title": "repeated notification read is idempotent",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "markMyNotificationRead"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-service.js",
+          "plannedAssertions": [
+            "Repeating the same notification read with the already-applied version returns the same safe result without changing the row again."
+          ],
+          "roleBoundary": "Only the inbox owner may mark a row read; notification ID and modifiedAt are validated server-side.",
+          "executionBoundary": "Use isolated CAP row with before/after/reload readback; no provider, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 244,
+          "mentorLabel": "Case 244",
+          "internalProposalKey": "IDTS110-F235C",
+          "title": "stale notification read is rejected",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "markMyNotificationRead"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "NOTIFICATION_VERSION_CONFLICT"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-service.js",
+          "plannedAssertions": [
+            "A notification read with a stale modifiedAt returns NOTIFICATION_VERSION_CONFLICT without changing the row."
+          ],
+          "roleBoundary": "Only the inbox owner may mark a row read; notification ID and modifiedAt are validated server-side.",
+          "executionBoundary": "Use isolated CAP row with before/after/reload readback; no provider, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 245,
+          "mentorLabel": "Case 245",
+          "internalProposalKey": "IDTS110-F236",
+          "title": "mark-all read honors a frozen occurrence snapshot",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "markAllMyNotificationsRead"
+            },
+            {
+              "file": "srv/notification/inbox.js",
+              "symbol": "throughOccurredAt"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-service.js",
+          "plannedAssertions": [
+            "markAllMyNotificationsRead updates only the caller’s unread rows with occurredAt at or before throughOccurredAt, leaving a later notification unread after reload."
+          ],
+          "roleBoundary": "The operation is caller-only and cannot mark another user's inbox even for a PM/UserAdmin identity.",
+          "executionBoundary": "Use isolated inbox timestamps and transaction readback; no delivery, email, provider, or live mutation.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 246,
+          "mentorLabel": "Case 246",
+          "internalProposalKey": "IDTS110-F237",
+          "title": "notification shell renders a compact Bug title row",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "createRowItem"
+            },
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "horizontalScrolling"
+            },
+            {
+              "file": "scripts/qa/test-my-notifications-shell.js",
+              "symbol": "Bug number and title form the readable primary line"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "A Bug notification row displays bugNumber — bugTitle as the primary line with unread state and timestamp, without a category icon or Bug description region, and with horizontalScrolling false."
+          ],
+          "roleBoundary": "The shell displays only the safe NotificationSummary returned for the current caller; it does not fetch raw Bug detail.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the compact notification row; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        },
+        {
+          "proposedSequence": 247,
+          "mentorLabel": "Case 247",
+          "internalProposalKey": "IDTS110-F238",
+          "title": "notification shell renders the empty state",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "setStateVisibility"
+            },
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "notificationEmpty"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "An empty inbox response shows the localized empty text without stale rows or horizontal overflow."
+          ],
+          "roleBoundary": "The UI state is a read-only presentation of the current caller's request result and never fabricates notification rows.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the empty notification state; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        },
+        {
+          "proposedSequence": 248,
+          "mentorLabel": "Case 248",
+          "internalProposalKey": "IDTS110-F238E",
+          "title": "notification shell renders error and retry state",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "setStateVisibility"
+            },
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "notificationLoadFailed"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "A failed inbox search shows the localized error and retry control while preserving no stale result rows."
+          ],
+          "roleBoundary": "The UI state is a read-only presentation of the current caller's request result and never fabricates notification rows.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the notification error/retry state; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        },
+        {
+          "proposedSequence": 249,
+          "mentorLabel": "Case 249",
+          "internalProposalKey": "IDTS110-F238L",
+          "title": "notification shell renders loading state",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "setStateVisibility"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "While an inbox request is pending, loading is visible and empty/error/retry controls are hidden."
+          ],
+          "roleBoundary": "The UI state is a read-only presentation of the current caller's request result and never fabricates notification rows.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the notification loading state; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        },
+        {
+          "proposedSequence": 250,
+          "mentorLabel": "Case 250",
+          "internalProposalKey": "IDTS110-F239",
+          "title": "notification shell refreshes unread count on visible change signals",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "bindVisibility"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "A visible notification-change signal refreshes the unread count once through the shell listener."
+          ],
+          "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the visible change-signal state; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        },
+        {
+          "proposedSequence": 251,
+          "mentorLabel": "Case 251",
+          "internalProposalKey": "IDTS110-F239P",
+          "title": "notification shell polls while visible",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "startPolling"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "The visible shell starts one 30-second polling timer that refreshes the unread count."
+          ],
+          "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the visible polling state; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        },
+        {
+          "proposedSequence": 252,
+          "mentorLabel": "Case 252",
+          "internalProposalKey": "IDTS110-F239H",
+          "title": "notification shell stops polling while hidden",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "bindVisibility"
+            },
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "startPolling"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "A hidden document prevents notification polling until visibility returns."
+          ],
+          "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the hidden-document state; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        },
+        {
+          "proposedSequence": 253,
+          "mentorLabel": "Case 253",
+          "internalProposalKey": "IDTS110-F239D",
+          "title": "notification shell destroys timer and listeners",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+              "symbol": "destroy"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-shell.js",
+          "plannedAssertions": [
+            "Destroy clears the polling timer and registered listeners exactly once."
+          ],
+          "roleBoundary": "Refreshes reuse the current caller's model and do not widen inbox scope or initiate delivery work.",
+          "executionBoundary": "The existing native-control shell contract is a programmatic precheck only; final acceptance requires browser/runtime rendered UI execution and screenshot(s) of the destroyed-shell state; no service write, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "acceptanceMode": "UI_RUNTIME_VISUAL",
+          "evidenceRequirements": [
+            "Run the existing programmatic/native-control harness as a precheck only; harness output cannot establish visual acceptance.",
+            "Execute the application in a browser/runtime with the rendered UI for this case.",
+            "Capture at least one case-specific screenshot of the rendered UI state and retain the runtime URL/route context."
+          ]
+        }
+      ]
+    },
+    {
+      "family": "ACCESS_EMAIL",
+      "objective": "Trace access-completion and onboarding email payloads, access inbox indexing, safe skip/retry behavior, and post-commit scheduling.",
+      "sourceTrace": [
+        {
+          "file": "srv/user-admin/access-delivery.js",
+          "symbol": "writeUserAccessDelivery"
+        },
+        {
+          "file": "srv/user-admin/access-delivery.js",
+          "symbol": "processUserAccessDeliveries"
+        },
+        {
+          "file": "srv/user-admin/access-delivery.js",
+          "symbol": "skippedAccessDeliveryReason"
+        },
+        {
+          "file": "srv/user-admin/delivery.js",
+          "symbol": "processUserOnboardingDeliveries"
+        },
+        {
+          "file": "srv/user-admin/delivery.js",
+          "symbol": "buildInvitationMessage"
+        },
+        {
+          "file": "srv/email/worker.js",
+          "symbol": "scheduleImmediateEmailOutbox"
+        }
+      ],
+      "currentTests": [
+        "scripts/qa/test-user-access-notifications.js",
+        "scripts/qa/test-user-onboarding-programmatic.js",
+        "scripts/qa/test-email-immediate-kick.js",
+        "scripts/qa/test-email-outbox-programmatic.js",
+        "scripts/qa/test-user-admin-access-lifecycle.js",
+        "scripts/qa/test-user-admin-operations-audit.js"
+      ],
+      "existingCaseKeys": [
+        "UT-NTF-003",
+        "UT-NTF-004",
+        "UT-NTF-005",
+        "UT-NTF-006",
+        "UT-NTF-007",
+        "UT-NTF-008",
+        "UT-NTF-009",
+        "UT-NTF-010",
+        "UT-NTF-011",
+        "UT-NTF-012"
+      ],
+      "implementedBehaviors": [
+        {
+          "behaviorKey": "ACCESS_EMAIL_SHARED_OUTBOX",
+          "description": "The approved generic outbox cases cover valid pending delivery, disabled/missing/inactive recipient skips, worker claim/send, failure sanitization, retry timing, maximum attempts, and duplicate worker claims.",
+          "coverageStatus": "SHARED_EXISTING_CASE",
+          "existingCaseKeys": [
+            "UT-NTF-003",
+            "UT-NTF-004",
+            "UT-NTF-005",
+            "UT-NTF-006",
+            "UT-NTF-007",
+            "UT-NTF-008",
+            "UT-NTF-009",
+            "UT-NTF-010",
+            "UT-NTF-011",
+            "UT-NTF-012"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "ACCESS_EMAIL_COMPLETION",
+          "description": "Applied CHANGE_ROLE or REACTIVATE completion audits create one access delivery and caller inbox index.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F240"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "ACCESS_EMAIL_SAFE_SKIP",
+          "description": "Applied access delivery creation applies an access-specific invalid application URL skip with a safe persisted reason.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F241"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "ACCESS_EMAIL_WORKER",
+          "description": "Generic access worker claim/send mechanics are covered by shared existing outbox cases; access-specific creation and skip behavior are traced separately.",
+          "coverageStatus": "SHARED_EXISTING_CASE",
+          "existingCaseKeys": [
+            "UT-NTF-003",
+            "UT-NTF-004",
+            "UT-NTF-005",
+            "UT-NTF-006",
+            "UT-NTF-007",
+            "UT-NTF-008",
+            "UT-NTF-009",
+            "UT-NTF-010",
+            "UT-NTF-011",
+            "UT-NTF-012"
+          ],
+          "proposedInternalKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "ACCESS_EMAIL_INVITATION_AND_KICK",
+          "description": "Onboarding-specific invitation eligibility, token integrity, message boundaries, cancellation state, and post-commit kick behavior are implemented but not atomic in the approved catalog.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F243",
+            "IDTS110-F243M",
+            "IDTS110-F244",
+            "IDTS110-F245",
+            "IDTS110-F246",
+            "IDTS110-F246R",
+            "IDTS110-F246B"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "ACCESS_EMAIL_REVOKE_DELIVERY",
+          "description": "An applied REVOKE audit maps to ACCESS_REVOKED and creates a delivery without a caller inbox index.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F240R"
+          ]
+        }
+      ],
+      "proposedCases": [
+        {
+          "proposedSequence": 254,
+          "mentorLabel": "Case 254",
+          "internalProposalKey": "IDTS110-F240",
+          "title": "applied role-change completion creates one inbox index",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "writeUserAccessDelivery"
+            },
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "writeUserAccessInboxIndex"
+            },
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "ACCESS_EVENT_BY_ACTION"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-access-notifications.js",
+          "plannedAssertions": [
+            "An APPLIED CHANGE_ROLE or REACTIVATE audit creates one source-bound access delivery and one caller inbox index, while queued, failed, mismatched, or duplicate calls create no second index."
+          ],
+          "roleBoundary": "Only an applied CHANGE_ROLE or REACTIVATE audit for the target user can create the completion delivery and inbox index.",
+          "executionBoundary": "Use isolated local audit/delivery fixtures and transaction; no provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 255,
+          "mentorLabel": "Case 255",
+          "internalProposalKey": "IDTS110-F240R",
+          "title": "applied REVOKE creates one access delivery",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "writeUserAccessDelivery"
+            },
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "ACCESS_EVENT_BY_ACTION"
+            },
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "ACCESS_REVOKED"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-access-notifications.js",
+          "plannedAssertions": [
+            "An APPLIED REVOKE audit with eventType ACCESS_REVOKED creates one access delivery for the target user and does not create an inbox index."
+          ],
+          "roleBoundary": "Only an applied REVOKE audit for the target user can create the revoked-access delivery; inbox indexing remains server-controlled.",
+          "executionBoundary": "Use isolated local audit/delivery fixtures and transaction; no provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 256,
+          "mentorLabel": "Case 256",
+          "internalProposalKey": "IDTS110-F241",
+          "title": "applied access delivery skips an invalid application URL",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "writeUserAccessDelivery"
+            },
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "skippedAccessDeliveryReason"
+            },
+            {
+              "file": "srv/user-admin/access-delivery.js",
+              "symbol": "buildAccessApplicationLink"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-access-notifications.js",
+          "plannedAssertions": [
+            "An APPLIED access audit with an invalid application URL creates a SKIPPED access delivery with EMAIL_BASE_URL_INVALID and makes no provider call."
+          ],
+          "roleBoundary": "Only the server-created applied access audit can create this access delivery; the client cannot override the application URL.",
+          "executionBoundary": "Use isolated local access audit, recipient, and invalid-URL fixtures; no provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 257,
+          "mentorLabel": "Case 257",
+          "internalProposalKey": "IDTS110-F243",
+          "title": "missing or expired onboarding invitation is skipped",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "processUserOnboardingDeliveries"
+            },
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "Invitation is no longer eligible for delivery"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "When the onboarding request is missing or expired, the worker marks its delivery SKIPPED with a safe code and makes no provider call."
+          ],
+          "roleBoundary": "The worker uses persisted invitation existence and expiry; a caller cannot turn a missing or expired invitation into a send.",
+          "executionBoundary": "Use isolated local onboarding request/delivery fixtures and an injected sender; no real email, provider, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 258,
+          "mentorLabel": "Case 258",
+          "internalProposalKey": "IDTS110-F243M",
+          "title": "token-mismatch onboarding delivery fails with bounded retry",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "processUserOnboardingDeliveries"
+            },
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "INVITATION_TOKEN_MISMATCH"
+            },
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "retryDelayMs"
+            },
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "sanitizeTransportError"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "When persisted token material does not match, the worker marks the delivery FAILED with INVITATION_TOKEN_MISMATCH, sanitizes error state, and schedules a bounded retry when attempts remain."
+          ],
+          "roleBoundary": "The worker compares regenerated invitation material with the persisted hash before sending and records only sanitized failure state.",
+          "executionBoundary": "Use isolated local onboarding delivery fixtures and an injected sender; no real email, provider, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 259,
+          "mentorLabel": "Case 259",
+          "internalProposalKey": "IDTS110-F244",
+          "title": "onboarding invitation email keeps link and security boundaries",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "buildInvitationMessage"
+            },
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "SAP_ACCOUNT_URL"
+            },
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "IDTS will never ask for your SAP password"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "The invitation text and HTML use an HTTPS fragment token link plus official SAP account/registration links, omit query-token links and credentials, and preserve requested role/expiry."
+          ],
+          "roleBoundary": "The message is an invitation to SAP identity verification, not a password, OTP, provider, or email-account existence flow.",
+          "executionBoundary": "Build the message in memory with sanitized fixture data; do not send email or contact SAP.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 260,
+          "mentorLabel": "Case 260",
+          "internalProposalKey": "IDTS110-F245",
+          "title": "cancelled invitation cannot be delivered",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/user-admin/existing-identity-link.js",
+              "symbol": "cancelExistingUserIdentityLink"
+            },
+            {
+              "file": "srv/user-admin/delivery.js",
+              "symbol": "Invitation is no longer eligible for delivery"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-user-onboarding-programmatic.js",
+          "plannedAssertions": [
+            "After cancellation marks the delivery SKIPPED and request FAILED, a worker run makes no provider call and preserves the cancellation reason."
+          ],
+          "roleBoundary": "Only an authorized administrator can cancel before verification; the worker rechecks server request state before sending.",
+          "executionBoundary": "Use isolated request/delivery rows and an injected sender; no real email, provider, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 261,
+          "mentorLabel": "Case 261",
+          "internalProposalKey": "IDTS110-F246",
+          "title": "successful CAP request registers one post-commit email kick",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/email/worker.js",
+              "symbol": "scheduleImmediateEmailOutbox"
+            },
+            {
+              "file": "srv/email/worker.js",
+              "symbol": "writeNotificationAndSchedule"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-email-immediate-kick.js",
+          "plannedAssertions": [
+            "A successful CAP request with a PENDING onboarding or access delivery registers one post-commit email outbox kick."
+          ],
+          "roleBoundary": "The kick is a server-side post-commit optimization; business callers cannot invoke the provider directly.",
+          "executionBoundary": "Use the existing fake request/worker dependency harness; no real email, provider, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 262,
+          "mentorLabel": "Case 262",
+          "internalProposalKey": "IDTS110-F246R",
+          "title": "repeated post-commit registration is idempotent",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/email/worker.js",
+              "symbol": "scheduleImmediateEmailOutbox"
+            },
+            {
+              "file": "srv/email/worker.js",
+              "symbol": "writeNotificationAndSchedule"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-email-immediate-kick.js",
+          "plannedAssertions": [
+            "Registering the same PENDING delivery twice results in one post-commit email outbox kick registration."
+          ],
+          "roleBoundary": "The kick is a server-side post-commit optimization; business callers cannot invoke the provider directly.",
+          "executionBoundary": "Use the existing fake request/worker dependency harness; no real email, provider, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 263,
+          "mentorLabel": "Case 263",
+          "internalProposalKey": "IDTS110-F246B",
+          "title": "CAP rollback starts no provider work",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/email/worker.js",
+              "symbol": "scheduleImmediateEmailOutbox"
+            },
+            {
+              "file": "srv/email/worker.js",
+              "symbol": "writeNotificationAndSchedule"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-email-immediate-kick.js",
+          "plannedAssertions": [
+            "A failed CAP request rolls back its post-commit registration and starts no provider work."
+          ],
+          "roleBoundary": "The kick is a server-side post-commit optimization; business callers cannot invoke the provider directly.",
+          "executionBoundary": "Use the existing fake request/worker dependency harness; no real email, provider, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        }
+      ]
+    },
+    {
+      "family": "BUG_EMAIL",
+      "objective": "Trace Bug notification outbox behavior plus scheduled Pending Assignment/Overdue/SLA discovery, digest snapshots, bounded paging, retry, and send-time authorization.",
+      "sourceTrace": [
+        {
+          "file": "srv/email/outbox.js",
+          "symbol": "writeNotificationRecord"
+        },
+        {
+          "file": "srv/email/outbox.js",
+          "symbol": "processEmailDeliveries"
+        },
+        {
+          "file": "srv/notification/scheduled.js",
+          "symbol": "discoverScheduledNotifications"
+        },
+        {
+          "file": "srv/notification/scheduled.js",
+          "symbol": "writeScheduledEvent"
+        },
+        {
+          "file": "srv/notification/digest.js",
+          "symbol": "buildDigestSnapshot"
+        },
+        {
+          "file": "srv/notification/digest.js",
+          "symbol": "processNotificationDigestDeliveries"
+        },
+        {
+          "file": "srv/email/worker.js",
+          "symbol": "processEmailOutboxBatch"
+        }
+      ],
+      "currentTests": [
+        "scripts/qa/test-email-outbox-programmatic.js",
+        "scripts/qa/test-email-immediate-kick.js",
+        "scripts/qa/test-my-notifications-events.js",
+        "scripts/qa/test-my-notifications-scheduled.js",
+        "scripts/qa/test-my-notifications-digest.js",
+        "scripts/qa/test-user-access-notifications.js"
+      ],
+      "existingCaseKeys": [
+        "UT-NTF-001",
+        "UT-NTF-002",
+        "UT-NTF-003",
+        "UT-NTF-004",
+        "UT-NTF-005",
+        "UT-NTF-006",
+        "UT-NTF-007",
+        "UT-NTF-008",
+        "UT-NTF-009",
+        "UT-NTF-010",
+        "UT-NTF-011",
+        "UT-NTF-012",
+        "UT-NTF-013",
+        "UT-SEC-007"
+      ],
+      "implementedBehaviors": [
+        {
+          "behaviorKey": "BUG_EMAIL_IMMEDIATE_OUTBOX",
+          "description": "Existing notification/outbox cases cover in-app source creation, email payload creation, disabled/recipient skips, worker claim/send, retry timing, max attempts, duplicate claims, Job Scheduler authorization, and provider-error sanitization.",
+          "coverageStatus": "EXISTING_188_CASE",
+          "existingCaseKeys": [
+            "UT-NTF-001",
+            "UT-NTF-002",
+            "UT-NTF-003",
+            "UT-NTF-004",
+            "UT-NTF-005",
+            "UT-NTF-006",
+            "UT-NTF-007",
+            "UT-NTF-008",
+            "UT-NTF-009",
+            "UT-NTF-010",
+            "UT-NTF-011",
+            "UT-NTF-012",
+            "UT-NTF-013",
+            "UT-SEC-007"
+          ],
+          "retainedProposalKeys": [],
+          "proposedInternalKeys": []
+        },
+        {
+          "behaviorKey": "BUG_EMAIL_SCHEDULED_DISCOVERY",
+          "description": "The scheduler discovers Pending Assignment, Critical/Blocker and standard SLA, and Overdue events with immutable history anchors, recipient rechecks, dedupe, and bounded keyset pages.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F247",
+            "IDTS110-F247S",
+            "IDTS110-F247SS",
+            "IDTS110-F248",
+            "IDTS110-F248C",
+            "IDTS110-F248N",
+            "IDTS110-F249",
+            "IDTS110-F249K",
+            "IDTS110-F249T"
+          ],
+          "retainedProposalKeys": []
+        },
+        {
+          "behaviorKey": "BUG_EMAIL_DIGEST",
+          "description": "Weekday Bangkok digest snapshots role-specific actionable items, limits rendered content, uses allowlisted links, persists one recipient/date/type row, and sends with bounded persona/retry checks.",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "existingCaseKeys": [],
+          "proposedInternalKeys": [
+            "IDTS110-F250",
+            "IDTS110-F250L",
+            "IDTS110-F250M",
+            "IDTS110-F250Q",
+            "IDTS110-F250R",
+            "IDTS110-F251",
+            "IDTS110-F251R",
+            "IDTS110-F252",
+            "IDTS110-F252R",
+            "IDTS110-F252P",
+            "IDTS110-F253"
+          ],
+          "retainedProposalKeys": []
+        }
+      ],
+      "proposedCases": [
+        {
+          "proposedSequence": 264,
+          "mentorLabel": "Case 264",
+          "internalProposalKey": "IDTS110-F247",
+          "title": "scheduled discovery emits one Pending Assignment event",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "discoverScheduledNotifications"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "isPendingAssignmentCandidate"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "The protected scheduler creates one Pending Assignment event for each eligible PM recipient and no event for a non-PM target."
+          ],
+          "roleBoundary": "Only OutboxProcessor may run scheduled discovery; recipient role and active state are rechecked before source or email creation.",
+          "executionBoundary": "Use deterministic local Bug/history/user fixtures and injected email configuration; no real scheduler, provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 265,
+          "mentorLabel": "Case 265",
+          "internalProposalKey": "IDTS110-F247S",
+          "title": "scheduled discovery emits urgent SLA at four hours",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "discoverScheduledNotifications"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "isSlaDue"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "A Critical or Blocker Pending Assignment emits its SLA event at exactly four hours and not before."
+          ],
+          "roleBoundary": "Only OutboxProcessor may run scheduled discovery; recipient role and active state are rechecked before source or email creation.",
+          "executionBoundary": "Use deterministic local Bug/history/user fixtures and injected email configuration; no real scheduler, provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 266,
+          "mentorLabel": "Case 266",
+          "internalProposalKey": "IDTS110-F247SS",
+          "title": "scheduled discovery emits standard SLA at 24 hours",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "discoverScheduledNotifications"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "isSlaDue"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "A non-Critical, non-Blocker Pending Assignment emits its SLA event at exactly 24 hours and not before."
+          ],
+          "roleBoundary": "Only OutboxProcessor may run scheduled discovery; recipient role and active state are rechecked before source or email creation.",
+          "executionBoundary": "Use deterministic local Bug/history/user fixtures and injected email configuration; no real scheduler, provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 267,
+          "mentorLabel": "Case 267",
+          "internalProposalKey": "IDTS110-F248",
+          "title": "overdue discovery excludes Closed Bugs and unsafe recipients",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "isOverdue"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "readOverdueRecipients"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "An overdue non-Closed Bug creates one event only for an eligible current owner or assignee, while a Closed Bug creates none."
+          ],
+          "roleBoundary": "Only active aligned recipients receive a scheduled event; stale or inactive current owners and profiles are excluded.",
+          "executionBoundary": "Use isolated Bug/history/profile/user fixtures and readback; no provider, email, scheduler service, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 268,
+          "mentorLabel": "Case 268",
+          "internalProposalKey": "IDTS110-F248C",
+          "title": "overdue discovery is idempotent for one source key",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "readScheduleAnchors"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "isOverdue"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "Rerunning an overdue discovery cycle with the same due-date history source key creates no duplicate event."
+          ],
+          "roleBoundary": "Only active aligned recipients receive a scheduled event; stale or inactive current owners and profiles are excluded.",
+          "executionBoundary": "Use isolated Bug/history/profile/user fixtures and readback; no provider, email, scheduler service, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 269,
+          "mentorLabel": "Case 269",
+          "internalProposalKey": "IDTS110-F248N",
+          "title": "a new due-date cycle gets a distinct source key",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "readScheduleAnchors"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "isOverdue"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "A changed due-date history cycle receives a distinct overdue source key from the previous cycle."
+          ],
+          "roleBoundary": "Only active aligned recipients receive a scheduled event; stale or inactive current owners and profiles are excluded.",
+          "executionBoundary": "Use isolated Bug/history/profile/user fixtures and readback; no provider, email, scheduler service, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 270,
+          "mentorLabel": "Case 270",
+          "internalProposalKey": "IDTS110-F249",
+          "title": "scheduled discovery enforces the activation cutoff",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "resolveDiscoveryFrom"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "isAtOrAfterCutoff"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "A server activation cutoff excludes Pending Assignment and Overdue backlog created before scheduler activation."
+          ],
+          "roleBoundary": "Cutoff and page scope are server-controlled; client request filters cannot widen scheduled Bug discovery.",
+          "executionBoundary": "Use injected local transaction/page fixtures with no external scheduler, provider, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 271,
+          "mentorLabel": "Case 271",
+          "internalProposalKey": "IDTS110-F249K",
+          "title": "scheduled discovery advances by ID keyset",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "readCandidatePage"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "forEachActivePMPage"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "The second candidate and PM page uses ID greater-than keyset ordering rather than OFFSET and remains bounded by the page limit."
+          ],
+          "roleBoundary": "Cutoff and page scope are server-controlled; client request filters cannot widen scheduled Bug discovery.",
+          "executionBoundary": "Use injected local transaction/page fixtures with no external scheduler, provider, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 272,
+          "mentorLabel": "Case 272",
+          "internalProposalKey": "IDTS110-F249T",
+          "title": "scheduled page failure does not advance its cursor",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "createPageTransactionRunner"
+            },
+            {
+              "file": "srv/notification/scheduled.js",
+              "symbol": "mergeScheduleResult"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-scheduled.js",
+          "plannedAssertions": [
+            "A failed page transaction rolls back its writes and leaves the committed cursor unchanged so the same page can be retried."
+          ],
+          "roleBoundary": "Cutoff and page scope are server-controlled; client request filters cannot widen scheduled Bug discovery.",
+          "executionBoundary": "Use injected local transaction/page fixtures with no external scheduler, provider, email, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 273,
+          "mentorLabel": "Case 273",
+          "internalProposalKey": "IDTS110-F250",
+          "title": "digest snapshot selects one persona’s actionable Bugs",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "buildDigestSnapshot"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "digestItemFor"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A PM, Developer, or Tester snapshot includes only that recipient persona’s actionable non-Closed Bugs."
+          ],
+          "roleBoundary": "Digest persona is derived from the stored recipient role/profile at snapshot time; a client cannot supply a different role or recipient.",
+          "executionBoundary": "Use isolated local Bug/profile/user fixtures and in-memory snapshot output; no email send, provider, scheduler, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 274,
+          "mentorLabel": "Case 274",
+          "internalProposalKey": "IDTS110-F250L",
+          "title": "digest snapshot orders items deterministically",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "buildDigestSnapshot"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "compareDigestItems"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A digest snapshot orders its included items with the server comparator before rendering."
+          ],
+          "roleBoundary": "Digest persona is derived from the stored recipient role/profile at snapshot time; a client cannot supply a different role or recipient.",
+          "executionBoundary": "Use isolated local Bug/profile/user fixtures and in-memory snapshot output; no email send, provider, scheduler, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 275,
+          "mentorLabel": "Case 275",
+          "internalProposalKey": "IDTS110-F250M",
+          "title": "digest snapshot enforces the render limit",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "buildDigestSnapshot"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "normalizeLimit"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A digest snapshot renders no more than the normalized limit and preserves the full itemCount for remaining items."
+          ],
+          "roleBoundary": "Digest persona is derived from the stored recipient role/profile at snapshot time; a client cannot supply a different role or recipient.",
+          "executionBoundary": "Use isolated local Bug/profile/user fixtures and in-memory snapshot output; no email send, provider, scheduler, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 276,
+          "mentorLabel": "Case 276",
+          "internalProposalKey": "IDTS110-F250Q",
+          "title": "digest snapshot uses allowlisted links",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "buildDigestSnapshot"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "buildBugLink"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "buildQueueLink"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A digest snapshot uses only allowlisted Bug and queue links for its rendered items."
+          ],
+          "roleBoundary": "Digest persona is derived from the stored recipient role/profile at snapshot time; a client cannot supply a different role or recipient.",
+          "executionBoundary": "Use isolated local Bug/profile/user fixtures and in-memory snapshot output; no email send, provider, scheduler, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 277,
+          "mentorLabel": "Case 277",
+          "internalProposalKey": "IDTS110-F250R",
+          "title": "digest snapshot omits raw fields",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "buildDigestSnapshot"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "safeText"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A digest snapshot omits raw fields from textBody and htmlBody and retains only the safe item projection."
+          ],
+          "roleBoundary": "Digest persona is derived from the stored recipient role/profile at snapshot time; a client cannot supply a different role or recipient.",
+          "executionBoundary": "Use isolated local Bug/profile/user fixtures and in-memory snapshot output; no email send, provider, scheduler, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 278,
+          "mentorLabel": "Case 278",
+          "internalProposalKey": "IDTS110-F251",
+          "title": "digest scheduling enforces recipient-date uniqueness",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "scheduleNotificationDigests"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "insertDigestDelivery"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "isDigestUniqueViolation"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "The weekday Bangkok scheduler persists at most one recipient/date/type digest and reuses the exact existing unique row."
+          ],
+          "roleBoundary": "Only eligible active recipients with the snapshot persona receive a digest row; duplicate handling never changes another recipient's row.",
+          "executionBoundary": "Use isolated CAP transactions with injected page/unique-conflict fixtures; no provider, email, scheduler, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 279,
+          "mentorLabel": "Case 279",
+          "internalProposalKey": "IDTS110-F251R",
+          "title": "digest scheduling resumes after a page failure",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "scheduleNotificationDigests"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "createDigestTransactionRunner"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A late-page failure leaves earlier committed pages intact and resumes the remaining recipient pages without duplicating their rows."
+          ],
+          "roleBoundary": "Only eligible active recipients with the snapshot persona receive a digest row; duplicate handling never changes another recipient's row.",
+          "executionBoundary": "Use isolated CAP transactions with injected page/unique-conflict fixtures; no provider, email, scheduler, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 280,
+          "mentorLabel": "Case 280",
+          "internalProposalKey": "IDTS110-F252",
+          "title": "digest send skips an inactive recipient",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "processNotificationDigestDeliveries"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "readDigestSendRecipient"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A claimed digest row is SKIPPED without provider call when its recipient is inactive before send."
+          ],
+          "roleBoundary": "Send-time User/Profile locks are authoritative over stale snapshot role/profile state.",
+          "executionBoundary": "Use isolated digest rows and injected send-time state changes; no real provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 281,
+          "mentorLabel": "Case 281",
+          "internalProposalKey": "IDTS110-F252R",
+          "title": "digest send skips a changed role",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "processNotificationDigestDeliveries"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "isSendPersonaValid"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A claimed digest row is SKIPPED without provider call when its recipient role no longer matches the stored digest type."
+          ],
+          "roleBoundary": "Send-time User/Profile locks are authoritative over stale snapshot role/profile state.",
+          "executionBoundary": "Use isolated digest rows and injected send-time state changes; no real provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 282,
+          "mentorLabel": "Case 282",
+          "internalProposalKey": "IDTS110-F252P",
+          "title": "digest send skips a missing active Developer Profile",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "processNotificationDigestDeliveries"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "isSendPersonaValid"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A claimed Developer digest row is SKIPPED without provider call when its recipient has no active Developer Profile at send time."
+          ],
+          "roleBoundary": "Send-time User/Profile locks are authoritative over stale snapshot role/profile state.",
+          "executionBoundary": "Use isolated digest rows and injected send-time state changes; no real provider, email, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        },
+        {
+          "proposedSequence": 283,
+          "mentorLabel": "Case 283",
+          "internalProposalKey": "IDTS110-F253",
+          "title": "digest delivery row records a sanitized provider failure",
+          "candidateStatus": "NOT_RUN",
+          "coverageStatus": "IMPLEMENTED_MISSING_ATOMIC_CASE",
+          "sourceTrace": [
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "DIGESTS"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "processNotificationDigestDeliveries"
+            },
+            {
+              "file": "srv/notification/digest.js",
+              "symbol": "sanitizeTransportError"
+            }
+          ],
+          "plannedTestFile": "scripts/qa/test-my-notifications-digest.js",
+          "plannedAssertions": [
+            "A NotificationDigestDeliveries row whose stored digest snapshot fails provider send becomes FAILED with sanitized error state, bounded nextAttemptAt when attempts remain, cleared lock fields, and unchanged snapshot body."
+          ],
+          "roleBoundary": "Only the digest worker handles a persisted digest row; recipients never receive raw provider errors.",
+          "executionBoundary": "Use an isolated NotificationDigestDeliveries row and injected failing sender; no real email, provider, BTP, or live data.",
+          "existingCaseKeys": [],
+          "retainedProposalKeys": []
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "featureCount": 7,
+    "proposedCaseCount": 80,
+    "retainedProposalCount": 10,
+    "proposedFinalCatalogCount": 278
+  }
+}
