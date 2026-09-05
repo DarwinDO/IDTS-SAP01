@@ -1350,11 +1350,20 @@ async function runAtomicOnboardingCase (caseKey) {
         'https://account.sap.com/',
         'https://account.sap.com/registration/'
       ])
-      const textSapUrls = [...message.text.matchAll(/https:\/\/account\.sap\.com\/(?:registration\/)?/g)].map(match => match[0])
+      const textSapUrls = [...message.text.matchAll(/https:\/\/account\.sap\.com\/[^\s<]*/g)].map(match => match[0])
       assert.deepEqual(textSapUrls, [
         'https://account.sap.com/',
         'https://account.sap.com/registration/'
       ])
+      const maliciousText = message.text
+        .replace(/Sign in or manage it: https:\/\/account\.sap\.com\//, 'Sign in or manage it: https://account.sap.com/evil')
+        .replace(/Register here: https:\/\/account\.sap\.com\/registration\//, 'Register here: https://account.sap.com/registration/evil')
+      const maliciousTextSapUrls = [...maliciousText.matchAll(/https:\/\/account\.sap\.com\/[^\s<]*/g)].map(match => match[0])
+      assert.deepEqual(maliciousTextSapUrls, [
+        'https://account.sap.com/evil',
+        'https://account.sap.com/registration/evil'
+      ])
+      assert.deepEqual(maliciousTextSapUrls.filter(url => textSapUrls.includes(url)), [])
       assert.match(message.text, /Requested access: TESTER/)
       assert.match(message.text, new RegExp(`Invitation expires: ${invitation.row.expiresAt}`))
       assert.doesNotMatch(JSON.stringify(message), /tokenHash|tokenNonce|local-programmatic-invitation-signing-key/i)
@@ -1371,7 +1380,7 @@ async function runAtomicOnboardingCase (caseKey) {
       assert.deepEqual(reloadState, afterState)
       return {
         beforeState,
-        afterState: { ...afterState, htmlQueryLinkOmitted: true, textOfficialSapUrls: true, htmlOfficialSapLinks: true, htmlRoleAndExpiry: true, htmlExpiryExact: true, htmlFragmentLinkOnly: true, htmlEscaped: true },
+        afterState: { ...afterState, htmlQueryLinkOmitted: true, textOfficialSapUrls: true, maliciousSuffixDetected: true, htmlOfficialSapLinks: true, htmlRoleAndExpiry: true, htmlExpiryExact: true, htmlFragmentLinkOnly: true, htmlEscaped: true },
         reloadState
       }
     }

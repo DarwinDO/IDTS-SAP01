@@ -149,3 +149,27 @@ NOT_RUN: 0
 Final fix-round batch output SHA-256: `d2b26fccb3ec17bde3f209eb815404517bf3013d7e09fec8bd3851b3e2663563`.
 
 Fresh no-argument suites, atomic protocol, syntax checks, secret scan, and `git diff --check` all exited `0`; no provider, email, BTP/HANA, or other external mutation occurred.
+
+## Fix round 3/5 — F244 exact URL extraction
+
+- Fix-round starting head: `0eea7cab90498a9864c792f7041cfaa87b3c9f2a`.
+- RED: the malicious-suffix probe used `https://account.sap.com/evil` and `https://account.sap.com/registration/evil`; the prior prefix extractor returned only the allowed prefixes, so the exact malicious candidates assertion failed as intended.
+- GREEN: F244 now extracts the complete URL candidate through the next whitespace/markup boundary, asserts the real text body’s exact two-URL set (`https://account.sap.com/` and `https://account.sap.com/registration/`), and proves malicious suffixes are not collapsed into either allowed URL. No query, fragment, or disallowed path suffix is accepted by the real-body set.
+
+Final F244 and batch verification:
+
+```text
+node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F244 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted
+status: PASS
+
+node scripts/qa/run-idts110-new-cases.js --scope=ACCESS_EMAIL --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/access-email-results.json
+runId: idts110-1788615519960-aa8146f5f0c5cf6dc16a344048da4892
+total: 10
+PASS: 10
+FAIL: 0
+BLOCKED: 0
+HELD: 0
+NOT_RUN: 0
+```
+
+Final batch output SHA-256: `91991c999470b7933f791efc480164f520e908e3991c05fa256d09ba24a54f65`.
