@@ -1,6 +1,7 @@
 'use strict'
 
 const assert = require('node:assert/strict')
+const Ajv = require('ajv')
 const crypto = require('node:crypto')
 const fs = require('node:fs')
 const os = require('node:os')
@@ -67,6 +68,7 @@ async function main () {
   assert.equal(BASELINE_SHA, '6eb6f73840d7150598a993f8656d2b44e5b0cd4b')
   assert.equal(fs.existsSync(schemaPath), true, 'atomic result JSON schema is required')
   const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'))
+  const validateSchema = new Ajv().compile(schema)
   assert.equal(schema.$id, 'idts-110-atomic-result.schema.json')
   assert.equal(schema.properties.sourceBaselineSha.const, BASELINE_SHA)
   assert.deepEqual(schema.properties.status.enum, ['PASS', 'FAIL', 'BLOCKED', 'HELD', 'NOT_RUN'])
@@ -97,6 +99,8 @@ async function main () {
 
   const redacted = redactText('Bearer abc password=secret postgresql://u:p@h/db alice@example.com')
   assert.doesNotMatch(redacted, /abc|secret|postgresql|alice@example\.com/i)
+  const escapedSecret = '\\{\\"password\\":\\"secret\\"\\}'
+  assert.doesNotMatch(redactText(escapedSecret), /password|secret/i, 'escaped JSON assignments must be redacted')
 
   assert.deepEqual(readAtomicOptions([
     '--idts110-case=IDTS110-F232',
@@ -125,6 +129,12 @@ async function main () {
   assert.ok(Date.parse(result.startedAt) <= Date.parse(result.completedAt))
   assert.doesNotMatch(JSON.stringify(result), /undefined|MAPPING_ONLY|password=|Bearer\s+abc|postgresql:\/\//i)
   validateAtomicResult(result)
+  assert.equal(validateSchema(result), true, 'the canonical result must satisfy the JSON schema')
+  assert.equal(validateSchema({ ...result, status: 'PASS', assertionPassed: false }), false, 'schema must reject PASS without assertionPassed=true')
+  assert.equal(validateSchema({ ...result, authorizedFixture: true, deployedSha: null }), false, 'schema must reject authorized fixture without deployed SHA')
+  assert.equal(validateSchema({ ...result, authorizedFixture: false, deployedSha: 'a'.repeat(40) }), false, 'schema must reject an unbound deployed SHA')
+  assert.equal(validateSchema({ ...result, status: 'PASS', evidenceKind: 'BTP_INTEGRATION', authorizedFixture: false, deployedSha: null }), false, 'schema must reject an external PASS without authorization')
+  assert.equal(validateSchema({ ...result, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: true, deployedSha: 'a'.repeat(40), runtimeEvidence: { deployedSha: 'a'.repeat(40), checked: true } }), true, 'schema must accept a structurally authorized external result')
 
   const implicitPass = await runAtomicCase({
     definition: definition(),
@@ -257,6 +267,7 @@ async function main () {
 
   assert.throws(() => validateAtomicResult({ ...result, status: 'MAPPING_ONLY' }), /MAPPING_ONLY|status/i)
   assert.throws(() => validateAtomicResult({ ...result, sourceBaselineSha: '0'.repeat(40) }), /baseline/i)
+  assert.throws(() => validateAtomicResult({ ...result, beforeState: { escaped: escapedSecret } }), /secret|sensitive|sanit/i)
 
   const tempDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'idts110-atomic-contract-'))
   const batchPath = path.join(process.cwd(), '.tmp', 'idts-110', 'batch-contract.json')
@@ -283,6 +294,25 @@ async function main () {
     approvalReference: { pullRequest: 388, mergeSha: BASELINE_SHA },
     results: [result, result]
   }, path.join(tempDirectory, 'duplicate.json')), /duplicate/i)
+  const outputEscapePath = path.join(process.cwd(), '.tmp', 'idts-110', 'escape-link')
+  let outputEscapeCreated = false
+  try {
+    fs.symlinkSync(tempDirectory, outputEscapePath, 'junction')
+    outputEscapeCreated = true
+  } catch {}
+  if (outputEscapeCreated) {
+    try {
+      assert.throws(() => writeAtomicBatch({
+        runId: 'idts110-contract-run',
+        sourceBaselineSha: BASELINE_SHA,
+        catalogSha: crypto.createHash('sha256').update('catalog').digest('hex'),
+        approvalReference: { pullRequest: 388, mergeSha: BASELINE_SHA },
+        results: [result]
+      }, path.join(outputEscapePath, 'escape.json')), /symlink|canonical|boundary/i)
+    } finally {
+      fs.unlinkSync(outputEscapePath)
+    }
+  }
 
   const approvedDefinitions = orchestrator.loadNewDefinitions()
   const definitions = ['IDTS110-F232', 'IDTS110-F233', 'IDTS110-F234', 'IDTS110-F235']
@@ -368,19 +398,16 @@ async function main () {
 
   const malformedDefinitions = [
     definition({ caseId: 'IDTS110-F232', title: undefined }),
-    definition({ caseId: 'IDTS110-F233', mentorNumber: 235, title: 'safe second case' })
+    definition({ caseId: 'IDTS110-F233', mentorNumber: 235, title: undefined })
   ]
-  const malformedBatch = await orchestrator.runNewCases({
+  await assert.rejects(() => orchestrator.runNewCases({
     definitions: malformedDefinitions,
     baselineSha: BASELINE_SHA,
     executor: 'Codex-agent-assisted',
     spawnSync: (file, args) => args.includes('--idts110-case=IDTS110-F232')
       ? { status: 0, stdout: `${formatAtomicMarker(childPass)}\n`, stderr: '' }
       : { status: 0, stdout: 'suite PASS', stderr: '' }
-  })
-  assert.equal(malformedBatch.results.length, 2)
-  assert.equal(malformedBatch.results[0].status, 'FAIL')
-  assert.equal(malformedBatch.results[1].status, 'FAIL')
+  }), /deep-equal|approved/i, 'known malformed definitions must be rejected rather than canonicalized')
 
   await assert.rejects(() => orchestrator.runNewCases({
     definitions: [definition({ caseId: 'IDTS110-CUSTOM1' })],
@@ -394,6 +421,12 @@ async function main () {
     executor: 'Codex-agent-assisted',
     spawnSync: () => ({ status: 0, stdout: 'suite PASS', stderr: '' })
   }), /approved|unknown|definition/i, 'null definitions must be rejected')
+  await assert.rejects(() => orchestrator.runNewCases({
+    definitions: [{ ...definitions[0], title: 'forged known-case definition' }],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: 'suite PASS', stderr: '' })
+  }), /approved|exact|definition/i, 'known case definitions must be deep-equal to the approved definition')
 
   const missingSnapshots = { ...childPass, beforeState: null, afterState: null, reloadState: null }
   const snapshotBatch = await orchestrator.runNewCases({
@@ -405,6 +438,12 @@ async function main () {
   assert.equal(snapshotBatch.results[0].status, 'FAIL', 'orchestrator must independently require catalog persistence snapshots')
 
   const visualDefinition = approvedDefinitions.find(current => current.caseId === 'IDTS110-F224')
+  const visualDirectory = path.join(process.cwd(), '.tmp', 'idts-110', 'contract-assets')
+  const screenshotPath = path.join(visualDirectory, 'F224.png')
+  const screenshotBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64')
+  fs.mkdirSync(visualDirectory, { recursive: true })
+  fs.writeFileSync(screenshotPath, screenshotBytes)
+  const screenshotSha256 = crypto.createHash('sha256').update(screenshotBytes).digest('hex')
   const visualResult = await runAtomicCase({
     definition: visualDefinition,
     assertionId: visualDefinition.assertionId,
@@ -413,17 +452,53 @@ async function main () {
     execute: async () => ({
       assertionPassed: true,
       actualResult: visualDefinition.expectedResult,
-      runtimeEvidence: { screenshotPath: 'F224.png', screenshotSha256: 'b'.repeat(64) },
-      evidenceIds: ['IDTS110-F224-RESULT']
+      runtimeEvidence: { screenshotPath, screenshotSha256 },
+      evidenceIds: ['IDTS110-F224-RESULT', 'IDTS110-F224-VISUAL']
     })
   })
   const visualBatch = await orchestrator.runNewCases({
     definitions: [visualDefinition],
     baselineSha: BASELINE_SHA,
     executor: 'Codex-agent-assisted',
-    spawnSync: () => ({ status: 0, stdout: `${formatAtomicMarker({ ...visualResult, runtimeEvidence: null })}\n`, stderr: '' })
+    spawnSync: () => ({ status: 0, stdout: `${MARKER_PREFIX}${JSON.stringify({ ...visualResult, runtimeEvidence: null })}\n`, stderr: '' })
   })
   assert.equal(visualBatch.results[0].status, 'FAIL', 'orchestrator must independently require rendered screenshot proof')
+
+  const emptySnapshots = { ...childPass, beforeState: {}, afterState: {}, reloadState: {} }
+  const emptySnapshotBatch = await orchestrator.runNewCases({
+    definitions: [definitions[0]],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: `${formatAtomicMarker(emptySnapshots)}\n`, stderr: '' })
+  })
+  assert.equal(emptySnapshotBatch.results[0].status, 'FAIL', 'required snapshots must contain evidence content')
+
+  const badEvidenceIds = { ...childPass, evidenceIds: ['arbitrary-evidence'] }
+  const badEvidenceBatch = await orchestrator.runNewCases({
+    definitions: [definitions[0]],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: `${MARKER_PREFIX}${JSON.stringify(badEvidenceIds)}\n`, stderr: '' })
+  })
+  assert.equal(badEvidenceBatch.results[0].status, 'FAIL', 'case evidence ID must be exact')
+
+  const badScreenshotPath = path.join(visualDirectory, 'missing.png')
+  const badScreenshotResult = { ...visualResult, runtimeEvidence: { screenshotPath: badScreenshotPath, screenshotSha256 } }
+  const badScreenshotBatch = await orchestrator.runNewCases({
+    definitions: [visualDefinition],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: `${MARKER_PREFIX}${JSON.stringify(badScreenshotResult)}\n`, stderr: '' })
+  })
+  assert.equal(badScreenshotBatch.results[0].status, 'FAIL', 'visual proof must reference an existing PNG')
+  const badScreenshotHashResult = { ...visualResult, runtimeEvidence: { screenshotPath, screenshotSha256: 'a'.repeat(64) } }
+  const badScreenshotHashBatch = await orchestrator.runNewCases({
+    definitions: [visualDefinition],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: () => ({ status: 0, stdout: `${MARKER_PREFIX}${JSON.stringify(badScreenshotHashResult)}\n`, stderr: '' })
+  })
+  assert.equal(badScreenshotHashBatch.results[0].status, 'FAIL', 'visual proof must match PNG bytes')
 
   const externalDefinition = definition({ environment: 'BTP' })
   const externalMarker = await runAtomicCase({
@@ -498,6 +573,9 @@ async function main () {
     }
   }
   if (fs.existsSync(orchestratedPath)) fs.unlinkSync(orchestratedPath)
+  if (fs.existsSync(screenshotPath)) fs.unlinkSync(screenshotPath)
+  if (fs.existsSync(visualDirectory)) fs.rmdirSync(visualDirectory)
+  if (fs.existsSync(tempDirectory)) fs.rmSync(tempDirectory, { recursive: true, force: true })
 
   console.log('IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batch, and orchestrator continuation.')
 }

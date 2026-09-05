@@ -1,10 +1,13 @@
 'use strict'
 
+const crypto = require('node:crypto')
 const fs = require('node:fs')
 const path = require('node:path')
 
 const BASELINE_SHA = '6eb6f73840d7150598a993f8656d2b44e5b0cd4b'
 const MARKER_PREFIX = 'IDTS110_ATOMIC_RESULT '
+const PROJECT_ROOT = path.resolve(__dirname, '../..')
+const ATOMIC_OUTPUT_ROOT = path.join(PROJECT_ROOT, '.tmp', 'idts-110')
 const RESULT_STATUSES = ['PASS', 'FAIL', 'BLOCKED', 'HELD', 'NOT_RUN']
 const EVIDENCE_KINDS = ['LOCAL_ATOMIC', 'UI_RUNTIME', 'BTP_INTEGRATION']
 const MAX_SAFE_STRING_LENGTH = 2000
@@ -43,18 +46,30 @@ function isPiiKey (key) {
   return /^(?:email|mail|phone|telephone|mobile|display[_-]?name|user[_-]?name|recipient|address)$/i.test(key)
 }
 
+function normalizeEscapedStructuredText (value) {
+  let normalized = String(value)
+  for (let pass = 0; pass < 3; pass += 1) normalized = normalized.replace(/\\(["'{}[\],:=/])/g, '$1')
+  return normalized
+}
+
+function containsRawSecret (text) {
+  const candidates = [String(text), normalizeEscapedStructuredText(text)]
+  return candidates.some(candidate => RAW_SECRET.some(pattern => {
+    pattern.lastIndex = 0
+    return pattern.test(candidate)
+  }))
+}
+
 function redactText (value) {
   if (value === null || value === undefined) return value
   let text = String(value)
   for (const pattern of RAW_SECRET) text = text.replace(pattern, '[REDACTED]')
+  if (containsRawSecret(text)) return '[REDACTED]'
   return text.replace(/\r?\n/g, ' ').trim()
 }
 
 function hasRawSecret (text) {
-  return RAW_SECRET.some(pattern => {
-    pattern.lastIndex = 0
-    return pattern.test(text)
-  })
+  return containsRawSecret(text)
 }
 
 function hasPlaceholder (text) {
@@ -241,21 +256,37 @@ function hasAuthorizedExternal (outcome) {
 
 function hasScreenshotEvidence (value) {
   if (!value || typeof value !== 'object') return false
-  let screenshotPath = false
-  let screenshotHash = false
+  const screenshotPaths = []
+  const screenshotHashes = []
   const visit = current => {
     if (!current || typeof current !== 'object') return
     for (const [key, item] of Object.entries(current)) {
       if (/screenshot|runtime(?:Image|Evidence)|imagePath/i.test(key)) {
         if (typeof item === 'string' && item.trim()) {
-          if (/sha|hash/i.test(key) && /^[a-f0-9]{64}$/i.test(item.trim())) screenshotHash = true
-          else screenshotPath = true
+          if (/sha|hash/i.test(key) && /^[a-f0-9]{64}$/i.test(item.trim())) screenshotHashes.push(item.trim().toLowerCase())
+          else screenshotPaths.push(item.trim())
         } else if (item && typeof item === 'object') visit(item)
       } else if (item && typeof item === 'object') visit(item)
     }
   }
   visit(value)
-  return screenshotPath && screenshotHash
+  return screenshotPaths.some(screenshotPath => screenshotHashes.some(screenshotHash => screenshotFileMatches(screenshotPath, screenshotHash)))
+}
+
+function screenshotFileMatches (screenshotPath, expectedHash) {
+  if (typeof screenshotPath !== 'string' || typeof expectedHash !== 'string') return false
+  const outputRoot = path.resolve(ATOMIC_OUTPUT_ROOT)
+  const lexical = path.isAbsolute(screenshotPath)
+    ? path.resolve(screenshotPath)
+    : path.resolve(outputRoot, screenshotPath)
+  if (!isWithin(lexical, outputRoot) || path.extname(lexical).toLowerCase() !== '.png') return false
+  if (!fs.existsSync(lexical)) return false
+  const stat = fs.lstatSync(lexical)
+  if (!stat.isFile() || stat.isSymbolicLink()) return false
+  const actual = fs.realpathSync.native(lexical)
+  if (!isWithin(actual, outputRoot)) return false
+  const actualHash = crypto.createHash('sha256').update(fs.readFileSync(actual)).digest('hex')
+  return actualHash === expectedHash.toLowerCase()
 }
 
 function statusFromError (error) {
@@ -303,30 +334,40 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
       finalActual = 'BTP, provider-live, or other external execution requires authorizedFixture=true, an exact deployed SHA, and matching runtime evidence.'
     }
   }
-  if (resultStatus === 'PASS') {
-    const missing = []
-    if (hasSnapshotRequirement(definition, 'before') && beforeState === null) missing.push('before-state')
-    if (hasSnapshotRequirement(definition, 'after') && afterState === null) missing.push('after-state')
-    if (hasSnapshotRequirement(definition, 'reload') && reloadState === null) missing.push('reload/readback')
-    if (needsVisualEvidence(definition) && !hasScreenshotEvidence(runtimeEvidence)) missing.push('browser/runtime screenshot and SHA-256')
-    if (missing.length) {
-      finalStatus = 'FAIL'
-      finalActual = `Atomic assertion ran but required evidence is missing: ${missing.join(', ')}.`
-    }
-  }
-  const evidenceIds = Object.hasOwn(outcome, 'evidenceIds') ? outcome.evidenceIds : [`${caseKey}-RESULT`]
-  if (evidenceIds === undefined) fail('execute.evidenceIds cannot be undefined')
-  if (!Array.isArray(evidenceIds) || evidenceIds.length === 0) {
-    if (finalStatus === 'PASS') {
-      finalStatus = 'FAIL'
-      finalActual = 'Atomic assertion ran but no case-specific evidence ID was recorded.'
-    }
-  }
   const evidenceKind = definition.acceptanceMode === 'UI_RUNTIME_VISUAL'
     ? 'UI_RUNTIME'
     : needsAuthorizedExternal(definition)
       ? 'BTP_INTEGRATION'
       : 'LOCAL_ATOMIC'
+  const safeBeforeState = sanitizeValue(beforeState, 'beforeState')
+  const safeAfterState = sanitizeValue(afterState, 'afterState')
+  const safeReloadState = sanitizeValue(reloadState, 'reloadState')
+  const safeRuntimeEvidence = sanitizeValue(runtimeEvidence, 'runtimeEvidence')
+  const requiredEvidenceIds = [`${caseKey}-RESULT`]
+  if (evidenceKind === 'UI_RUNTIME') requiredEvidenceIds.push(`${caseKey}-VISUAL`)
+  const suppliedEvidenceIds = Object.hasOwn(outcome, 'evidenceIds') ? outcome.evidenceIds : requiredEvidenceIds
+  if (suppliedEvidenceIds === undefined) fail('execute.evidenceIds cannot be undefined')
+  const sanitizedEvidenceIds = sanitizeValue(suppliedEvidenceIds, 'evidenceIds')
+  const safeEvidenceIds = Array.isArray(sanitizedEvidenceIds)
+    ? [...new Set(sanitizedEvidenceIds.filter(id => typeof id === 'string' && requiredEvidenceIds.includes(id)))]
+    : []
+  const missingEvidenceIds = requiredEvidenceIds.filter(id => !safeEvidenceIds.includes(id))
+  if (missingEvidenceIds.length || !Array.isArray(sanitizedEvidenceIds) || safeEvidenceIds.length !== sanitizedEvidenceIds.length) {
+    finalStatus = 'FAIL'
+    finalActual = `Atomic assertion ran without the required case evidence ID(s): ${missingEvidenceIds.join(', ') || `${caseKey}-RESULT`}.`
+    for (const id of requiredEvidenceIds) if (!safeEvidenceIds.includes(id)) safeEvidenceIds.push(id)
+  }
+  if (resultStatus === 'PASS') {
+    const missing = []
+    if (hasSnapshotRequirement(definition, 'before') && (!isObject(safeBeforeState) || Object.keys(safeBeforeState).length === 0)) missing.push('before-state')
+    if (hasSnapshotRequirement(definition, 'after') && (!isObject(safeAfterState) || Object.keys(safeAfterState).length === 0)) missing.push('after-state')
+    if (hasSnapshotRequirement(definition, 'reload') && (!isObject(safeReloadState) || Object.keys(safeReloadState).length === 0)) missing.push('reload/readback')
+    if (needsVisualEvidence(definition) && !hasScreenshotEvidence(safeRuntimeEvidence)) missing.push('browser/runtime screenshot and SHA-256')
+    if (missing.length && finalStatus !== 'BLOCKED') {
+      finalStatus = 'FAIL'
+      finalActual = `Atomic assertion ran but required evidence is missing: ${missing.join(', ')}.`
+    }
+  }
   const result = {
     schemaVersion: '1.0',
     jiraKey: 'IDTS-110',
@@ -350,11 +391,11 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
     expectedResult: expected,
     actualResult: finalActual,
     sourceTrace: sanitizeValue(definition.sourceTrace || [], 'definition.sourceTrace'),
-    beforeState: sanitizeValue(beforeState, 'beforeState'),
-    afterState: sanitizeValue(afterState, 'afterState'),
-    reloadState: sanitizeValue(reloadState, 'reloadState'),
-    runtimeEvidence: sanitizeValue(runtimeEvidence, 'runtimeEvidence'),
-    evidenceIds: sanitizeValue(evidenceIds, 'evidenceIds'),
+    beforeState: safeBeforeState,
+    afterState: safeAfterState,
+    reloadState: safeReloadState,
+    runtimeEvidence: safeRuntimeEvidence,
+    evidenceIds: safeEvidenceIds,
     limitation: textResult(outcome.limitation, 'limitation', definition.environment === 'BTP_REQUIRED'
       ? 'BTP or provider-live evidence requires a separately authorized target and fixture.'
       : 'No provider or live BTP state used.'),
@@ -434,7 +475,12 @@ function validateAtomicResult (result) {
   for (const state of ['beforeState', 'afterState', 'reloadState', 'runtimeEvidence']) if (state !== 'runtimeEvidence' && result[state] !== null && !isObject(result[state])) fail(`result ${state} must be an object or null`)
   if (result.runtimeEvidence !== null && !isObject(result.runtimeEvidence)) fail('result runtimeEvidence must be an object or null')
   if (result.authorizedFixture && (!isObject(result.runtimeEvidence) || result.runtimeEvidence.deployedSha !== result.deployedSha)) fail('authorizedFixture requires runtimeEvidence.deployedSha to match deployedSha')
-  if (!Array.isArray(result.evidenceIds) || result.evidenceIds.length === 0 || result.evidenceIds.some(id => typeof id !== 'string' || !id.trim())) fail('result evidenceIds must be a non-empty string array')
+  const requiredEvidenceId = `${result.caseKey}-RESULT`
+  const visualEvidenceId = `${result.caseKey}-VISUAL`
+  const allowedEvidenceIds = result.evidenceKind === 'UI_RUNTIME' ? [requiredEvidenceId, visualEvidenceId] : [requiredEvidenceId]
+  if (!Array.isArray(result.evidenceIds) || result.evidenceIds.length === 0 || result.evidenceIds.some(id => typeof id !== 'string' || !id.trim() || !allowedEvidenceIds.includes(id)) || !result.evidenceIds.includes(requiredEvidenceId)) fail('result evidenceIds must contain the exact case result ID')
+  if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !result.evidenceIds.includes(visualEvidenceId)) fail('visual PASS requires the exact case visual evidence ID')
+  if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !hasScreenshotEvidence(result.runtimeEvidence)) fail('visual PASS requires an existing PNG screenshot with a matching SHA-256')
   const serialized = JSON.stringify(result)
   if (/MAPPING_ONLY|\bundefined\b/i.test(serialized)) fail('result contains forbidden MAPPING_ONLY or undefined text')
   assertSafeValue(result)
@@ -463,8 +509,6 @@ function formatAtomicMarker (result) {
   return `${MARKER_PREFIX}${JSON.stringify(sanitized)}`
 }
 
-const PROJECT_ROOT = path.resolve(__dirname, '../..')
-
 function realPathWithMissingTail (target) {
   let current = path.resolve(target)
   const missing = []
@@ -483,18 +527,48 @@ function isWithin (target, parent) {
   return resolvedTarget === resolvedParent || resolvedTarget.startsWith(`${resolvedParent}${path.sep}`)
 }
 
+function samePath (left, right) {
+  const normalize = value => path.resolve(value)
+  const a = normalize(left)
+  const b = normalize(right)
+  return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b
+}
+
+function assertNoSymlinkAncestors (targetRoot) {
+  const safeRoot = fs.realpathSync.native(PROJECT_ROOT)
+  const resolvedTarget = path.resolve(targetRoot)
+  if (!isWithin(resolvedTarget, safeRoot)) fail('target root is outside the repository')
+  let current = safeRoot
+  for (const segment of path.relative(safeRoot, resolvedTarget).split(path.sep).filter(Boolean)) {
+    current = path.join(current, segment)
+    let stat
+    try {
+      stat = fs.lstatSync(current)
+    } catch (error) {
+      if (error.code === 'ENOENT') break
+      throw error
+    }
+    if (stat.isSymbolicLink()) fail('output root contains a symlink or reparse point')
+    if (!stat.isDirectory()) fail('output root contains a non-directory ancestor')
+    if (!samePath(fs.realpathSync.native(current), current)) fail('output root canonical ancestor differs from the intended path')
+  }
+}
+
 function atomicOutputPath (outputPath) {
   if (typeof outputPath !== 'string' || !outputPath.trim()) fail('outputPath is required')
   const safeRoot = fs.realpathSync.native(PROJECT_ROOT)
   const outputRoot = path.join(safeRoot, '.tmp', 'idts-110')
-  const actualOutputRoot = realPathWithMissingTail(outputRoot)
+  assertNoSymlinkAncestors(outputRoot)
+  const actualOutputRoot = path.resolve(outputRoot)
   if (!isWithin(actualOutputRoot, safeRoot)) fail('atomic output root has a symlink escape')
   const lexical = path.resolve(outputPath)
   if (!isWithin(lexical, outputRoot)) fail('outputPath must stay inside the approved .tmp/idts-110 boundary')
   if (fs.existsSync(lexical) && fs.lstatSync(lexical).isSymbolicLink()) fail('outputPath cannot be a symlink')
+  assertNoSymlinkAncestors(path.dirname(lexical))
   fs.mkdirSync(path.dirname(lexical), { recursive: true })
+  assertNoSymlinkAncestors(path.dirname(lexical))
   const actualParent = fs.realpathSync.native(path.dirname(lexical))
-  if (!isWithin(actualParent, actualOutputRoot)) fail('outputPath parent has a symlink escape outside .tmp/idts-110')
+  if (!samePath(actualParent, path.dirname(lexical)) || !isWithin(actualParent, actualOutputRoot)) fail('outputPath parent has a symlink escape outside .tmp/idts-110')
   const actual = realPathWithMissingTail(lexical)
   if (!isWithin(actual, actualOutputRoot)) fail('outputPath has a symlink escape outside .tmp/idts-110')
   return actual

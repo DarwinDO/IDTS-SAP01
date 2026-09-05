@@ -50,20 +50,29 @@ function definitionRequiresExternal (definition) {
 
 function hasScreenshotProof (value) {
   if (!value || typeof value !== 'object') return false
-  let screenshotPath = false
-  let screenshotHash = false
+  const screenshotPaths = []
+  const screenshotHashes = []
   const visit = current => {
     for (const [key, item] of Object.entries(current || {})) {
       if (/screenshot|runtime(?:Image|Evidence)|imagePath/i.test(key)) {
         if (typeof item === 'string' && item.trim()) {
-          if (/sha|hash/i.test(key) && /^[a-f0-9]{64}$/i.test(item.trim())) screenshotHash = true
-          else screenshotPath = true
+          if (/sha|hash/i.test(key) && /^[a-f0-9]{64}$/i.test(item.trim())) screenshotHashes.push(item.trim().toLowerCase())
+          else screenshotPaths.push(item.trim())
         } else if (item && typeof item === 'object') visit(item)
       } else if (item && typeof item === 'object') visit(item)
     }
   }
   visit(value)
-  return screenshotPath && screenshotHash
+  const outputRoot = path.join(repositoryRoot(ROOT), '.tmp', 'idts-110')
+  return screenshotPaths.some(screenshotPath => screenshotHashes.some(screenshotHash => {
+    const lexical = path.isAbsolute(screenshotPath) ? path.resolve(screenshotPath) : path.resolve(outputRoot, screenshotPath)
+    if (!isWithin(lexical, outputRoot) || path.extname(lexical).toLowerCase() !== '.png' || !fs.existsSync(lexical)) return false
+    const stat = fs.lstatSync(lexical)
+    if (!stat.isFile() || stat.isSymbolicLink()) return false
+    const actual = fs.realpathSync.native(lexical)
+    if (!isWithin(actual, outputRoot)) return false
+    return crypto.createHash('sha256').update(fs.readFileSync(actual)).digest('hex') === screenshotHash
+  }))
 }
 
 function assertDefinitionEvidence (marker, definition) {
@@ -75,10 +84,14 @@ function assertDefinitionEvidence (marker, definition) {
     reloadState: /reload|readback|persistence/i.test(requirements)
   }
   for (const [field, isRequired] of Object.entries(required)) {
-    if (isRequired && marker[field] === null) fail(`${field} evidence is required for ${definition.caseId}`)
+    if (isRequired && (!marker[field] || typeof marker[field] !== 'object' || Object.keys(marker[field]).length === 0)) fail(`${field} evidence must be a non-empty object for ${definition.caseId}`)
   }
-  const visual = definition.acceptanceMode === 'UI_RUNTIME_VISUAL' || /browser\/runtime|rendered UI|screenshot|UI runtime/i.test(requirements)
-  if (visual && !hasScreenshotProof(marker.runtimeEvidence)) fail(`rendered screenshot proof is required for ${definition.caseId}`)
+  if (definitionRequiresVisual(definition) && !hasScreenshotProof(marker.runtimeEvidence)) fail(`rendered screenshot proof is required for ${definition.caseId}`)
+}
+
+function definitionRequiresVisual (definition) {
+  const requirements = Array.isArray(definition.evidenceRequirements) ? definition.evidenceRequirements.join(' ') : ''
+  return definition.acceptanceMode === 'UI_RUNTIME_VISUAL' || /browser\/runtime|rendered UI|screenshot|UI runtime/i.test(requirements)
 }
 
 function assertExternalProof (marker, definition) {
@@ -321,6 +334,10 @@ function assertMarkerMatches (marker, definition, baselineSha, invocationWindow 
   if (JSON.stringify(marker.sourceTrace) !== JSON.stringify(definition.sourceTrace)) fail(`marker source trace mismatch for ${definition.caseId}`)
   if (marker.expectedResult.trim().replace(/\s+/g, ' ') !== String(definition.expectedResult).trim().replace(/\s+/g, ' ')) fail(`marker expected result mismatch for ${definition.caseId}`)
   if (marker.status === 'PASS' && (marker.assertionPassed !== true || marker.actualResult.trim().replace(/\s+/g, ' ') !== marker.expectedResult.trim().replace(/\s+/g, ' '))) fail(`marker PASS proof mismatch for ${definition.caseId}`)
+  const requiredEvidenceIds = [`${definition.caseId}-RESULT`]
+  if (definitionRequiresVisual(definition)) requiredEvidenceIds.push(`${definition.caseId}-VISUAL`)
+  if (requiredEvidenceIds.some(id => !marker.evidenceIds.includes(id))) fail(`marker evidence IDs are not case-bound for ${definition.caseId}`)
+  if (marker.evidenceIds.some(id => !requiredEvidenceIds.includes(id))) fail(`marker contains arbitrary evidence IDs for ${definition.caseId}`)
   if (marker.status === 'PASS' && (!marker.testCommand.includes(`--idts110-case=${definition.caseId}`) || !marker.testCommand.includes(`--baseline=${baselineSha}`))) fail(`marker command proof mismatch for ${definition.caseId}`)
   if (marker.reviewStatus !== 'PENDING_DONHV_REVIEW') fail(`marker review status must remain pending for ${definition.caseId}`)
   if (marker.status === 'NOT_RUN') fail(`marker cannot report NOT_RUN after invoking ${definition.caseId}`)
@@ -412,6 +429,8 @@ async function runNewCases ({
   const approvedByKey = new Map(approvedDefinitions.map(definition => [definition.caseId, definition]))
   for (const definition of requestedDefinitions) {
     if (!definition || typeof definition !== 'object' || typeof definition.caseId !== 'string' || !approvedByKey.has(definition.caseId)) fail('definitions may contain only approved IDTS-110 case definitions')
+    const approvedDefinition = approvedByKey.get(definition.caseId)
+    if (!isExactApprovedDefinition(definition, approvedDefinition)) fail('known IDTS-110 definitions must be deep-equal to the approved catalog definition')
   }
   const selectedDefinitions = filterDefinitions(requestedDefinitions, scope).map(definition => {
     const approvedDefinition = approvedByKey.get(definition?.caseId)

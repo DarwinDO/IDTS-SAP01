@@ -133,3 +133,33 @@ Ajv schema compile PASS
 ```
 
 The protocol remains scoped to Task 3 files only. No business runners were integrated and no product/catalog/workbook/BTP/provider/external state was changed.
+
+## Fix round 3 — adversarial RED → GREEN
+
+Fix round parent head: `830604a3c41b91aa37cb3366c541620e167f4d95`.
+
+The contract was extended before implementation. The first RED assertion demonstrated that escaped JSON secret text was not detected:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract FAIL
+AssertionError: escaped JSON assignments must be redacted
+    at .../scripts/qa/test-idts110-atomic-runner.js:103:10
+```
+
+Additional adversarial RED assertions then covered known-key forged definitions, empty required snapshots, arbitrary evidence IDs, missing/non-matching screenshot files, schema PASS/authorization invariants, and output-root ancestor symlink escapes. The minimal fixes now:
+
+- Reject every caller definition that is not deep-equal to its approved hashed catalog row; unknown, null, altered, and forged definitions cannot be canonicalized into execution.
+- Require nonempty sanitized required snapshots, exact `<caseKey>-RESULT` evidence identity, and `<caseKey>-VISUAL` for visual cases. Screenshot proof must be a regular existing PNG under `.tmp/idts-110` whose SHA-256 matches the marker.
+- Normalize escaped structural JSON delimiters before secret detection so escaped password/token assignments are redacted or rejected.
+- Add draft-07 `allOf`/`if`/`then` invariants for PASS assertion proof, authorization/deployed-SHA consistency, and external evidence consistency; runtime validation additionally checks matching runtime SHA evidence.
+- Validate every existing output ancestor with `lstat`/realpath and reject symlink/reparse redirects before creating directories or writing.
+
+GREEN evidence:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batch, and orchestrator continuation.
+```
+
+Round 3 remains limited to the Task 3 schema/helper/orchestrator/contract/report files. Temporary PNG and output fixtures are created and removed under `.tmp/idts-110` by the contract; no business or external state is used.

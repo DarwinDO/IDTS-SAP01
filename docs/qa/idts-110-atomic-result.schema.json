@@ -255,7 +255,8 @@
       "uniqueItems": true,
       "items": {
         "type": "string",
-        "minLength": 1
+        "minLength": 1,
+        "pattern": "^IDTS110-[A-Z0-9]+-(?:RESULT|VISUAL)$"
       }
     },
     "limitation": {
@@ -271,5 +272,34 @@
         "PENDING_REVIEW"
       ]
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "PASS" } } },
+      "then": { "required": ["assertionPassed"], "properties": { "assertionPassed": { "const": true } } },
+      "else": { "required": ["assertionPassed"], "properties": { "assertionPassed": { "const": false } } }
+    },
+    {
+      "if": { "properties": { "authorizedFixture": { "const": true } } },
+      "then": {
+        "required": ["deployedSha", "runtimeEvidence"],
+        "properties": {
+          "authorizedFixture": { "const": true },
+          "deployedSha": { "type": "string", "pattern": "^[a-fA-F0-9]{40}$" },
+          "evidenceKind": { "const": "BTP_INTEGRATION" },
+          "runtimeEvidence": { "type": "object" }
+        }
+      },
+      "else": { "properties": { "deployedSha": { "const": null } } }
+    },
+    {
+      "if": {
+        "allOf": [
+          { "properties": { "status": { "const": "PASS" } } },
+          { "properties": { "evidenceKind": { "const": "BTP_INTEGRATION" } } }
+        ]
+      },
+      "then": { "properties": { "authorizedFixture": { "const": true } } }
+    }
+  ]
 }
