@@ -4,9 +4,27 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const vm = require('node:vm')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const root = path.resolve(__dirname, '../..')
 const moduleFile = path.join(root, 'app/bug-management-ui/webapp/ext/notification/NotificationShell.js')
+const catalogPath = path.join(root, 'docs/qa/idts-110-unit-test-catalog.json')
+const VISUAL_CASES = new Set([
+  'IDTS110-F237', 'IDTS110-F238', 'IDTS110-F238E', 'IDTS110-F238L',
+  'IDTS110-F239', 'IDTS110-F239P', 'IDTS110-F239H', 'IDTS110-F239D'
+])
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
 
 class FakeControl {
   constructor (settings = {}) {
@@ -120,7 +138,7 @@ function row (index, readAt = null, eventType = 'ASSIGNED') {
   }
 }
 
-async function main () {
+async function runRegressionChecks () {
   assert.ok(fs.existsSync(moduleFile), 'NotificationShell must exist')
   const calls = { search: [], unread: 0, markRead: [], markAll: [] }
   let resolveSearch
@@ -254,7 +272,48 @@ async function main () {
   assert.equal(host.controls[0].destroyed, true)
   assert.equal(globals.document.visibilitychange, undefined)
   assert.equal(globals.window['idts:notification-change'], undefined)
+  return { precheck: 'PASS', controls: 'native UI5 controls', rows: 'case fixture only' }
+}
+
+async function runAtomicSelector (options) {
+  if (!VISUAL_CASES.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-my-notifications-shell.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => {
+      const precheck = await runRegressionChecks()
+      return {
+        status: 'BLOCKED',
+        assertionPassed: false,
+        actualResult: 'Programmatic/native-control precheck passed; authoritative rendered UI execution is owned by the UI-runtime lane.',
+        beforeState: { precheck: precheck.precheck },
+        afterState: { controls: precheck.controls },
+        reloadState: { fixture: precheck.rows },
+        evidenceIds: [`${options.caseKey}-RESULT`, `${options.caseKey}-VISUAL`],
+        limitation: 'This record is a programmatic/native-control precheck only; Task 6 browser execution must provide the rendered screenshot.'
+      }
+    }
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = 1
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runRegressionChecks()
   console.log('IDTS My Notifications shell contract: PASS')
 }
 
-main().catch(error => { console.error(error); process.exitCode = 1 })
+if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1 })
+
+module.exports = { VISUAL_CASES, runRegressionChecks, runAtomicSelector }
