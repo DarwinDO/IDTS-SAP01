@@ -1340,11 +1340,18 @@ async function runAtomicOnboardingCase (caseKey) {
         assert.doesNotMatch(body, /\bBearer\s+\S+/i)
       }
       assert.match(message.html, /<strong>Requested access:<\/strong> TESTER/)
-      assert.match(message.html, /<strong>Invitation expires:<\/strong> \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z/)
+      const htmlExpiryValue = message.html.match(/<strong>Invitation expires:<\/strong> ([^<]*)<\/p>/)?.[1]
+      const escapeHtmlForAssertion = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
+      assert.equal(htmlExpiryValue, escapeHtmlForAssertion(invitation.row.expiresAt))
       assert.match(message.html, /href="https:\/\/idts\.example\.invalid\/onboarding\/continue#token=[^"&]+"/)
       const htmlLinks = [...message.html.matchAll(/href="([^"]+)"/g)].map(match => match[1])
       assert.equal(htmlLinks.filter(link => link.includes('#token=')).length, 1)
       assert.deepEqual(htmlLinks.filter(link => !link.includes('#token=')).sort(), [
+        'https://account.sap.com/',
+        'https://account.sap.com/registration/'
+      ])
+      const textSapUrls = [...message.text.matchAll(/https:\/\/account\.sap\.com\/(?:registration\/)?/g)].map(match => match[0])
+      assert.deepEqual(textSapUrls, [
         'https://account.sap.com/',
         'https://account.sap.com/registration/'
       ])
@@ -1364,7 +1371,7 @@ async function runAtomicOnboardingCase (caseKey) {
       assert.deepEqual(reloadState, afterState)
       return {
         beforeState,
-        afterState: { ...afterState, htmlQueryLinkOmitted: true, htmlOfficialSapLinks: true, htmlRoleAndExpiry: true, htmlFragmentLinkOnly: true, htmlEscaped: true },
+        afterState: { ...afterState, htmlQueryLinkOmitted: true, textOfficialSapUrls: true, htmlOfficialSapLinks: true, htmlRoleAndExpiry: true, htmlExpiryExact: true, htmlFragmentLinkOnly: true, htmlEscaped: true },
         reloadState
       }
     }

@@ -120,3 +120,32 @@ NOT_RUN: 0
 ```
 
 Final batch output SHA-256: `7259a9920ab0e45ae6e213a1c08aa848f555a2db111b105fac1ef9e9b90217fe`.
+
+## Fix round 2/5 — F244 exact-link and expiry proof
+
+- Fix-round starting head: `5ba5cc666e066af7b07327617fc4e8e8bc796b81`.
+- RED contract: the strengthened selector contract failed before this fix at the missing exact text-URL proof (`textOfficialSapUrls` was `undefined`).
+- F244 now extracts the text-body SAP URLs and requires exactly `https://account.sap.com/` and `https://account.sap.com/registration/` in that order. It extracts the HTML expiry paragraph and compares its value exactly with `invitation.row.expiresAt` after applying the same HTML escaping rules used for rendered content. The HTML role, single fragment-token link, official links, query-token/credential omission, and hostile-value escaping checks remain active.
+
+Fresh targeted F244 and full-batch evidence:
+
+```text
+node .tmp/idts-110/task7-fix-round1-red.js
+Task7 fix round 2 F244 contract: PASS
+
+node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F244 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted
+status: PASS
+
+node scripts/qa/run-idts110-new-cases.js --scope=ACCESS_EMAIL --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/access-email-results.json
+runId: idts110-1788615031594-3b60d9bc789fe3973d1ca9c9ab43e247
+total: 10
+PASS: 10
+FAIL: 0
+BLOCKED: 0
+HELD: 0
+NOT_RUN: 0
+```
+
+Final fix-round batch output SHA-256: `d2b26fccb3ec17bde3f209eb815404517bf3013d7e09fec8bd3851b3e2663563`.
+
+Fresh no-argument suites, atomic protocol, syntax checks, secret scan, and `git diff --check` all exited `0`; no provider, email, BTP/HANA, or other external mutation occurred.
