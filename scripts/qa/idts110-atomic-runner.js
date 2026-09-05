@@ -9,14 +9,14 @@ const RESULT_STATUSES = ['PASS', 'FAIL', 'BLOCKED', 'HELD', 'NOT_RUN']
 const EVIDENCE_KINDS = ['LOCAL_ATOMIC', 'UI_RUNTIME', 'BTP_INTEGRATION']
 const REQUIRED_RESULT_FIELDS = [
   'schemaVersion', 'jiraKey', 'caseKey', 'mentorNumber', 'assertionId', 'title',
-  'status', 'evidenceKind', 'executor', 'startedAt', 'completedAt',
+  'status', 'assertionPassed', 'evidenceKind', 'executor', 'startedAt', 'completedAt',
   'sourceBaselineSha', 'deployedSha', 'testFile', 'testCommand', 'preconditions',
   'input', 'expectedResult', 'actualResult', 'sourceTrace', 'beforeState',
   'afterState', 'reloadState', 'runtimeEvidence', 'evidenceIds', 'limitation',
   'reviewStatus'
 ]
 
-const SENSITIVE_ASSIGNMENT = /(?:password|passwd|pwd|token|access[_-]?token|api[_-]?key|secret|client[_-]?secret|authorization|cookie|private[_-]?key)\s*[:=]\s*(?:"[^"]*"|'[^']*'|[^\s,;]+)/gi
+const SENSITIVE_ASSIGNMENT = /["']?(?:password|passwd|pwd|token|access[_-]?token|api[_-]?key|secret|client[_-]?secret|authorization|cookie|private[_-]?key)["']?\s*[:=]\s*(?:"(?:\\.|[^"])*"|'(?:\\.|[^'])*'|[^\s,;}]+)/gi
 const BEARER_TOKEN = /\bBearer\s+[A-Za-z0-9._~+\-/=]+/gi
 const PRIVATE_URL = /\b(?:https?|postgres(?:ql)?|mysql|mssql|mongodb(?:\+srv)?|redis|amqps?|sftp|ftp):\/\/[^\s"'<>]+/gi
 const EMAIL = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi
@@ -95,9 +95,8 @@ function sanitizeValue (value, location = 'value', seen = new Set()) {
   } else {
     output = {}
     for (const [key, item] of Object.entries(value)) {
-      if (isSensitiveKey(key) || isPiiKey(key)) output[key] = '[REDACTED]'
-      else if (key.toLowerCase() === 'stack') output[key] = '[REDACTED]'
-      else output[key] = sanitizeValue(item, `${location}.${key}`, seen)
+      if (isSensitiveKey(key) || isPiiKey(key) || key.toLowerCase() === 'stack') continue
+      output[key] = sanitizeValue(item, `${location}.${key}`, seen)
     }
   }
   seen.delete(value)
@@ -118,6 +117,7 @@ function assertSafeValue (value, location = 'value', seen = new Set()) {
     for (let index = 0; index < value.length; index += 1) assertSafeValue(value[index], `${location}[${index}]`, seen)
   } else {
     for (const [key, item] of Object.entries(value)) {
+      if (isSensitiveKey(key) || isPiiKey(key) || key.toLowerCase() === 'stack') fail(`sensitive or PII key at ${location}.${key}`)
       assertSafeValue(key, `${location}.<key>`, seen)
       assertSafeValue(item, `${location}.${key}`, seen)
     }
@@ -207,6 +207,23 @@ function needsVisualEvidence (definition) {
   return /browser\/runtime|rendered UI|screenshot|UI runtime/i.test(requirements)
 }
 
+function needsAuthorizedExternal (definition) {
+  const executionModes = [definition.environment, definition.testLevel, definition.acceptanceMode, definition.providerMode, definition.provider, definition.executionMode]
+    .filter(value => typeof value === 'string')
+    .map(value => value.toUpperCase())
+  return executionModes.some(value => /BTP|PROVIDER[_-]?LIVE|LIVE(?:[_-]|$)|EXTERNAL/.test(value)) || definition.providerLive === true || definition.live === true
+}
+
+function hasAuthorizedExternal (outcome) {
+  const deployedSha = outcome.deployedSha
+  return outcome.authorizedFixture === true &&
+    typeof deployedSha === 'string' &&
+    /^[a-f0-9]{40}$/i.test(deployedSha) &&
+    isObject(outcome.runtimeEvidence) &&
+    outcome.runtimeEvidence.deployedSha === deployedSha &&
+    Object.keys(outcome.runtimeEvidence).length > 1
+}
+
 function hasScreenshotEvidence (value) {
   if (!value || typeof value !== 'object') return false
   let screenshotPath = false
@@ -242,11 +259,12 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
   const expected = textResult(definition.expectedResult, 'definition.expectedResult', 'The selected atomic assertion completes.')
   const actualProvided = Object.hasOwn(outcome, 'actualResult')
   if (actualProvided && outcome.actualResult === undefined) fail('execute.actualResult cannot be undefined')
-  const actual = textResult(actualProvided ? outcome.actualResult : undefined, 'actualResult', expected)
-  const resultStatus = statusOverride || (outcome.status ? String(outcome.status).toUpperCase() : null) || (
-    outcome.expectedResultMatched === false || (actualProvided && normalizeComparable(actual) !== normalizeComparable(expected)) || outcome.assertionPassed === false
-      ? 'FAIL'
-      : 'PASS'
+  const actual = textResult(actualProvided ? outcome.actualResult : undefined, 'actualResult', 'Atomic assertion did not provide an actual result.')
+  const actualMatches = actualProvided && normalizeComparable(actual) === normalizeComparable(expected)
+  const explicitSuccess = outcome.assertionPassed === true
+  const requestedStatus = outcome.status ? String(outcome.status).toUpperCase() : null
+  const resultStatus = statusOverride || (requestedStatus && requestedStatus !== 'PASS' ? requestedStatus : null) || (
+    explicitSuccess && actualMatches && outcome.expectedResultMatched !== false ? 'PASS' : 'FAIL'
   )
   if (!RESULT_STATUSES.includes(resultStatus)) fail(`unsupported result status: ${resultStatus}`)
   if (resultStatus === 'MAPPING_ONLY') fail('MAPPING_ONLY is forbidden for new atomic results')
@@ -262,6 +280,14 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
   }
   let finalStatus = resultStatus
   let finalActual = actual
+  let authorizedExternal = false
+  if (needsAuthorizedExternal(definition)) {
+    authorizedExternal = hasAuthorizedExternal(outcome)
+    if (!authorizedExternal) {
+      finalStatus = 'BLOCKED'
+      finalActual = 'BTP, provider-live, or other external execution requires authorizedFixture=true, an exact deployed SHA, and matching runtime evidence.'
+    }
+  }
   if (resultStatus === 'PASS') {
     const missing = []
     if (hasSnapshotRequirement(definition, 'before') && beforeState === null) missing.push('before-state')
@@ -283,7 +309,7 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
   }
   const evidenceKind = definition.acceptanceMode === 'UI_RUNTIME_VISUAL'
     ? 'UI_RUNTIME'
-    : definition.environment === 'BTP_REQUIRED' || definition.environment === 'HYBRID_BTP'
+    : needsAuthorizedExternal(definition)
       ? 'BTP_INTEGRATION'
       : 'LOCAL_ATOMIC'
   const result = {
@@ -294,12 +320,13 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
     assertionId,
     title: textResult(definition.title, 'definition.title'),
     status: finalStatus,
+    assertionPassed: finalStatus === 'PASS',
     evidenceKind,
     executor: textResult(executor, 'executor'),
     startedAt,
     completedAt,
     sourceBaselineSha: baselineSha,
-    deployedSha: Object.hasOwn(outcome, 'deployedSha') ? outcome.deployedSha : null,
+    deployedSha: authorizedExternal ? outcome.deployedSha : null,
     testFile: textResult(definition.plannedTestFile, 'definition.plannedTestFile'),
     testCommand: textResult(outcome.testCommand, 'testCommand', `node ${definition.plannedTestFile} --idts110-case=${caseKey} --baseline=${baselineSha} --executor=${executor}`),
     preconditions: textResult(definition.preconditions, 'definition.preconditions', 'Use the isolated fixture defined for this case.'),
@@ -364,6 +391,7 @@ function validateAtomicResult (result) {
   if (!isObject(result)) fail('atomic result must be an object')
   assertNoUndefined(result)
   for (const field of REQUIRED_RESULT_FIELDS) if (!Object.hasOwn(result, field)) fail(`result missing ${field}`)
+  for (const field of Object.keys(result)) if (!REQUIRED_RESULT_FIELDS.includes(field)) fail(`result contains unsupported field ${field}`)
   if (result.schemaVersion !== '1.0') fail('result schemaVersion must be 1.0')
   if (result.jiraKey !== 'IDTS-110') fail('result jiraKey must be IDTS-110')
   if (typeof result.caseKey !== 'string' || !/^IDTS110-[A-Z0-9]+$/.test(result.caseKey)) fail('result caseKey is invalid')
@@ -373,6 +401,9 @@ function validateAtomicResult (result) {
     if (typeof result[field] !== 'string' || !result[field].trim()) fail(`result ${field} must be non-empty`)
   }
   if (!RESULT_STATUSES.includes(result.status) || result.status === 'MAPPING_ONLY') fail('result status is invalid; MAPPING_ONLY is forbidden')
+  if (typeof result.assertionPassed !== 'boolean') fail('result assertionPassed must be boolean')
+  if (result.status === 'PASS' && result.assertionPassed !== true) fail('PASS requires explicit assertionPassed=true')
+  if (result.status !== 'PASS' && result.assertionPassed !== false) fail('non-PASS results require assertionPassed=false')
   if (!EVIDENCE_KINDS.includes(result.evidenceKind)) fail('result evidenceKind is invalid')
   validateTimestamp(result.startedAt, 'startedAt')
   validateTimestamp(result.completedAt, 'completedAt')
@@ -407,8 +438,9 @@ function parseAtomicMarker (output) {
 }
 
 function formatAtomicMarker (result) {
-  validateAtomicResult(result)
-  return `${MARKER_PREFIX}${JSON.stringify(result)}`
+  const sanitized = sanitizeValue(result, 'result')
+  validateAtomicResult(sanitized)
+  return `${MARKER_PREFIX}${JSON.stringify(sanitized)}`
 }
 
 function writeAtomicBatch ({ runId, sourceBaselineSha, catalogSha, approvalReference, results }, outputPath) {

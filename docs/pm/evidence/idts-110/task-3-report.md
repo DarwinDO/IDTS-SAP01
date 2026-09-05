@@ -71,3 +71,33 @@ IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batc
 ## Handoff boundary
 
 Task 3 stops at the committed protocol and contract. It does not integrate adapters, execute the 90 cases, generate evidence/cards/workbook artifacts, claim any new PASS, merge, deploy, or update Drive.
+
+## Fix round 1 — adversarial RED → GREEN
+
+Fix round parent head: `c5f9e13bb609c055f8067e7e1e16c149aa076f54`.
+
+The covering contract was extended before fixes. The pre-fix run surfaced the review findings in sequence:
+
+| Finding | Adversarial assertion | Pre-fix observation |
+| --- | --- | --- |
+| Major 1 | `status: PASS` without explicit assertion success/actual result | Caller-supplied `PASS` was accepted. |
+| Major 2 | Marker expected/actual text differs from the catalog definition | Forged marker remained `PASS` instead of `FAIL`. |
+| Major 3 | `environment: BTP` without authorized fixture/deployed proof | Result remained `PASS` instead of `BLOCKED`. |
+| Important 4 | Nested and JSON-encoded password/token values plus unbounded state schema | Raw encoded secret was emitted; state schema had no bounded shape. |
+| Important 5 | Batch containing `HELD` or `NOT_RUN` | No `exitCodeForBatch` guard existed. |
+| Important 6 | Fake caller catalog SHA and altered catalog input | Caller SHA was accepted; altered input was not rejected. |
+| Medium 7 | Outside output path, runner symlink escape, arbitrary environment secret | Output resolver was absent, lexical runner checks missed symlinks, and `process.env` was forwarded. |
+| Medium 8 | Invalid definition and `null` definition followed by a valid case | Fallback re-entered the malformed definition and threw before completing the batch. |
+
+The minimal fixes are now covered by the same contract and pass:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batch, and orchestrator continuation.
+```
+
+- `runAtomicCase` now requires `assertionPassed: true` and an explicitly supplied `actualResult` matching the catalog expected result before PASS; it never uses caller status or a default expected result as proof.
+- The result/schema includes the explicit assertion flag, bounded recursive safe state values, and exact status semantics. `formatAtomicMarker` sanitizes before validating/emitting; sensitive keys are omitted, encoded assignments are redacted, and unsafe raw marker content is rejected.
+- External/BTP/provider-live modes remain `BLOCKED` until `authorizedFixture: true`, a valid deployed SHA, and matching runtime evidence are present.
+- The orchestrator binds markers to canonical catalog definitions and planned assertion metadata, binds catalog/extension/number-map/approval hashes and the DonHV PR/merge receipt to repository files, and exits zero only when every result is `PASS`.
+- Runner/output paths are real-path checked within `scripts/qa` and repository `.tmp`; child processes receive only a small non-secret environment allowlist. Invalid cases use a fixed sanitized FAIL skeleton so later cases still run.

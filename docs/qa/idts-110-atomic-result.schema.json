@@ -5,6 +5,31 @@
   "description": "One sanitized, case-specific execution result for a new IDTS-110 unit-test case.",
   "type": "object",
   "additionalProperties": false,
+  "$defs": {
+    "safeValue": {
+      "anyOf": [
+        { "type": "null" },
+        { "type": "boolean" },
+        { "type": "number" },
+        { "type": "string", "maxLength": 2000 },
+        { "$ref": "#/$defs/safeObject" },
+        {
+          "type": "array",
+          "maxItems": 64,
+          "items": { "$ref": "#/$defs/safeValue" }
+        }
+      ]
+    },
+    "safeObject": {
+      "type": "object",
+      "maxProperties": 32,
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^(?!.*(?:password|passwd|pwd|token|access[_-]?token|api[_-]?key|secret|authorization|cookie|private[_-]?key|endpoint|database[_-]?url|connection[_-]?string|email|mail|phone|display[_-]?name|user[_-]?name|recipient|address)).{1,80}$"
+      },
+      "additionalProperties": { "$ref": "#/$defs/safeValue" }
+    }
+  },
   "required": [
     "schemaVersion",
     "jiraKey",
@@ -13,6 +38,7 @@
     "assertionId",
     "title",
     "status",
+    "assertionPassed",
     "evidenceKind",
     "executor",
     "startedAt",
@@ -61,6 +87,9 @@
     "status": {
       "type": "string",
       "enum": ["PASS", "FAIL", "BLOCKED", "HELD", "NOT_RUN"]
+    },
+    "assertionPassed": {
+      "type": "boolean"
     },
     "evidenceKind": {
       "type": "string",
@@ -130,25 +159,25 @@
     "beforeState": {
       "anyOf": [
         { "type": "null" },
-        { "type": "object" }
+        { "$ref": "#/$defs/safeObject" }
       ]
     },
     "afterState": {
       "anyOf": [
         { "type": "null" },
-        { "type": "object" }
+        { "$ref": "#/$defs/safeObject" }
       ]
     },
     "reloadState": {
       "anyOf": [
         { "type": "null" },
-        { "type": "object" }
+        { "$ref": "#/$defs/safeObject" }
       ]
     },
     "runtimeEvidence": {
       "anyOf": [
         { "type": "null" },
-        { "type": "object" }
+        { "$ref": "#/$defs/safeObject" }
       ]
     },
     "evidenceIds": {
