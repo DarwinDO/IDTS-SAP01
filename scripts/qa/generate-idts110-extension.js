@@ -23,8 +23,8 @@ const writeJson = (relative, value) => {
   fs.mkdirSync(path.dirname(target), { recursive: true })
   fs.writeFileSync(target, JSON.stringify(value, null, 2) + '\n')
 }
-const lowerFirst = value => value.charAt(0).toLowerCase() + value.slice(1)
 const titleCase = value => value.charAt(0).toUpperCase() + value.slice(1)
+const unique = values => [...new Set(values)]
 
 const visualKeys = new Set([
   'IDTS110-F224', 'IDTS110-F237', 'IDTS110-F238', 'IDTS110-F238E',
@@ -239,7 +239,7 @@ const definition = ({ key, origin, sequence, mentorNumber, source, family, retai
     environment: 'LOCAL',
     requirementIds: policy.requirementIds,
     roles: retained ? policy.roles : (family === 'USER_PROFILE' && key.startsWith('IDTS110-F220') ? ['DEVELOPER'] : policy.roles),
-    coverage: retained ? policy.coverage : coverageFor(key, classification),
+    coverage: unique(retained ? policy.coverage : coverageFor(key, classification)),
     preconditions: 'Use an isolated ' + policy.domain.toLowerCase() + ' fixture at source baseline ' + BASELINE + '; capture the relevant before-state.',
     input: assertions[0],
     steps: [

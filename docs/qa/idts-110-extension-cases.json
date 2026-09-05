@@ -441,7 +441,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "SANITIZATION"
       ],
       "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -657,7 +656,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -872,7 +870,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -945,7 +942,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -1017,7 +1013,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -1161,7 +1156,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -1515,7 +1509,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -1585,7 +1578,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -1654,7 +1646,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -1729,7 +1720,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -1798,7 +1788,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -1873,7 +1862,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -1943,7 +1931,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -2012,7 +1999,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -2084,7 +2070,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -2155,7 +2140,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -2225,7 +2209,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -2435,7 +2418,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -2501,7 +2483,6 @@
         "DEVELOPER"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -2569,7 +2550,6 @@
         "DEVELOPER"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -2645,7 +2625,6 @@
         "DEVELOPER"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -2789,7 +2768,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "UI_RUNTIME",
         "PERSISTENCE"
       ],
@@ -2865,7 +2843,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -2939,7 +2916,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -3015,7 +2991,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -3090,7 +3065,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -3157,7 +3131,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -3223,7 +3196,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -3295,7 +3267,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -3366,7 +3337,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -3432,7 +3402,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -3505,7 +3474,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -3657,7 +3625,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -3728,7 +3695,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -3801,7 +3767,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -3868,7 +3833,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -3941,7 +3905,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -4012,7 +3975,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "UI_RUNTIME",
         "PERSISTENCE"
@@ -4090,7 +4052,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "UI_RUNTIME",
         "PERSISTENCE"
       ],
@@ -4163,7 +4124,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "UI_RUNTIME",
         "PERSISTENCE"
       ],
@@ -4235,7 +4195,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "UI_RUNTIME",
         "PERSISTENCE"
@@ -4581,7 +4540,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -4806,7 +4764,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -5035,7 +4992,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -5106,7 +5062,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -5179,7 +5134,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -5250,7 +5204,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -5323,7 +5276,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -5394,7 +5346,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -5467,7 +5418,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -5538,7 +5488,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -5611,7 +5560,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -5682,7 +5630,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -5968,7 +5915,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -6039,7 +5985,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -6112,7 +6057,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -6183,7 +6127,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -6332,7 +6275,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -6408,7 +6350,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -6479,7 +6420,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],
@@ -6552,7 +6492,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -6624,7 +6563,6 @@
       ],
       "coverage": [
         "ROLE",
-        "ROLE",
         "PERSISTENCE"
       ],
       "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
@@ -6695,7 +6633,6 @@
         "PM"
       ],
       "coverage": [
-        "ROLE",
         "ROLE",
         "PERSISTENCE"
       ],

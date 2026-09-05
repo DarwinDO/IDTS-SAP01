@@ -86,6 +86,7 @@ for (const row of rows) {
   assert.deepEqual(row.execution.evidenceIds, [])
   assert.equal(row.sourceProposalSequence > 0, true)
   assert.equal(Number.isInteger(row.mentorNumber), true)
+  assert.equal(new Set(row.coverage).size, row.coverage.length, row.internalCaseKey + ' duplicate coverage tag')
   assert.equal(row.plannedAssertions.length >= 1, true)
   assert.equal(row.sourceTrace.every(trace => typeof trace.file === 'string' && typeof trace.symbol === 'string'), true)
   for (const trace of row.sourceTrace) {

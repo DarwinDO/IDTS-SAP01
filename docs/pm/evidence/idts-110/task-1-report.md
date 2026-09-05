@@ -54,3 +54,11 @@ The contract validates the exact retained/inventory order, contiguous and biject
 - `IDTS110-P191` intentionally points to the not-yet-created `scripts/qa/test-user-admin-role-contract.js`; it is the single `NEW_ROLE_RUNNER` entry for the next execution task.
 - The 188-case canonical catalog, product source, workbook/template, dependencies, runtime data, BTP/HANA, Drive, Jira, email, and other external state were not changed.
 - This package defines execution candidates only. No new case has an actual result or PASS claim; DonHV result review remains pending.
+
+## Coverage uniqueness fix — review round 1
+
+- RED contract added: every new definition must contain unique `coverage` tags.
+- RED result before regeneration: `node scripts/qa/test-idts110-extension-manifest.js` exited `1` at `IDTS110-P191 duplicate coverage tag` (`2 !== 3`). A focused count identified 63 affected rows caused by repeated `ROLE` tags.
+- Fix: the generator now applies one order-preserving `unique` helper to retained and feature coverage arrays, including P191’s policy values. No source trace symbol or adapter mapping was changed.
+- GREEN results after regeneration: `node scripts/qa/generate-idts110-extension.js --check` passed; manifest contract passed; both generator/test files passed `node --check`; secret scan passed; staged diff check passed.
+- Coverage result: all 90 new definitions now have unique coverage tags while retaining deterministic source order.
