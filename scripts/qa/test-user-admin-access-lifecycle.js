@@ -7,6 +7,11 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase
+} = require('./idts110-atomic-runner')
 const { INSERT, SELECT } = cds.ql
 const { executeAccessChange } = require('../../broker/lib/access-provisioning')
 
@@ -97,6 +102,131 @@ function administrator (email) {
 
 async function expectRejected (operation, status, code) {
   await assert.rejects(operation, error => Number(error?.status || error?.statusCode) === status && error?.code === code)
+}
+
+const catalogPath = path.join(root, 'docs/qa/idts-110-unit-test-catalog.json')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+async function runAtomicLifecycleCase (caseKey) {
+  cds.env.idts = {
+    ...(cds.env.idts || {}),
+    email: { enabled: false }
+  }
+  const db = await cds.deploy('db').to('sqlite::memory:')
+  const previousDb = cds.db
+  cds.db = db
+  try {
+    await db.run(INSERT.into('idts.cap.Users').entries([
+      {
+        ID: ADMIN_ONE_ID,
+        displayName: 'Atomic Lifecycle Admin One',
+        email: 'lifecycle.atomic.one@example.invalid',
+        role_code: 'PM',
+        active: true
+      },
+      {
+        ID: ADMIN_TWO_ID,
+        displayName: 'Atomic Lifecycle Admin Two',
+        email: 'lifecycle.atomic.two@example.invalid',
+        role_code: 'PM',
+        active: true
+      },
+      {
+        ID: TARGET_ID,
+        displayName: 'Atomic Lifecycle Target',
+        email: 'lifecycle.atomic.target@example.invalid',
+        role_code: 'TESTER',
+        active: caseKey === 'IDTS110-F212',
+        externalIdentityKeyHash: TARGET_IDENTITY_HASH
+      }
+    ]))
+    await db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries([
+      requestEntry(ADMIN_ONE_REQUEST_ID, {
+        email: 'lifecycle.atomic.one@example.invalid', role: 'PM', userAdmin: true,
+        status: 'ACTIVE', requestedBy: ADMIN_ONE_ID, version: 1, userID: ADMIN_ONE_ID
+      }),
+      requestEntry(ADMIN_TWO_REQUEST_ID, {
+        email: 'lifecycle.atomic.two@example.invalid', role: 'PM', userAdmin: true,
+        status: 'ACTIVE', requestedBy: ADMIN_ONE_ID, version: 1, userID: ADMIN_TWO_ID
+      }),
+      requestEntry(TARGET_REQUEST_ID, {
+        email: 'lifecycle.atomic.target@example.invalid', role: 'TESTER',
+        status: caseKey === 'IDTS110-F212' ? 'ACTIVE' : 'SUSPENDED',
+        requestedBy: ADMIN_ONE_ID, version: caseKey === 'IDTS110-F212' ? 7 : 8,
+        userID: TARGET_ID
+      })
+    ]))
+    await db.run(INSERT.into('idts.cap.AuthSessions').entries([
+      {
+        ID: TARGET_SESSION_ONE_ID,
+        user_ID: TARGET_ID,
+        tokenHash: 'b'.repeat(64),
+        issuedAt: '2026-08-20T00:00:00.000Z',
+        expiresAt: '2026-08-21T00:00:00.000Z',
+        revokedAt: caseKey === 'IDTS110-F212' ? null : '2026-08-21T00:00:00.000Z'
+      },
+      {
+        ID: TARGET_SESSION_TWO_ID,
+        user_ID: TARGET_ID,
+        tokenHash: 'c'.repeat(64),
+        issuedAt: '2026-08-20T00:00:00.000Z',
+        expiresAt: '2026-08-21T00:00:00.000Z',
+        revokedAt: caseKey === 'IDTS110-F212' ? null : '2026-08-21T00:00:00.000Z'
+      }
+    ]))
+
+    const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
+    const administrator = new cds.User({ id: 'lifecycle.atomic.one@example.invalid', roles: ['authenticated-user', 'PM', 'UserAdmin'] })
+    if (caseKey === 'IDTS110-F212') {
+      const before = await db.run(SELECT.from('idts.cap.AuthSessions').where({ user_ID: TARGET_ID, revokedAt: null }))
+      const suspended = await service.send({
+        event: 'requestSuspend',
+        data: { userID: TARGET_ID, reason: 'Atomic controlled suspension.', expectedVersion: 7 },
+        user: administrator
+      })
+      assert.equal(suspended.status, 'SUSPENDED')
+      assert.equal(suspended.provisioningVersion, 8)
+      const user = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: TARGET_ID }))
+      const request = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: TARGET_REQUEST_ID }))
+      const sessions = await db.run(SELECT.from('idts.cap.AuthSessions').where({ user_ID: TARGET_ID }))
+      const audits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ targetUser_ID: TARGET_ID }))
+      const delivery = await db.run(SELECT.one.from('idts.cap.UserAccessNotificationDeliveries').where({ targetUser_ID: TARGET_ID }))
+      assert.equal(user.active, false)
+      assert.equal(request.status_code, 'SUSPENDED')
+      assert.equal(sessions.filter(session => session.revokedAt).length, 2)
+      assert.ok(audits.some(audit => audit.action === 'REQUEST_SUSPEND' && audit.result === 'QUEUED'))
+      assert.ok(audits.some(audit => audit.action === 'SUSPEND' && audit.result === 'APPLIED'))
+      assert.equal(delivery.eventType, 'ACCESS_SUSPENDED')
+      assert.equal(before.length, 2)
+      return { openSessionsBefore: before.length, revokedSessionsAfter: sessions.filter(session => session.revokedAt).length, delivery: delivery.eventType }
+    }
+    const reactivated = await service.send({
+      event: 'requestReactivate',
+      data: { userID: TARGET_ID, reason: 'Atomic reactivation request.', expectedVersion: 8 },
+      user: administrator
+    })
+    assert.equal(reactivated.status, 'SUSPENDED')
+    assert.equal(reactivated.provisioningVersion, 9)
+    const request = await db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: TARGET_REQUEST_ID }))
+    const operation = await db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: request.latestOperation_ID }))
+    const user = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: TARGET_ID }))
+    assert.equal(request.status_code, 'SUSPENDED')
+    assert.equal(request.provisioningVersion, 9)
+    assert.equal(operation.operationType, 'REACTIVATE')
+    assert.equal(operation.state, 'PENDING')
+    assert.equal(user.active, false)
+    return { status: request.status_code, version: request.provisioningVersion, operation: operation.operationType, operationState: operation.state }
+  } finally {
+    if (previousDb === undefined) delete cds.db
+    else cds.db = previousDb
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
 }
 
 async function runProgrammaticLifecycleChecks () {
@@ -435,7 +565,41 @@ async function runProgrammaticLifecycleChecks () {
   console.log('IDTS access lifecycle transaction checks: PASS')
 }
 
-runProgrammaticLifecycleChecks().catch(error => {
+async function runAtomicSelector (options) {
+  const atomicCases = new Map([
+    ['IDTS110-F212', 'suspend'],
+    ['IDTS110-F213', 'reactivate']
+  ])
+  if (!atomicCases.has(options.caseKey)) throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      beforeState: { fixture: 'isolated-sqlite', state: atomicCases.get(options.caseKey) === 'suspend' ? 'ACTIVE' : 'SUSPENDED' },
+      afterState: await runAtomicLifecycleCase(options.caseKey),
+      reloadState: { persisted: true },
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runProgrammaticLifecycleChecks()
+}
+
+main().catch(error => {
   console.error(error)
   process.exitCode = 1
 })

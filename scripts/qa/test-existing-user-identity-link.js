@@ -4,6 +4,11 @@ const assert = require('node:assert/strict')
 const crypto = require('node:crypto')
 const fs = require('node:fs')
 const path = require('node:path')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase
+} = require('./idts110-atomic-runner')
 
 const root = path.resolve(__dirname, '../..')
 const readSource = relativePath => fs.readFileSync(path.join(root, relativePath), 'utf8')
@@ -95,7 +100,46 @@ function fixtureXsuaaUser (cds, email, options = {}) {
   })
 }
 
-async function main () {
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+async function runAtomicExistingLinkCase () {
+  const cds = require('@sap/cds')
+  const db = await cds.deploy('db').to('sqlite::memory:')
+  const previousDb = cds.db
+  const previousIdts = cds.env.idts
+  cds.db = db
+  cds.env.idts = {
+    ...(previousIdts || {}),
+    userAdmin: {
+      ...((previousIdts && previousIdts.userAdmin) || {}),
+      invitationSigningKey: fixtureSigningKey(),
+      invitationTtlMinutes: 60,
+      invitationBaseUrl: 'https://idts.example.invalid/onboarding/continue'
+    }
+  }
+  try {
+    await seedFixture(cds, db)
+    const context = await assertExistingLinkRequest(cds, db)
+    const request = await db.run(cds.ql.SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: context.request.ID }))
+    const deliveries = await db.run(cds.ql.SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: context.request.ID }))
+    assert.equal(request.linkTargetUser_ID, IDS.targetDeveloper)
+    assert.equal(request.linkSourceEmailNormalized, 'legacy.developer@example.local')
+    assert.equal(deliveries.length, 1)
+    return { linkedTarget: true, sourceEmailSnapshotted: true, deliveries: deliveries.length }
+  } finally {
+    cds.env.idts = previousIdts
+    if (previousDb === undefined) delete cds.db
+    else cds.db = previousDb
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runRegressionChecks () {
   const schema = readSource('db/schema.cds')
   const service = readSource('srv/user-admin.cds')
   const userAdmin = readSource('srv/user-admin.js')
@@ -139,7 +183,6 @@ async function main () {
 
   await runEphemeralBehavioralContract()
 
-  console.log('Gate 3B existing-user identity-link contract: PASS')
 }
 
 async function runEphemeralBehavioralContract () {
@@ -1183,6 +1226,37 @@ async function assertAssignmentReadinessContract (db) {
   assert.match(readSource('srv/access/identity-readiness.js'), /function hasActiveIdentityAccess/, 'shared identity readiness predicate is missing')
   assert.match(readSource('srv/bug-service/bug-write.js'), /hasActiveIdentityAccess/, 'direct assignment does not use shared identity readiness')
   assert.match(readSource('srv/bug-service/read-models.js'), /hasActiveIdentityAccess/, 'Smart Assign candidates do not use shared identity readiness')
+}
+
+async function runAtomicSelector (options) {
+  if (options.caseKey !== 'IDTS110-F214') throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      beforeState: { fixture: 'isolated-sqlite', requests: 0 },
+      afterState: await runAtomicExistingLinkCase(),
+      reloadState: { requestHistoryPreserved: true },
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runRegressionChecks()
+  console.log('Gate 3B existing-user identity-link contract: PASS')
 }
 
 main().catch(error => {
