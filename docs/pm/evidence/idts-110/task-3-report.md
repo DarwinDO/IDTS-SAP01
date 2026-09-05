@@ -163,3 +163,65 @@ IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batc
 ```
 
 Round 3 remains limited to the Task 3 schema/helper/orchestrator/contract/report files. Temporary PNG and output fixtures are created and removed under `.tmp/idts-110` by the contract; no business or external state is used.
+
+## Fix round 4 — adversarial RED → GREEN
+
+Fix round parent head: `75f4a752dd2ccf99c2a99c89134b162334f6dcd9`.
+
+The contract was extended before the implementation changes. The first RED run
+proved the published schema accepted a parent traversal in the runner path:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract FAIL
+AssertionError [ERR_ASSERTION]: schema must reject parent traversal in testFile
+true !== false
+```
+
+After the schema/runtime changes, the next RED run exposed the independent
+cross-pair check: two different screenshot paths and hashes were being treated
+as one valid proof. The implementation was then completed and the full
+adversarial contract turned GREEN:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batch, and orchestrator continuation.
+```
+
+The round-4 contract now proves:
+
+- PNG signature, chunk/CRC structure, IDAT decompression, case-key path and
+  `case-manifest.json` binding, exact screenshot/hash pairing, and no visual
+  hash reuse across cases or batch results;
+- `PASS` requires `assertionPassed: true` and normalized `actualResult` equal to
+  the catalog `expectedResult` in `validateAtomicResult`;
+- `BTP_INTEGRATION` and `authorizedFixture` are equivalent runtime states, with
+  a 40-character deployed SHA and matching runtime proof when authorized;
+- repository root, `scripts/qa`, and `.tmp/idts-110` ancestors reject symlink,
+  junction, reparse, and in-repository canonical redirects;
+- the draft-07 schema rejects `..` runner paths, documents that cross-property
+  equality and exact evidence-ID case binding remain runtime invariants, and
+  does not contradict those runtime checks;
+- `writeAtomicBatch` handles short writes, fsyncs and closes a contained temp
+  file before rename, preserves the prior destination on rename failure, and
+  removes failed temp files.
+
+Additional GREEN gates:
+
+```text
+node -e "const Ajv=require('ajv'); const schema=require('./docs/qa/idts-110-atomic-result.schema.json'); new Ajv({strict:true}).compile(schema); console.log('strict Ajv schema compile PASS')"
+strict Ajv schema compile PASS
+node --check scripts/qa/idts110-atomic-runner.js
+node --check scripts/qa/run-idts110-new-cases.js
+node --check scripts/qa/test-idts110-atomic-runner.js
+npm run qa:secret-scan
+IDTS secret scan: PASS - no credential-like key patterns found.
+npm run qa:agent-rules
+Agent rule check: PASS (8 required rules)
+git diff --check
+PASS
+```
+
+The five-file Task 3 scope remains isolated. No adapter/business runner,
+catalog/workbook, dependency, product, database, BTP/HANA, provider, email,
+Drive, Jira, or other external state changed.

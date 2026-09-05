@@ -180,6 +180,7 @@
       "const": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
     },
     "deployedSha": {
+      "description": "An authorized BTP fixture must prove the same deployed SHA in runtimeEvidence; cross-property equality is enforced at runtime because draft-07 JSON Schema cannot compare values.",
       "anyOf": [
         { "type": "null" },
         {
@@ -190,7 +191,7 @@
     },
     "testFile": {
       "type": "string",
-      "pattern": "^scripts/qa/[^\\s]+\\.m?js$"
+      "pattern": "^scripts/qa/(?!.*\\.\\.)[^\\s]+\\.m?js$"
     },
     "testCommand": {
       "type": "string",
@@ -205,10 +206,12 @@
       "minLength": 1
     },
     "expectedResult": {
+      "description": "For PASS results actualResult must equal this value; exact cross-property equality is a runtime invariant.",
       "type": "string",
       "minLength": 1
     },
     "actualResult": {
+      "description": "For PASS results this must equal expectedResult; exact cross-property equality is a runtime invariant.",
       "type": "string",
       "minLength": 1
     },
@@ -250,6 +253,7 @@
       ]
     },
     "evidenceIds": {
+      "description": "IDs must use the IDTS-110 case-key shape. Draft-07/Ajv cannot compare each ID to caseKey, so validateAtomicResult enforces exact <caseKey>-RESULT and optional <caseKey>-VISUAL binding.",
       "type": "array",
       "minItems": 1,
       "uniqueItems": true,
@@ -293,13 +297,14 @@
       "else": { "properties": { "deployedSha": { "const": null } } }
     },
     {
-      "if": {
-        "allOf": [
-          { "properties": { "status": { "const": "PASS" } } },
-          { "properties": { "evidenceKind": { "const": "BTP_INTEGRATION" } } }
-        ]
-      },
+      "if": { "properties": { "evidenceKind": { "const": "BTP_INTEGRATION" } } },
       "then": { "properties": { "authorizedFixture": { "const": true } } }
+    },
+    {
+      "if": {
+        "properties": { "authorizedFixture": { "const": true } }
+      },
+      "then": { "properties": { "evidenceKind": { "const": "BTP_INTEGRATION" } } }
     }
   ]
 }

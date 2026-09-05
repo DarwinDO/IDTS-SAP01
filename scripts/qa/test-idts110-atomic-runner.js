@@ -134,6 +134,13 @@ async function main () {
   assert.equal(validateSchema({ ...result, authorizedFixture: true, deployedSha: null }), false, 'schema must reject authorized fixture without deployed SHA')
   assert.equal(validateSchema({ ...result, authorizedFixture: false, deployedSha: 'a'.repeat(40) }), false, 'schema must reject an unbound deployed SHA')
   assert.equal(validateSchema({ ...result, status: 'PASS', evidenceKind: 'BTP_INTEGRATION', authorizedFixture: false, deployedSha: null }), false, 'schema must reject an external PASS without authorization')
+  assert.equal(validateSchema({ ...result, status: 'FAIL', assertionPassed: false, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: false, deployedSha: null }), false, 'schema must reject any unbound BTP evidence kind')
+  assert.equal(validateSchema({ ...result, testFile: 'scripts/qa/../evil.js' }), false, 'schema must reject parent traversal in testFile')
+  assert.equal(validateSchema({ ...result, status: 'PASS', assertionPassed: true, actualResult: 'not expected' }), true, 'schema leaves actual/expected equality to the runtime invariant')
+  assert.throws(() => validateAtomicResult({ ...result, status: 'PASS', assertionPassed: true, actualResult: 'not expected' }), /actualResult|expectedResult|match/i, 'runtime must reject PASS when actualResult differs from expectedResult')
+  assert.throws(() => validateAtomicResult({ ...result, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: false, deployedSha: null }), /BTP|authorized|evidenceKind/i, 'runtime must bind BTP evidence to an authorized fixture')
+  assert.throws(() => validateAtomicResult({ ...result, status: 'FAIL', assertionPassed: false, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: false, deployedSha: null }), /BTP|authorized|evidenceKind/i, 'runtime must bind BTP evidence to an authorized fixture for non-PASS results')
+  assert.throws(() => validateAtomicResult({ ...result, evidenceKind: 'LOCAL_ATOMIC', authorizedFixture: true, deployedSha: 'a'.repeat(40), runtimeEvidence: { deployedSha: 'a'.repeat(40), checked: true } }), /BTP|authorized|evidenceKind/i, 'runtime must bind authorized fixtures to BTP evidence')
   assert.equal(validateSchema({ ...result, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: true, deployedSha: 'a'.repeat(40), runtimeEvidence: { deployedSha: 'a'.repeat(40), checked: true } }), true, 'schema must accept a structurally authorized external result')
 
   const implicitPass = await runAtomicCase({
@@ -229,7 +236,7 @@ async function main () {
     })
   })
   assert.equal(external.status, 'BLOCKED', 'BTP/provider/live cases need an authorized fixture and deployed proof')
-  assert.equal(external.evidenceKind, 'BTP_INTEGRATION')
+  assert.equal(external.evidenceKind, 'LOCAL_ATOMIC', 'unauthorized external attempts are blocked without claiming BTP integration evidence')
 
   const externalSha = 'a'.repeat(40)
   const authorizedExternal = await runAtomicCase({
@@ -280,6 +287,50 @@ async function main () {
   }, batchPath)
   assert.equal(batch.results.length, 1)
   assert.deepEqual(JSON.parse(fs.readFileSync(batchPath, 'utf8')), batch)
+
+  const atomicWritePath = path.join(process.cwd(), '.tmp', 'idts-110', 'atomic-write-contract.json')
+  const realWriteSync = fs.writeSync
+  let partialWriteCalls = 0
+  fs.writeSync = (fd, buffer, offset, length, position) => {
+    partialWriteCalls += 1
+    return realWriteSync(fd, buffer, offset, Math.max(1, Math.floor(length / 2)), position)
+  }
+  let partialBatch
+  try {
+    partialBatch = writeAtomicBatch({
+      runId: 'idts110-partial-write-contract',
+      sourceBaselineSha: BASELINE_SHA,
+      catalogSha: crypto.createHash('sha256').update('catalog').digest('hex'),
+      approvalReference: { pullRequest: 388, mergeSha: BASELINE_SHA },
+      results: [result]
+    }, atomicWritePath)
+  } finally {
+    fs.writeSync = realWriteSync
+  }
+  assert.ok(partialWriteCalls > 1, 'batch writing must handle a short write to the contained temp file')
+  assert.deepEqual(JSON.parse(fs.readFileSync(atomicWritePath, 'utf8')), partialBatch)
+
+  const realRenameSync = fs.renameSync
+  let renameAttempts = 0
+  fs.renameSync = () => {
+    renameAttempts += 1
+    throw new Error('simulated atomic rename failure')
+  }
+  try {
+    assert.throws(() => writeAtomicBatch({
+      runId: 'idts110-rename-failure-contract',
+      sourceBaselineSha: BASELINE_SHA,
+      catalogSha: crypto.createHash('sha256').update('catalog').digest('hex'),
+      approvalReference: { pullRequest: 388, mergeSha: BASELINE_SHA },
+      results: [result]
+    }, atomicWritePath), /rename failure/i)
+  } finally {
+    fs.renameSync = realRenameSync
+  }
+  assert.equal(renameAttempts, 1, 'batch writes must finish through one atomic rename')
+  assert.deepEqual(JSON.parse(fs.readFileSync(atomicWritePath, 'utf8')), partialBatch, 'rename failure must preserve the prior destination')
+  assert.equal(fs.readdirSync(path.dirname(atomicWritePath)).some(name => name.includes('atomic-write-contract') && name !== path.basename(atomicWritePath)), false, 'failed atomic writes must remove temporary files')
+
   assert.throws(() => writeAtomicBatch({
     runId: 'idts110-contract-run',
     sourceBaselineSha: BASELINE_SHA,
@@ -311,6 +362,55 @@ async function main () {
       }, path.join(outputEscapePath, 'escape.json')), /symlink|canonical|boundary/i)
     } finally {
       fs.unlinkSync(outputEscapePath)
+    }
+  }
+
+  const outputInRepoRedirect = path.join(process.cwd(), '.tmp', 'idts-110', 'in-repo-output-redirect')
+  let outputInRepoRedirectCreated = false
+  try {
+    fs.symlinkSync(path.join(process.cwd(), '.tmp', 'idts-110'), outputInRepoRedirect, 'junction')
+    outputInRepoRedirectCreated = true
+  } catch {}
+  if (outputInRepoRedirectCreated) {
+    try {
+      assert.throws(() => orchestrator.resolveOutputPath(path.join(outputInRepoRedirect, 'in-repo.json'), process.cwd()), /reparse|symlink|canonical|redirect|boundary/i)
+    } finally {
+      fs.unlinkSync(outputInRepoRedirect)
+    }
+  }
+
+  const repositoryRedirect = path.join(process.cwd(), '.tmp', 'idts-110', 'repository-redirect')
+  let repositoryRedirectCreated = false
+  try {
+    fs.symlinkSync(process.cwd(), repositoryRedirect, 'junction')
+    repositoryRedirectCreated = true
+  } catch {}
+  if (repositoryRedirectCreated) {
+    try {
+      assert.throws(() => orchestrator.resolveOutputPath('.tmp/idts-110/repository-redirect.json', repositoryRedirect), /reparse|symlink|canonical|redirect|boundary/i)
+    } finally {
+      fs.unlinkSync(repositoryRedirect)
+    }
+  }
+
+  const runnerInRepoRedirect = path.join(process.cwd(), 'scripts', 'qa', 'idts110-runner-redirect')
+  let runnerInRepoRedirectCreated = false
+  try {
+    fs.symlinkSync(path.join(process.cwd(), 'scripts', 'qa'), runnerInRepoRedirect, 'junction')
+    runnerInRepoRedirectCreated = true
+  } catch {}
+  if (runnerInRepoRedirectCreated) {
+    try {
+      await assert.rejects(() => orchestrator.runOneCase(definition({ plannedTestFile: 'scripts/qa/idts110-runner-redirect/test.js' }), {
+        baselineSha: BASELINE_SHA,
+        executor: 'Codex-agent-assisted',
+        outputPath: null,
+        root: process.cwd(),
+        timeoutMs: 1000,
+        spawnSync: () => ({ status: 0, stdout: 'suite PASS', stderr: '' })
+      }), /reparse|symlink|canonical|redirect|outside/i)
+    } finally {
+      fs.unlinkSync(runnerInRepoRedirect)
     }
   }
 
@@ -439,11 +539,23 @@ async function main () {
 
   const visualDefinition = approvedDefinitions.find(current => current.caseId === 'IDTS110-F224')
   const visualDirectory = path.join(process.cwd(), '.tmp', 'idts-110', 'contract-assets')
-  const screenshotPath = path.join(visualDirectory, 'F224.png')
+  const visualCaseDirectory = path.join(visualDirectory, 'IDTS110-F224')
+  const screenshotPath = path.join(visualCaseDirectory, 'result.png')
+  const manifestPath = path.join(visualCaseDirectory, 'case-manifest.json')
   const screenshotBytes = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=', 'base64')
-  fs.mkdirSync(visualDirectory, { recursive: true })
+  const atomicOutputRoot = path.join(process.cwd(), '.tmp', 'idts-110')
+  const relativeScreenshotPath = path.relative(atomicOutputRoot, screenshotPath).replace(/\\/g, '/')
+  const relativeManifestPath = path.relative(atomicOutputRoot, manifestPath).replace(/\\/g, '/')
+  fs.mkdirSync(visualCaseDirectory, { recursive: true })
   fs.writeFileSync(screenshotPath, screenshotBytes)
   const screenshotSha256 = crypto.createHash('sha256').update(screenshotBytes).digest('hex')
+  const writeVisualManifest = hash => fs.writeFileSync(manifestPath, `${JSON.stringify({
+    caseKey: 'IDTS110-F224',
+    evidenceId: 'IDTS110-F224-VISUAL',
+    screenshotPath: relativeScreenshotPath,
+    screenshotSha256: hash
+  })}\n`)
+  writeVisualManifest(screenshotSha256)
   const visualResult = await runAtomicCase({
     definition: visualDefinition,
     assertionId: visualDefinition.assertionId,
@@ -452,10 +564,70 @@ async function main () {
     execute: async () => ({
       assertionPassed: true,
       actualResult: visualDefinition.expectedResult,
-      runtimeEvidence: { screenshotPath, screenshotSha256 },
+      runtimeEvidence: { screenshotPath: relativeScreenshotPath, screenshotSha256, manifestPath: relativeManifestPath },
       evidenceIds: ['IDTS110-F224-RESULT', 'IDTS110-F224-VISUAL']
     })
   })
+
+  fs.writeFileSync(screenshotPath, Buffer.from('not a PNG'))
+  const invalidPngSha256 = crypto.createHash('sha256').update(fs.readFileSync(screenshotPath)).digest('hex')
+  writeVisualManifest(invalidPngSha256)
+  const invalidPngResult = await runAtomicCase({
+    definition: visualDefinition,
+    assertionId: visualDefinition.assertionId,
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: visualDefinition.expectedResult,
+      runtimeEvidence: { screenshotPath: relativeScreenshotPath, screenshotSha256: invalidPngSha256, manifestPath: relativeManifestPath },
+      evidenceIds: ['IDTS110-F224-RESULT', 'IDTS110-F224-VISUAL']
+    })
+  })
+  assert.equal(invalidPngResult.status, 'FAIL', 'visual proof must validate PNG signature and basic structure')
+
+  fs.writeFileSync(screenshotPath, screenshotBytes)
+  writeVisualManifest(screenshotSha256)
+  fs.unlinkSync(manifestPath)
+  const missingManifestResult = await runAtomicCase({
+    definition: visualDefinition,
+    assertionId: visualDefinition.assertionId,
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: visualDefinition.expectedResult,
+      runtimeEvidence: { screenshotPath: relativeScreenshotPath, screenshotSha256, manifestPath: relativeManifestPath },
+      evidenceIds: ['IDTS110-F224-RESULT', 'IDTS110-F224-VISUAL']
+    })
+  })
+  assert.equal(missingManifestResult.status, 'FAIL', 'visual proof must use a case-bound manifest')
+  writeVisualManifest(screenshotSha256)
+
+  const secondScreenshotPath = path.join(visualCaseDirectory, 'runtime.png')
+  const secondScreenshotBytes = fs.readFileSync(path.join(process.cwd(), 'docs', 'diagrams', 'rendered', 'png', '07-developer-review.png'))
+  fs.writeFileSync(secondScreenshotPath, secondScreenshotBytes)
+  const secondScreenshotSha256 = crypto.createHash('sha256').update(fs.readFileSync(secondScreenshotPath)).digest('hex')
+  const crossPairResult = await runAtomicCase({
+    definition: visualDefinition,
+    assertionId: visualDefinition.assertionId,
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: visualDefinition.expectedResult,
+      runtimeEvidence: {
+        screenshotPath: relativeScreenshotPath,
+        screenshotSha256: secondScreenshotSha256,
+        alternateScreenshotPath: path.relative(atomicOutputRoot, secondScreenshotPath).replace(/\\/g, '/'),
+        alternateScreenshotSha256: screenshotSha256,
+        manifestPath: relativeManifestPath
+      },
+      evidenceIds: ['IDTS110-F224-RESULT', 'IDTS110-F224-VISUAL']
+    })
+  })
+  assert.equal(crossPairResult.status, 'FAIL', 'visual proof must not pair a path with another screenshot hash')
+
   const visualBatch = await orchestrator.runNewCases({
     definitions: [visualDefinition],
     baselineSha: BASELINE_SHA,
@@ -463,6 +635,42 @@ async function main () {
     spawnSync: () => ({ status: 0, stdout: `${MARKER_PREFIX}${JSON.stringify({ ...visualResult, runtimeEvidence: null })}\n`, stderr: '' })
   })
   assert.equal(visualBatch.results[0].status, 'FAIL', 'orchestrator must independently require rendered screenshot proof')
+
+  const secondVisualDefinition = approvedDefinitions.find(current => current.caseId === 'IDTS110-F237')
+  const secondVisualDirectory = path.join(visualDirectory, 'IDTS110-F237')
+  const secondVisualPath = path.join(secondVisualDirectory, 'result.png')
+  const secondVisualManifest = path.join(secondVisualDirectory, 'case-manifest.json')
+  fs.mkdirSync(secondVisualDirectory, { recursive: true })
+  fs.writeFileSync(secondVisualPath, screenshotBytes)
+  const secondVisualRelativePath = path.relative(atomicOutputRoot, secondVisualPath).replace(/\\/g, '/')
+  const secondVisualRelativeManifest = path.relative(atomicOutputRoot, secondVisualManifest).replace(/\\/g, '/')
+  fs.writeFileSync(secondVisualManifest, `${JSON.stringify({
+    caseKey: 'IDTS110-F237',
+    evidenceId: 'IDTS110-F237-VISUAL',
+    screenshotPath: secondVisualRelativePath,
+    screenshotSha256
+  })}\n`)
+  const secondVisualResult = await runAtomicCase({
+    definition: secondVisualDefinition,
+    assertionId: secondVisualDefinition.assertionId,
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: secondVisualDefinition.expectedResult,
+      runtimeEvidence: { screenshotPath: secondVisualRelativePath, screenshotSha256, manifestPath: secondVisualRelativeManifest },
+      evidenceIds: ['IDTS110-F237-RESULT', 'IDTS110-F237-VISUAL']
+    })
+  })
+  const reusedScreenshotBatch = await orchestrator.runNewCases({
+    definitions: [visualDefinition, secondVisualDefinition],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: (file, args) => args.some(value => value === '--idts110-case=IDTS110-F224')
+      ? { status: 0, stdout: `${formatAtomicMarker(visualResult)}\n`, stderr: '' }
+      : { status: 0, stdout: `${formatAtomicMarker(secondVisualResult)}\n`, stderr: '' }
+  })
+  assert.deepEqual(reusedScreenshotBatch.results.map(item => item.status), ['PASS', 'FAIL'], 'orchestrator must reject screenshot reuse across case results')
 
   const emptySnapshots = { ...childPass, beforeState: {}, afterState: {}, reloadState: {} }
   const emptySnapshotBatch = await orchestrator.runNewCases({
@@ -574,7 +782,14 @@ async function main () {
   }
   if (fs.existsSync(orchestratedPath)) fs.unlinkSync(orchestratedPath)
   if (fs.existsSync(screenshotPath)) fs.unlinkSync(screenshotPath)
+  if (fs.existsSync(secondScreenshotPath)) fs.unlinkSync(secondScreenshotPath)
+  if (fs.existsSync(secondVisualPath)) fs.unlinkSync(secondVisualPath)
+  if (fs.existsSync(manifestPath)) fs.unlinkSync(manifestPath)
+  if (fs.existsSync(secondVisualManifest)) fs.unlinkSync(secondVisualManifest)
+  if (fs.existsSync(secondVisualDirectory)) fs.rmdirSync(secondVisualDirectory)
+  if (fs.existsSync(visualCaseDirectory)) fs.rmdirSync(visualCaseDirectory)
   if (fs.existsSync(visualDirectory)) fs.rmdirSync(visualDirectory)
+  if (fs.existsSync(atomicWritePath)) fs.unlinkSync(atomicWritePath)
   if (fs.existsSync(tempDirectory)) fs.rmSync(tempDirectory, { recursive: true, force: true })
 
   console.log('IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batch, and orchestrator continuation.')

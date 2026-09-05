@@ -3,6 +3,7 @@
 const crypto = require('node:crypto')
 const fs = require('node:fs')
 const path = require('node:path')
+const zlib = require('node:zlib')
 
 const BASELINE_SHA = '6eb6f73840d7150598a993f8656d2b44e5b0cd4b'
 const MARKER_PREFIX = 'IDTS110_ATOMIC_RESULT '
@@ -14,6 +15,8 @@ const MAX_SAFE_STRING_LENGTH = 2000
 const MAX_SAFE_ARRAY_ITEMS = 64
 const MAX_SAFE_OBJECT_PROPERTIES = 32
 const MAX_SAFE_DEPTH = 4
+const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
+const MAX_PNG_BYTES = 64 * 1024 * 1024
 const REQUIRED_RESULT_FIELDS = [
   'schemaVersion', 'jiraKey', 'caseKey', 'mentorNumber', 'assertionId', 'title',
   'status', 'assertionPassed', 'authorizedFixture', 'evidenceKind', 'executor', 'startedAt', 'completedAt',
@@ -254,39 +257,134 @@ function hasAuthorizedExternal (outcome) {
     Object.keys(outcome.runtimeEvidence).length > 1
 }
 
-function hasScreenshotEvidence (value) {
-  if (!value || typeof value !== 'object') return false
-  const screenshotPaths = []
-  const screenshotHashes = []
-  const visit = current => {
-    if (!current || typeof current !== 'object') return
-    for (const [key, item] of Object.entries(current)) {
-      if (/screenshot|runtime(?:Image|Evidence)|imagePath/i.test(key)) {
-        if (typeof item === 'string' && item.trim()) {
-          if (/sha|hash/i.test(key) && /^[a-f0-9]{64}$/i.test(item.trim())) screenshotHashes.push(item.trim().toLowerCase())
-          else screenshotPaths.push(item.trim())
-        } else if (item && typeof item === 'object') visit(item)
-      } else if (item && typeof item === 'object') visit(item)
-    }
+function crc32 (buffer) {
+  let crc = 0xffffffff
+  for (const byte of buffer) {
+    crc ^= byte
+    for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0)
   }
-  visit(value)
-  return screenshotPaths.some(screenshotPath => screenshotHashes.some(screenshotHash => screenshotFileMatches(screenshotPath, screenshotHash)))
+  return (crc ^ 0xffffffff) >>> 0
 }
 
-function screenshotFileMatches (screenshotPath, expectedHash) {
-  if (typeof screenshotPath !== 'string' || typeof expectedHash !== 'string') return false
+function isDecodablePng (buffer) {
+  if (!Buffer.isBuffer(buffer) || buffer.length < PNG_SIGNATURE.length + 12 || !buffer.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) return false
+  let offset = PNG_SIGNATURE.length
+  let sawHeader = false
+  let sawData = false
+  let sawEnd = false
+  let idat = []
+  while (offset < buffer.length) {
+    if (offset + 12 > buffer.length) return false
+    const length = buffer.readUInt32BE(offset)
+    const typeStart = offset + 4
+    const dataStart = offset + 8
+    const dataEnd = dataStart + length
+    const chunkEnd = dataEnd + 4
+    if (chunkEnd > buffer.length) return false
+    const type = buffer.toString('ascii', typeStart, typeStart + 4)
+    if (!/^[A-Za-z]{4}$/.test(type)) return false
+    const chunkData = buffer.subarray(dataStart, dataEnd)
+    const suppliedCrc = buffer.readUInt32BE(dataEnd)
+    if (crc32(buffer.subarray(typeStart, dataEnd)) !== suppliedCrc) return false
+    if (!sawHeader && type !== 'IHDR') return false
+    if (type === 'IHDR') {
+      if (sawHeader || length !== 13) return false
+      const width = chunkData.readUInt32BE(0)
+      const height = chunkData.readUInt32BE(4)
+      const bitDepth = chunkData[8]
+      const colorType = chunkData[9]
+      if (width === 0 || height === 0 || ![1, 2, 4, 8, 16].includes(bitDepth) || ![0, 2, 3, 4, 6].includes(colorType) || chunkData[10] !== 0 || chunkData[11] !== 0 || chunkData[12] > 1) return false
+      sawHeader = true
+    } else if (type === 'IDAT') {
+      if (!sawHeader || sawEnd) return false
+      sawData = true
+      idat.push(chunkData)
+    } else if (type === 'IEND') {
+      if (!sawHeader || !sawData || length !== 0 || sawEnd) return false
+      sawEnd = true
+    }
+    offset = chunkEnd
+    if (sawEnd) break
+  }
+  if (!sawHeader || !sawData || !sawEnd || offset !== buffer.length) return false
+  try {
+    const inflated = zlib.inflateSync(Buffer.concat(idat), { maxOutputLength: MAX_PNG_BYTES })
+    return inflated.length > 0
+  } catch {
+    return false
+  }
+}
+
+function normalizeOutputRelativePath (value, field) {
+  if (typeof value !== 'string' || !value.trim()) return null
+  const supplied = value.trim().replace(/\\/g, '/')
+  const absolute = path.isAbsolute(value)
+  if (!absolute && (supplied.startsWith('/') || /^[A-Za-z]:\//.test(supplied) || supplied.split('/').includes('..'))) return null
   const outputRoot = path.resolve(ATOMIC_OUTPUT_ROOT)
-  const lexical = path.isAbsolute(screenshotPath)
-    ? path.resolve(screenshotPath)
-    : path.resolve(outputRoot, screenshotPath)
-  if (!isWithin(lexical, outputRoot) || path.extname(lexical).toLowerCase() !== '.png') return false
-  if (!fs.existsSync(lexical)) return false
-  const stat = fs.lstatSync(lexical)
-  if (!stat.isFile() || stat.isSymbolicLink()) return false
-  const actual = fs.realpathSync.native(lexical)
-  if (!isWithin(actual, outputRoot)) return false
-  const actualHash = crypto.createHash('sha256').update(fs.readFileSync(actual)).digest('hex')
-  return actualHash === expectedHash.toLowerCase()
+  const lexical = path.isAbsolute(value) ? path.resolve(value) : path.resolve(outputRoot, value)
+  if (!isWithin(lexical, outputRoot)) return null
+  const relative = path.relative(outputRoot, lexical).replace(/\\/g, '/')
+  if (!relative || relative.split('/').includes('..')) return null
+  return { lexical, relative, field }
+}
+
+function screenshotCandidates (value) {
+  const candidates = []
+  const visit = current => {
+    if (Array.isArray(current)) {
+      for (const item of current) visit(item)
+      return
+    }
+    if (!isObject(current)) return
+    const screenshotPath = current.screenshotPath || current.path || current.imagePath || current.runtimeImagePath
+    const screenshotSha256 = current.screenshotSha256 || current.sha256 || current.imageSha256 || current.runtimeImageSha256
+    const manifestPath = current.manifestPath || current.caseManifestPath
+    if (typeof screenshotPath === 'string' && typeof screenshotSha256 === 'string' && typeof manifestPath === 'string') candidates.push({ screenshotPath, screenshotSha256, manifestPath })
+    for (const item of Object.values(current)) if (isObject(item)) visit(item)
+  }
+  visit(value)
+  return candidates
+}
+
+function screenshotProof (value, caseKey) {
+  if (!isObject(value) || typeof caseKey !== 'string') return null
+  for (const candidate of screenshotCandidates(value)) {
+    const screenshot = normalizeOutputRelativePath(candidate.screenshotPath, 'screenshotPath')
+    const manifest = normalizeOutputRelativePath(candidate.manifestPath, 'manifestPath')
+    const hash = candidate.screenshotSha256.trim().toLowerCase()
+    if (!screenshot || !manifest || !/^[a-f0-9]{64}$/.test(hash)) continue
+    const screenshotParts = screenshot.relative.split('/')
+    const manifestParts = manifest.relative.split('/')
+    if (screenshotParts.length < 2 || screenshotParts[screenshotParts.length - 2] !== caseKey || !/^(?:result|runtime)\.png$/.test(screenshotParts.at(-1))) continue
+    if (manifestParts.length < 2 || manifestParts[manifestParts.length - 2] !== caseKey || manifestParts.at(-1) !== 'case-manifest.json') continue
+    try {
+      assertNoReparseAncestors(path.dirname(screenshot.lexical))
+      assertNoReparseAncestors(path.dirname(manifest.lexical))
+      const screenshotStat = fs.lstatSync(screenshot.lexical)
+      const manifestStat = fs.lstatSync(manifest.lexical)
+      if (!screenshotStat.isFile() || screenshotStat.isSymbolicLink() || !manifestStat.isFile() || manifestStat.isSymbolicLink()) continue
+      if (!samePath(fs.realpathSync.native(screenshot.lexical), screenshot.lexical) || !samePath(fs.realpathSync.native(manifest.lexical), manifest.lexical)) continue
+      if (screenshotStat.size > MAX_PNG_BYTES) continue
+      const bytes = fs.readFileSync(screenshot.lexical)
+      if (!isDecodablePng(bytes)) continue
+      if (crypto.createHash('sha256').update(bytes).digest('hex') !== hash) continue
+      const manifestJson = JSON.parse(fs.readFileSync(manifest.lexical, 'utf8'))
+      assertNoUndefined(manifestJson, 'screenshot manifest')
+      assertSafeValue(manifestJson, 'screenshot manifest')
+      const manifestEvidenceIds = Array.isArray(manifestJson.evidenceIds)
+        ? manifestJson.evidenceIds
+        : [manifestJson.evidenceId]
+      if (manifestJson.caseKey !== caseKey || manifestJson.screenshotPath !== screenshot.relative || String(manifestJson.screenshotSha256 || '').toLowerCase() !== hash || !manifestEvidenceIds.includes(`${caseKey}-VISUAL`)) continue
+      return { relativePath: screenshot.relative, hash, manifestPath: manifest.relative }
+    } catch {
+      continue
+    }
+  }
+  return null
+}
+
+function hasScreenshotEvidence (value, caseKey) {
+  return screenshotProof(value, caseKey) !== null
 }
 
 function statusFromError (error) {
@@ -334,15 +432,16 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
       finalActual = 'BTP, provider-live, or other external execution requires authorizedFixture=true, an exact deployed SHA, and matching runtime evidence.'
     }
   }
-  const evidenceKind = definition.acceptanceMode === 'UI_RUNTIME_VISUAL'
-    ? 'UI_RUNTIME'
-    : needsAuthorizedExternal(definition)
-      ? 'BTP_INTEGRATION'
+  const evidenceKind = authorizedExternal
+    ? 'BTP_INTEGRATION'
+    : definition.acceptanceMode === 'UI_RUNTIME_VISUAL'
+      ? 'UI_RUNTIME'
       : 'LOCAL_ATOMIC'
   const safeBeforeState = sanitizeValue(beforeState, 'beforeState')
   const safeAfterState = sanitizeValue(afterState, 'afterState')
   const safeReloadState = sanitizeValue(reloadState, 'reloadState')
   const safeRuntimeEvidence = sanitizeValue(runtimeEvidence, 'runtimeEvidence')
+  if (!authorizedExternal && needsAuthorizedExternal(definition) && isObject(safeRuntimeEvidence)) delete safeRuntimeEvidence.deployedSha
   const requiredEvidenceIds = [`${caseKey}-RESULT`]
   if (evidenceKind === 'UI_RUNTIME') requiredEvidenceIds.push(`${caseKey}-VISUAL`)
   const suppliedEvidenceIds = Object.hasOwn(outcome, 'evidenceIds') ? outcome.evidenceIds : requiredEvidenceIds
@@ -362,7 +461,7 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
     if (hasSnapshotRequirement(definition, 'before') && (!isObject(safeBeforeState) || Object.keys(safeBeforeState).length === 0)) missing.push('before-state')
     if (hasSnapshotRequirement(definition, 'after') && (!isObject(safeAfterState) || Object.keys(safeAfterState).length === 0)) missing.push('after-state')
     if (hasSnapshotRequirement(definition, 'reload') && (!isObject(safeReloadState) || Object.keys(safeReloadState).length === 0)) missing.push('reload/readback')
-    if (needsVisualEvidence(definition) && !hasScreenshotEvidence(safeRuntimeEvidence)) missing.push('browser/runtime screenshot and SHA-256')
+    if (needsVisualEvidence(definition) && !hasScreenshotEvidence(safeRuntimeEvidence, caseKey)) missing.push('browser/runtime screenshot and SHA-256')
     if (missing.length && finalStatus !== 'BLOCKED') {
       finalStatus = 'FAIL'
       finalActual = `Atomic assertion ran but required evidence is missing: ${missing.join(', ')}.`
@@ -462,7 +561,9 @@ function validateAtomicResult (result) {
   if (typeof result.authorizedFixture !== 'boolean') fail('result authorizedFixture must be boolean')
   if (result.status === 'PASS' && result.assertionPassed !== true) fail('PASS requires explicit assertionPassed=true')
   if (result.status !== 'PASS' && result.assertionPassed !== false) fail('non-PASS results require assertionPassed=false')
+  if (result.status === 'PASS' && normalizeComparable(result.actualResult) !== normalizeComparable(result.expectedResult)) fail('PASS requires actualResult to equal expectedResult')
   if (!EVIDENCE_KINDS.includes(result.evidenceKind)) fail('result evidenceKind is invalid')
+  if ((result.evidenceKind === 'BTP_INTEGRATION') !== (result.authorizedFixture === true)) fail('BTP_INTEGRATION evidenceKind requires authorizedFixture=true and authorizedFixture requires BTP_INTEGRATION evidenceKind')
   validateTimestamp(result.startedAt, 'startedAt')
   validateTimestamp(result.completedAt, 'completedAt')
   if (Date.parse(result.completedAt) < Date.parse(result.startedAt)) fail('completedAt cannot precede startedAt')
@@ -474,13 +575,14 @@ function validateAtomicResult (result) {
   if (!Array.isArray(result.sourceTrace) || result.sourceTrace.length === 0 || result.sourceTrace.some(trace => !isObject(trace) || typeof trace.file !== 'string' || typeof trace.symbol !== 'string' || !trace.file.trim() || !trace.symbol.trim())) fail('result sourceTrace must contain file and symbol entries')
   for (const state of ['beforeState', 'afterState', 'reloadState', 'runtimeEvidence']) if (state !== 'runtimeEvidence' && result[state] !== null && !isObject(result[state])) fail(`result ${state} must be an object or null`)
   if (result.runtimeEvidence !== null && !isObject(result.runtimeEvidence)) fail('result runtimeEvidence must be an object or null')
-  if (result.authorizedFixture && (!isObject(result.runtimeEvidence) || result.runtimeEvidence.deployedSha !== result.deployedSha)) fail('authorizedFixture requires runtimeEvidence.deployedSha to match deployedSha')
+  if (result.authorizedFixture && (!isObject(result.runtimeEvidence) || result.runtimeEvidence.deployedSha !== result.deployedSha || Object.keys(result.runtimeEvidence).length < 2)) fail('authorizedFixture requires runtimeEvidence.deployedSha to match deployedSha and include runtime proof')
+  if (!result.authorizedFixture && isObject(result.runtimeEvidence) && Object.hasOwn(result.runtimeEvidence, 'deployedSha')) fail('runtime deployed SHA requires authorizedFixture=true')
   const requiredEvidenceId = `${result.caseKey}-RESULT`
   const visualEvidenceId = `${result.caseKey}-VISUAL`
   const allowedEvidenceIds = result.evidenceKind === 'UI_RUNTIME' ? [requiredEvidenceId, visualEvidenceId] : [requiredEvidenceId]
   if (!Array.isArray(result.evidenceIds) || result.evidenceIds.length === 0 || result.evidenceIds.some(id => typeof id !== 'string' || !id.trim() || !allowedEvidenceIds.includes(id)) || !result.evidenceIds.includes(requiredEvidenceId)) fail('result evidenceIds must contain the exact case result ID')
   if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !result.evidenceIds.includes(visualEvidenceId)) fail('visual PASS requires the exact case visual evidence ID')
-  if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !hasScreenshotEvidence(result.runtimeEvidence)) fail('visual PASS requires an existing PNG screenshot with a matching SHA-256')
+  if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !hasScreenshotEvidence(result.runtimeEvidence, result.caseKey)) fail('visual PASS requires a case-bound, decodable PNG screenshot with a matching SHA-256 and manifest')
   const serialized = JSON.stringify(result)
   if (/MAPPING_ONLY|\bundefined\b/i.test(serialized)) fail('result contains forbidden MAPPING_ONLY or undefined text')
   assertSafeValue(result)
@@ -534,12 +636,12 @@ function samePath (left, right) {
   return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b
 }
 
-function assertNoSymlinkAncestors (targetRoot) {
-  const safeRoot = fs.realpathSync.native(PROJECT_ROOT)
-  const resolvedTarget = path.resolve(targetRoot)
-  if (!isWithin(resolvedTarget, safeRoot)) fail('target root is outside the repository')
-  let current = safeRoot
-  for (const segment of path.relative(safeRoot, resolvedTarget).split(path.sep).filter(Boolean)) {
+function assertNoReparseAncestors (target) {
+  const resolvedTarget = path.resolve(target)
+  const volumeRoot = path.parse(resolvedTarget).root
+  let current = volumeRoot
+  const segments = path.relative(volumeRoot, resolvedTarget).split(path.sep).filter(Boolean)
+  for (const [index, segment] of segments.entries()) {
     current = path.join(current, segment)
     let stat
     try {
@@ -548,30 +650,36 @@ function assertNoSymlinkAncestors (targetRoot) {
       if (error.code === 'ENOENT') break
       throw error
     }
-    if (stat.isSymbolicLink()) fail('output root contains a symlink or reparse point')
-    if (!stat.isDirectory()) fail('output root contains a non-directory ancestor')
-    if (!samePath(fs.realpathSync.native(current), current)) fail('output root canonical ancestor differs from the intended path')
+    if (stat.isSymbolicLink()) fail(`path contains a symlink or reparse point: ${current}`)
+    if (index < segments.length - 1 && !stat.isDirectory()) fail(`path contains a non-directory ancestor: ${current}`)
+    if (!samePath(fs.realpathSync.native(current), current)) fail(`path canonical ancestor differs from the intended path: ${current}`)
   }
 }
 
 function atomicOutputPath (outputPath) {
   if (typeof outputPath !== 'string' || !outputPath.trim()) fail('outputPath is required')
-  const safeRoot = fs.realpathSync.native(PROJECT_ROOT)
+  const safeRoot = path.resolve(PROJECT_ROOT)
+  assertNoReparseAncestors(safeRoot)
   const outputRoot = path.join(safeRoot, '.tmp', 'idts-110')
-  assertNoSymlinkAncestors(outputRoot)
+  assertNoReparseAncestors(outputRoot)
   const actualOutputRoot = path.resolve(outputRoot)
   if (!isWithin(actualOutputRoot, safeRoot)) fail('atomic output root has a symlink escape')
   const lexical = path.resolve(outputPath)
   if (!isWithin(lexical, outputRoot)) fail('outputPath must stay inside the approved .tmp/idts-110 boundary')
-  if (fs.existsSync(lexical) && fs.lstatSync(lexical).isSymbolicLink()) fail('outputPath cannot be a symlink')
-  assertNoSymlinkAncestors(path.dirname(lexical))
+  try {
+    const outputStat = fs.lstatSync(lexical)
+    if (outputStat.isSymbolicLink()) fail('outputPath cannot be a symlink or reparse point')
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+  }
+  assertNoReparseAncestors(path.dirname(lexical))
   fs.mkdirSync(path.dirname(lexical), { recursive: true })
-  assertNoSymlinkAncestors(path.dirname(lexical))
+  assertNoReparseAncestors(path.dirname(lexical))
   const actualParent = fs.realpathSync.native(path.dirname(lexical))
   if (!samePath(actualParent, path.dirname(lexical)) || !isWithin(actualParent, actualOutputRoot)) fail('outputPath parent has a symlink escape outside .tmp/idts-110')
   const actual = realPathWithMissingTail(lexical)
-  if (!isWithin(actual, actualOutputRoot)) fail('outputPath has a symlink escape outside .tmp/idts-110')
-  return actual
+  if (!samePath(actual, lexical) || !isWithin(actual, actualOutputRoot)) fail('outputPath has a symlink escape outside .tmp/idts-110')
+  return lexical
 }
 
 function writeAtomicBatch ({ runId, sourceBaselineSha, catalogSha, approvalReference, results }, outputPath) {
@@ -586,6 +694,14 @@ function writeAtomicBatch ({ runId, sourceBaselineSha, catalogSha, approvalRefer
   const safeResults = results.map(result => validateAtomicResult(result))
   const keys = safeResults.map(result => result.caseKey)
   if (new Set(keys).size !== keys.length) fail('results contain a duplicate caseKey')
+  const visualHashes = new Set()
+  for (const result of safeResults) {
+    if (result.status !== 'PASS' || result.evidenceKind !== 'UI_RUNTIME') continue
+    const proof = screenshotProof(result.runtimeEvidence, result.caseKey)
+    if (!proof) fail(`results contain invalid visual proof for ${result.caseKey}`)
+    if (visualHashes.has(proof.hash)) fail(`results reuse screenshot evidence across case results for ${result.caseKey}`)
+    visualHashes.add(proof.hash)
+  }
   const startedAt = safeResults.map(result => Date.parse(result.startedAt)).reduce((min, value) => Math.min(min, value), Number.POSITIVE_INFINITY)
   const completedAt = safeResults.map(result => Date.parse(result.completedAt)).reduce((max, value) => Math.max(max, value), 0)
   const batch = {
@@ -603,7 +719,34 @@ function writeAtomicBatch ({ runId, sourceBaselineSha, catalogSha, approvalRefer
   assertNoUndefined(batch)
   assertSafeValue(batch)
   const target = atomicOutputPath(outputPath)
-  fs.writeFileSync(target, `${JSON.stringify(batch, null, 2)}\n`, 'utf8')
+  const temporaryPath = path.join(path.dirname(target), `.${path.basename(target)}.${process.pid}.${Date.now()}.${crypto.randomBytes(8).toString('hex')}.tmp`)
+  assertNoReparseAncestors(path.dirname(temporaryPath))
+  let descriptor = null
+  try {
+    descriptor = fs.openSync(temporaryPath, 'wx', 0o600)
+    const bytes = Buffer.from(`${JSON.stringify(batch, null, 2)}\n`, 'utf8')
+    let offset = 0
+    while (offset < bytes.length) {
+      const written = fs.writeSync(descriptor, bytes, offset, bytes.length - offset, null)
+      if (!Number.isInteger(written) || written <= 0) throw new Error('atomic batch temporary write made no progress')
+      offset += written
+    }
+    fs.fsyncSync(descriptor)
+    fs.closeSync(descriptor)
+    descriptor = null
+    fs.renameSync(temporaryPath, target)
+  } catch (error) {
+    if (descriptor !== null) {
+      try { fs.closeSync(descriptor) } catch {}
+    }
+    try {
+      if (fs.existsSync(temporaryPath)) {
+        const stat = fs.lstatSync(temporaryPath)
+        if (stat.isFile() && !stat.isSymbolicLink()) fs.unlinkSync(temporaryPath)
+      }
+    } catch {}
+    throw error
+  }
   return batch
 }
 
@@ -623,5 +766,7 @@ module.exports = {
   formatAtomicMarker,
   writeAtomicBatch,
   sanitizeValue,
-  assertSafeValue
+  assertSafeValue,
+  screenshotProof,
+  assertNoReparseAncestors
 }

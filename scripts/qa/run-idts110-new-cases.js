@@ -7,9 +7,11 @@ const childProcess = require('node:child_process')
 
 const {
   BASELINE_SHA,
+  assertNoReparseAncestors,
   parseAtomicMarker,
   readAtomicOptions,
   runAtomicCase,
+  screenshotProof,
   validateAtomicResult,
   writeAtomicBatch
 } = require('./idts110-atomic-runner')
@@ -48,31 +50,8 @@ function definitionRequiresExternal (definition) {
   return executionModes.some(value => /BTP|PROVIDER[_-]?LIVE|LIVE(?:[_-]|$)|EXTERNAL/.test(value)) || definition.providerLive === true || definition.live === true
 }
 
-function hasScreenshotProof (value) {
-  if (!value || typeof value !== 'object') return false
-  const screenshotPaths = []
-  const screenshotHashes = []
-  const visit = current => {
-    for (const [key, item] of Object.entries(current || {})) {
-      if (/screenshot|runtime(?:Image|Evidence)|imagePath/i.test(key)) {
-        if (typeof item === 'string' && item.trim()) {
-          if (/sha|hash/i.test(key) && /^[a-f0-9]{64}$/i.test(item.trim())) screenshotHashes.push(item.trim().toLowerCase())
-          else screenshotPaths.push(item.trim())
-        } else if (item && typeof item === 'object') visit(item)
-      } else if (item && typeof item === 'object') visit(item)
-    }
-  }
-  visit(value)
-  const outputRoot = path.join(repositoryRoot(ROOT), '.tmp', 'idts-110')
-  return screenshotPaths.some(screenshotPath => screenshotHashes.some(screenshotHash => {
-    const lexical = path.isAbsolute(screenshotPath) ? path.resolve(screenshotPath) : path.resolve(outputRoot, screenshotPath)
-    if (!isWithin(lexical, outputRoot) || path.extname(lexical).toLowerCase() !== '.png' || !fs.existsSync(lexical)) return false
-    const stat = fs.lstatSync(lexical)
-    if (!stat.isFile() || stat.isSymbolicLink()) return false
-    const actual = fs.realpathSync.native(lexical)
-    if (!isWithin(actual, outputRoot)) return false
-    return crypto.createHash('sha256').update(fs.readFileSync(actual)).digest('hex') === screenshotHash
-  }))
+function hasScreenshotProof (value, caseKey) {
+  return screenshotProof(value, caseKey) !== null
 }
 
 function assertDefinitionEvidence (marker, definition) {
@@ -86,7 +65,7 @@ function assertDefinitionEvidence (marker, definition) {
   for (const [field, isRequired] of Object.entries(required)) {
     if (isRequired && (!marker[field] || typeof marker[field] !== 'object' || Object.keys(marker[field]).length === 0)) fail(`${field} evidence must be a non-empty object for ${definition.caseId}`)
   }
-  if (definitionRequiresVisual(definition) && !hasScreenshotProof(marker.runtimeEvidence)) fail(`rendered screenshot proof is required for ${definition.caseId}`)
+  if (definitionRequiresVisual(definition) && !hasScreenshotProof(marker.runtimeEvidence, definition.caseId)) fail(`rendered screenshot proof is required for ${definition.caseId}`)
 }
 
 function definitionRequiresVisual (definition) {
@@ -211,42 +190,80 @@ function realPathWithMissingTail (target) {
 }
 
 function isWithin (target, parent) {
-  const normalizedTarget = path.resolve(target)
-  const normalizedParent = path.resolve(parent)
+  const normalize = value => {
+    const resolved = path.resolve(value)
+    return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+  }
+  const normalizedTarget = normalize(target)
+  const normalizedParent = normalize(parent)
   return normalizedTarget === normalizedParent || normalizedTarget.startsWith(`${normalizedParent}${path.sep}`)
 }
 
+function samePath (left, right) {
+  const normalize = value => {
+    const resolved = path.resolve(value)
+    return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+  }
+  return normalize(left) === normalize(right)
+}
+
 function repositoryRoot (root = ROOT) {
-  const resolved = fs.realpathSync.native(path.resolve(root))
-  if (!fs.existsSync(path.join(resolved, 'scripts/qa'))) fail('repository root is missing scripts/qa')
-  return resolved
+  const intended = path.resolve(root)
+  assertNoReparseAncestors(intended)
+  let stat
+  try {
+    stat = fs.lstatSync(intended)
+  } catch (error) {
+    if (error.code === 'ENOENT') fail('repository root does not exist')
+    throw error
+  }
+  if (!stat.isDirectory()) fail('repository root is not a directory')
+  if (path.resolve(fs.realpathSync.native(intended)) !== intended && process.platform !== 'win32') fail('repository root canonical path differs from the intended path')
+  const scriptsQa = path.join(intended, 'scripts', 'qa')
+  assertNoReparseAncestors(scriptsQa)
+  if (!fs.existsSync(scriptsQa) || !fs.statSync(scriptsQa).isDirectory()) fail('repository root is missing scripts/qa')
+  return intended
 }
 
 function runnerPath (definition, root = ROOT) {
   if (typeof definition.plannedTestFile !== 'string' || !/^scripts\/qa\/[^\s]+\.m?js$/.test(definition.plannedTestFile) || definition.plannedTestFile.includes('..')) fail(`${definition.caseId} has an unsafe plannedTestFile`)
   const safeRoot = repositoryRoot(root)
-  const scriptsRoot = fs.realpathSync.native(path.join(safeRoot, 'scripts/qa'))
+  const scriptsRoot = path.join(safeRoot, 'scripts/qa')
+  assertNoReparseAncestors(scriptsRoot)
   if (!isWithin(scriptsRoot, safeRoot)) fail('scripts/qa resolves outside the repository root')
-  const resolved = realPathWithMissingTail(path.join(safeRoot, definition.plannedTestFile))
-  if (!isWithin(resolved, scriptsRoot)) fail(`${definition.caseId} plannedTestFile has a symlink escape outside scripts/qa`)
-  return resolved
+  const lexical = path.resolve(safeRoot, definition.plannedTestFile)
+  if (!isWithin(lexical, scriptsRoot)) fail(`${definition.caseId} plannedTestFile has a symlink escape outside scripts/qa`)
+  assertNoReparseAncestors(path.dirname(lexical))
+  const resolved = realPathWithMissingTail(lexical)
+  if (!samePath(resolved, lexical) || !isWithin(resolved, scriptsRoot)) fail(`${definition.caseId} plannedTestFile has a reparse or symlink redirect outside its intended path`)
+  if (fs.existsSync(lexical)) {
+    const stat = fs.lstatSync(lexical)
+    if (!stat.isFile() || stat.isSymbolicLink()) fail(`${definition.caseId} plannedTestFile is not a regular file`)
+  }
+  return lexical
 }
 
 function resolveOutputPath (outputPath, root = ROOT) {
   if (typeof outputPath !== 'string' || !outputPath.trim()) fail('output path is required')
   const safeRoot = repositoryRoot(root)
   const tmpRoot = path.join(safeRoot, '.tmp')
+  const atomicRoot = path.join(tmpRoot, 'idts-110')
+  assertNoReparseAncestors(tmpRoot)
+  assertNoReparseAncestors(atomicRoot)
   const lexical = path.resolve(safeRoot, outputPath)
   if (!isWithin(lexical, tmpRoot)) fail('output path must stay inside the repository .tmp boundary')
-  const actualTmpRoot = realPathWithMissingTail(tmpRoot)
-  if (!isWithin(actualTmpRoot, safeRoot)) fail('repository .tmp resolves outside the repository root')
-  const existingParent = realPathWithMissingTail(path.dirname(lexical))
-  if (!isWithin(existingParent, actualTmpRoot)) fail('output path parent has a symlink escape outside the repository .tmp boundary')
+  assertNoReparseAncestors(path.dirname(lexical))
   fs.mkdirSync(path.dirname(lexical), { recursive: true })
+  assertNoReparseAncestors(path.dirname(lexical))
   const actual = realPathWithMissingTail(lexical)
-  if (!isWithin(actualTmpRoot, safeRoot) || !isWithin(actual, actualTmpRoot)) fail('output path has a symlink escape outside the repository .tmp boundary')
-  if (fs.existsSync(lexical) && fs.lstatSync(lexical).isSymbolicLink()) fail('output path cannot be a symlink')
-  return actual
+  if (!samePath(actual, lexical) || !isWithin(actual, tmpRoot)) fail('output path has a symlink or reparse redirect outside the repository .tmp boundary')
+  try {
+    const stat = fs.lstatSync(lexical)
+    if (stat.isSymbolicLink()) fail('output path cannot be a symlink or reparse point')
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error
+  }
+  return lexical
 }
 
 function perCaseOutputPath (outputPath, caseKey, root = ROOT) {
@@ -398,6 +415,12 @@ async function runOneCase (definition, options) {
   if (child.status !== 0 && marker.status === 'PASS') {
     return fallbackResult(definition, options, 'FAIL', `Atomic child exited with code ${child.status} after claiming PASS; the result is not accepted.`, options.index)
   }
+  if (marker.status === 'PASS' && definitionRequiresVisual(definition) && options.usedVisualEvidence) {
+    const proof = screenshotProof(marker.runtimeEvidence, definition.caseId)
+    if (!proof) fail(`rendered screenshot proof is required for ${definition.caseId}`)
+    if (options.usedVisualEvidence.has(proof.hash)) fail(`screenshot evidence is reused across case results for ${definition.caseId}`)
+    options.usedVisualEvidence.add(proof.hash)
+  }
   return marker
 }
 
@@ -442,6 +465,7 @@ async function runNewCases ({
   if (suppliedCatalogSha !== undefined && suppliedCatalogSha !== actualCatalogSha) fail('caller catalogSha does not match the approved catalog file')
   if (approvalReference !== undefined && JSON.stringify(approvalReference) !== JSON.stringify(approved.approval.approvalReference)) fail('caller approvalReference does not match the approved receipt file')
   const results = []
+  const usedVisualEvidence = new Set()
   for (const [index, definition] of selectedDefinitions.entries()) {
     try {
       results.push(await runOneCase(definition, {
@@ -451,7 +475,8 @@ async function runNewCases ({
         root: safeRoot,
         timeoutMs,
         spawnSync,
-        index
+        index,
+        usedVisualEvidence
       }))
     } catch (error) {
       results.push(await fallbackResult(definition, {
