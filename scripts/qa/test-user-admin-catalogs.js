@@ -265,10 +265,25 @@ async function runAtomicCatalogCase (caseKey) {
       return { active: true, bugReferenceCount: impact.bugReferenceCount, dependencyGuard: 'CATALOG_HAS_ACTIVE_DEPENDENCIES' }
     }
     if (caseKey === 'IDTS110-F230') {
-      const impact = await service.send({ event: 'readCatalogImpact', data: { catalogType: 'SAP_MODULE', catalogID: IDS.module }, user: administrator })
-      assert.deepEqual({ bugReferenceCount: impact.bugReferenceCount, activeResponsibilityCount: impact.activeResponsibilityCount, activeChildReferenceCount: impact.activeChildReferenceCount }, { bugReferenceCount: 1, activeResponsibilityCount: 1, activeChildReferenceCount: 1 })
+      const requestedCatalogType = 'SAP_MODULE'
+      const requestedCatalogID = IDS.module
+      const impact = await service.send({ event: 'readCatalogImpact', data: { catalogType: requestedCatalogType, catalogID: requestedCatalogID }, user: administrator })
+      assert.equal(impact.catalogType, requestedCatalogType)
+      assert.equal(impact.catalogID, requestedCatalogID)
+      assert.deepEqual({
+        bugReferenceCount: impact.bugReferenceCount,
+        activeResponsibilityCount: impact.activeResponsibilityCount,
+        activeChildReferenceCount: impact.activeChildReferenceCount
+      }, { bugReferenceCount: 1, activeResponsibilityCount: 1, activeChildReferenceCount: 1 })
       await expectRejected(service.send({ event: 'readCatalogImpact', data: { catalogType: 'USERS', catalogID: IDS.module }, user: administrator }), 400, 'INVALID_CATALOG_TYPE')
-      return { boundedCounts: true, invalidTargetRejected: true }
+      return {
+        catalogType: impact.catalogType,
+        catalogID: impact.catalogID,
+        bugReferenceCount: impact.bugReferenceCount,
+        activeResponsibilityCount: impact.activeResponsibilityCount,
+        activeChildReferenceCount: impact.activeChildReferenceCount,
+        invalidTargetRejected: true
+      }
     }
     if (caseKey === 'IDTS110-F231') {
       const before = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))

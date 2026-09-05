@@ -1130,13 +1130,17 @@ async function runAtomicOnboardingCase (caseKey) {
       assert.equal(approved.status, 'PROVISION_QUEUED')
       assert.equal(approved.provisioningVersion, 2)
       const afterRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.row.ID }))
-      const operation = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: invitation.row.ID }))
+      const operations = await fixture.db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: invitation.row.ID }))
       const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: invitation.row.ID, action: 'APPROVE_PROVISIONING', result: 'QUEUED' }))
       assert.equal(afterRequest.status_code, 'PROVISION_QUEUED')
-      assert.equal(afterRequest.latestOperation_ID, operation.ID)
+      assert.equal(operations.length, 1)
+      const operation = operations[0]
+      assert.equal(operation.operationType, 'PROVISION')
       assert.equal(operation.state, 'PENDING')
+      assert.equal(operation.onboardingRequest_ID, invitation.row.ID)
+      assert.equal(afterRequest.latestOperation_ID, operation.ID)
       assert.equal(audits.length, 1)
-      return { status: afterRequest.status_code, provisioningVersion: afterRequest.provisioningVersion, operationState: operation.state, auditRows: audits.length }
+      return { status: afterRequest.status_code, provisioningVersion: afterRequest.provisioningVersion, operationRows: operations.length, operationType: operation.operationType, operationState: operation.state, auditRows: audits.length }
     }
     if (caseKey === 'IDTS110-F211') {
       const componentCategoryID = await activeComponentCategory(fixture.db)
