@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "approvalDate": "2026-09-05",
+  "approvedAt": "2026-09-05",
+  "approvedBy": "DonHV",
+  "status": "APPROVED_FOR_EXECUTION",
+  "approvedCatalogCount": 278,
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "authorizationStatement": "DonHV approval authorizes the 278 catalog definitions and the local or candidate execution workflow. It does not pre-approve any execution result as PASS.",
+  "resultsPreApproved": false,
+  "resultReviewStatus": "PENDING_DONHV_REVIEW",
+  "externalMutations": []
+}

@@ -1,0 +1,1682 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "historicalGapPackageBaseSha": "9d5aad699662bde65a747de4c0d631678de639e4",
+  "historicalCatalogBaselineSha": "bc0c47e522ae208384d4b23dda21535dcc683683",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "numbering": "SEQUENTIAL_ONLY",
+  "entries": [
+    {
+      "mentorNumber": 1,
+      "internalCaseKey": "UT-AUTH-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 2,
+      "internalCaseKey": "UT-AUTH-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 3,
+      "internalCaseKey": "UT-AUTH-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 4,
+      "internalCaseKey": "UT-AUTH-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 5,
+      "internalCaseKey": "UT-AUTH-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 6,
+      "internalCaseKey": "UT-AUTH-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 7,
+      "internalCaseKey": "UT-AUTH-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 8,
+      "internalCaseKey": "UT-AUTH-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 9,
+      "internalCaseKey": "UT-AUTH-009",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 10,
+      "internalCaseKey": "UT-AUTH-010",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 11,
+      "internalCaseKey": "UT-AUTH-011",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 12,
+      "internalCaseKey": "UT-AUTH-012",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 13,
+      "internalCaseKey": "UT-AUTH-013",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 14,
+      "internalCaseKey": "UT-AUTH-014",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 15,
+      "internalCaseKey": "UT-AUTH-015",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 16,
+      "internalCaseKey": "UT-BUG-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 17,
+      "internalCaseKey": "UT-BUG-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 18,
+      "internalCaseKey": "UT-BUG-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 19,
+      "internalCaseKey": "UT-BUG-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 20,
+      "internalCaseKey": "UT-BUG-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 21,
+      "internalCaseKey": "UT-BUG-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 22,
+      "internalCaseKey": "UT-BUG-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 23,
+      "internalCaseKey": "UT-BUG-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 24,
+      "internalCaseKey": "UT-BUG-009",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 25,
+      "internalCaseKey": "UT-BUG-010",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 26,
+      "internalCaseKey": "UT-BUG-011",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 27,
+      "internalCaseKey": "UT-VAL-TITLE",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 28,
+      "internalCaseKey": "UT-VAL-DESCRIPTION",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 29,
+      "internalCaseKey": "UT-VAL-STEPS",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 30,
+      "internalCaseKey": "UT-VAL-ACTUAL",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 31,
+      "internalCaseKey": "UT-VAL-EXPECTED",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 32,
+      "internalCaseKey": "UT-VAL-PRIORITY",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 33,
+      "internalCaseKey": "UT-VAL-SEVERITY",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 34,
+      "internalCaseKey": "UT-VAL-COMPONENT",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 35,
+      "internalCaseKey": "UT-VAL-CATEGORY",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 36,
+      "internalCaseKey": "UT-VAL-REPORTER",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 37,
+      "internalCaseKey": "UT-VAL-WHITESPACE",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 38,
+      "internalCaseKey": "UT-VAL-CODE-UNKNOWN",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 39,
+      "internalCaseKey": "UT-VAL-CODE-INACTIVE",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 40,
+      "internalCaseKey": "UT-VAL-CODE-SPACES",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 41,
+      "internalCaseKey": "UT-VAL-CODE-EMPTY",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 42,
+      "internalCaseKey": "UT-VAL-CODE-TYPE",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 43,
+      "internalCaseKey": "UT-VAL-PAIR-VALID",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 44,
+      "internalCaseKey": "UT-VAL-PAIR-NOMAP",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 45,
+      "internalCaseKey": "UT-VAL-PAIR-MISMATCH",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 46,
+      "internalCaseKey": "UT-VAL-PAIR-CHANGE",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 47,
+      "internalCaseKey": "UT-VAL-PAIR-PARTIAL",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 48,
+      "internalCaseKey": "UT-ASN-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 49,
+      "internalCaseKey": "UT-ASN-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 50,
+      "internalCaseKey": "UT-ASN-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 51,
+      "internalCaseKey": "UT-ASN-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 52,
+      "internalCaseKey": "UT-ASN-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 53,
+      "internalCaseKey": "UT-ASN-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 54,
+      "internalCaseKey": "UT-ASN-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 55,
+      "internalCaseKey": "UT-ASN-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 56,
+      "internalCaseKey": "UT-ASN-009",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 57,
+      "internalCaseKey": "UT-ASN-010",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 58,
+      "internalCaseKey": "UT-ASN-011",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 59,
+      "internalCaseKey": "UT-LC-01A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 60,
+      "internalCaseKey": "UT-LC-01B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 61,
+      "internalCaseKey": "UT-LC-01C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 62,
+      "internalCaseKey": "UT-LC-01D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 63,
+      "internalCaseKey": "UT-LC-02A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 64,
+      "internalCaseKey": "UT-LC-02B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 65,
+      "internalCaseKey": "UT-LC-02C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 66,
+      "internalCaseKey": "UT-LC-03A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 67,
+      "internalCaseKey": "UT-LC-03B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 68,
+      "internalCaseKey": "UT-LC-03C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 69,
+      "internalCaseKey": "UT-LC-03D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 70,
+      "internalCaseKey": "UT-LC-04A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 71,
+      "internalCaseKey": "UT-LC-04B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 72,
+      "internalCaseKey": "UT-LC-04C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 73,
+      "internalCaseKey": "UT-LC-04D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 74,
+      "internalCaseKey": "UT-LC-04E",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 75,
+      "internalCaseKey": "UT-LC-05A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 76,
+      "internalCaseKey": "UT-LC-05B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 77,
+      "internalCaseKey": "UT-LC-05C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 78,
+      "internalCaseKey": "UT-LC-05D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 79,
+      "internalCaseKey": "UT-LC-05E",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 80,
+      "internalCaseKey": "UT-LC-06A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 81,
+      "internalCaseKey": "UT-LC-06B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 82,
+      "internalCaseKey": "UT-LC-06C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 83,
+      "internalCaseKey": "UT-LC-06D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 84,
+      "internalCaseKey": "UT-LC-06E",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 85,
+      "internalCaseKey": "UT-LC-07A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 86,
+      "internalCaseKey": "UT-LC-07B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 87,
+      "internalCaseKey": "UT-LC-07C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 88,
+      "internalCaseKey": "UT-LC-07D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 89,
+      "internalCaseKey": "UT-LC-08A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 90,
+      "internalCaseKey": "UT-LC-08B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 91,
+      "internalCaseKey": "UT-LC-08C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 92,
+      "internalCaseKey": "UT-LC-08D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 93,
+      "internalCaseKey": "UT-LC-08E",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 94,
+      "internalCaseKey": "UT-LC-09A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 95,
+      "internalCaseKey": "UT-LC-09B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 96,
+      "internalCaseKey": "UT-LC-09C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 97,
+      "internalCaseKey": "UT-LC-10A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 98,
+      "internalCaseKey": "UT-LC-10B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 99,
+      "internalCaseKey": "UT-LC-10C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 100,
+      "internalCaseKey": "UT-LC-11A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 101,
+      "internalCaseKey": "UT-LC-11B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 102,
+      "internalCaseKey": "UT-LC-11C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 103,
+      "internalCaseKey": "UT-LC-11D",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 104,
+      "internalCaseKey": "UT-CMT-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 105,
+      "internalCaseKey": "UT-CMT-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 106,
+      "internalCaseKey": "UT-CMT-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 107,
+      "internalCaseKey": "UT-CMT-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 108,
+      "internalCaseKey": "UT-CMT-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 109,
+      "internalCaseKey": "UT-CMT-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 110,
+      "internalCaseKey": "UT-CMT-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 111,
+      "internalCaseKey": "UT-CMT-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 112,
+      "internalCaseKey": "UT-ATT-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 113,
+      "internalCaseKey": "UT-ATT-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 114,
+      "internalCaseKey": "UT-ATT-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 115,
+      "internalCaseKey": "UT-ATT-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 116,
+      "internalCaseKey": "UT-ATT-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 117,
+      "internalCaseKey": "UT-ATT-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 118,
+      "internalCaseKey": "UT-ATT-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 119,
+      "internalCaseKey": "UT-ATT-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 120,
+      "internalCaseKey": "UT-ATT-009",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 121,
+      "internalCaseKey": "UT-ATT-010",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 122,
+      "internalCaseKey": "UT-ATT-011",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 123,
+      "internalCaseKey": "UT-ATT-012",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 124,
+      "internalCaseKey": "UT-HIS-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 125,
+      "internalCaseKey": "UT-HIS-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 126,
+      "internalCaseKey": "UT-HIS-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 127,
+      "internalCaseKey": "UT-HIS-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 128,
+      "internalCaseKey": "UT-HIS-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 129,
+      "internalCaseKey": "UT-HIS-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 130,
+      "internalCaseKey": "UT-HIS-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 131,
+      "internalCaseKey": "UT-NTF-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 132,
+      "internalCaseKey": "UT-NTF-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 133,
+      "internalCaseKey": "UT-NTF-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 134,
+      "internalCaseKey": "UT-NTF-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 135,
+      "internalCaseKey": "UT-NTF-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 136,
+      "internalCaseKey": "UT-NTF-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 137,
+      "internalCaseKey": "UT-NTF-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 138,
+      "internalCaseKey": "UT-NTF-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 139,
+      "internalCaseKey": "UT-NTF-009",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 140,
+      "internalCaseKey": "UT-NTF-010",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 141,
+      "internalCaseKey": "UT-NTF-011",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 142,
+      "internalCaseKey": "UT-NTF-012",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 143,
+      "internalCaseKey": "UT-NTF-013",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 144,
+      "internalCaseKey": "UT-MON-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 145,
+      "internalCaseKey": "UT-MON-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 146,
+      "internalCaseKey": "UT-MON-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 147,
+      "internalCaseKey": "UT-MON-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 148,
+      "internalCaseKey": "UT-MON-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 149,
+      "internalCaseKey": "UT-MON-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 150,
+      "internalCaseKey": "UT-MON-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 151,
+      "internalCaseKey": "UT-AI-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 152,
+      "internalCaseKey": "UT-AI-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 153,
+      "internalCaseKey": "UT-AI-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 154,
+      "internalCaseKey": "UT-AI-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 155,
+      "internalCaseKey": "UT-AI-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 156,
+      "internalCaseKey": "UT-AI-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 157,
+      "internalCaseKey": "UT-AI-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 158,
+      "internalCaseKey": "UT-AI-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 159,
+      "internalCaseKey": "UT-AI-009",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 160,
+      "internalCaseKey": "UT-AI-010",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 161,
+      "internalCaseKey": "UT-AI-011",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 162,
+      "internalCaseKey": "UT-AI-012",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 163,
+      "internalCaseKey": "UT-AI-013",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 164,
+      "internalCaseKey": "UT-AI-014",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 165,
+      "internalCaseKey": "UT-AI-015",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 166,
+      "internalCaseKey": "UT-AI-016",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 167,
+      "internalCaseKey": "UT-AI-017",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 168,
+      "internalCaseKey": "UT-AI-018",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 169,
+      "internalCaseKey": "UT-AI-019A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 170,
+      "internalCaseKey": "UT-AI-019B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 171,
+      "internalCaseKey": "UT-AI-019C",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 172,
+      "internalCaseKey": "UT-AI-020",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 173,
+      "internalCaseKey": "UT-AI-021",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 174,
+      "internalCaseKey": "UT-AI-022",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 175,
+      "internalCaseKey": "UT-AI-023",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 176,
+      "internalCaseKey": "UT-AI-024",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 177,
+      "internalCaseKey": "UT-AI-025A",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 178,
+      "internalCaseKey": "UT-AI-025B",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 179,
+      "internalCaseKey": "UT-AI-026",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 180,
+      "internalCaseKey": "UT-AI-027",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 181,
+      "internalCaseKey": "UT-SEC-001",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 182,
+      "internalCaseKey": "UT-SEC-002",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 183,
+      "internalCaseKey": "UT-SEC-003",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 184,
+      "internalCaseKey": "UT-SEC-004",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 185,
+      "internalCaseKey": "UT-SEC-005",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 186,
+      "internalCaseKey": "UT-SEC-006",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 187,
+      "internalCaseKey": "UT-SEC-007",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 188,
+      "internalCaseKey": "UT-SEC-008",
+      "sourceProposalSequence": null,
+      "candidateOrigin": "EXISTING_CATALOG"
+    },
+    {
+      "mentorNumber": 189,
+      "internalCaseKey": "IDTS110-P189",
+      "sourceProposalSequence": 189,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 190,
+      "internalCaseKey": "IDTS110-P190",
+      "sourceProposalSequence": 190,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 191,
+      "internalCaseKey": "IDTS110-P191",
+      "sourceProposalSequence": 191,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 192,
+      "internalCaseKey": "IDTS110-P194",
+      "sourceProposalSequence": 194,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 193,
+      "internalCaseKey": "IDTS110-P195",
+      "sourceProposalSequence": 195,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 194,
+      "internalCaseKey": "IDTS110-P196",
+      "sourceProposalSequence": 196,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 195,
+      "internalCaseKey": "IDTS110-P197",
+      "sourceProposalSequence": 197,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 196,
+      "internalCaseKey": "IDTS110-P200",
+      "sourceProposalSequence": 200,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 197,
+      "internalCaseKey": "IDTS110-P202",
+      "sourceProposalSequence": 202,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 198,
+      "internalCaseKey": "IDTS110-P203",
+      "sourceProposalSequence": 203,
+      "candidateOrigin": "RETAINED_TASK_2"
+    },
+    {
+      "mentorNumber": 199,
+      "internalCaseKey": "IDTS110-F204",
+      "sourceProposalSequence": 204,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 200,
+      "internalCaseKey": "IDTS110-F205",
+      "sourceProposalSequence": 205,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 201,
+      "internalCaseKey": "IDTS110-F206",
+      "sourceProposalSequence": 206,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 202,
+      "internalCaseKey": "IDTS110-F207",
+      "sourceProposalSequence": 207,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 203,
+      "internalCaseKey": "IDTS110-F208",
+      "sourceProposalSequence": 208,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 204,
+      "internalCaseKey": "IDTS110-F209",
+      "sourceProposalSequence": 209,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 205,
+      "internalCaseKey": "IDTS110-F210",
+      "sourceProposalSequence": 210,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 206,
+      "internalCaseKey": "IDTS110-F210S",
+      "sourceProposalSequence": 211,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 207,
+      "internalCaseKey": "IDTS110-F211",
+      "sourceProposalSequence": 212,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 208,
+      "internalCaseKey": "IDTS110-F212",
+      "sourceProposalSequence": 213,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 209,
+      "internalCaseKey": "IDTS110-F213",
+      "sourceProposalSequence": 214,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 210,
+      "internalCaseKey": "IDTS110-F214",
+      "sourceProposalSequence": 215,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 211,
+      "internalCaseKey": "IDTS110-F215",
+      "sourceProposalSequence": 216,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 212,
+      "internalCaseKey": "IDTS110-F216",
+      "sourceProposalSequence": 217,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 213,
+      "internalCaseKey": "IDTS110-F216R",
+      "sourceProposalSequence": 218,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 214,
+      "internalCaseKey": "IDTS110-F217",
+      "sourceProposalSequence": 219,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 215,
+      "internalCaseKey": "IDTS110-F218",
+      "sourceProposalSequence": 220,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 216,
+      "internalCaseKey": "IDTS110-F219",
+      "sourceProposalSequence": 221,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 217,
+      "internalCaseKey": "IDTS110-F220",
+      "sourceProposalSequence": 222,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 218,
+      "internalCaseKey": "IDTS110-F220D",
+      "sourceProposalSequence": 223,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 219,
+      "internalCaseKey": "IDTS110-F220R",
+      "sourceProposalSequence": 224,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 220,
+      "internalCaseKey": "IDTS110-F220N",
+      "sourceProposalSequence": 225,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 221,
+      "internalCaseKey": "IDTS110-F221",
+      "sourceProposalSequence": 226,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 222,
+      "internalCaseKey": "IDTS110-F222",
+      "sourceProposalSequence": 227,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 223,
+      "internalCaseKey": "IDTS110-F223",
+      "sourceProposalSequence": 228,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 224,
+      "internalCaseKey": "IDTS110-F224",
+      "sourceProposalSequence": 229,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 225,
+      "internalCaseKey": "IDTS110-F225",
+      "sourceProposalSequence": 230,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 226,
+      "internalCaseKey": "IDTS110-F226",
+      "sourceProposalSequence": 231,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 227,
+      "internalCaseKey": "IDTS110-F227",
+      "sourceProposalSequence": 232,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 228,
+      "internalCaseKey": "IDTS110-F228",
+      "sourceProposalSequence": 233,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 229,
+      "internalCaseKey": "IDTS110-F228E",
+      "sourceProposalSequence": 234,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 230,
+      "internalCaseKey": "IDTS110-F229",
+      "sourceProposalSequence": 235,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 231,
+      "internalCaseKey": "IDTS110-F230",
+      "sourceProposalSequence": 236,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 232,
+      "internalCaseKey": "IDTS110-F231",
+      "sourceProposalSequence": 237,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 233,
+      "internalCaseKey": "IDTS110-F231R",
+      "sourceProposalSequence": 238,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 234,
+      "internalCaseKey": "IDTS110-F232",
+      "sourceProposalSequence": 239,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 235,
+      "internalCaseKey": "IDTS110-F233",
+      "sourceProposalSequence": 240,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 236,
+      "internalCaseKey": "IDTS110-F234",
+      "sourceProposalSequence": 241,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 237,
+      "internalCaseKey": "IDTS110-F235",
+      "sourceProposalSequence": 242,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 238,
+      "internalCaseKey": "IDTS110-F235I",
+      "sourceProposalSequence": 243,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 239,
+      "internalCaseKey": "IDTS110-F235C",
+      "sourceProposalSequence": 244,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 240,
+      "internalCaseKey": "IDTS110-F236",
+      "sourceProposalSequence": 245,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 241,
+      "internalCaseKey": "IDTS110-F237",
+      "sourceProposalSequence": 246,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 242,
+      "internalCaseKey": "IDTS110-F238",
+      "sourceProposalSequence": 247,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 243,
+      "internalCaseKey": "IDTS110-F238E",
+      "sourceProposalSequence": 248,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 244,
+      "internalCaseKey": "IDTS110-F238L",
+      "sourceProposalSequence": 249,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 245,
+      "internalCaseKey": "IDTS110-F239",
+      "sourceProposalSequence": 250,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 246,
+      "internalCaseKey": "IDTS110-F239P",
+      "sourceProposalSequence": 251,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 247,
+      "internalCaseKey": "IDTS110-F239H",
+      "sourceProposalSequence": 252,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 248,
+      "internalCaseKey": "IDTS110-F239D",
+      "sourceProposalSequence": 253,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 249,
+      "internalCaseKey": "IDTS110-F240",
+      "sourceProposalSequence": 254,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 250,
+      "internalCaseKey": "IDTS110-F240R",
+      "sourceProposalSequence": 255,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 251,
+      "internalCaseKey": "IDTS110-F241",
+      "sourceProposalSequence": 256,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 252,
+      "internalCaseKey": "IDTS110-F243",
+      "sourceProposalSequence": 257,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 253,
+      "internalCaseKey": "IDTS110-F243M",
+      "sourceProposalSequence": 258,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 254,
+      "internalCaseKey": "IDTS110-F244",
+      "sourceProposalSequence": 259,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 255,
+      "internalCaseKey": "IDTS110-F245",
+      "sourceProposalSequence": 260,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 256,
+      "internalCaseKey": "IDTS110-F246",
+      "sourceProposalSequence": 261,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 257,
+      "internalCaseKey": "IDTS110-F246R",
+      "sourceProposalSequence": 262,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 258,
+      "internalCaseKey": "IDTS110-F246B",
+      "sourceProposalSequence": 263,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 259,
+      "internalCaseKey": "IDTS110-F247",
+      "sourceProposalSequence": 264,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 260,
+      "internalCaseKey": "IDTS110-F247S",
+      "sourceProposalSequence": 265,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 261,
+      "internalCaseKey": "IDTS110-F247SS",
+      "sourceProposalSequence": 266,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 262,
+      "internalCaseKey": "IDTS110-F248",
+      "sourceProposalSequence": 267,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 263,
+      "internalCaseKey": "IDTS110-F248C",
+      "sourceProposalSequence": 268,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 264,
+      "internalCaseKey": "IDTS110-F248N",
+      "sourceProposalSequence": 269,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 265,
+      "internalCaseKey": "IDTS110-F249",
+      "sourceProposalSequence": 270,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 266,
+      "internalCaseKey": "IDTS110-F249K",
+      "sourceProposalSequence": 271,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 267,
+      "internalCaseKey": "IDTS110-F249T",
+      "sourceProposalSequence": 272,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 268,
+      "internalCaseKey": "IDTS110-F250",
+      "sourceProposalSequence": 273,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 269,
+      "internalCaseKey": "IDTS110-F250L",
+      "sourceProposalSequence": 274,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 270,
+      "internalCaseKey": "IDTS110-F250M",
+      "sourceProposalSequence": 275,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 271,
+      "internalCaseKey": "IDTS110-F250Q",
+      "sourceProposalSequence": 276,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 272,
+      "internalCaseKey": "IDTS110-F250R",
+      "sourceProposalSequence": 277,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 273,
+      "internalCaseKey": "IDTS110-F251",
+      "sourceProposalSequence": 278,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 274,
+      "internalCaseKey": "IDTS110-F251R",
+      "sourceProposalSequence": 279,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 275,
+      "internalCaseKey": "IDTS110-F252",
+      "sourceProposalSequence": 280,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 276,
+      "internalCaseKey": "IDTS110-F252R",
+      "sourceProposalSequence": 281,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 277,
+      "internalCaseKey": "IDTS110-F252P",
+      "sourceProposalSequence": 282,
+      "candidateOrigin": "TASK_3_FEATURE"
+    },
+    {
+      "mentorNumber": 278,
+      "internalCaseKey": "IDTS110-F253",
+      "sourceProposalSequence": 283,
+      "candidateOrigin": "TASK_3_FEATURE"
+    }
+  ]
+}
