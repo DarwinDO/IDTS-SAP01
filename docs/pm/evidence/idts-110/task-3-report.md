@@ -225,3 +225,74 @@ PASS
 The five-file Task 3 scope remains isolated. No adapter/business runner,
 catalog/workbook, dependency, product, database, BTP/HANA, provider, email,
 Drive, Jira, or other external state changed.
+
+## Fix round 5 — final adversarial RED -> GREEN
+
+Fix round parent head: `b17be0710ae6b9b8a28e1cbb5bb58d342695298f`.
+
+The contract was extended before the production changes. The strict RED run
+failed at the new runtime duplicate-evidence assertion, proving the existing
+runtime silently deduplicated a caller-supplied duplicate:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract FAIL
+AssertionError [ERR_ASSERTION]: Missing expected exception: runtime must reject duplicate evidence IDs
+exit_code=1
+```
+
+The final fixes are bounded to the existing protocol:
+
+- PNG proof now enforces legal IHDR color-type/bit-depth pairs, non-interlaced
+  bounded dimensions, exact decompressed scanline output including each filter
+  byte, and rejects truncated, extra, or invalid-filter rows. It uses only the
+  Node.js standard-library `zlib` module.
+- The orchestrator creates a per-run random `runId` and `nonce`, forwards both
+  through explicit child arguments and a small environment allowlist, and
+  requires visual marker runtime evidence, path metadata, and case manifest
+  metadata to match the exact case, run, nonce, baseline, and in-window
+  `createdAt`. Screenshot and manifest files must be new regular files written
+  during the child invocation; a pre-existing same-case pair is rejected.
+- Runtime validation now rejects duplicate `evidenceIds` instead of silently
+  normalizing them, and rejects non-finite numbers before any JSON serialization.
+  The published schema already had `uniqueItems: true`; no schema relaxation
+  was introduced.
+
+GREEN evidence:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+IDTS-110 atomic runner contract PASS: marker, schema, sanitization, status, batch, and orchestrator continuation.
+```
+
+The round-5 contract covers the malformed 1x1 RGBA filter-only payload,
+illegal color-depth combinations, invalid filters, truncated and extra rows,
+unreasonable dimensions, fresh child-created visual artifacts, exact
+runId/nonce/baseline/case/createdAt binding across marker/manifest/path
+metadata, stale pre-existing artifacts, duplicate IDs, and non-finite state
+numbers. No business runner was integrated and no product or external state was
+used.
+
+Additional GREEN gates:
+
+| Command | Result |
+| --- | --- |
+| `node -e "const Ajv=require('ajv'); const schema=require('./docs/qa/idts-110-atomic-result.schema.json'); new Ajv({strict:true}).compile(schema); console.log('strict Ajv schema compile PASS')"` | PASS |
+| `node --check scripts/qa/idts110-atomic-runner.js` | PASS |
+| `node --check scripts/qa/run-idts110-new-cases.js` | PASS |
+| `node --check scripts/qa/test-idts110-atomic-runner.js` | PASS |
+| `node scripts/qa/generate-idts110-extension.js --check` | PASS — 10 retained, 80 feature, 90 total; map 278; adapters 11/33/1 |
+| `node scripts/qa/generate-idts110-unit-test-catalog.js --check` | PASS — 278 `NOT_RUN` cases |
+| `node scripts/qa/generate-idts110-unit-test-catalog.js --extended --source-baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --check` | PASS — 278 `NOT_RUN` cases |
+| `node scripts/qa/test-idts110-extension-manifest.js` | PASS |
+| `node scripts/qa/test-idts110-extended-catalog.js` | PASS |
+| `node scripts/qa/test-idts110-catalog-gap.js` | PASS |
+| `node scripts/qa/test-idts110-local-primary-fixtures-contract.js` | PASS |
+| `npm run qa:secret-scan` | PASS — no credential-like key patterns |
+| `npm run qa:agent-rules` | PASS — 8 required rules |
+| `git diff --check` | PASS |
+| `officecli --version` | `1.0.147`; read-only documentation preflight |
+
+The final handoff remains source-only and pending DonHV review. It does not
+execute the 90 cases, generate workbook/evidence cards, merge, deploy, update
+Drive/Jira, or mutate BTP/HANA/provider state.

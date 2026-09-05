@@ -17,6 +17,15 @@ const MAX_SAFE_OBJECT_PROPERTIES = 32
 const MAX_SAFE_DEPTH = 4
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
 const MAX_PNG_BYTES = 64 * 1024 * 1024
+const MAX_PNG_DIMENSION = 16384
+const PNG_CHANNELS = { 0: 1, 2: 3, 3: 1, 4: 2, 6: 4 }
+const PNG_BIT_DEPTHS = {
+  0: [1, 2, 4, 8, 16],
+  2: [8, 16],
+  3: [1, 2, 4, 8],
+  4: [8, 16],
+  6: [8, 16]
+}
 const REQUIRED_RESULT_FIELDS = [
   'schemaVersion', 'jiraKey', 'caseKey', 'mentorNumber', 'assertionId', 'title',
   'status', 'assertionPassed', 'authorizedFixture', 'evidenceKind', 'executor', 'startedAt', 'completedAt',
@@ -138,6 +147,10 @@ function assertSafeValue (value, location = 'value', seen = new Set(), depth = 0
     if (hasRawSecret(value)) fail(`unsanitized secret, PII, or private endpoint at ${location}`)
     if (hasPlaceholder(value)) fail(`unresolved placeholder at ${location}`)
     if (value.length > MAX_SAFE_STRING_LENGTH) fail(`string length exceeds ${MAX_SAFE_STRING_LENGTH} characters at ${location}`)
+    return
+  }
+  if (typeof value === 'number') {
+    if (!Number.isFinite(value)) fail(`non-finite number at ${location}`)
     return
   }
   if (value === null || typeof value !== 'object') return
@@ -273,19 +286,22 @@ function isDecodablePng (buffer) {
   let sawData = false
   let sawEnd = false
   let idat = []
+  let expectedScanlineBytes = null
+  let expectedOutputBytes = null
   while (offset < buffer.length) {
     if (offset + 12 > buffer.length) return false
     const length = buffer.readUInt32BE(offset)
     const typeStart = offset + 4
     const dataStart = offset + 8
+    if (length > buffer.length - dataStart - 4) return false
     const dataEnd = dataStart + length
     const chunkEnd = dataEnd + 4
-    if (chunkEnd > buffer.length) return false
     const type = buffer.toString('ascii', typeStart, typeStart + 4)
     if (!/^[A-Za-z]{4}$/.test(type)) return false
     const chunkData = buffer.subarray(dataStart, dataEnd)
     const suppliedCrc = buffer.readUInt32BE(dataEnd)
     if (crc32(buffer.subarray(typeStart, dataEnd)) !== suppliedCrc) return false
+    if (sawEnd) return false
     if (!sawHeader && type !== 'IHDR') return false
     if (type === 'IHDR') {
       if (sawHeader || length !== 13) return false
@@ -293,7 +309,14 @@ function isDecodablePng (buffer) {
       const height = chunkData.readUInt32BE(4)
       const bitDepth = chunkData[8]
       const colorType = chunkData[9]
-      if (width === 0 || height === 0 || ![1, 2, 4, 8, 16].includes(bitDepth) || ![0, 2, 3, 4, 6].includes(colorType) || chunkData[10] !== 0 || chunkData[11] !== 0 || chunkData[12] > 1) return false
+      if (width === 0 || height === 0 || width > MAX_PNG_DIMENSION || height > MAX_PNG_DIMENSION ||
+        !Object.hasOwn(PNG_CHANNELS, colorType) || !PNG_BIT_DEPTHS[colorType].includes(bitDepth) ||
+        chunkData[10] !== 0 || chunkData[11] !== 0 || chunkData[12] !== 0) return false
+      const rowBytes = Math.ceil(width * PNG_CHANNELS[colorType] * bitDepth / 8)
+      const outputBytes = (rowBytes + 1) * height
+      if (!Number.isSafeInteger(rowBytes) || !Number.isSafeInteger(outputBytes) || outputBytes < 1 || outputBytes > MAX_PNG_BYTES) return false
+      expectedScanlineBytes = rowBytes + 1
+      expectedOutputBytes = outputBytes
       sawHeader = true
     } else if (type === 'IDAT') {
       if (!sawHeader || sawEnd) return false
@@ -308,8 +331,12 @@ function isDecodablePng (buffer) {
   }
   if (!sawHeader || !sawData || !sawEnd || offset !== buffer.length) return false
   try {
-    const inflated = zlib.inflateSync(Buffer.concat(idat), { maxOutputLength: MAX_PNG_BYTES })
-    return inflated.length > 0
+    const inflated = zlib.inflateSync(Buffer.concat(idat), { maxOutputLength: expectedOutputBytes })
+    if (inflated.length !== expectedOutputBytes) return false
+    for (let row = 0; row < expectedOutputBytes; row += expectedScanlineBytes) {
+      if (inflated[row] > 4) return false
+    }
+    return true
   } catch {
     return false
   }
@@ -328,6 +355,39 @@ function normalizeOutputRelativePath (value, field) {
   return { lexical, relative, field }
 }
 
+function normalizedArtifactPath (value) {
+  const resolved = path.resolve(value)
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+}
+
+function invocationTimestampInWindow (value, invocation) {
+  if (!invocation || !Number.isFinite(invocation.startedAt) || !Number.isFinite(invocation.completedAt)) return true
+  const timestamp = Date.parse(value)
+  return Number.isFinite(timestamp) && timestamp >= invocation.startedAt - (invocation.clockToleranceMs || 0) && timestamp <= invocation.completedAt + (invocation.clockToleranceMs || 0)
+}
+
+function matchesInvocationMetadata (value, caseKey, invocation) {
+  if (!invocation) return true
+  if (!isObject(value) || value.caseKey !== caseKey || value.runId !== invocation.runId || value.nonce !== invocation.nonce || value.baseline !== invocation.baselineSha ||
+    typeof value.createdAt !== 'string' || !invocationTimestampInWindow(value.createdAt, invocation)) return false
+  const pathMetadata = value.pathMetadata
+  return isObject(pathMetadata) && pathMetadata.caseKey === caseKey && pathMetadata.runId === invocation.runId && pathMetadata.nonce === invocation.nonce &&
+    pathMetadata.baseline === invocation.baselineSha && pathMetadata.createdAt === value.createdAt && invocationTimestampInWindow(pathMetadata.createdAt, invocation)
+}
+
+function isFreshArtifact (target, invocation) {
+  if (!invocation) return true
+  if (invocation.preexistingPaths?.has(normalizedArtifactPath(target))) return false
+  try {
+    const stat = fs.lstatSync(target)
+    if (!stat.isFile() || stat.isSymbolicLink() || !Number.isFinite(stat.mtimeMs)) return false
+    const tolerance = Number.isFinite(invocation.clockToleranceMs) ? invocation.clockToleranceMs : 0
+    return stat.mtimeMs >= invocation.startedAt - tolerance && stat.mtimeMs <= invocation.completedAt + tolerance
+  } catch {
+    return false
+  }
+}
+
 function screenshotCandidates (value) {
   const candidates = []
   const visit = current => {
@@ -339,14 +399,14 @@ function screenshotCandidates (value) {
     const screenshotPath = current.screenshotPath || current.path || current.imagePath || current.runtimeImagePath
     const screenshotSha256 = current.screenshotSha256 || current.sha256 || current.imageSha256 || current.runtimeImageSha256
     const manifestPath = current.manifestPath || current.caseManifestPath
-    if (typeof screenshotPath === 'string' && typeof screenshotSha256 === 'string' && typeof manifestPath === 'string') candidates.push({ screenshotPath, screenshotSha256, manifestPath })
+    if (typeof screenshotPath === 'string' && typeof screenshotSha256 === 'string' && typeof manifestPath === 'string') candidates.push({ screenshotPath, screenshotSha256, manifestPath, metadata: current })
     for (const item of Object.values(current)) if (isObject(item)) visit(item)
   }
   visit(value)
   return candidates
 }
 
-function screenshotProof (value, caseKey) {
+function screenshotProof (value, caseKey, invocation = null) {
   if (!isObject(value) || typeof caseKey !== 'string') return null
   for (const candidate of screenshotCandidates(value)) {
     const screenshot = normalizeOutputRelativePath(candidate.screenshotPath, 'screenshotPath')
@@ -357,6 +417,7 @@ function screenshotProof (value, caseKey) {
     const manifestParts = manifest.relative.split('/')
     if (screenshotParts.length < 2 || screenshotParts[screenshotParts.length - 2] !== caseKey || !/^(?:result|runtime)\.png$/.test(screenshotParts.at(-1))) continue
     if (manifestParts.length < 2 || manifestParts[manifestParts.length - 2] !== caseKey || manifestParts.at(-1) !== 'case-manifest.json') continue
+    if (!matchesInvocationMetadata(candidate.metadata, caseKey, invocation)) continue
     try {
       assertNoReparseAncestors(path.dirname(screenshot.lexical))
       assertNoReparseAncestors(path.dirname(manifest.lexical))
@@ -365,12 +426,14 @@ function screenshotProof (value, caseKey) {
       if (!screenshotStat.isFile() || screenshotStat.isSymbolicLink() || !manifestStat.isFile() || manifestStat.isSymbolicLink()) continue
       if (!samePath(fs.realpathSync.native(screenshot.lexical), screenshot.lexical) || !samePath(fs.realpathSync.native(manifest.lexical), manifest.lexical)) continue
       if (screenshotStat.size > MAX_PNG_BYTES) continue
+      if (!isFreshArtifact(screenshot.lexical, invocation) || !isFreshArtifact(manifest.lexical, invocation)) continue
       const bytes = fs.readFileSync(screenshot.lexical)
       if (!isDecodablePng(bytes)) continue
       if (crypto.createHash('sha256').update(bytes).digest('hex') !== hash) continue
       const manifestJson = JSON.parse(fs.readFileSync(manifest.lexical, 'utf8'))
       assertNoUndefined(manifestJson, 'screenshot manifest')
       assertSafeValue(manifestJson, 'screenshot manifest')
+      if (!matchesInvocationMetadata(manifestJson, caseKey, invocation)) continue
       const manifestEvidenceIds = Array.isArray(manifestJson.evidenceIds)
         ? manifestJson.evidenceIds
         : [manifestJson.evidenceId]
@@ -446,6 +509,7 @@ function buildResult ({ definition, assertionId, baselineSha, executor, startedA
   if (evidenceKind === 'UI_RUNTIME') requiredEvidenceIds.push(`${caseKey}-VISUAL`)
   const suppliedEvidenceIds = Object.hasOwn(outcome, 'evidenceIds') ? outcome.evidenceIds : requiredEvidenceIds
   if (suppliedEvidenceIds === undefined) fail('execute.evidenceIds cannot be undefined')
+  if (Array.isArray(suppliedEvidenceIds) && new Set(suppliedEvidenceIds).size !== suppliedEvidenceIds.length) fail('execute.evidenceIds must be unique')
   const sanitizedEvidenceIds = sanitizeValue(suppliedEvidenceIds, 'evidenceIds')
   const safeEvidenceIds = Array.isArray(sanitizedEvidenceIds)
     ? [...new Set(sanitizedEvidenceIds.filter(id => typeof id === 'string' && requiredEvidenceIds.includes(id)))]
@@ -580,7 +644,7 @@ function validateAtomicResult (result) {
   const requiredEvidenceId = `${result.caseKey}-RESULT`
   const visualEvidenceId = `${result.caseKey}-VISUAL`
   const allowedEvidenceIds = result.evidenceKind === 'UI_RUNTIME' ? [requiredEvidenceId, visualEvidenceId] : [requiredEvidenceId]
-  if (!Array.isArray(result.evidenceIds) || result.evidenceIds.length === 0 || result.evidenceIds.some(id => typeof id !== 'string' || !id.trim() || !allowedEvidenceIds.includes(id)) || !result.evidenceIds.includes(requiredEvidenceId)) fail('result evidenceIds must contain the exact case result ID')
+  if (!Array.isArray(result.evidenceIds) || result.evidenceIds.length === 0 || new Set(result.evidenceIds).size !== result.evidenceIds.length || result.evidenceIds.some(id => typeof id !== 'string' || !id.trim() || !allowedEvidenceIds.includes(id)) || !result.evidenceIds.includes(requiredEvidenceId)) fail('result evidenceIds must be unique and contain the exact case result ID')
   if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !result.evidenceIds.includes(visualEvidenceId)) fail('visual PASS requires the exact case visual evidence ID')
   if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !hasScreenshotEvidence(result.runtimeEvidence, result.caseKey)) fail('visual PASS requires a case-bound, decodable PNG screenshot with a matching SHA-256 and manifest')
   const serialized = JSON.stringify(result)
@@ -768,5 +832,6 @@ module.exports = {
   sanitizeValue,
   assertSafeValue,
   screenshotProof,
+  matchesInvocationMetadata,
   assertNoReparseAncestors
 }

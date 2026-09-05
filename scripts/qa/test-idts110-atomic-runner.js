@@ -6,6 +6,7 @@ const crypto = require('node:crypto')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
+const zlib = require('node:zlib')
 
 const {
   BASELINE_SHA,
@@ -22,6 +23,42 @@ const orchestrator = require('./run-idts110-new-cases')
 const schemaPath = path.join(__dirname, '../../docs/qa/idts-110-atomic-result.schema.json')
 
 const sourceTrace = [{ file: 'srv/notification/inbox.js', symbol: 'searchMyNotifications' }]
+
+function pngCrc32 (buffer) {
+  let crc = 0xffffffff
+  for (const byte of buffer) {
+    crc ^= byte
+    for (let bit = 0; bit < 8; bit += 1) crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0)
+  }
+  return (crc ^ 0xffffffff) >>> 0
+}
+
+function pngChunk (type, data) {
+  const typeBytes = Buffer.from(type, 'ascii')
+  const chunk = Buffer.alloc(12 + data.length)
+  chunk.writeUInt32BE(data.length, 0)
+  typeBytes.copy(chunk, 4)
+  data.copy(chunk, 8)
+  chunk.writeUInt32BE(pngCrc32(chunk.subarray(4, 8 + data.length)), 8 + data.length)
+  return chunk
+}
+
+function makePng ({ width = 1, height = 1, bitDepth = 8, colorType = 6, scanlines = [0, 0, 0, 0, 0], interlace = 0 }) {
+  const ihdr = Buffer.alloc(13)
+  ihdr.writeUInt32BE(width, 0)
+  ihdr.writeUInt32BE(height, 4)
+  ihdr[8] = bitDepth
+  ihdr[9] = colorType
+  ihdr[10] = 0
+  ihdr[11] = 0
+  ihdr[12] = interlace
+  return Buffer.concat([
+    Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+    pngChunk('IHDR', ihdr),
+    pngChunk('IDAT', zlib.deflateSync(Buffer.from(scanlines))),
+    pngChunk('IEND', Buffer.alloc(0))
+  ])
+}
 
 function definition (overrides = {}) {
   const current = {
@@ -141,6 +178,23 @@ async function main () {
   assert.throws(() => validateAtomicResult({ ...result, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: false, deployedSha: null }), /BTP|authorized|evidenceKind/i, 'runtime must bind BTP evidence to an authorized fixture')
   assert.throws(() => validateAtomicResult({ ...result, status: 'FAIL', assertionPassed: false, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: false, deployedSha: null }), /BTP|authorized|evidenceKind/i, 'runtime must bind BTP evidence to an authorized fixture for non-PASS results')
   assert.throws(() => validateAtomicResult({ ...result, evidenceKind: 'LOCAL_ATOMIC', authorizedFixture: true, deployedSha: 'a'.repeat(40), runtimeEvidence: { deployedSha: 'a'.repeat(40), checked: true } }), /BTP|authorized|evidenceKind/i, 'runtime must bind authorized fixtures to BTP evidence')
+  assert.equal(validateSchema({ ...result, evidenceIds: ['IDTS110-F232-RESULT', 'IDTS110-F232-RESULT'] }), false, 'schema must reject duplicate evidence IDs')
+  assert.throws(() => validateAtomicResult({ ...result, evidenceIds: ['IDTS110-F232-RESULT', 'IDTS110-F232-RESULT'] }), /duplicate|unique/i, 'runtime must reject duplicate evidence IDs')
+  assert.throws(() => validateAtomicResult({ ...result, beforeState: { rows: Number.NaN } }), /finite|number/i, 'runtime must reject non-finite numbers before serialization')
+  await assert.rejects(() => runAtomicCase({
+    definition: definition(),
+    assertionId: 'IDTS110-F232-A1',
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: 'expected result',
+      beforeState: { rows: 1 },
+      afterState: { rows: 1 },
+      reloadState: { rows: 1 },
+      evidenceIds: ['IDTS110-F232-RESULT', 'IDTS110-F232-RESULT']
+    })
+  }), /duplicate|unique/i, 'atomic execution must not silently deduplicate evidence IDs')
   assert.equal(validateSchema({ ...result, evidenceKind: 'BTP_INTEGRATION', authorizedFixture: true, deployedSha: 'a'.repeat(40), runtimeEvidence: { deployedSha: 'a'.repeat(40), checked: true } }), true, 'schema must accept a structurally authorized external result')
 
   const implicitPass = await runAtomicCase({
@@ -569,6 +623,37 @@ async function main () {
     })
   })
 
+  const runVisualBytes = async bytes => {
+    fs.writeFileSync(screenshotPath, bytes)
+    const hash = crypto.createHash('sha256').update(bytes).digest('hex')
+    writeVisualManifest(hash)
+    return runAtomicCase({
+      definition: visualDefinition,
+      assertionId: visualDefinition.assertionId,
+      baselineSha: BASELINE_SHA,
+      executor: 'Codex-agent-assisted',
+      execute: async () => ({
+        assertionPassed: true,
+        actualResult: visualDefinition.expectedResult,
+        runtimeEvidence: { screenshotPath: relativeScreenshotPath, screenshotSha256: hash, manifestPath: relativeManifestPath },
+        evidenceIds: ['IDTS110-F224-RESULT', 'IDTS110-F224-VISUAL']
+      })
+    })
+  }
+
+  const malformedRgba = await runVisualBytes(makePng({ colorType: 6, scanlines: [0] }))
+  assert.equal(malformedRgba.status, 'FAIL', 'a 1x1 RGBA PNG must contain the complete filtered scanline')
+  const illegalColorDepth = await runVisualBytes(makePng({ colorType: 2, bitDepth: 4, scanlines: [0, 0] }))
+  assert.equal(illegalColorDepth.status, 'FAIL', 'PNG must reject illegal color-type/bit-depth combinations')
+  const invalidFilter = await runVisualBytes(makePng({ colorType: 6, scanlines: [5, 0, 0, 0, 0] }))
+  assert.equal(invalidFilter.status, 'FAIL', 'PNG must reject filter bytes outside 0 through 4')
+  const truncatedScanline = await runVisualBytes(makePng({ colorType: 6, scanlines: [0, 0, 0, 0] }))
+  assert.equal(truncatedScanline.status, 'FAIL', 'PNG must reject truncated scanline data')
+  const extraScanline = await runVisualBytes(makePng({ colorType: 6, scanlines: [0, 0, 0, 0, 0, 0] }))
+  assert.equal(extraScanline.status, 'FAIL', 'PNG must reject extra scanline data')
+  const unreasonableDimensions = await runVisualBytes(makePng({ width: 100000, scanlines: [0] }))
+  assert.equal(unreasonableDimensions.status, 'FAIL', 'PNG must reject unreasonable dimensions/output bounds')
+
   fs.writeFileSync(screenshotPath, Buffer.from('not a PNG'))
   const invalidPngSha256 = crypto.createHash('sha256').update(fs.readFileSync(screenshotPath)).digest('hex')
   writeVisualManifest(invalidPngSha256)
@@ -662,15 +747,140 @@ async function main () {
       evidenceIds: ['IDTS110-F237-RESULT', 'IDTS110-F237-VISUAL']
     })
   })
+  fs.rmSync(visualCaseDirectory, { recursive: true, force: true })
+  fs.rmSync(secondVisualDirectory, { recursive: true, force: true })
+  const reuseRunId = 'idts110-reuse-run'
+  const reuseNonce = 'idts110-reuse-nonce'
   const reusedScreenshotBatch = await orchestrator.runNewCases({
     definitions: [visualDefinition, secondVisualDefinition],
     baselineSha: BASELINE_SHA,
     executor: 'Codex-agent-assisted',
-    spawnSync: (file, args) => args.some(value => value === '--idts110-case=IDTS110-F224')
-      ? { status: 0, stdout: `${formatAtomicMarker(visualResult)}\n`, stderr: '' }
-      : { status: 0, stdout: `${formatAtomicMarker(secondVisualResult)}\n`, stderr: '' }
+    runId: reuseRunId,
+    nonce: reuseNonce,
+    spawnSync: (file, args) => {
+      const isFirst = args.some(value => value === '--idts110-case=IDTS110-F224')
+      const currentDefinition = isFirst ? visualDefinition : secondVisualDefinition
+      const currentDirectory = isFirst ? visualCaseDirectory : secondVisualDirectory
+      const currentScreenshotPath = isFirst ? screenshotPath : secondVisualPath
+      const currentManifestPath = isFirst ? manifestPath : secondVisualManifest
+      const currentRelativeScreenshotPath = isFirst ? relativeScreenshotPath : secondVisualRelativePath
+      const currentRelativeManifestPath = isFirst ? relativeManifestPath : secondVisualRelativeManifest
+      const currentResult = isFirst ? visualResult : secondVisualResult
+      const createdAt = new Date().toISOString()
+      const metadata = {
+        caseKey: currentDefinition.caseId,
+        runId: reuseRunId,
+        nonce: reuseNonce,
+        baseline: BASELINE_SHA,
+        createdAt,
+        pathMetadata: { caseKey: currentDefinition.caseId, runId: reuseRunId, nonce: reuseNonce, baseline: BASELINE_SHA, createdAt }
+      }
+      fs.mkdirSync(currentDirectory, { recursive: true })
+      fs.writeFileSync(currentScreenshotPath, screenshotBytes)
+      fs.writeFileSync(currentManifestPath, `${JSON.stringify({ ...metadata, evidenceId: `${currentDefinition.caseId}-VISUAL`, screenshotPath: currentRelativeScreenshotPath, screenshotSha256 })}\n`)
+      const marker = {
+        ...currentResult,
+        startedAt: createdAt,
+        completedAt: createdAt,
+        runtimeEvidence: { ...metadata, screenshotPath: currentRelativeScreenshotPath, screenshotSha256, manifestPath: currentRelativeManifestPath }
+      }
+      return { status: 0, stdout: `${formatAtomicMarker(marker)}\n`, stderr: '' }
+    }
   })
   assert.deepEqual(reusedScreenshotBatch.results.map(item => item.status), ['PASS', 'FAIL'], 'orchestrator must reject screenshot reuse across case results')
+
+  const invocationDefinition = approvedDefinitions.find(current => current.caseId === 'IDTS110-F238')
+  const invocationCaseDirectory = path.join(visualDirectory, invocationDefinition.caseId)
+  const invocationScreenshotPath = path.join(invocationCaseDirectory, 'result.png')
+  const invocationManifestPath = path.join(invocationCaseDirectory, 'case-manifest.json')
+  const invocationRelativeScreenshotPath = path.relative(atomicOutputRoot, invocationScreenshotPath).replace(/\\/g, '/')
+  const invocationRelativeManifestPath = path.relative(atomicOutputRoot, invocationManifestPath).replace(/\\/g, '/')
+  const invocationMetadata = ({ runId, nonce, createdAt }) => ({
+    caseKey: invocationDefinition.caseId,
+    runId,
+    nonce,
+    baseline: BASELINE_SHA,
+    createdAt,
+    pathMetadata: { caseKey: invocationDefinition.caseId, runId, nonce, baseline: BASELINE_SHA, createdAt }
+  })
+  const invocationMarker = ({ runId, nonce, createdAt, screenshotSha256 }) => ({
+    ...visualResult,
+    caseKey: invocationDefinition.caseId,
+    mentorNumber: invocationDefinition.mentorNumber,
+    assertionId: invocationDefinition.assertionId,
+    title: invocationDefinition.title,
+    testFile: invocationDefinition.plannedTestFile,
+    sourceTrace: invocationDefinition.sourceTrace,
+    expectedResult: invocationDefinition.expectedResult,
+    actualResult: invocationDefinition.expectedResult,
+    startedAt: createdAt,
+    completedAt: createdAt,
+    testCommand: `node ${invocationDefinition.plannedTestFile} --idts110-case=${invocationDefinition.caseId} --baseline=${BASELINE_SHA}`,
+    runtimeEvidence: {
+      ...invocationMetadata({ runId, nonce, createdAt }),
+      screenshotPath: invocationRelativeScreenshotPath,
+      screenshotSha256,
+      manifestPath: invocationRelativeManifestPath
+    },
+    evidenceIds: [`${invocationDefinition.caseId}-RESULT`, `${invocationDefinition.caseId}-VISUAL`]
+  })
+  fs.rmSync(invocationCaseDirectory, { recursive: true, force: true })
+  let invocationArgs
+  let invocationEnv
+  const freshInvocationBatch = await orchestrator.runNewCases({
+    definitions: [invocationDefinition],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    spawnSync: (file, args, childOptions) => {
+      invocationArgs = args
+      invocationEnv = childOptions.env
+      const runId = args.find(value => value.startsWith('--idts110-run-id='))?.slice('--idts110-run-id='.length) || 'missing-run-id'
+      const nonce = args.find(value => value.startsWith('--idts110-nonce='))?.slice('--idts110-nonce='.length) || 'missing-nonce'
+      const createdAt = new Date().toISOString()
+      fs.mkdirSync(invocationCaseDirectory, { recursive: true })
+      fs.writeFileSync(invocationScreenshotPath, screenshotBytes)
+      const screenshotSha256 = crypto.createHash('sha256').update(screenshotBytes).digest('hex')
+      fs.writeFileSync(invocationManifestPath, `${JSON.stringify({
+        ...invocationMetadata({ runId, nonce, createdAt }),
+        evidenceId: `${invocationDefinition.caseId}-VISUAL`,
+        screenshotPath: invocationRelativeScreenshotPath,
+        screenshotSha256
+      })}\n`)
+      return { status: 0, stdout: `${formatAtomicMarker(invocationMarker({ runId, nonce, createdAt, screenshotSha256 }))}\n`, stderr: '' }
+    }
+  })
+  assert.equal(freshInvocationBatch.results[0].status, 'PASS', 'fresh visual evidence created by the child must be accepted')
+  assert.ok(invocationArgs.some(value => value.startsWith('--idts110-run-id=')), 'child must receive an unpredictable runId')
+  assert.ok(invocationArgs.some(value => value.startsWith('--idts110-nonce=')), 'child must receive an unpredictable nonce')
+  assert.ok(invocationEnv && invocationEnv.IDTS110_RUN_ID, 'child must receive a safe runId environment value')
+  assert.ok(invocationEnv && invocationEnv.IDTS110_NONCE, 'child must receive a safe nonce environment value')
+
+  const staleRunId = 'idts110-stale-run'
+  const staleNonce = 'idts110-stale-nonce'
+  const staleCreatedAt = new Date().toISOString()
+  fs.rmSync(invocationCaseDirectory, { recursive: true, force: true })
+  fs.mkdirSync(invocationCaseDirectory, { recursive: true })
+  fs.writeFileSync(invocationScreenshotPath, screenshotBytes)
+  const staleScreenshotSha256 = crypto.createHash('sha256').update(screenshotBytes).digest('hex')
+  fs.writeFileSync(invocationManifestPath, `${JSON.stringify({
+    ...invocationMetadata({ runId: staleRunId, nonce: staleNonce, createdAt: staleCreatedAt }),
+    evidenceId: `${invocationDefinition.caseId}-VISUAL`,
+    screenshotPath: invocationRelativeScreenshotPath,
+    screenshotSha256: staleScreenshotSha256
+  })}\n`)
+  const staleBatch = await orchestrator.runNewCases({
+    definitions: [invocationDefinition],
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    runId: staleRunId,
+    nonce: staleNonce,
+    spawnSync: () => ({
+      status: 0,
+      stdout: `${formatAtomicMarker(invocationMarker({ runId: staleRunId, nonce: staleNonce, createdAt: staleCreatedAt, screenshotSha256: staleScreenshotSha256 }))}\n`,
+      stderr: ''
+    })
+  })
+  assert.equal(staleBatch.results[0].status, 'FAIL', 'a pre-existing same-case screenshot and manifest must not be accepted as fresh evidence')
 
   const emptySnapshots = { ...childPass, beforeState: {}, afterState: {}, reloadState: {} }
   const emptySnapshotBatch = await orchestrator.runNewCases({
@@ -784,6 +994,7 @@ async function main () {
   if (fs.existsSync(screenshotPath)) fs.unlinkSync(screenshotPath)
   if (fs.existsSync(secondScreenshotPath)) fs.unlinkSync(secondScreenshotPath)
   if (fs.existsSync(secondVisualPath)) fs.unlinkSync(secondVisualPath)
+  if (fs.existsSync(invocationCaseDirectory)) fs.rmSync(invocationCaseDirectory, { recursive: true, force: true })
   if (fs.existsSync(manifestPath)) fs.unlinkSync(manifestPath)
   if (fs.existsSync(secondVisualManifest)) fs.unlinkSync(secondVisualManifest)
   if (fs.existsSync(secondVisualDirectory)) fs.rmdirSync(secondVisualDirectory)

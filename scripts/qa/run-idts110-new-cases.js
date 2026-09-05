@@ -12,6 +12,7 @@ const {
   readAtomicOptions,
   runAtomicCase,
   screenshotProof,
+  matchesInvocationMetadata,
   validateAtomicResult,
   writeAtomicBatch
 } = require('./idts110-atomic-runner')
@@ -31,6 +32,12 @@ const CHILD_ENV_KEYS = [
   'NODE_ENV', 'CDS_ENV', 'CDS_LOG_LEVEL', 'CDS_TEST_FAKE', 'CDS_PLUGIN_UI5_ACTIVE',
   'CI', 'NO_COLOR', 'FORCE_COLOR'
 ]
+const INVOCATION_ENV_KEYS = {
+  runId: 'IDTS110_RUN_ID',
+  nonce: 'IDTS110_NONCE',
+  caseKey: 'IDTS110_CASE_KEY',
+  baselineSha: 'IDTS110_BASELINE_SHA'
+}
 const APPROVED_INPUT_HASHES = {
   catalog: '7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253',
   extension: '6d04a936c8678cdda93324be1ee810cc5acb6e5f5eb50213796df43b1e0135c2',
@@ -50,11 +57,11 @@ function definitionRequiresExternal (definition) {
   return executionModes.some(value => /BTP|PROVIDER[_-]?LIVE|LIVE(?:[_-]|$)|EXTERNAL/.test(value)) || definition.providerLive === true || definition.live === true
 }
 
-function hasScreenshotProof (value, caseKey) {
-  return screenshotProof(value, caseKey) !== null
+function hasScreenshotProof (value, caseKey, invocation = null) {
+  return screenshotProof(value, caseKey, invocation) !== null
 }
 
-function assertDefinitionEvidence (marker, definition) {
+function assertDefinitionEvidence (marker, definition, invocation = null) {
   if (marker.status !== 'PASS') return
   const requirements = Array.isArray(definition.evidenceRequirements) ? definition.evidenceRequirements.join(' ') : ''
   const required = {
@@ -65,7 +72,7 @@ function assertDefinitionEvidence (marker, definition) {
   for (const [field, isRequired] of Object.entries(required)) {
     if (isRequired && (!marker[field] || typeof marker[field] !== 'object' || Object.keys(marker[field]).length === 0)) fail(`${field} evidence must be a non-empty object for ${definition.caseId}`)
   }
-  if (definitionRequiresVisual(definition) && !hasScreenshotProof(marker.runtimeEvidence, definition.caseId)) fail(`rendered screenshot proof is required for ${definition.caseId}`)
+  if (definitionRequiresVisual(definition) && !hasScreenshotProof(marker.runtimeEvidence, definition.caseId, invocation)) fail(`rendered screenshot proof is required for ${definition.caseId}`)
 }
 
 function definitionRequiresVisual (definition) {
@@ -272,8 +279,50 @@ function perCaseOutputPath (outputPath, caseKey, root = ROOT) {
   return resolveOutputPath(`${base}.${safeKey}.json`, root)
 }
 
-function childEnvironment (source = process.env) {
-  return Object.fromEntries(CHILD_ENV_KEYS.filter(key => typeof source[key] === 'string').map(key => [key, source[key]]))
+function invocationToken (value, field, generated) {
+  if (value === undefined || value === null) return generated
+  if (typeof value !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$/.test(value)) fail(`${field} must be a safe invocation token`)
+  return value
+}
+
+function newInvocationRunId () {
+  return `idts110-${Date.now()}-${crypto.randomBytes(16).toString('hex')}`
+}
+
+function newInvocationNonce () {
+  return crypto.randomBytes(16).toString('hex')
+}
+
+function normalizedPath (value) {
+  const resolved = path.resolve(value)
+  return process.platform === 'win32' ? resolved.toLowerCase() : resolved
+}
+
+function snapshotOutputFiles (root) {
+  const files = new Set()
+  if (!fs.existsSync(root)) return files
+  const visit = directory => {
+    assertNoReparseAncestors(directory)
+    for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+      const target = path.join(directory, entry.name)
+      const stat = fs.lstatSync(target)
+      if (stat.isSymbolicLink()) fail(`output evidence tree contains a symlink or reparse point: ${target}`)
+      if (stat.isDirectory()) visit(target)
+      else if (stat.isFile()) files.add(normalizedPath(target))
+    }
+  }
+  visit(root)
+  return files
+}
+
+function childEnvironment (source = process.env, invocation = null) {
+  const environment = Object.fromEntries(CHILD_ENV_KEYS.filter(key => typeof source[key] === 'string').map(key => [key, source[key]]))
+  if (invocation) {
+    for (const [field, key] of Object.entries(INVOCATION_ENV_KEYS)) {
+      if (typeof invocation[field] === 'string' && invocation[field]) environment[key] = invocation[field]
+    }
+  }
+  return environment
 }
 
 function commandStatus (child) {
@@ -358,7 +407,8 @@ function assertMarkerMatches (marker, definition, baselineSha, invocationWindow 
   if (marker.status === 'PASS' && (!marker.testCommand.includes(`--idts110-case=${definition.caseId}`) || !marker.testCommand.includes(`--baseline=${baselineSha}`))) fail(`marker command proof mismatch for ${definition.caseId}`)
   if (marker.reviewStatus !== 'PENDING_DONHV_REVIEW') fail(`marker review status must remain pending for ${definition.caseId}`)
   if (marker.status === 'NOT_RUN') fail(`marker cannot report NOT_RUN after invoking ${definition.caseId}`)
-  assertDefinitionEvidence(marker, definition)
+  if (marker.status === 'PASS' && definitionRequiresVisual(definition) && !matchesInvocationMetadata(marker.runtimeEvidence, definition.caseId, invocationWindow)) fail(`marker runtimeEvidence is not bound to the current invocation for ${definition.caseId}`)
+  assertDefinitionEvidence(marker, definition, invocationWindow)
   assertExternalProof(marker, definition)
   if (invocationWindow && marker.status === 'PASS') {
     const startedAt = Date.parse(marker.startedAt)
@@ -369,21 +419,33 @@ function assertMarkerMatches (marker, definition, baselineSha, invocationWindow 
 }
 
 async function runOneCase (definition, options) {
+  const invocationRunId = invocationToken(options.runId, 'runId', newInvocationRunId())
+  const invocationNonce = invocationToken(options.nonce, 'nonce', newInvocationNonce())
   const executable = runnerPath(definition, options.root)
   const childArgs = [
     executable,
     `--idts110-case=${definition.caseId}`,
     `--baseline=${options.baselineSha}`,
     `--executor=${options.executor}`,
+    `--idts110-run-id=${invocationRunId}`,
+    `--idts110-nonce=${invocationNonce}`,
     `--output=${perCaseOutputPath(options.outputPath, definition.caseId)}`
   ]
   let child
   const invocationStartedAt = Date.now()
+  const preexistingPaths = definitionRequiresVisual(definition)
+    ? snapshotOutputFiles(path.join(options.root, '.tmp', 'idts-110'))
+    : null
   try {
     child = options.spawnSync(process.execPath, childArgs, {
       cwd: options.root,
       encoding: 'utf8',
-      env: childEnvironment(),
+      env: childEnvironment(process.env, {
+        caseKey: definition.caseId,
+        runId: invocationRunId,
+        nonce: invocationNonce,
+        baselineSha: options.baselineSha
+      }),
       timeout: options.timeoutMs,
       maxBuffer: 16 * 1024 * 1024,
       windowsHide: true
@@ -404,7 +466,15 @@ async function runOneCase (definition, options) {
   let marker
   try {
     marker = parseAtomicMarker(markerOutput(child))
-    assertMarkerMatches(marker, definition, options.baselineSha, { startedAt: invocationStartedAt, completedAt: invocationCompletedAt })
+    assertMarkerMatches(marker, definition, options.baselineSha, {
+      startedAt: invocationStartedAt,
+      completedAt: invocationCompletedAt,
+      runId: invocationRunId,
+      nonce: invocationNonce,
+      baselineSha: options.baselineSha,
+      clockToleranceMs: CLOCK_TOLERANCE_MS,
+      preexistingPaths
+    })
   } catch (error) {
     const detail = error.message.includes('exactly one')
       ? `Atomic child did not emit exactly one case marker for ${definition.caseId}; suite-only output is not atomic evidence.`
@@ -429,7 +499,8 @@ async function runNewCases ({
   baselineSha,
   executor,
   outputPath = null,
-  runId = `idts110-${Date.now()}-${process.pid}`,
+  runId = null,
+  nonce = null,
   catalogSha: suppliedCatalogSha,
   approvalReference,
   scope = 'ALL',
@@ -442,6 +513,8 @@ async function runNewCases ({
     `--baseline=${baselineSha || ''}`,
     `--executor=${executor || ''}`
   ])
+  const invocationRunId = invocationToken(runId, 'runId', newInvocationRunId())
+  const invocationNonce = invocationToken(nonce, 'nonce', newInvocationNonce())
   const safeRoot = repositoryRoot(root)
   const safeOutputPath = outputPath ? resolveOutputPath(outputPath, safeRoot) : null
   const catalog = loadCatalog(catalogPath)
@@ -476,22 +549,26 @@ async function runNewCases ({
         timeoutMs,
         spawnSync,
         index,
-        usedVisualEvidence
+        usedVisualEvidence,
+        runId: invocationRunId,
+        nonce: invocationNonce
       }))
     } catch (error) {
       results.push(await fallbackResult(definition, {
         baselineSha: parsed.baselineSha,
         executor: parsed.executor,
         outputPath: safeOutputPath,
-        root: safeRoot,
-        timeoutMs,
-        spawnSync,
-        index
-      }, 'FAIL', 'Atomic orchestrator rejected the child result; no PASS was inferred.', index))
+          root: safeRoot,
+          timeoutMs,
+          spawnSync,
+          index,
+          runId: invocationRunId,
+          nonce: invocationNonce
+        }, 'FAIL', 'Atomic orchestrator rejected the child result; no PASS was inferred.', index))
     }
   }
   const batch = {
-    runId,
+    runId: invocationRunId,
     sourceBaselineSha: parsed.baselineSha,
     catalogSha: actualCatalogSha,
     approvalReference: approved.approval.approvalReference,
