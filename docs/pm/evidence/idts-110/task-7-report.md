@@ -76,3 +76,47 @@ OfficeCLI documentation preflight was run as required: `officecli --version` ret
 ## Handoff
 
 Task 7 is complete at the requested source-only handoff boundary. The coordinator should verify the post-commit branch head and review the ten candidate records, with particular attention to F243M retry truth, F246R duplicate registration, and F246B rollback/no-provider evidence. Do not push, merge, deploy, send real mail, update Drive/Jira, or promote these candidate results without DonHV review.
+
+## Fix round 1/5 — Important-gap strengthening
+
+- Fix-round starting head: `1ebdfcc68130717988c97ede3881619e8a930fd7`.
+- RED contract: `node .tmp/idts-110/task7-fix-round1-red.js` failed before the fixes at the missing F240 failed-audit assertion (`actual: undefined`, `expected: true`).
+- F240 now persists a `FAILED` audit and proves it creates no delivery, binds each delivery’s `sourceAuditEvent_ID` to the two applied audits, binds each `targetUser_ID` to the fixture user, and leaves exactly one inbox index after duplicate delivery registration.
+- F244 now checks both text and HTML for query-token and credential patterns, verifies exactly one fragment-token link plus the two official SAP links, verifies HTML role/expiry content, and checks HTML escaping with hostile role/expiry text.
+- F246 and F246R now call the real `writeNotificationAndSchedule` path in an isolated SQLite transaction. The path creates one real `PENDING` `NotificationDeliveries` row; F246 kicks exactly once after commit, while F246R writes the same source-key delivery twice and records `REGISTERED` then `DUPLICATE_IGNORED` with one kick.
+- F246B writes the same candidate delivery inside a real transaction, throws, confirms both notification and delivery rows are absent after rollback, and confirms zero detached worker/provider calls.
+
+The strengthened contract and authoritative batch passed:
+
+```text
+node .tmp/idts-110/task7-fix-round1-red.js
+Task7 fix round 1 strengthening contract: PASS
+
+node scripts/qa/run-idts110-new-cases.js --scope=ACCESS_EMAIL --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/access-email-results.json
+runId: idts110-1788614317516-3d2e101a52770fc85135494df8ecdb63
+total: 10
+PASS: 10
+FAIL: 0
+BLOCKED: 0
+HELD: 0
+NOT_RUN: 0
+```
+
+Fix-round batch output SHA-256: `63d5ada6c9e673f4bb8b30455512ffe2a54733cedccb68b8535ed8e3a736f5cf`.
+
+Fresh no-argument suites, atomic protocol, syntax checks, secret scan, and `git diff --check` all exited `0`. Unknown-selector checks still emitted exactly one `BLOCKED` marker and exit `1` for each of the three adapters. The result set remains local candidate evidence with `PENDING_DONHV_REVIEW`; no real provider/email or external state was used.
+
+Final rerun after the direct F244 HTML assertions:
+
+```text
+node scripts/qa/run-idts110-new-cases.js --scope=ACCESS_EMAIL --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/access-email-results.json
+runId: idts110-1788614468502-e3aa9776098f128ba421fec17d15b322
+total: 10
+PASS: 10
+FAIL: 0
+BLOCKED: 0
+HELD: 0
+NOT_RUN: 0
+```
+
+Final batch output SHA-256: `7259a9920ab0e45ae6e213a1c08aa848f555a2db111b105fac1ef9e9b90217fe`.

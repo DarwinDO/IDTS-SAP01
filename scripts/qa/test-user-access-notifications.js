@@ -186,13 +186,15 @@ function accessEmailConfig (baseUrl = 'https://idts.example.invalid') {
 
 async function readAtomicAccessState (db) {
   const [deliveries, inbox] = await Promise.all([
-    db.run(SELECT.from(ENTITY).columns('ID', 'sourceAuditEvent_ID', 'status_code', 'attemptCount', 'lastErrorCode', 'providerMessageId')),
+    db.run(SELECT.from(ENTITY).columns('ID', 'sourceAuditEvent_ID', 'targetUser_ID', 'status_code', 'attemptCount', 'lastErrorCode', 'providerMessageId')),
     db.run(SELECT.from(INBOX).columns('ID', 'accessAuditEvent_ID'))
   ])
+  deliveries.sort((left, right) => String(left.sourceAuditEvent_ID).localeCompare(String(right.sourceAuditEvent_ID)))
   return {
     deliveryRows: deliveries.length,
     deliveryIDs: deliveries.map(row => row.ID),
     deliverySourceAuditEventIDs: deliveries.map(row => row.sourceAuditEvent_ID),
+    deliveryTargetUserIDs: deliveries.map(row => row.targetUser_ID),
     deliveryStatuses: deliveries.map(row => row.status_code),
     deliveryAttempts: deliveries.map(row => Number(row.attemptCount || 0)),
     deliveryErrorCodes: deliveries.map(row => row.lastErrorCode || null),
@@ -255,6 +257,26 @@ async function runAtomicAccessCase (caseKey) {
       assert.equal(changeDelivery.deliveryStatus, 'PENDING')
       assert.equal(reactivateDelivery.created, true)
       assert.equal(reactivateDelivery.deliveryStatus, 'PENDING')
+      const failedAudit = {
+        ID: '62000000-0000-4000-8000-000000000025',
+        action: 'CHANGE_ROLE',
+        result: 'FAILED'
+      }
+      await fixture.db.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries({
+        ...failedAudit,
+        targetUser_ID: fixture.userID,
+        correlationId: '63000000-0000-4000-8000-000000000025'
+      }))
+      const failed = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: failedAudit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_ROLE_CHANGED',
+        effectiveRole: 'DEVELOPER',
+        effectiveAccessState: 'ACTIVE',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
       const queued = await writeUserAccessDelivery({
         tx: fixture.db,
         auditEvent: { ID: '62000000-0000-4000-8000-000000000022', action: 'CHANGE_ROLE', result: 'QUEUED' },
@@ -287,10 +309,19 @@ async function runAtomicAccessCase (caseKey) {
       })
       assert.deepEqual(queued, { created: false })
       assert.deepEqual(mismatched, { created: false })
+      assert.deepEqual(failed, { created: false })
       assert.equal(duplicate.created, false)
       assert.equal(duplicate.deliveryID, changeDelivery.deliveryID)
       assert.equal(await countInbox(fixture.db, changeAudit.ID), 1)
       assert.equal(await countInbox(fixture.db, reactivateAudit.ID), 1)
+      const linkedRows = await fixture.db.run(SELECT.from(ENTITY).columns('sourceAuditEvent_ID', 'targetUser_ID').where({ sourceAuditEvent_ID: { in: [changeAudit.ID, reactivateAudit.ID] } }))
+      assert.equal(linkedRows.length, 2)
+      for (const row of linkedRows) {
+        assert.equal([changeAudit.ID, reactivateAudit.ID].includes(row.sourceAuditEvent_ID), true)
+        assert.equal(row.targetUser_ID, fixture.userID)
+      }
+      assert.equal(await count(fixture.db, ENTITY, { sourceAuditEvent_ID: failedAudit.ID }), 0)
+      const duplicateIndexRows = await countInbox(fixture.db, changeAudit.ID)
       const sentMessages = []
       const processed = await processUserAccessDeliveries({
         tx: fixture.db,
@@ -312,7 +343,7 @@ async function runAtomicAccessCase (caseKey) {
       assert.deepEqual(reloadState, afterState)
       return {
         beforeState,
-        afterState: { ...afterState, queuedCreated: queued.created, mismatchedCreated: mismatched.created, duplicateCreated: duplicate.created, senderCalls: sentMessages.length },
+        afterState: { ...afterState, failedAuditExcluded: failed.created === false, duplicateIndexRows, queuedCreated: queued.created, mismatchedCreated: mismatched.created, duplicateCreated: duplicate.created, senderCalls: sentMessages.length },
         reloadState
       }
     }

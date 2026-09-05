@@ -1332,21 +1332,39 @@ async function runAtomicOnboardingCase (caseKey) {
       const beforeState = await readAtomicOnboardingState(fixture.db)
       const emailConfig = onboardingEmailConfig()
       const message = buildInvitationMessage(invitation.row, invitation.token, cds.env.idts.userAdmin, emailConfig)
-      assert.match(message.text, /https:\/\/idts\.example\.invalid\/onboarding\/continue#token=/)
-      assert.doesNotMatch(message.text, /\?token=/)
-      assert.match(message.html, /#token=/)
-      assert.match(message.text, /https:\/\/account\.sap\.com\//)
-      assert.match(message.text, /https:\/\/account\.sap\.com\/registration\//)
+      for (const body of [message.text, message.html]) {
+        assert.match(body, /https:\/\/idts\.example\.invalid\/onboarding\/continue#token=/)
+        assert.doesNotMatch(body, /(?:\?|&|&amp;)token=/i)
+        assert.doesNotMatch(body, /\b(?:tokenHash|tokenNonce|invitationSigningKey|signingKey)\b/i)
+        assert.doesNotMatch(body, /(?:password|otp|passkey|recovery code)\s*[:=]/i)
+        assert.doesNotMatch(body, /\bBearer\s+\S+/i)
+      }
+      assert.match(message.html, /<strong>Requested access:<\/strong> TESTER/)
+      assert.match(message.html, /<strong>Invitation expires:<\/strong> \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z/)
+      assert.match(message.html, /href="https:\/\/idts\.example\.invalid\/onboarding\/continue#token=[^"&]+"/)
+      const htmlLinks = [...message.html.matchAll(/href="([^"]+)"/g)].map(match => match[1])
+      assert.equal(htmlLinks.filter(link => link.includes('#token=')).length, 1)
+      assert.deepEqual(htmlLinks.filter(link => !link.includes('#token=')).sort(), [
+        'https://account.sap.com/',
+        'https://account.sap.com/registration/'
+      ])
       assert.match(message.text, /Requested access: TESTER/)
       assert.match(message.text, new RegExp(`Invitation expires: ${invitation.row.expiresAt}`))
-      assert.doesNotMatch(message.text, /(?:password|otp|passkey|recovery code)\s*[:=]/i)
       assert.doesNotMatch(JSON.stringify(message), /tokenHash|tokenNonce|local-programmatic-invitation-signing-key/i)
+      const escaped = buildInvitationMessage({
+        ...invitation.row,
+        requestedRole_code: 'TESTER & <role>',
+        expiresAt: '2026-09-05T00:00:00.000Z & <expiry>'
+      }, invitation.token, cds.env.idts.userAdmin, emailConfig)
+      assert.match(escaped.html, /TESTER &amp; &lt;role&gt;/)
+      assert.match(escaped.html, /2026-09-05T00:00:00\.000Z &amp; &lt;expiry&gt;/)
+      assert.doesNotMatch(escaped.html, /<role>|<expiry>/)
       const afterState = await readAtomicOnboardingState(fixture.db)
       const reloadState = await readAtomicOnboardingState(fixture.db)
       assert.deepEqual(reloadState, afterState)
       return {
         beforeState,
-        afterState: { ...afterState, fragmentLink: true, officialSapLinks: true, queryTokenOmitted: true, securityFieldsOmitted: true },
+        afterState: { ...afterState, htmlQueryLinkOmitted: true, htmlOfficialSapLinks: true, htmlRoleAndExpiry: true, htmlFragmentLinkOnly: true, htmlEscaped: true },
         reloadState
       }
     }
