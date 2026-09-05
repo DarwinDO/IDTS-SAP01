@@ -45,7 +45,17 @@ const IDS = Object.freeze({
   staleDueDate: 'a3000000-0000-4000-8000-000000000008',
   staleRecipient: 'a3000000-0000-4000-8000-000000000009',
   staleProfile: 'a3000000-0000-4000-8000-000000000010',
-  cutoffOverdue: 'a3000000-0000-4000-8000-000000000011'
+  cutoffOverdue: 'a3000000-0000-4000-8000-000000000011',
+  inactiveOverdueOwner: 'a1100000-0000-4000-8000-000000000001',
+  staleOverdueOwner: 'a1100000-0000-4000-8000-000000000002',
+  unmappedOverdueOwner: 'a1100000-0000-4000-8000-000000000003',
+  invalidProfileUser: 'a1100000-0000-4000-8000-000000000004',
+  invalidProfileOwner: 'a1100000-0000-4000-8000-000000000005',
+  invalidOverdueProfile: 'a2100000-0000-4000-8000-000000000002',
+  inactiveOverdueBug: 'a3100000-0000-4000-8000-000000000001',
+  staleOverdueBug: 'a3100000-0000-4000-8000-000000000002',
+  unmappedOverdueBug: 'a3100000-0000-4000-8000-000000000003',
+  invalidProfileOverdueBug: 'a3100000-0000-4000-8000-000000000004'
 })
 
 const BASE_NOW = new Date('2026-08-27T04:00:00.000Z')
@@ -692,12 +702,43 @@ async function runAtomicOverdueRecipientCase () {
   const db = await createScheduledAtomicFixture({
     bugs: [
       bug(IDS.overdue, 'BUG-ATOMIC-OVERDUE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
-      bug(IDS.closed, 'BUG-ATOMIC-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-20T00:00:00.000Z', '2026-08-20', IDS.owner, IDS.assigneeProfile, 'CLOSED')
+      bug(IDS.closed, 'BUG-ATOMIC-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-20T00:00:00.000Z', '2026-08-20', IDS.owner, IDS.assigneeProfile, 'CLOSED'),
+      bug(IDS.inactiveOverdueBug, 'BUG-ATOMIC-OVERDUE-INACTIVE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.inactiveOverdueOwner, null, 'ASSIGNED'),
+      bug(IDS.staleOverdueBug, 'BUG-ATOMIC-OVERDUE-STALE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.staleOverdueOwner, null, 'ASSIGNED'),
+      bug(IDS.unmappedOverdueBug, 'BUG-ATOMIC-OVERDUE-UNMAPPED', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.unmappedOverdueOwner, null, 'ASSIGNED'),
+      bug(IDS.invalidProfileOverdueBug, 'BUG-ATOMIC-OVERDUE-INVALID-PROFILE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.invalidProfileOwner, IDS.invalidOverdueProfile, 'ASSIGNED')
     ]
   })
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.inactiveOverdueOwner, 'Inactive overdue owner', 'inactive-overdue-owner@example.test', 'TESTER', false),
+    user(IDS.staleOverdueOwner, 'Stale overdue owner', 'stale-overdue-owner@example.test', 'TESTER', true),
+    user(IDS.invalidProfileUser, 'Invalid profile user', 'invalid-profile-user@example.test', 'DEVELOPER', true)
+  ]))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: IDS.invalidOverdueProfile,
+    user_ID: IDS.invalidProfileUser,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 5,
+    active: false
+  }))
   try {
     const beforeState = await scheduledState(db)
-    await discoverScheduledNotifications({ tx: db, now: BASE_NOW, discoveryFrom: new Date('2026-08-26T00:00:00.000Z'), emailConfig: emailConfig() })
+    let staleRecipientInjected = false
+    const tx = {
+      run: async query => {
+        const from = query.SELECT?.from?.ref?.[0]
+        const isEligibilityRead = from === 'idts.cap.Users' && !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') &&
+          JSON.stringify(query.SELECT.where).includes(IDS.staleOverdueOwner)
+        if (isEligibilityRead && !staleRecipientInjected) {
+          const rows = await db.run(query)
+          await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: IDS.staleOverdueOwner }))
+          staleRecipientInjected = true
+          return rows
+        }
+        return db.run(query)
+      }
+    }
+    await discoverScheduledNotifications({ tx, now: BASE_NOW, discoveryFrom: new Date('2026-08-26T00:00:00.000Z'), emailConfig: emailConfig() })
     const overdueRows = await db.run(SELECT.from('idts.cap.Notifications')
       .columns('recipient_ID', 'eventType_code')
       .where({ bug_ID: IDS.overdue })
@@ -708,8 +749,18 @@ async function runAtomicOverdueRecipientCase () {
     ], 'overdue discovery notifies the current owner and aligned technical assignee only')
     assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: IDS.closed }), 0,
       'Closed Bugs are excluded from overdue discovery')
-    assert.equal(await count(db, 'idts.cap.Notifications', { recipient_ID: IDS.inactivePm }), 0,
-      'inactive recipients are excluded')
+    assert.equal(staleRecipientInjected, true, 'stale owner is deactivated after the source eligibility read')
+    for (const [bugID, recipientID, label] of [
+      [IDS.inactiveOverdueBug, IDS.inactiveOverdueOwner, 'inactive owner'],
+      [IDS.staleOverdueBug, IDS.staleOverdueOwner, 'stale owner'],
+      [IDS.unmappedOverdueBug, IDS.unmappedOverdueOwner, 'unmapped owner'],
+      [IDS.invalidProfileOverdueBug, IDS.invalidProfileUser, 'invalid Developer Profile user']
+    ]) {
+      assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID }), 0,
+        `${label} Bug produces no overdue notification rows`)
+      assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID, recipient_ID: recipientID }), 0,
+        `${label} recipient is never persisted`)
+    }
     assert.equal(await count(db, 'idts.cap.NotificationDeliveries'), 0,
       'overdue discovery does not send through a provider')
     const afterState = await scheduledState(db)
@@ -823,29 +874,96 @@ function scheduledUuidFromIndex (index) {
   return `c3000000-0000-4000-8000-${String(index).padStart(12, '0')}`
 }
 
+function scheduledPmUuidFromIndex (index) {
+  return `c4000000-0000-4000-8000-${String(index).padStart(12, '0')}`
+}
+
+function scheduledMissingUserUuidFromIndex (index) {
+  return `c5000000-0000-4000-8000-${String(index).padStart(12, '0')}`
+}
+
 async function runAtomicKeysetPagingCase () {
-  const bugs = Array.from({ length: 501 }, (_, index) =>
-    bug(scheduledUuidFromIndex(index + 1), `BUG-ATOMIC-KEYSET-${index + 1}`, 'LOW', 'MINOR', '2026-08-27T00:00:00.000Z', null, null, null))
+  // Keep the candidate and recipient streams independently page-bounded without
+  // creating a 501x501 notification cross-product: one pending candidate drives
+  // both PM pages while the other 500 overdue candidates exercise candidate paging.
+  const bugs = [
+    bug(scheduledUuidFromIndex(1), 'BUG-ATOMIC-KEYSET-PENDING', 'LOW', 'MINOR', '2026-08-27T00:00:00.000Z', null, null, null),
+    ...Array.from({ length: 500 }, (_, index) =>
+      bug(
+        scheduledUuidFromIndex(index + 2),
+        `BUG-ATOMIC-KEYSET-OVERDUE-${index + 1}`,
+        'LOW',
+        'MINOR',
+        '2026-08-27T00:00:00.000Z',
+        '2026-08-26',
+        scheduledMissingUserUuidFromIndex(index + 1),
+        null,
+        'ASSIGNED'
+      ))
+  ]
   const db = await createScheduledAtomicFixture({ bugs })
+  const extraPMs = Array.from({ length: 500 }, (_, index) =>
+    user(scheduledPmUuidFromIndex(index + 1), `Atomic PM ${index + 1}`, `atomic-pm-${index + 1}@example.test`, 'PM', true))
+  await db.run(INSERT.into('idts.cap.Users').entries(extraPMs))
   try {
     const beforeState = await scheduledPageState(db)
+    const expectedCandidateRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    const expectedPMRows = await db.run(SELECT.from('idts.cap.Users')
+      .columns('ID')
+      .where({ active: true, role_code: 'PM' })
+      .orderBy('ID asc'))
     const candidateQueries = []
+    const pmQueries = []
     const tx = {
       run: async query => {
-        if (query.SELECT?.from?.ref?.[0] === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) candidateQueries.push(query)
+        const from = query.SELECT?.from?.ref?.[0]
+        if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+          const rows = await db.run(query)
+          candidateQueries.push({ query, ids: rows.map(row => row.ID) })
+          return rows
+        }
+        const isPMPageRead = from === 'idts.cap.Users' && query.SELECT.limit?.rows?.val === 500 &&
+          query.SELECT.columns?.length === 1 && !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')
+        if (isPMPageRead) {
+          const rows = await db.run(query)
+          pmQueries.push({ query, ids: rows.map(row => row.ID) })
+          return rows
+        }
         return db.run(query)
       }
     }
     await discoverScheduledNotifications({ tx, now: BASE_NOW, discoveryFrom: new Date('2026-08-27T00:00:00.000Z'), emailConfig: emailConfig() })
-    assert.equal(candidateQueries.length, 2, '501 candidates are read through two bounded pages')
-    assert.equal(candidateQueries[1].SELECT.limit.offset, undefined, 'the second page does not use OFFSET')
-    assert.match(JSON.stringify(candidateQueries[1].SELECT.where), new RegExp(`ID.*>.*${scheduledUuidFromIndex(500)}`),
-      'the second page starts strictly after the last ID from page one')
+    assert.deepEqual(candidateQueries.map(page => page.ids.length), [500, 1], '501 candidates are read through two bounded pages')
+    assert.deepEqual(pmQueries.map(page => page.ids.length), [500, 1], '501 active PMs are read through two bounded PM pages')
+    const candidatePageOne = candidateQueries[0]
+    const candidatePageTwo = candidateQueries[1]
+    const pmPageOne = pmQueries[0]
+    const pmPageTwo = pmQueries[1]
+    for (const page of [...candidateQueries, ...pmQueries]) {
+      assert.equal(page.query.SELECT.limit.offset, undefined, 'keyset pages never use OFFSET')
+      assert.deepEqual(page.query.SELECT.orderBy, [{ ref: ['ID'], sort: 'asc' }], 'keyset pages order by ID ascending')
+      assert.equal(new Set(page.ids).size, page.ids.length, 'each returned page has no duplicate IDs')
+    }
+    assert.doesNotMatch(JSON.stringify(candidatePageOne.query.SELECT.where), /ID.*>.*c3/, 'the first candidate page has no prior cursor')
+    assert.match(JSON.stringify(candidatePageTwo.query.SELECT.where), new RegExp(`ID.*>.*${candidatePageOne.ids.at(-1)}`),
+      'the second candidate page starts strictly after page one')
+    assert.doesNotMatch(JSON.stringify(pmPageOne.query.SELECT.where), /ID.*>.*c4/, 'the first PM page has no prior cursor')
+    assert.match(JSON.stringify(pmPageTwo.query.SELECT.where), new RegExp(`ID.*>.*${pmPageOne.ids.at(-1)}`),
+      'the second PM page starts strictly after page one')
+    const expectedCandidateIDs = expectedCandidateRows.map(row => row.ID)
+    const observedCandidateIDs = candidateQueries.flatMap(page => page.ids)
+    assert.deepEqual(observedCandidateIDs, expectedCandidateIDs, 'candidate rows are returned exactly once across both pages')
+    assert.deepEqual(pmQueries.flatMap(page => page.ids), expectedPMRows.map(row => row.ID),
+      'active PM rows are returned exactly once across both PM pages')
     const afterState = await scheduledPageState(db)
-    assert.equal(afterState.notificationCount, 501, 'all keyset candidates produce one PM event')
+    assert.equal(afterState.notificationCount, expectedPMRows.length, 'the one pending candidate produces one event per active PM')
     const reloadState = await scheduledPageState(db)
     assert.deepEqual(reloadState, afterState)
-    return { beforeState, afterState, reloadState }
+    return {
+      beforeState: { ...beforeState, candidateSourceRows: expectedCandidateRows.length, activePMSourceRows: expectedPMRows.length },
+      afterState: { ...afterState, candidatePages: candidateQueries.length, pmPages: pmQueries.length },
+      reloadState: { ...reloadState, candidateRowsObservedOnce: observedCandidateIDs.length, pmRowsObservedOnce: pmQueries.flatMap(page => page.ids).length }
+    }
   } finally {
     if (typeof db.disconnect === 'function') await db.disconnect()
   }
@@ -865,20 +983,7 @@ async function scheduledPageState (db) {
 }
 
 async function runAtomicCursorRollbackCase () {
-  const summary = await assertContextPageRollback(null, emailConfig(), true)
-  const beforeState = { committedPages: 0, failedPageWrites: 0, cursorAdvanced: false }
-  const afterState = {
-    committedPages: summary.committedPages,
-    failedPageWrites: summary.failedPageWrites,
-    callbackPages: summary.callbackPages,
-    cursorAdvanced: summary.cursorAdvanced
-  }
-  const reloadState = { ...afterState, retryablePage: summary.retryablePage }
-  assert.deepEqual(afterState.committedPages, [1], 'only page one commits before the page-two failure')
-  assert.equal(afterState.failedPageWrites, 0, 'the failed page writes are rolled back')
-  assert.equal(afterState.cursorAdvanced, false, 'the failed page does not advance its cursor')
-  assert.deepEqual(reloadState, { ...afterState, retryablePage: 2 })
-  return { beforeState, afterState, reloadState }
+  return assertContextPageRollback(null, emailConfig(), true)
 }
 
 function user (ID, displayName, email, role_code, active) {
@@ -1272,12 +1377,11 @@ async function assertContextPageRollback (db, config, clean = false) {
   const pageBugs = Array.from({ length: 501 }, (_, index) =>
     bug(`f4000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-ROLLBACK-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
   await realDb.run(INSERT.into('idts.cap.Bugs').entries(pageBugs))
-  const candidatePage = pageNumber => pageNumber === 1 ? pageBugs.slice(0, 500) : pageBugs.slice(500)
-
   const pageContexts = []
   const candidatePageStarts = []
   const candidateCommittedPages = []
   const candidateCallbackPages = []
+  const candidateQueries = []
   const requestUser = new cds.User({ id: 'context-rollback-scheduler', roles: ['OutboxProcessor'] })
   const request = new cds.Request({
     tenant: 'tenant-context-rollback',
@@ -1288,6 +1392,8 @@ async function assertContextPageRollback (db, config, clean = false) {
   const originalServiceTx = servicePrototype.tx
   const previousDb = cds.db
   let candidatePageNumber = 0
+  let attempt = 0
+  let failureInjected = false
   servicePrototype.tx = function (...args) {
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const context = typeof args[0] === 'function' ? null : args[0]
@@ -1303,13 +1409,25 @@ async function assertContextPageRollback (db, config, clean = false) {
               candidatePageStarts.push({ pageNumber: rootStats.candidatePageNumber, committedBefore: candidateCommittedPages.length })
               candidateCallbackPages.push(rootStats.candidatePageNumber)
             }
-            return candidatePage(rootStats.candidatePageNumber)
+            const rows = await pageTx.run(query)
+            const where = query.SELECT.where || []
+            const cursorIndex = where.findIndex(part => part === '>')
+            candidateQueries.push({
+              attempt,
+              pageNumber: rootStats.candidatePageNumber,
+              cursor: cursorIndex >= 0 ? where[cursorIndex + 1]?.val || null : null,
+              ids: rows.map(row => row.ID)
+            })
+            return rows
           }
           return pageTx.run(query)
         }
       }
       const result = await callback(wrappedPageTx)
-      if (rootStats.candidatePageNumber === 2) throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
+      if (rootStats.candidatePageNumber === 2 && !failureInjected) {
+        failureInjected = true
+        throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
+      }
       return result
     }).then(result => {
       if (rootStats.candidatePageNumber !== null) candidateCommittedPages.push(rootStats.candidatePageNumber)
@@ -1317,37 +1435,108 @@ async function assertContextPageRollback (db, config, clean = false) {
     })
   }
   cds.db = realDb
+  let summary
+  let firstAttemptPageOne
+  let firstAttemptPageTwo
+  let secondAttemptPageTwo
+  let beforePersistedRows
+  let afterFailureRows
+  let afterRetryRows
   try {
+    const readPersistedRows = () => realDb.run(SELECT.from('idts.cap.Notifications')
+      .columns('ID', 'bug_ID', 'recipient_ID', 'sourceKey')
+      .where({ eventType_code: 'PENDING_ASSIGNMENT' })
+      .orderBy('sourceKey asc'))
+    beforePersistedRows = await readPersistedRows()
+    attempt = 1
     await assert.rejects(() => processNotificationSchedules(request), /scheduled page failure fixture/)
+    afterFailureRows = await readPersistedRows()
+    const firstAttemptQueries = candidateQueries.filter(query => query.attempt === 1)
+    firstAttemptPageOne = firstAttemptQueries.find(query => query.pageNumber === 1)
+    firstAttemptPageTwo = firstAttemptQueries.find(query => query.pageNumber === 2)
+    assert.deepEqual(firstAttemptQueries.map(query => query.pageNumber), [1, 2],
+      'the first run reads page one and then fails on page two')
+    if (clean) {
+      assert.equal(afterFailureRows.length, firstAttemptPageOne.ids.length,
+        'page one notification writes persist before page two fails')
+      assert.equal(afterFailureRows.filter(row => firstAttemptPageTwo.ids.includes(row.bug_ID)).length, 0,
+        'page two notification writes are rolled back')
+      assert.equal(firstAttemptPageTwo.cursor, firstAttemptPageOne.ids.at(-1),
+        'the failed page cursor is the last committed page-one ID')
+    }
+
+    afterRetryRows = afterFailureRows
+    if (clean) {
+      candidatePageNumber = 0
+      attempt = 2
+      await processNotificationSchedules(request)
+      afterRetryRows = await readPersistedRows()
+      const secondAttemptQueries = candidateQueries.filter(query => query.attempt === 2)
+      secondAttemptPageTwo = secondAttemptQueries.find(query => query.pageNumber === 2)
+      assert.deepEqual(secondAttemptQueries.map(query => query.pageNumber), [1, 2],
+        'the retry resumes through the same two source pages')
+      assert.deepEqual(secondAttemptPageTwo.ids, firstAttemptPageTwo.ids,
+        'the retry reads the same failed page rows')
+      assert.equal(secondAttemptPageTwo.cursor, firstAttemptPageTwo.cursor,
+        'the retry uses the same unadvanced keyset cursor')
+      assert.equal(afterRetryRows.length, pageBugs.length,
+        'the resumed page persists the remaining source rows')
+      assert.equal(new Set(afterRetryRows.map(row => row.sourceKey)).size, afterRetryRows.length,
+        'page resume leaves no duplicate source keys')
+      const persistedBugIDs = new Set(afterRetryRows.map(row => row.bug_ID))
+      assert.deepEqual(persistedBugIDs, new Set(pageBugs.map(row => row.ID)),
+        'the final persisted source set contains every Bug exactly once')
+    }
+    const beforeState = {
+      persistedNotificationCount: beforePersistedRows.length,
+      cursor: null
+    }
+    const afterState = {
+      persistedNotificationCount: afterFailureRows.length,
+      committedPages: candidateCommittedPages.slice(0, 1),
+      failedPagePersistedCount: afterFailureRows.filter(row => firstAttemptPageTwo.ids.includes(row.bug_ID)).length,
+      attemptedPageTwoCursor: firstAttemptPageTwo.cursor
+    }
+    const reloadState = {
+      persistedNotificationCount: afterRetryRows.length,
+      uniqueSourceKeyCount: new Set(afterRetryRows.map(row => row.sourceKey)).size,
+      retriedPageTwoRowCount: secondAttemptPageTwo?.ids.length || 0,
+      retriedPageTwoCursor: secondAttemptPageTwo?.cursor || null
+    }
+    summary = { beforeState, afterState, reloadState }
   } finally {
     servicePrototype.tx = originalServiceTx
     cds.db = previousDb
   }
 
-  const firstSource = `PENDING_ASSIGNMENT:${pageBugs[0].ID}:${IDS.pm}`
-  const secondSource = `PENDING_ASSIGNMENT:${pageBugs[500].ID}:${IDS.pm}`
-  assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: firstSource }), 1,
-    'page one source/inbox write survives a later page failure')
-  assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
-    'failed page source/inbox write rolls back as one CAP unit')
-  assert.deepEqual(candidateCallbackPages, [1, 2],
-    'the failing page callback still runs before its root transaction rolls back')
-  assert.deepEqual(candidateCommittedPages, [1],
-    'only the successful first page commits')
+  assert.deepEqual(candidateCallbackPages, clean ? [1, 2, 1, 2] : [1, 2],
+    'the failing page callback runs before its root transaction rolls back and the retry replays both pages')
+  assert.deepEqual(candidateCommittedPages, clean ? [1, 1, 2] : [1],
+    'only page one commits before failure and the retry commits both pages')
   assert.ok(new Set(pageContexts).size >= 2,
-    'rollback path also receives a fresh context per detached root page')
+    'rollback path receives a fresh context per detached root page')
   assert.ok(pageContexts.every(context => context.tenant === request.tenant && context.user === request.user),
     'rollback path preserves tenant and user context')
-  assert.deepEqual(candidatePageStarts.map(page => page.committedBefore), [0, 1],
+  assert.deepEqual(candidatePageStarts.map(page => page.committedBefore), clean ? [0, 1, 1, 2] : [0, 1],
     'rollback path starts page two only after page one commits')
-  assert.equal(config.enabled, true, 'rollback fixture keeps the existing email policy')
-  return {
-    callbackPages: candidateCallbackPages,
-    committedPages: candidateCommittedPages,
-    failedPageWrites: 0,
-    cursorAdvanced: false,
-    retryablePage: 2
+  if (!clean) {
+    const firstSource = `PENDING_ASSIGNMENT:${pageBugs[0].ID}:${IDS.pm}`
+    const secondSource = `PENDING_ASSIGNMENT:${pageBugs[500].ID}:${IDS.pm}`
+    assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: firstSource }), 1,
+      'page one source/inbox write survives a later page failure')
+    assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
+      'failed page source/inbox write rolls back as one CAP unit')
   }
+  assert.equal(config.enabled, true, 'rollback fixture keeps the existing email policy')
+  return clean
+    ? summary
+    : {
+        callbackPages: candidateCallbackPages,
+        committedPages: candidateCommittedPages,
+        failedPageWrites: 0,
+        cursorAdvanced: false,
+        retryablePage: 2
+      }
 }
 
 async function isolatedSchedulerDatabase () {

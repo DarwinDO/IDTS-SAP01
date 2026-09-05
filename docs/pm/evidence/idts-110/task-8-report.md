@@ -124,3 +124,47 @@ patching and no Office artifact operation was attempted.
 Task 8 stops at the requested committed runners and report. Do not push, merge,
 deploy, send real mail, update Drive/Jira, mutate BTP/HANA, or remove the
 worktree as part of this task.
+
+## Fix round 1/5 — review findings addressed
+
+The review RED contract was rerun against the committed Task 8 implementation
+and failed before the fix on the missing retry/resume, PM-page, safe-item, and
+winner-row assertions. The focused GREEN selectors then passed:
+
+```text
+IDTS110-F248   PASS — inactive, stale, unmapped, and invalid-profile overdue targets are absent; active owner/assignee remain
+IDTS110-F249K  PASS — 501 candidate rows and 501 active PM rows are read exactly once through separate two-page ID keysets
+IDTS110-F249T  PASS — page-two failure rolls back 0 page-two writes, retries the same cursor/page, and leaves 501 unique source rows
+IDTS110-F250R  PASS — snapshot.items has exactly the eight-field safe allowlist and contains no raw keys/values
+IDTS110-F251   PASS — exact pre-existing winner ID and unchanged row are reused; later recipient has one row
+IDTS110-F251R  PASS — failed recipient page leaves no rows and the same source page is read on resume without duplicates
+```
+
+F249K now uses 500 overdue candidates with no mapped owner plus one pending
+candidate, and 501 active PMs, so both candidate and PM streams cross their
+bounded page limits without producing a notification cross-product. F249T
+uses real SQLite candidate queries and a one-shot injected page-two exception;
+the retry executes the real scheduler again and reads back persisted rows and
+the unchanged keyset cursor. F248 now includes all unsafe recipient shapes and
+deactivates the stale owner only after the real eligibility read. F250M/Q/R,
+F251, and F251R use fresh database/source queries for before, after, and reload
+state; F250Q binds each rendered item to its exact Bug Object Page link, and
+F250R asserts the exact safe item projection.
+
+Fresh authoritative batch after the fix:
+
+```text
+runId: idts110-1788622556261-f0b0f10e37ece75d3a2bf539e1ee2fd4
+scope: BUG_EMAIL
+total: 20
+PASS: 20
+FAIL: 0
+BLOCKED: 0
+HELD: 0
+NOT_RUN: 0
+Batch SHA-256: D80E3068E2A17454BF46D150EA85DD73A5EEEACB73E7985FB381AFF98CEAB405
+```
+
+No-argument scheduled and digest suites remain `PASS`. No product source or
+external state changed; all provider behavior remains locally injected and is
+not live-delivery evidence.
