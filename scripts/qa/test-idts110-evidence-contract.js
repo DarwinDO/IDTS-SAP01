@@ -8,12 +8,12 @@ const path = require('node:path')
 const root = path.resolve(__dirname, '../..')
 const generator = require('./generate-idts110-evidence')
 const cards = require('./generate-idts110-mentor-cards')
-const atomic = require('./idts110-atomic-runner')
 
 const BASELINE = '6eb6f73840d7150598a993f8656d2b44e5b0cd4b'
 const catalogPath = path.join(root, 'docs/qa/idts-110-unit-test-catalog.json')
 const numberMapPath = path.join(root, 'docs/qa/idts-110-case-number-map.json')
 const approvalPath = path.join(root, 'docs/pm/evidence/idts-110/catalog-approval.json')
+const ledgerPath = path.join(root, 'docs/pm/evidence/idts-110/source-result-ledger.json')
 const unitRoot = path.join(root, 'docs/pm/evidence/idts-110/unit')
 const cardRoot = path.join(root, 'docs/pm/evidence/idts-110/cards')
 const sourcePaths = [
@@ -48,7 +48,14 @@ function assertNoSecret (value) {
 
   assert.equal(typeof generator.aggregateAtomicResults, 'function')
   assert.equal(typeof generator.writeAtomicEvidence, 'function')
+  assert.equal(typeof generator.validatePackagedAtomicResult, 'function')
   assert.equal(typeof cards.buildCardModels, 'function')
+  const ledger = readJson(ledgerPath)
+  assert.equal(ledger.schemaVersion, '1.0')
+  assert.equal(ledger.sourceBaselineSha, BASELINE)
+  assert.deepEqual(ledger.approvalReference, approval.approvalReference)
+  assert.equal(ledger.entries.length, 6)
+  assert.equal(ledger.entries.reduce((sum, entry) => sum + entry.selectedCaseKeys.length, 0), 90)
 
   const batch = generator.aggregateAtomicResults({
     inputPaths: sourcePaths,
@@ -85,6 +92,20 @@ assert.throws(
   /duplicate|exactly 90|historical|selected/i
 )
 
+  const tamperedSourcePath = sourcePaths[0]
+  const originalSourceBytes = fs.readFileSync(tamperedSourcePath)
+  try {
+    const tampered = readJson(tamperedSourcePath)
+    tampered.results[0].actualResult = 'same run ID but tampered source bytes'
+    fs.writeFileSync(tamperedSourcePath, `${JSON.stringify(tampered, null, 2)}\n`, 'utf8')
+    assert.throws(
+      () => generator.aggregateAtomicResults({ inputPaths: sourcePaths, catalogPath, numberMapPath, approvalPath }),
+      /sha-256|hash|ledger/i
+    )
+  } finally {
+    fs.writeFileSync(tamperedSourcePath, originalSourceBytes)
+  }
+
   await generator.writeAtomicEvidence({ batch, catalogPath, numberMapPath, approvalPath, evidenceRoot: unitRoot })
   const models = cards.buildCardModels({ catalogPath, numberMapPath, approvalPath, results: batch, evidenceRoot: unitRoot })
 assert.equal(models.length, 278)
@@ -111,13 +132,7 @@ for (const row of batch.results) {
   assert.ok(fs.existsSync(manifestPath), `${row.caseKey} case-manifest.json`)
   const result = readJson(resultPath)
   const manifest = readJson(manifestPath)
-  if (row.evidenceKind === 'UI_RUNTIME') {
-    // The shared atomic runner validates live UI paths under .tmp/idts-110;
-    // the packaged result intentionally points at its committed copy instead.
-    atomic.validateAtomicResult({ ...result, runtimeEvidence: row.runtimeEvidence })
-  } else {
-    atomic.validateAtomicResult(result)
-  }
+  generator.validatePackagedAtomicResult(result, { evidenceRoot: dir })
   assert.equal(manifest.caseKey, row.caseKey)
   assert.equal(manifest.resultSha256, sha256(resultPath))
   assertNoSecret(manifest)
@@ -140,6 +155,20 @@ for (const row of batch.results) {
     assert.ok(manifest.evidenceFiles.includes('result.png'))
   }
 }
+
+const packagedUiRow = batch.results.find(row => row.evidenceKind === 'UI_RUNTIME')
+const packagedUiResult = readJson(path.join(unitRoot, packagedUiRow.caseKey, 'result.json'))
+assert.throws(
+  () => generator.validatePackagedAtomicResult({
+    ...packagedUiResult,
+    runtimeEvidence: {
+      ...packagedUiResult.runtimeEvidence,
+      screenshotPath: '../runtime.png'
+    }
+  }, { evidenceRoot: path.join(unitRoot, packagedUiRow.caseKey) }),
+  /packaged|visual|path|evidence|traversal/i,
+  'packaged validator must reject traversal in a UI artifact path'
+)
 
   await cards.writeCards({ models, outputRoot: cardRoot })
   const cardFiles = fs.readdirSync(cardRoot).filter(name => /^Case-\d{3}\.png$/.test(name))

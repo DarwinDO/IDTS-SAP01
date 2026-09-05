@@ -10,10 +10,12 @@
 
 ## Deterministic source selection
 
-The aggregator uses an explicit latest-reviewed source ledger embedded in
-`scripts/qa/generate-idts110-evidence.js`. It does not discover result files by
-directory order, and rejects a source outside that ledger so an old candidate
-cannot be promoted accidentally.
+The aggregator uses the committed
+`docs/pm/evidence/idts-110/source-result-ledger.json`, with matching enforcement
+in `scripts/qa/generate-idts110-evidence.js`. It does not discover result files
+by directory order, and rejects a source outside that ledger so an old candidate
+cannot be promoted accidentally. Each selected source is hash-checked before
+parsing, so replacing a `.tmp` file while retaining its run ID is rejected.
 
 | Source | Run ID | Selected | Excluded | Raw SHA-256 |
 | --- | --- | ---: | ---: | --- |
@@ -55,15 +57,17 @@ F239P, F239H, and F239D; F224 comes only from the fix-round replacement.
 
 ## TDD and verification
 
-RED was observed before implementation: the new contract failed because the
-mentor-card module did not exist. GREEN was observed after the minimal
-aggregator, package writer, renderer, card generator, and contract were added:
+RED was observed before implementation: the fixed contract failed on the
+missing packaged validator and the stale P191 absence assertion. GREEN was
+observed after the minimal aggregator, committed source ledger, strict package
+validator, package writer, renderer, card generator, and adversarial checks were
+added:
 
 ```text
 node scripts/qa/test-idts110-evidence-contract.js                         PASS
 node scripts/qa/generate-idts110-evidence.js --atomic-results=.tmp/idts-110/all-results.json  PASS
 node scripts/qa/generate-idts110-mentor-cards.js --results=.tmp/idts-110/all-results.json --output=docs/pm/evidence/idts-110/cards  PASS
-node scripts/qa/generate-idts110-extension.js --check                     PASS
+node scripts/qa/test-idts110-extension-manifest.js                          PASS
 node scripts/qa/test-idts110-extended-catalog.js                          PASS
 node scripts/qa/test-idts110-atomic-runner.js                             PASS
 node --check scripts/qa/generate-idts110-evidence.js                      PASS
@@ -75,17 +79,12 @@ npx --yes ai-devkit@latest lint --json                                     PASS 
 git diff --check                                                            PASS
 ```
 
-OfficeCLI preflight was run with `officecli --version` (`11.0.147`) and
+OfficeCLI preflight was run with `officecli --version` (`1.0.147`) and
 `officecli help`; OfficeCLI does not author repository Markdown, so no Office
 artifact operation was attempted.
 
 ## Concerns and handoff
 
-- `node scripts/qa/test-idts110-extension-manifest.js` remains a pre-existing
-  stale contract failure at line 129: it asserts the approved
-  `scripts/qa/test-user-admin-role-contract.js` runner must not exist, although
-  Task 4 added that required runner. Task 9 did not change that unrelated
-  historical test; the generator `--check` and extended-catalog contract pass.
 - Candidate `PASS` is not DonHV approval, official workbook PASS, deployment,
   provider/live-email acceptance, BTP/HANA evidence, Drive release, or Jira
   completion. Task 10 may consume the ignored aggregate and the committed unit

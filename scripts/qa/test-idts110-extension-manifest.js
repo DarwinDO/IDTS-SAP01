@@ -126,7 +126,11 @@ for (const row of extension.featureCandidates) {
     assert.deepEqual(row.evidenceRequirements, source.evidenceRequirements)
   }
 }
-assert.equal(fs.existsSync(path.join(root, 'scripts/qa/test-user-admin-role-contract.js')), false)
+const roleRunnerRelative = 'scripts/qa/test-user-admin-role-contract.js'
+const roleRunnerPath = path.join(root, roleRunnerRelative)
+assert.equal(fs.existsSync(roleRunnerPath), true, 'P191 role runner is required after Task 4')
+assert.equal(fs.statSync(roleRunnerPath).isFile(), true, 'P191 role runner must be a regular file')
+assert.equal(childProcess.execFileSync('git', ['ls-files', '--error-unmatch', roleRunnerRelative], { cwd: root, encoding: 'utf8' }).trim(), roleRunnerRelative, 'P191 role runner must be tracked')
 for (const row of rows) {
   if (row.internalCaseKey !== 'IDTS110-P191') assert.equal(fs.existsSync(path.join(root, row.plannedTestFile)), true)
 }

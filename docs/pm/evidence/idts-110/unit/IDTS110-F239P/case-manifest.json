@@ -99,5 +99,8 @@
   "resultSha256": "bb56739d29e5977e8119c29cdb1e773efad4bf3957e6319d19805bc10326e83d",
   "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
   "acceptanceMode": "UI_RUNTIME_VISUAL",
-  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "66d86d5091f946a6f496d41e3f1a94873bd1d16cf8ebe6c1f54087a500476c48",
+  "manifestPath": "case-manifest.json"
 }

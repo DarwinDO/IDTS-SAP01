@@ -9,6 +9,7 @@ const BASELINE_SHA = '6eb6f73840d7150598a993f8656d2b44e5b0cd4b'
 const MARKER_PREFIX = 'IDTS110_ATOMIC_RESULT '
 const PROJECT_ROOT = path.resolve(__dirname, '../..')
 const ATOMIC_OUTPUT_ROOT = path.join(PROJECT_ROOT, '.tmp', 'idts-110')
+const PACKAGED_EVIDENCE_ROOT = path.join(PROJECT_ROOT, 'docs', 'pm', 'evidence', 'idts-110', 'unit')
 const RESULT_STATUSES = ['PASS', 'FAIL', 'BLOCKED', 'HELD', 'NOT_RUN']
 const EVIDENCE_KINDS = ['LOCAL_ATOMIC', 'UI_RUNTIME', 'BTP_INTEGRATION']
 const MAX_SAFE_STRING_LENGTH = 2000
@@ -142,7 +143,7 @@ function sanitizeValue (value, location = 'value', seen = new Set(), depth = 0) 
   return output
 }
 
-function assertSafeValue (value, location = 'value', seen = new Set(), depth = 0) {
+function assertSafeValue (value, location = 'value', seen = new Set(), depth = 0, options = {}) {
   if (value === undefined) fail(`undefined value at ${location}`)
   if (typeof value === 'string') {
     if (hasRawSecret(value)) fail(`unsanitized secret, PII, or private endpoint at ${location}`)
@@ -160,13 +161,16 @@ function assertSafeValue (value, location = 'value', seen = new Set(), depth = 0
   seen.add(value)
   if (Array.isArray(value)) {
     if (value.length > MAX_SAFE_ARRAY_ITEMS) fail(`array length exceeds ${MAX_SAFE_ARRAY_ITEMS} items at ${location}`)
-    for (let index = 0; index < value.length; index += 1) assertSafeValue(value[index], `${location}[${index}]`, seen, depth + 1)
+    for (let index = 0; index < value.length; index += 1) assertSafeValue(value[index], `${location}[${index}]`, seen, depth + 1, options)
   } else {
-    if (Object.keys(value).length > MAX_SAFE_OBJECT_PROPERTIES) fail(`object exceeds ${MAX_SAFE_OBJECT_PROPERTIES} properties at ${location}`)
+    const maxObjectProperties = Number.isInteger(options.maxObjectProperties) && options.maxObjectProperties >= MAX_SAFE_OBJECT_PROPERTIES
+      ? options.maxObjectProperties
+      : MAX_SAFE_OBJECT_PROPERTIES
+    if (Object.keys(value).length > maxObjectProperties) fail(`object exceeds ${maxObjectProperties} properties at ${location}`)
     for (const [key, item] of Object.entries(value)) {
       if (isSensitiveKey(key) || isPiiKey(key) || key.toLowerCase() === 'stack') fail(`sensitive or PII key at ${location}.${key}`)
-      assertSafeValue(key, `${location}.<key>`, seen)
-      assertSafeValue(item, `${location}.${key}`, seen, depth + 1)
+      assertSafeValue(key, `${location}.<key>`, seen, 0, options)
+      assertSafeValue(item, `${location}.${key}`, seen, depth + 1, options)
     }
   }
   seen.delete(value)
@@ -408,17 +412,45 @@ function isDecodablePng (buffer) {
   }
 }
 
-function normalizeOutputRelativePath (value, field) {
+function trustedPackagedEvidenceRoot (evidenceRoot, caseKey) {
+  if (typeof evidenceRoot !== 'string' || !path.isAbsolute(evidenceRoot) || typeof caseKey !== 'string') return null
+  const resolved = path.resolve(evidenceRoot)
+  const expected = path.join(PACKAGED_EVIDENCE_ROOT, caseKey)
+  if (!samePath(resolved, expected)) return null
+  try {
+    assertNoReparseAncestors(resolved)
+    const stat = fs.lstatSync(resolved)
+    if (!stat.isDirectory() || stat.isSymbolicLink() || !samePath(fs.realpathSync.native(resolved), resolved)) return null
+  } catch {
+    return null
+  }
+  return resolved
+}
+
+function normalizeOutputRelativePath (value, field, options = {}) {
   if (typeof value !== 'string' || !value.trim()) return null
   const supplied = value.trim().replace(/\\/g, '/')
+  const packaged = options.packageMode === true
+  const outputRoot = packaged ? trustedPackagedEvidenceRoot(options.evidenceRoot, options.caseKey) : path.resolve(ATOMIC_OUTPUT_ROOT)
+  if (!outputRoot) return null
   const absolute = path.isAbsolute(value)
+  if (packaged && absolute) return null
   if (!absolute && (supplied.startsWith('/') || /^[A-Za-z]:\//.test(supplied) || supplied.split('/').includes('..'))) return null
-  const outputRoot = path.resolve(ATOMIC_OUTPUT_ROOT)
-  const lexical = path.isAbsolute(value) ? path.resolve(value) : path.resolve(outputRoot, value)
+  let relative = supplied
+  if (packaged) {
+    const prefixes = [
+      `unit/${options.caseKey}/`,
+      `docs/pm/evidence/idts-110/unit/${options.caseKey}/`
+    ]
+    const prefix = prefixes.find(candidate => relative.startsWith(candidate))
+    if (prefix) relative = relative.slice(prefix.length)
+    if (!/^(?:runtime\.png|case-manifest\.json)$/.test(relative)) return null
+  }
+  const lexical = absolute ? path.resolve(value) : path.resolve(outputRoot, relative)
   if (!isWithin(lexical, outputRoot)) return null
-  const relative = path.relative(outputRoot, lexical).replace(/\\/g, '/')
-  if (!relative || relative.split('/').includes('..')) return null
-  return { lexical, relative, field }
+  const outputRelative = path.relative(outputRoot, lexical).replace(/\\/g, '/')
+  if (!outputRelative || outputRelative.split('/').includes('..')) return null
+  return { lexical, relative: outputRelative, field }
 }
 
 function normalizedArtifactPath (value) {
@@ -472,17 +504,23 @@ function screenshotCandidates (value) {
   return candidates
 }
 
-function screenshotProof (value, caseKey, invocation = null) {
+function screenshotProof (value, caseKey, invocation = null, options = {}) {
   if (!isObject(value) || typeof caseKey !== 'string') return null
+  const packaged = options.packageMode === true
+  if (packaged && !trustedPackagedEvidenceRoot(options.evidenceRoot, caseKey)) return null
   for (const candidate of screenshotCandidates(value)) {
-    const screenshot = normalizeOutputRelativePath(candidate.screenshotPath, 'screenshotPath')
-    const manifest = normalizeOutputRelativePath(candidate.manifestPath, 'manifestPath')
+    const screenshot = normalizeOutputRelativePath(candidate.screenshotPath, 'screenshotPath', { ...options, caseKey })
+    const manifest = normalizeOutputRelativePath(candidate.manifestPath, 'manifestPath', { ...options, caseKey })
     const hash = candidate.screenshotSha256.trim().toLowerCase()
     if (!screenshot || !manifest || !/^[a-f0-9]{64}$/.test(hash)) continue
     const screenshotParts = screenshot.relative.split('/')
     const manifestParts = manifest.relative.split('/')
-    if (screenshotParts.length < 2 || screenshotParts[screenshotParts.length - 2] !== caseKey || !/^(?:result|runtime)\.png$/.test(screenshotParts.at(-1))) continue
-    if (manifestParts.length < 2 || manifestParts[manifestParts.length - 2] !== caseKey || manifestParts.at(-1) !== 'case-manifest.json') continue
+    if (packaged) {
+      if (screenshot.relative !== 'runtime.png' || manifest.relative !== 'case-manifest.json') continue
+    } else {
+      if (screenshotParts.length < 2 || screenshotParts[screenshotParts.length - 2] !== caseKey || !/^(?:result|runtime)\.png$/.test(screenshotParts.at(-1))) continue
+      if (manifestParts.length < 2 || manifestParts[manifestParts.length - 2] !== caseKey || manifestParts.at(-1) !== 'case-manifest.json') continue
+    }
     if (!matchesInvocationMetadata(candidate.metadata, caseKey, invocation)) continue
     try {
       assertNoReparseAncestors(path.dirname(screenshot.lexical))
@@ -498,7 +536,7 @@ function screenshotProof (value, caseKey, invocation = null) {
       if (crypto.createHash('sha256').update(bytes).digest('hex') !== hash) continue
       const manifestJson = JSON.parse(fs.readFileSync(manifest.lexical, 'utf8'))
       assertNoUndefined(manifestJson, 'screenshot manifest')
-      assertSafeValue(manifestJson, 'screenshot manifest')
+      assertSafeValue(manifestJson, 'screenshot manifest', new Set(), 0, packaged ? { maxObjectProperties: 64 } : {})
       if (!matchesInvocationMetadata(manifestJson, caseKey, invocation)) continue
       const manifestEvidenceIds = Array.isArray(manifestJson.evidenceIds)
         ? manifestJson.evidenceIds
@@ -512,8 +550,8 @@ function screenshotProof (value, caseKey, invocation = null) {
   return null
 }
 
-function hasScreenshotEvidence (value, caseKey) {
-  return screenshotProof(value, caseKey) !== null
+function hasScreenshotEvidence (value, caseKey, invocation = null, options = {}) {
+  return screenshotProof(value, caseKey, invocation, options) !== null
 }
 
 function statusFromError (error) {
@@ -678,7 +716,7 @@ function validateTimestamp (value, field) {
   if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(value) || !Number.isFinite(Date.parse(value))) fail(`${field} must be a safe ISO-8601 UTC timestamp`)
 }
 
-function validateAtomicResult (result) {
+function validateAtomicResult (result, options = {}) {
   if (!isObject(result)) fail('atomic result must be an object')
   assertNoUndefined(result)
   for (const field of REQUIRED_RESULT_FIELDS) if (!Object.hasOwn(result, field)) fail(`result missing ${field}`)
@@ -717,7 +755,7 @@ function validateAtomicResult (result) {
   const allowedEvidenceIds = result.evidenceKind === 'UI_RUNTIME' ? [requiredEvidenceId, visualEvidenceId] : [requiredEvidenceId]
   if (!Array.isArray(result.evidenceIds) || result.evidenceIds.length === 0 || new Set(result.evidenceIds).size !== result.evidenceIds.length || result.evidenceIds.some(id => typeof id !== 'string' || !id.trim() || !allowedEvidenceIds.includes(id)) || !result.evidenceIds.includes(requiredEvidenceId)) fail('result evidenceIds must be unique and contain the exact case result ID')
   if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !result.evidenceIds.includes(visualEvidenceId)) fail('visual PASS requires the exact case visual evidence ID')
-  if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !hasScreenshotEvidence(result.runtimeEvidence, result.caseKey)) fail('visual PASS requires a case-bound, decodable PNG screenshot with a matching SHA-256 and manifest')
+  if (result.status === 'PASS' && result.evidenceKind === 'UI_RUNTIME' && !hasScreenshotEvidence(result.runtimeEvidence, result.caseKey, null, options)) fail('visual PASS requires a case-bound, decodable PNG screenshot with a matching SHA-256 and manifest')
   const serialized = JSON.stringify(result)
   if (/MAPPING_ONLY|\bundefined\b/i.test(serialized)) fail('result contains forbidden MAPPING_ONLY or undefined text')
   assertSafeValue(result)

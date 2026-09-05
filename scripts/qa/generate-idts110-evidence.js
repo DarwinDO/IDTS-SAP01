@@ -14,6 +14,7 @@ const evidenceRoot = path.join(repoRoot, 'docs', 'pm', 'evidence', 'idts-110', '
 const unitEvidenceRoot = path.join(repoRoot, 'docs', 'pm', 'evidence', 'idts-110', 'unit')
 const numberMapPath = path.join(repoRoot, 'docs', 'qa', 'idts-110-case-number-map.json')
 const approvalPath = path.join(repoRoot, 'docs', 'pm', 'evidence', 'idts-110', 'catalog-approval.json')
+const sourceLedgerPath = path.join(repoRoot, 'docs', 'pm', 'evidence', 'idts-110', 'source-result-ledger.json')
 const BASELINE_SHA = atomic.BASELINE_SHA
 const NEW_CASE_START = 188
 const NEW_CASE_COUNT = 90
@@ -345,21 +346,54 @@ function loadAuthority(options = {}) {
   if (JSON.stringify(catalogKeys) !== JSON.stringify(mapKeys)) failEvidence('number map is not a bijection in catalog order')
   if (numberMap.entries.some((row, index) => row.mentorNumber !== index + 1)) failEvidence('number map mentor numbers are not contiguous 1..278')
   const catalogSha = canonicalSha(catalog)
-  return { catalog, numberMap, approval, catalogSha }
+  const sourceLedger = loadSourceLedger({ catalog, catalogSha, approval })
+  return { catalog, numberMap, approval, catalogSha, sourceLedger }
 }
 
-function approvedSourceSpec(file, specs = DEFAULT_SOURCE_SPECS) {
-  const resolved = path.resolve(file)
+function loadSourceLedger({ catalog, catalogSha, approval }) {
+  if (!fs.existsSync(sourceLedgerPath)) failEvidence('committed source-result-ledger.json is required')
+  const ledger = readJson(sourceLedgerPath)
+  if (ledger.schemaVersion !== '1.0' || ledger.jiraKey !== 'IDTS-110' || ledger.sourceBaselineSha !== BASELINE_SHA || ledger.catalogSha !== catalogSha || !sameApproval(ledger.approvalReference, APPROVAL_REFERENCE)) failEvidence('source-result-ledger is not bound to the approved catalog, baseline, and approval')
+  if (!Array.isArray(ledger.entries) || ledger.entries.length !== 6 || ledger.selectedCaseCount !== NEW_CASE_COUNT || !Array.isArray(ledger.externalMutations) || ledger.externalMutations.length !== 0) failEvidence('source-result-ledger has an invalid entry count or mutation ledger')
+  const expectedKeys = catalog.cases.slice(NEW_CASE_START).map(row => row.caseId)
+  const allSelected = ledger.entries.flatMap(entry => entry.selectedCaseKeys || [])
+  if (new Set(allSelected).size !== allSelected.length || JSON.stringify([...allSelected].sort()) !== JSON.stringify([...expectedKeys].sort())) failEvidence('source-result-ledger selected keys do not exactly match the approved 90-case extension')
+  const seenPaths = new Set()
+  const seenRuns = new Set()
+  const normalizedEntries = ledger.entries.map((entry, index) => {
+    if (!entry || typeof entry.path !== 'string' || typeof entry.runId !== 'string' || !/^[a-f0-9]{64}$/i.test(entry.sha256 || '') || !Number.isInteger(entry.rawResultCount) || !Array.isArray(entry.selectedCaseKeys) || !Array.isArray(entry.excludedCaseKeys)) failEvidence(`source-result-ledger entry ${index + 1} is incomplete`)
+    const relativePath = entry.path.replace(/\\/g, '/')
+    const resolvedPath = path.resolve(repoRoot, relativePath)
+    if (!resolvedPath.startsWith(`${RESULT_INPUT_ROOT}${path.sep}`) || path.isAbsolute(entry.path) || relativePath.split('/').includes('..')) failEvidence(`source-result-ledger entry ${entry.path} escapes .tmp/idts-110`)
+    if (seenPaths.has(resolvedPath) || seenRuns.has(entry.runId)) failEvidence('source-result-ledger contains duplicate source paths or run IDs')
+    seenPaths.add(resolvedPath)
+    seenRuns.add(entry.runId)
+    if (entry.rawResultCount !== entry.selectedCaseKeys.length + entry.excludedCaseKeys.length) failEvidence(`source-result-ledger count mismatch for ${entry.path}`)
+    if (entry.selectedCaseKeys.some(key => !expectedKeys.includes(key)) || entry.excludedCaseKeys.some(key => !expectedKeys.includes(key)) || entry.selectedCaseKeys.some(key => entry.excludedCaseKeys.includes(key))) failEvidence(`source-result-ledger has an unknown or overlapping case set for ${entry.path}`)
+    return { ...entry, path: relativePath, expectedCount: entry.rawResultCount }
+  })
+  const excludedF224 = normalizedEntries.filter(entry => entry.excludedCaseKeys.includes('IDTS110-F224'))
+  if (excludedF224.length !== 2 || normalizedEntries.filter(entry => entry.selectedCaseKeys.includes('IDTS110-F224')).length !== 1) failEvidence('source-result-ledger must exclude superseded F224 twice and select one fix-round replacement')
+  return { ...ledger, entries: normalizedEntries }
+}
+
+function approvedSourceSpec(file, specs) {
+  const resolved = path.resolve(repoRoot, file)
   return specs.find(spec => path.resolve(repoRoot, spec.path) === resolved) || null
 }
 
-function normalizeSourceSpecs(inputPaths) {
-  const values = inputPaths && inputPaths.length ? inputPaths : DEFAULT_SOURCE_SPECS
+function normalizeSourceSpecs(inputPaths, sourceLedger) {
+  const values = inputPaths && inputPaths.length ? inputPaths : sourceLedger.entries
   return values.map(value => {
     const source = typeof value === 'string' ? { path: value } : { ...value }
     if (!source.path) failEvidence('each result source must have a path')
-    const approved = approvedSourceSpec(source.path)
-    if (approved) return { ...approved, ...source, path: approved.path }
+    const approved = approvedSourceSpec(source.path, sourceLedger.entries)
+    if (approved) {
+      for (const field of ['runId', 'sha256', 'rawResultCount', 'expectedCount', 'selectedCaseKeys', 'excludedCaseKeys']) {
+        if (source[field] !== undefined && JSON.stringify(source[field]) !== JSON.stringify(approved[field])) failEvidence(`source ${source.path} does not match the committed source-result-ledger for ${field}`)
+      }
+      return approved
+    }
     failEvidence(`source ${source.path} is not in the approved latest-reviewed result ledger; historical candidate promotion is disabled`)
   })
 }
@@ -368,6 +402,8 @@ function validateSourceBatch(spec, authority) {
   const sourceFile = path.resolve(repoRoot, spec.path)
   if (!sourceFile.startsWith(`${RESULT_INPUT_ROOT}${path.sep}`)) failEvidence(`result source must be inside .tmp/idts-110: ${spec.path}`)
   if (!fs.existsSync(sourceFile)) failEvidence(`missing result source: ${spec.path}`)
+  const sourceSha256 = fileSha(sourceFile)
+  if (sourceSha256.toLowerCase() !== String(spec.sha256).toLowerCase()) failEvidence(`source SHA-256 mismatch for ${spec.path}; committed source-result-ledger is stale or the .tmp result was replaced`)
   const batch = readJson(sourceFile)
   if (batch.schemaVersion !== '1.0' || batch.jiraKey !== 'IDTS-110' || !Array.isArray(batch.results)) failEvidence(`source is not an atomic result batch: ${spec.path}`)
   if (batch.sourceBaselineSha !== BASELINE_SHA) failEvidence(`source baseline mismatch in ${spec.path}`)
@@ -377,7 +413,7 @@ function validateSourceBatch(spec, authority) {
   if (spec.expectedCount !== undefined && batch.results.length !== spec.expectedCount) failEvidence(`source ${spec.path} expected ${spec.expectedCount} rows, found ${batch.results.length}`)
 
   const newKeys = new Set(authority.catalog.cases.slice(NEW_CASE_START).map(row => row.caseId))
-  const excluded = new Set(spec.excludeCaseKeys || [])
+  const excluded = new Set(spec.excludedCaseKeys || [])
   const rawKeys = batch.results.map(row => row.caseKey)
   if (new Set(rawKeys).size !== rawKeys.length) failEvidence(`source ${spec.path} contains duplicate case keys`)
   for (const result of batch.results) {
@@ -395,9 +431,9 @@ function validateSourceBatch(spec, authority) {
     if (result.reviewStatus !== 'PENDING_DONHV_REVIEW') failEvidence(`${spec.path} result ${result.caseKey} is not pending DonHV review`)
   }
 
-  const included = new Set(spec.includeCaseKeys || batch.results.map(row => row.caseKey).filter(key => !excluded.has(key)))
+  const included = new Set(spec.selectedCaseKeys || batch.results.map(row => row.caseKey).filter(key => !excluded.has(key)))
   const selected = batch.results.filter(row => !excluded.has(row.caseKey) && included.has(row.caseKey))
-  if (selected.length !== included.size) failEvidence(`source ${spec.path} selection does not match its declared case keys`)
+  if (selected.length !== included.size || JSON.stringify(selected.map(row => row.caseKey)) !== JSON.stringify(spec.selectedCaseKeys)) failEvidence(`source ${spec.path} selection does not match its committed case set`)
   if (batch.results.some(row => !excluded.has(row.caseKey) && !included.has(row.caseKey))) failEvidence(`source ${spec.path} has an undeclared selected key`)
   return {
     spec,
@@ -406,13 +442,13 @@ function validateSourceBatch(spec, authority) {
     selected,
     selectedCaseKeys: selected.map(row => row.caseKey),
     excludedCaseKeys: [...excluded],
-    sourceSha256: fileSha(sourceFile)
+    sourceSha256
   }
 }
 
 function aggregateAtomicResults(options = {}) {
   const authority = loadAuthority(options)
-  const specs = normalizeSourceSpecs(options.inputPaths)
+  const specs = normalizeSourceSpecs(options.inputPaths, authority.sourceLedger)
   const sources = specs.map(spec => validateSourceBatch(spec, authority))
   const results = sources.flatMap(source => source.selected)
   const expectedKeys = authority.catalog.cases.slice(NEW_CASE_START).map(row => row.caseId)
@@ -579,7 +615,63 @@ function buildAtomicManifest({ result, definition, batch, evidenceFiles, artifac
     acceptanceMode: definition.acceptanceMode,
     sourceBatchRunId: batch.runId
   }
+  if (result.evidenceKind === 'UI_RUNTIME') {
+    manifest.screenshotPath = 'runtime.png'
+    manifest.screenshotSha256 = artifactHashes['runtime.png']
+    manifest.manifestPath = 'case-manifest.json'
+  }
   return manifest
+}
+
+function samePath(left, right) {
+  const normalize = value => path.resolve(value)
+  const a = normalize(left)
+  const b = normalize(right)
+  return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b
+}
+
+function assertRegularPackagePath(target, label) {
+  atomic.assertNoReparseAncestors(target)
+  const stat = fs.lstatSync(target)
+  if (!stat.isFile() || stat.isSymbolicLink() || !samePath(fs.realpathSync.native(target), target)) failEvidence(`${label} must be a regular non-reparse file`)
+}
+
+function validatePackagedAtomicResult(result, options = {}) {
+  if (!result || typeof result !== 'object' || typeof result.caseKey !== 'string') failEvidence('packaged atomic result must contain a caseKey')
+  if (typeof options.evidenceRoot !== 'string' || !path.isAbsolute(options.evidenceRoot)) failEvidence(`packaged evidence root must be an absolute resolved path for ${result.caseKey}`)
+  const packageDir = path.resolve(options.evidenceRoot)
+  if (!samePath(path.dirname(packageDir), unitEvidenceRoot) || path.basename(packageDir) !== result.caseKey) failEvidence(`packaged evidence root must be docs/pm/evidence/idts-110/unit/${result.caseKey}`)
+  atomic.assertNoReparseAncestors(packageDir)
+  const dirStat = fs.lstatSync(packageDir)
+  if (!dirStat.isDirectory() || dirStat.isSymbolicLink() || !samePath(fs.realpathSync.native(packageDir), packageDir)) failEvidence(`packaged evidence root is not a regular directory for ${result.caseKey}`)
+  const resultPath = path.join(packageDir, 'result.json')
+  const manifestPath = path.join(packageDir, 'case-manifest.json')
+  assertRegularPackagePath(resultPath, `${result.caseKey}/result.json`)
+  assertRegularPackagePath(manifestPath, `${result.caseKey}/case-manifest.json`)
+
+  try {
+    atomic.validateAtomicResult(result, { packageMode: true, evidenceRoot: packageDir })
+  } catch (error) {
+    failEvidence(`${result.caseKey} packaged atomic validation failed: ${error.message}`)
+  }
+  const manifest = readJson(manifestPath)
+  const approvedCatalogSha = canonicalSha(readJson(catalogPath))
+  if (manifest.schemaVersion !== '1.0' || manifest.jiraKey !== 'IDTS-110' || manifest.caseKey !== result.caseKey || manifest.mentorNumber !== result.mentorNumber || manifest.assertionId !== result.assertionId || manifest.sourceBaselineSha !== BASELINE_SHA || manifest.catalogSha !== approvedCatalogSha || (result.catalogSha !== undefined && result.catalogSha !== approvedCatalogSha) || !sameApproval(manifest.approvalReference, APPROVAL_REFERENCE) || manifest.resultSha256 !== fileSha(resultPath)) failEvidence(`${result.caseKey} packaged manifest is not bound to result, baseline, or approval`)
+  if (manifest.candidateExecutionStatus !== result.status || manifest.reviewStatus !== result.reviewStatus || manifest.evidenceKind !== result.evidenceKind || manifest.testFile !== result.testFile || manifest.expectedResult !== result.expectedResult || manifest.actualResult !== result.actualResult) failEvidence(`${result.caseKey} packaged manifest does not mirror the atomic result`)
+  if (!Array.isArray(manifest.evidenceFiles) || !manifest.artifactHashes || !Array.isArray(manifest.evidenceIds)) failEvidence(`${result.caseKey} packaged manifest has incomplete artifact metadata`)
+  for (const file of manifest.evidenceFiles) {
+    if (typeof file !== 'string' || path.basename(file) !== file || !/^[A-Za-z0-9._-]+\.png$/.test(file)) failEvidence(`${result.caseKey} packaged evidence file is unsafe: ${file}`)
+    const artifact = path.join(packageDir, file)
+    assertRegularPackagePath(artifact, `${result.caseKey}/${file}`)
+    if (fileSha(artifact) !== manifest.artifactHashes[file]) failEvidence(`${result.caseKey}/${file} packaged hash mismatch`)
+  }
+  if (result.evidenceKind === 'UI_RUNTIME') {
+    const expectedScreenshotPath = `unit/${result.caseKey}/runtime.png`
+    const expectedManifestPath = `unit/${result.caseKey}/case-manifest.json`
+    if (!result.runtimeEvidence || result.runtimeEvidence.screenshotPath !== expectedScreenshotPath || result.runtimeEvidence.manifestPath !== expectedManifestPath) failEvidence(`${result.caseKey} packaged UI paths must be portable repo-relative package paths`)
+    if (!manifest.evidenceFiles.includes('runtime.png') || manifest.screenshotPath !== 'runtime.png' || manifest.manifestPath !== 'case-manifest.json' || manifest.screenshotSha256 !== manifest.artifactHashes['runtime.png']) failEvidence(`${result.caseKey} packaged UI screenshot metadata is incomplete`)
+  }
+  return true
 }
 
 async function writeAtomicEvidence({ batch, catalogPath: sourceCatalogPath = catalogPath, numberMapPath: sourceNumberMapPath = numberMapPath, approvalPath: sourceApprovalPath = approvalPath, evidenceRoot: targetRoot = unitEvidenceRoot }) {
@@ -643,6 +735,7 @@ async function writeAtomicEvidence({ batch, catalogPath: sourceCatalogPath = cat
     const manifest = buildAtomicManifest({ result: row.packagedResult, definition: row.definition, batch, evidenceFiles: row.evidenceFiles, artifactHashes: row.artifactHashes })
     manifest.resultSha256 = fileSha(resultPath)
     fs.writeFileSync(path.join(row.caseDir, 'case-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
+    validatePackagedAtomicResult(row.packagedResult, { evidenceRoot: row.caseDir })
   }
   return { caseCount: packageRows.length, renderCount: renderItems.length, evidenceRoot: targetRoot }
 }
@@ -703,7 +796,9 @@ module.exports = {
   loadAuthority,
   renderHtml,
   renderPngFiles,
+  validatePackagedAtomicResult,
   writeAtomicEvidence,
   DEFAULT_SOURCE_SPECS,
-  BASELINE_SHA
+  BASELINE_SHA,
+  sourceLedgerPath
 }
