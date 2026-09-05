@@ -22,11 +22,13 @@ const {
   invitationIDFromToken
 } = require('../../srv/user-admin/invitations')
 const { identityKeyHash } = require('../../srv/auth/identity-map')
-const { processUserOnboardingDeliveries } = require('../../srv/user-admin/delivery')
+const { buildInvitationMessage, processUserOnboardingDeliveries } = require('../../srv/user-admin/delivery')
 const { requiresProvisioningApproval } = require('../../srv/user-admin')
 
 const SIGNING_KEY = 'local-programmatic-invitation-signing-key-123456789'
 const PM_ID = '71000000-0000-4000-8000-000000000001'
+const ONBOARDING_REQUESTS = 'idts.cap.UserOnboardingRequests'
+const ONBOARDING_DELIVERIES = 'idts.cap.UserOnboardingDeliveries'
 const root = path.resolve(__dirname, '../..')
 
 function readDefinition (caseKey) {
@@ -989,6 +991,41 @@ async function createStandardInvitation (fixture, options = {}) {
   return { created, row, token, email }
 }
 
+function onboardingEmailConfig () {
+  return {
+    enabled: true,
+    ready: true,
+    batchSize: 10,
+    maxRetryCount: 1,
+    pollIntervalMs: 15000,
+    fromAddress: 'no-reply@example.invalid',
+    fromName: 'IDTS Atomic'
+  }
+}
+
+async function readAtomicOnboardingState (db) {
+  const [requests, deliveries] = await Promise.all([
+    db.run(SELECT.from(ONBOARDING_REQUESTS).columns('ID', 'status_code', 'provisioningVersion', 'lastErrorCode', 'expiresAt')),
+    db.run(SELECT.from(ONBOARDING_DELIVERIES).columns('ID', 'onboardingRequest_ID', 'status_code', 'attemptCount', 'nextAttemptAt', 'lastErrorCode', 'providerMessageId'))
+  ])
+  return {
+    requestRows: requests.length,
+    requestIDs: requests.map(row => row.ID),
+    requestStatuses: requests.map(row => row.status_code),
+    requestVersions: requests.map(row => Number(row.provisioningVersion || 0)),
+    requestErrorCodes: requests.map(row => row.lastErrorCode || null),
+    requestExpiresAt: requests.map(row => row.expiresAt),
+    deliveryRows: deliveries.length,
+    deliveryIDs: deliveries.map(row => row.ID),
+    deliveryRequestIDs: deliveries.map(row => row.onboardingRequest_ID),
+    deliveryStatuses: deliveries.map(row => row.status_code),
+    deliveryAttempts: deliveries.map(row => Number(row.attemptCount || 0)),
+    deliveryNextAttemptAt: deliveries.map(row => row.nextAttemptAt),
+    deliveryErrorCodes: deliveries.map(row => row.lastErrorCode || null),
+    deliveryProviderMessages: deliveries.map(row => row.providerMessageId || null)
+  }
+}
+
 async function verifyStandardInvitation (fixture, invitation, options = {}) {
   return fixture.service.send({
     event: 'verifySapIdentity',
@@ -1197,6 +1234,162 @@ async function runAtomicOnboardingCase (caseKey) {
         auditRows: audits.length
       }
     }
+    if (caseKey === 'IDTS110-F243') {
+      const missingInvitation = await createStandardInvitation(fixture, { email: 'atomic.missing.invitation@example.invalid' })
+      const expiredInvitation = await createStandardInvitation(fixture, { email: 'atomic.expired.invitation@example.invalid' })
+      const missingDelivery = await fixture.db.run(SELECT.one.from(ONBOARDING_DELIVERIES).where({ onboardingRequest_ID: missingInvitation.row.ID }))
+      const expiredDelivery = await fixture.db.run(SELECT.one.from(ONBOARDING_DELIVERIES).where({ onboardingRequest_ID: expiredInvitation.row.ID }))
+      const missingRequestID = '71000000-0000-4000-8000-000000000099'
+      await fixture.db.run(UPDATE(ONBOARDING_DELIVERIES).set({ onboardingRequest_ID: missingRequestID }).where({ ID: missingDelivery.ID }))
+      await fixture.db.run(UPDATE(ONBOARDING_REQUESTS).set({ expiresAt: '2026-09-04T00:00:00.000Z' }).where({ ID: expiredInvitation.row.ID }))
+      const beforeState = await readAtomicOnboardingState(fixture.db)
+      let senderCalls = 0
+      const processed = await processUserOnboardingDeliveries({
+        tx: fixture.db,
+        emailConfig: onboardingEmailConfig(),
+        invitationConfig: cds.env.idts.userAdmin,
+        sendMail: async () => {
+          senderCalls += 1
+          throw new Error('ineligible invitation must not send')
+        },
+        now: new Date('2026-09-05T00:00:00.000Z'),
+        workerID: 'atomic-onboarding-f243'
+      })
+      assert.deepEqual(processed, { sent: 0, failed: 0, skipped: 2 })
+      assert.equal(senderCalls, 0)
+      const afterState = await readAtomicOnboardingState(fixture.db)
+      const missingIndex = afterState.deliveryIDs.indexOf(missingDelivery.ID)
+      const expiredIndex = afterState.deliveryIDs.indexOf(expiredDelivery.ID)
+      const expiredRequestIndex = afterState.requestIDs.indexOf(expiredInvitation.row.ID)
+      assert.equal(afterState.deliveryStatuses[missingIndex], 'SKIPPED')
+      assert.equal(afterState.deliveryErrorCodes[missingIndex], 'INVITATION_NOT_FOUND')
+      assert.equal(afterState.deliveryStatuses[expiredIndex], 'SKIPPED')
+      assert.equal(afterState.deliveryErrorCodes[expiredIndex], 'INVITATION_EXPIRED')
+      assert.equal(afterState.requestErrorCodes[expiredRequestIndex], 'INVITATION_EXPIRED')
+      const reloadState = await readAtomicOnboardingState(fixture.db)
+      assert.deepEqual(reloadState, afterState)
+      return {
+        beforeState,
+        afterState: { ...afterState, skippedMissing: true, skippedExpired: true, senderCalls },
+        reloadState
+      }
+    }
+    if (caseKey === 'IDTS110-F243M') {
+      const invitation = await createStandardInvitation(fixture, { email: 'atomic.token-mismatch@example.invalid' })
+      const delivery = await fixture.db.run(SELECT.one.from(ONBOARDING_DELIVERIES).where({ onboardingRequest_ID: invitation.row.ID }))
+      await fixture.db.run(UPDATE(ONBOARDING_REQUESTS).set({ tokenHash: 'f'.repeat(64) }).where({ ID: invitation.row.ID }))
+      const beforeState = await readAtomicOnboardingState(fixture.db)
+      let senderCalls = 0
+      const emailConfig = onboardingEmailConfig()
+      const first = await processUserOnboardingDeliveries({
+        tx: fixture.db,
+        emailConfig,
+        invitationConfig: cds.env.idts.userAdmin,
+        sendMail: async () => {
+          senderCalls += 1
+          throw new Error('token mismatch must not reach provider')
+        },
+        now: new Date('2026-09-05T00:00:00.000Z'),
+        workerID: 'atomic-onboarding-f243m-1'
+      })
+      assert.deepEqual(first, { sent: 0, failed: 1, skipped: 0 })
+      const firstFailure = await fixture.db.run(SELECT.one.from(ONBOARDING_DELIVERIES).where({ ID: delivery.ID }))
+      assert.equal(firstFailure.status_code, 'FAILED')
+      assert.equal(firstFailure.lastErrorCode, 'INVITATION_TOKEN_MISMATCH')
+      assert.equal(firstFailure.attemptCount, 1)
+      assert.ok(firstFailure.nextAttemptAt)
+      await fixture.db.run(UPDATE(ONBOARDING_DELIVERIES).set({ nextAttemptAt: '2026-09-05T00:00:00.000Z' }).where({ ID: delivery.ID }))
+      const second = await processUserOnboardingDeliveries({
+        tx: fixture.db,
+        emailConfig,
+        invitationConfig: cds.env.idts.userAdmin,
+        sendMail: async () => {
+          senderCalls += 1
+          throw new Error('token mismatch must not reach provider')
+        },
+        now: new Date('2026-09-05T00:02:00.000Z'),
+        workerID: 'atomic-onboarding-f243m-2'
+      })
+      assert.deepEqual(second, { sent: 0, failed: 1, skipped: 0 })
+      assert.equal(senderCalls, 0)
+      const finalFailure = await fixture.db.run(SELECT.one.from(ONBOARDING_DELIVERIES).where({ ID: delivery.ID }))
+      assert.equal(finalFailure.status_code, 'FAILED')
+      assert.equal(finalFailure.lastErrorCode, 'INVITATION_TOKEN_MISMATCH')
+      assert.equal(finalFailure.attemptCount, 2)
+      assert.equal(finalFailure.nextAttemptAt, null)
+      assert.doesNotMatch(finalFailure.lastErrorSummary, /tokenHash|tokenNonce|signing|programmatic/i)
+      const afterState = await readAtomicOnboardingState(fixture.db)
+      const reloadState = await readAtomicOnboardingState(fixture.db)
+      assert.deepEqual(reloadState, afterState)
+      return {
+        beforeState,
+        afterState: { ...afterState, firstAttemptFailed: true, retryScheduled: true, retryBoundedAtTwoAttempts: true, senderCalls },
+        reloadState
+      }
+    }
+    if (caseKey === 'IDTS110-F244') {
+      const invitation = await createStandardInvitation(fixture, { email: 'atomic.message-boundary@example.invalid', role: 'TESTER' })
+      const beforeState = await readAtomicOnboardingState(fixture.db)
+      const emailConfig = onboardingEmailConfig()
+      const message = buildInvitationMessage(invitation.row, invitation.token, cds.env.idts.userAdmin, emailConfig)
+      assert.match(message.text, /https:\/\/idts\.example\.invalid\/onboarding\/continue#token=/)
+      assert.doesNotMatch(message.text, /\?token=/)
+      assert.match(message.html, /#token=/)
+      assert.match(message.text, /https:\/\/account\.sap\.com\//)
+      assert.match(message.text, /https:\/\/account\.sap\.com\/registration\//)
+      assert.match(message.text, /Requested access: TESTER/)
+      assert.match(message.text, new RegExp(`Invitation expires: ${invitation.row.expiresAt}`))
+      assert.doesNotMatch(message.text, /(?:password|otp|passkey|recovery code)\s*[:=]/i)
+      assert.doesNotMatch(JSON.stringify(message), /tokenHash|tokenNonce|local-programmatic-invitation-signing-key/i)
+      const afterState = await readAtomicOnboardingState(fixture.db)
+      const reloadState = await readAtomicOnboardingState(fixture.db)
+      assert.deepEqual(reloadState, afterState)
+      return {
+        beforeState,
+        afterState: { ...afterState, fragmentLink: true, officialSapLinks: true, queryTokenOmitted: true, securityFieldsOmitted: true },
+        reloadState
+      }
+    }
+    if (caseKey === 'IDTS110-F245') {
+      const targetID = '71000000-0000-4000-8000-000000000025'
+      await fixture.db.run(INSERT.into('idts.cap.Users').entries({ ID: targetID, displayName: 'Atomic Cancellation Target', email: 'atomic.cancellation.target@example.local', role_code: 'DEVELOPER', active: true }))
+      const invitation = await fixture.service.send({ event: 'requestExistingUserIdentityLink', data: { userID: targetID, email: 'atomic.cancelled.invitation@example.invalid' }, user: fixture.administrator })
+      const beforeState = await readAtomicOnboardingState(fixture.db)
+      const beforeRequest = await fixture.db.run(SELECT.one.from(ONBOARDING_REQUESTS).where({ ID: invitation.ID }))
+      assert.equal(beforeRequest.status_code, 'INVITED')
+      const cancelled = await fixture.service.send({ event: 'cancelExistingUserIdentityLink', data: { requestID: invitation.ID, expectedVersion: beforeRequest.provisioningVersion }, user: fixture.administrator })
+      assert.equal(cancelled.status, 'FAILED')
+      let senderCalls = 0
+      const processed = await processUserOnboardingDeliveries({
+        tx: fixture.db,
+        emailConfig: onboardingEmailConfig(),
+        invitationConfig: cds.env.idts.userAdmin,
+        sendMail: async () => {
+          senderCalls += 1
+          throw new Error('cancelled invitation must not send')
+        },
+        now: new Date('2026-09-05T00:00:00.000Z'),
+        workerID: 'atomic-onboarding-f245'
+      })
+      assert.deepEqual(processed, { sent: 0, failed: 0, skipped: 0 })
+      assert.equal(senderCalls, 0)
+      const afterRequest = await fixture.db.run(SELECT.one.from(ONBOARDING_REQUESTS).where({ ID: invitation.ID }))
+      const afterDelivery = await fixture.db.run(SELECT.one.from(ONBOARDING_DELIVERIES).where({ onboardingRequest_ID: invitation.ID }))
+      const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: invitation.ID, action: 'CANCEL_LINK_INVITATION', result: 'APPLIED' }))
+      assert.equal(afterRequest.status_code, 'FAILED')
+      assert.equal(afterRequest.lastErrorCode, 'INVITATION_CANCELLED')
+      assert.equal(afterDelivery.status_code, 'SKIPPED')
+      assert.equal(afterDelivery.lastErrorCode, 'INVITATION_CANCELLED')
+      assert.equal(audits.length, 1)
+      const afterState = await readAtomicOnboardingState(fixture.db)
+      const reloadState = await readAtomicOnboardingState(fixture.db)
+      assert.deepEqual(reloadState, afterState)
+      return {
+        beforeState,
+        afterState: { ...afterState, cancellationPreserved: true, deliverySkipped: true, senderCalls },
+        reloadState
+      }
+    }
     if (caseKey === 'IDTS110-F216' || caseKey === 'IDTS110-F216R') {
       const invitation = await createStandardInvitation(fixture, { email: `atomic.recovery.${caseKey.slice(-1).toLowerCase()}@example.invalid` })
       await verifyStandardInvitation(fixture, invitation, { userUuid: `atomic-recovery-${caseKey}` })
@@ -1261,7 +1454,7 @@ async function runAtomicOnboardingCase (caseKey) {
 }
 
 async function runAtomicSelector (options) {
-  const supported = new Set(['IDTS110-F205', 'IDTS110-F206', 'IDTS110-F209', 'IDTS110-F210', 'IDTS110-F210S', 'IDTS110-F211', 'IDTS110-F215', 'IDTS110-F216', 'IDTS110-F216R'])
+  const supported = new Set(['IDTS110-F205', 'IDTS110-F206', 'IDTS110-F209', 'IDTS110-F210', 'IDTS110-F210S', 'IDTS110-F211', 'IDTS110-F215', 'IDTS110-F216', 'IDTS110-F216R', 'IDTS110-F243', 'IDTS110-F243M', 'IDTS110-F244', 'IDTS110-F245'])
   if (!supported.has(options.caseKey)) {
     await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-onboarding-programmatic.js' })
     return
@@ -1272,14 +1465,17 @@ async function runAtomicSelector (options) {
     assertionId: `${options.caseKey}-A1`,
     baselineSha: options.baselineSha,
     executor: options.executor,
-    execute: async () => ({
-      assertionPassed: true,
-      actualResult: definition.expectedResult,
-      beforeState: { fixture: 'isolated-sqlite' },
-      afterState: await runAtomicOnboardingCase(options.caseKey),
-      reloadState: { readback: true },
-      evidenceIds: [`${options.caseKey}-RESULT`]
-    })
+    execute: async () => {
+      const observed = await runAtomicOnboardingCase(options.caseKey)
+      return {
+        assertionPassed: true,
+        actualResult: definition.expectedResult,
+        beforeState: observed.beforeState || { fixture: 'isolated-sqlite' },
+        afterState: observed.afterState || observed,
+        reloadState: observed.reloadState || { readback: true },
+        evidenceIds: [`${options.caseKey}-RESULT`]
+      }
+    }
   })
   console.log(formatAtomicMarker(result))
   process.exitCode = result.status === 'PASS' ? 0 : 1

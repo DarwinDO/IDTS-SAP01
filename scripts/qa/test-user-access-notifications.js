@@ -5,6 +5,8 @@ process.env.CDS_ENV = 'test'
 
 const assert = require('node:assert/strict')
 const cds = require('@sap/cds')
+const fs = require('node:fs')
+const path = require('node:path')
 const { INSERT, SELECT, UPDATE } = cds.ql
 
 const {
@@ -14,8 +16,23 @@ const {
   processUserAccessDeliveries,
   writeUserAccessDelivery
 } = require('../../srv/user-admin/access-delivery')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const ENTITY = 'idts.cap.UserAccessNotificationDeliveries'
+const INBOX = 'idts.cap.UserNotificationInboxEntries'
+const PROJECT_ROOT = path.resolve(__dirname, '../..')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
 
 async function countInbox (db, auditID) {
   const row = await db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').columns('count(*) as count').where({ accessAuditEvent_ID: auditID }))
@@ -74,6 +91,11 @@ const ONBOARDING_DELIVERY_SHAPE = [
 ]
 
 async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
   const model = await cds.load('db/schema.cds')
   const delivery = model.definitions[ENTITY]
 
@@ -147,6 +169,282 @@ async function main () {
   await verifyConstraintFailuresPropagate()
 
   console.log('IDTS user access notification contract: PASS')
+}
+
+function accessEmailConfig (baseUrl = 'https://idts.example.invalid') {
+  return {
+    enabled: true,
+    ready: true,
+    baseUrl,
+    fromAddress: 'no-reply@example.invalid',
+    fromName: 'IDTS Atomic',
+    batchSize: 10,
+    maxRetryCount: 1,
+    pollIntervalMs: 15000
+  }
+}
+
+async function readAtomicAccessState (db) {
+  const [deliveries, inbox] = await Promise.all([
+    db.run(SELECT.from(ENTITY).columns('ID', 'sourceAuditEvent_ID', 'status_code', 'attemptCount', 'lastErrorCode', 'providerMessageId')),
+    db.run(SELECT.from(INBOX).columns('ID', 'accessAuditEvent_ID'))
+  ])
+  return {
+    deliveryRows: deliveries.length,
+    deliveryIDs: deliveries.map(row => row.ID),
+    deliverySourceAuditEventIDs: deliveries.map(row => row.sourceAuditEvent_ID),
+    deliveryStatuses: deliveries.map(row => row.status_code),
+    deliveryAttempts: deliveries.map(row => Number(row.attemptCount || 0)),
+    deliveryErrorCodes: deliveries.map(row => row.lastErrorCode || null),
+    deliveryProviderMessages: deliveries.map(row => row.providerMessageId || null),
+    inboxRows: inbox.length,
+    inboxAuditEventIDs: inbox.map(row => row.accessAuditEvent_ID).sort()
+  }
+}
+
+async function createAtomicAccessFixture () {
+  const csn = await cds.load('db/schema.cds')
+  const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
+  await cds.deploy(csn).to(db)
+  const userID = '61000000-0000-4000-8000-000000000020'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: userID,
+    displayName: 'Atomic Access User',
+    email: 'atomic.access.user@example.invalid',
+    role_code: 'TESTER',
+    active: true
+  }))
+  return {
+    db,
+    userID,
+    restore: async () => {
+      if (typeof db.disconnect === 'function') await db.disconnect()
+    }
+  }
+}
+
+async function runAtomicAccessCase (caseKey) {
+  const fixture = await createAtomicAccessFixture()
+  try {
+    const config = accessEmailConfig()
+    if (caseKey === 'IDTS110-F240') {
+      const beforeState = await readAtomicAccessState(fixture.db)
+      const changeAudit = await insertAppliedAudit(fixture.db, '62000000-0000-4000-8000-000000000020', fixture.userID, 'CHANGE_ROLE')
+      const reactivateAudit = await insertAppliedAudit(fixture.db, '62000000-0000-4000-8000-000000000021', fixture.userID, 'REACTIVATE')
+      const changeDelivery = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: changeAudit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_ROLE_CHANGED',
+        effectiveRole: 'DEVELOPER',
+        effectiveAccessState: 'ACTIVE',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
+      const reactivateDelivery = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: reactivateAudit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_REACTIVATED',
+        effectiveRole: 'TESTER',
+        effectiveAccessState: 'ACTIVE',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
+      assert.equal(changeDelivery.created, true)
+      assert.equal(changeDelivery.deliveryStatus, 'PENDING')
+      assert.equal(reactivateDelivery.created, true)
+      assert.equal(reactivateDelivery.deliveryStatus, 'PENDING')
+      const queued = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: { ID: '62000000-0000-4000-8000-000000000022', action: 'CHANGE_ROLE', result: 'QUEUED' },
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_ROLE_CHANGED',
+        effectiveRole: 'DEVELOPER',
+        effectiveAccessState: 'ACTIVE',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
+      const mismatched = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: changeAudit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_REACTIVATED',
+        effectiveRole: 'TESTER',
+        effectiveAccessState: 'ACTIVE',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
+      const duplicate = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: changeAudit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_ROLE_CHANGED',
+        effectiveRole: 'DEVELOPER',
+        effectiveAccessState: 'ACTIVE',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
+      assert.deepEqual(queued, { created: false })
+      assert.deepEqual(mismatched, { created: false })
+      assert.equal(duplicate.created, false)
+      assert.equal(duplicate.deliveryID, changeDelivery.deliveryID)
+      assert.equal(await countInbox(fixture.db, changeAudit.ID), 1)
+      assert.equal(await countInbox(fixture.db, reactivateAudit.ID), 1)
+      const sentMessages = []
+      const processed = await processUserAccessDeliveries({
+        tx: fixture.db,
+        config,
+        sendMail: async message => {
+          sentMessages.push(message)
+          return { messageId: `atomic-access-message-${sentMessages.length}` }
+        },
+        now: new Date('2026-09-05T00:01:00.000Z'),
+        workerID: 'atomic-access-f240'
+      })
+      assert.deepEqual(processed, { sent: 2, failed: 0, skipped: 0 })
+      assert.equal(sentMessages.length, 2)
+      const afterState = await readAtomicAccessState(fixture.db)
+      assert.equal(afterState.deliveryRows, 2)
+      assert.deepEqual(afterState.deliveryStatuses.sort(), ['SENT', 'SENT'])
+      assert.equal(afterState.inboxRows, 2)
+      const reloadState = await readAtomicAccessState(fixture.db)
+      assert.deepEqual(reloadState, afterState)
+      return {
+        beforeState,
+        afterState: { ...afterState, queuedCreated: queued.created, mismatchedCreated: mismatched.created, duplicateCreated: duplicate.created, senderCalls: sentMessages.length },
+        reloadState
+      }
+    }
+
+    if (caseKey === 'IDTS110-F240R') {
+      const beforeState = await readAtomicAccessState(fixture.db)
+      const revokeAudit = await insertAppliedAudit(fixture.db, '62000000-0000-4000-8000-000000000023', fixture.userID, 'REVOKE')
+      const delivery = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: revokeAudit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_REVOKED',
+        effectiveRole: 'TESTER',
+        effectiveAccessState: 'REVOKED',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
+      assert.equal(delivery.created, true)
+      assert.equal(delivery.deliveryStatus, 'PENDING')
+      assert.equal(await countInbox(fixture.db, revokeAudit.ID), 0)
+      const duplicate = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: revokeAudit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_REVOKED',
+        effectiveRole: 'TESTER',
+        effectiveAccessState: 'REVOKED',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: config
+      })
+      assert.equal(duplicate.created, false)
+      assert.equal(duplicate.deliveryID, delivery.deliveryID)
+      const sentMessages = []
+      const processed = await processUserAccessDeliveries({
+        tx: fixture.db,
+        config,
+        sendMail: async message => {
+          sentMessages.push(message)
+          return { messageId: 'atomic-access-revoke-message' }
+        },
+        now: new Date('2026-09-05T00:01:00.000Z'),
+        workerID: 'atomic-access-f240r'
+      })
+      assert.deepEqual(processed, { sent: 1, failed: 0, skipped: 0 })
+      assert.equal(sentMessages.length, 1)
+      const afterState = await readAtomicAccessState(fixture.db)
+      assert.equal(afterState.deliveryRows, 1)
+      assert.deepEqual(afterState.deliveryStatuses, ['SENT'])
+      assert.equal(afterState.inboxRows, 0)
+      const reloadState = await readAtomicAccessState(fixture.db)
+      assert.deepEqual(reloadState, afterState)
+      return {
+        beforeState,
+        afterState: { ...afterState, emailOnly: true, duplicateCreated: duplicate.created, senderCalls: sentMessages.length },
+        reloadState
+      }
+    }
+
+    if (caseKey === 'IDTS110-F241') {
+      const beforeState = await readAtomicAccessState(fixture.db)
+      const invalidUrlConfig = accessEmailConfig('http://idts.example.invalid')
+      const audit = await insertAppliedAudit(fixture.db, '62000000-0000-4000-8000-000000000024', fixture.userID, 'CHANGE_ROLE')
+      const delivery = await writeUserAccessDelivery({
+        tx: fixture.db,
+        auditEvent: audit,
+        targetUserID: fixture.userID,
+        eventType: 'ACCESS_ROLE_CHANGED',
+        effectiveRole: 'DEVELOPER',
+        effectiveAccessState: 'ACTIVE',
+        completedAt: '2026-09-05T00:00:00.000Z',
+        emailConfig: invalidUrlConfig
+      })
+      assert.equal(delivery.created, true)
+      assert.equal(delivery.deliveryStatus, 'SKIPPED')
+      const stored = await fixture.db.run(SELECT.one.from(ENTITY).where({ ID: delivery.deliveryID }))
+      assert.equal(stored.status_code, 'SKIPPED')
+      assert.equal(stored.lastErrorCode, 'EMAIL_BASE_URL_INVALID')
+      assert.equal(await countInbox(fixture.db, audit.ID), 1)
+      let senderCalls = 0
+      const processed = await processUserAccessDeliveries({
+        tx: fixture.db,
+        config: invalidUrlConfig,
+        sendMail: async () => {
+          senderCalls += 1
+          throw new Error('invalid URL must not send')
+        },
+        now: new Date('2026-09-05T00:01:00.000Z'),
+        workerID: 'atomic-access-f241'
+      })
+      assert.deepEqual(processed, { sent: 0, failed: 0, skipped: 0 })
+      assert.equal(senderCalls, 0)
+      const afterState = await readAtomicAccessState(fixture.db)
+      assert.equal(afterState.deliveryRows, 1)
+      assert.deepEqual(afterState.deliveryStatuses, ['SKIPPED'])
+      assert.equal(afterState.deliveryErrorCodes[0], 'EMAIL_BASE_URL_INVALID')
+      assert.equal(afterState.inboxRows, 1)
+      const reloadState = await readAtomicAccessState(fixture.db)
+      assert.deepEqual(reloadState, afterState)
+      return {
+        beforeState,
+        afterState: { ...afterState, senderCalls, providerWorkStarted: false },
+        reloadState
+      }
+    }
+
+    throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  } finally {
+    await fixture.restore()
+  }
+}
+
+async function runAtomicSelector (options) {
+  const supported = new Set(['IDTS110-F240', 'IDTS110-F240R', 'IDTS110-F241'])
+  if (!supported.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-access-notifications.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      ...(await runAtomicAccessCase(options.caseKey)),
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
 }
 
 async function verifyAccessDeliveryBehavior () {
