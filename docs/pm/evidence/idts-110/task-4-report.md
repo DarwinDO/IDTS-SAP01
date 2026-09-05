@@ -152,3 +152,73 @@ F224 precheck BLOCKED result. It does not claim an overall matrix PASS, merge,
 deployment, release, browser acceptance, provider/BTP evidence, or DonHV
 review approval. The final report commit SHA and final branch head are stated
 in the handoff after this report-only commit.
+
+## Fix round 1/5 — complete selectors and evidence-strengthening review
+
+- Fix-round starting head: `029bf316a43796849ed398ba3315dfe17cce4a5a`.
+- Fix-round implementation commit: `32752d4091021646b23d468ad65fb06e84833165`.
+
+### RED checks
+
+The protocol contract was extended before implementation. The missing-marker
+classification assertion failed as expected because the orchestrator still
+returned `FAIL` for a child that emitted no atomic marker:
+
+```text
+node scripts/qa/test-idts110-atomic-runner.js
+AssertionError: Expected values to be strictly deep-equal
+actual:   PASS, FAIL, FAIL, BLOCKED
+expected: PASS, FAIL, BLOCKED, BLOCKED
+```
+
+The adapter review assertions were then run before their corrections. They
+exposed the service-route ID conflict not reaching the handler, and the
+incorrect expectation that rejected catalog operations would not create the
+separate allowed `REJECTED` audit record. F231 also demonstrated that CAP's
+DELETE capability precheck can return `ENTITY_IS_NOT_CRUD` before the registered
+handler; the fix invokes the registered DELETE boundary directly and requires
+the product's exact `CATALOG_DELETE_FORBIDDEN` error.
+
+### GREEN changes
+
+- Added P200 and P203 PM monitoring selectors.
+- Added F204–F211, including F210S, F215, F216, and F216R onboarding selectors.
+- Added F217 and F218 active-user display-name selectors.
+- Added F220 workload-limit and F222 decimal-effort selectors.
+- Bound F214 to its single planned identity-link assertion instead of the full
+  broad identity-link suite.
+- Strengthened P194/P195 active-state and success-audit checks; P196 now covers
+  both TESTER and DEVELOPER updates with successful-audit immutability; F219
+  proves the persisted/reloaded workload limit; and F225–F231R now cover the
+  reviewed name, audit, route, ETag, dependency-count, immutability, delete,
+  and reactivation requirements.
+- Added `runAtomicUnavailableCase`; every adapter runner now rejects an
+  unknown selector before broad setup, emits exactly one BLOCKED marker, and
+  exits nonzero. Missing-marker children are BLOCKED with explicit
+  `ATOMIC_ADAPTER_UNAVAILABLE` actual/limitation text; executed assertion
+  mismatches remain FAIL.
+
+The complete User Administration matrix now passes every executable selector:
+
+```text
+node scripts/qa/run-idts110-new-cases.js --scope=USER_ADMIN_PROGRAMMATIC --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/user-admin-results-fix-round-final.json
+runId: idts110-1788599271216-7b817f21a63870e7e0cc5105aafb637e
+total: 45
+PASS: 44
+FAIL: 0
+BLOCKED: 1 (IDTS110-F224 only; Task 6 UI-runtime ownership)
+```
+
+The post-fix focused no-argument suite, protocol contract, syntax checks, and
+`git diff --check` all pass. A separate unknown-selector sweep across all 12
+adapter runners recorded exit 1 and exactly one `BLOCKED` marker per runner.
+
+### Fix-round status
+
+Task 4 has no remaining unimplemented selector keys. The only remaining
+concern is the intentional F224 UI-runtime boundary: Task 4 supplies the
+programmatic/native-control precheck, while Task 6 must capture its rendered
+screenshot and authoritative UI result. This remains
+**DONE_WITH_CONCERNS — F224 BLOCKED FOR TASK 6 UI EVIDENCE**; the 44 local
+programmatic results are PASS, but the 45-row batch is not an overall PASS until
+the UI lane replaces the precheck record.
