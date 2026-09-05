@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F216",
+  "mentorNumber": 212,
+  "title": "retry accepts only a bounded retryable access failure",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:15.418Z",
+  "completedAt": "2026-09-05T10:05:16.113Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F216-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F216 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Retry accepts only a bounded retryable access-operation failure with the expected version, resets it to PENDING with a new correlation, and appends one audit.",
+  "expectedResult": "Retry accepts only a bounded retryable access-operation failure with the expected version, resets it to PENDING with a new correlation, and appends one audit.",
+  "actualResult": "Retry accepts only a bounded retryable access-operation failure with the expected version, resets it to PENDING with a new correlation, and appends one audit.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "retryAccessOperation"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "assertExpectedVersion"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "invalidStateRejected": true,
+    "invalidVersionRejected": true,
+    "recoveryAction": "RETRY_ACCESS_OPERATION",
+    "state": "PENDING",
+    "auditFromState": "RETRYABLE_FAILURE",
+    "auditToState": "PROVISION_QUEUED",
+    "newCorrelation": true,
+    "auditRows": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F216-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "8361da4a8df43ecb86ca0dc2d9ed668b74d2c1f42086abbc66a7e36647887a22",
+    "before-database.png": "6cfa698d5ef8a9b83c79b0309472b2e276d9d907d7dd64dd48736eda46905dd7",
+    "after-database.png": "39586fde02f6479becef25753cc576ba0b939bde2e527622e1f27c981d2379ec",
+    "reload-readback.png": "db21e2702d212891c27d56c300b001f79eb98bc4c46f88b17d6f1e30f52fc0f7"
+  },
+  "resultSha256": "2fe8dc5e84036991a0c61b9c22ea2099eb4d0846ee5f954dfb2e252bcca22eb2",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F220D",
+  "mentorNumber": 218,
+  "assertionId": "IDTS110-F220D-A1",
+  "title": "profile responsibilities reject duplicate scope tuples",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:20.030Z",
+  "completedAt": "2026-09-05T10:05:20.032Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-developer-profile.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile.js --idts110-case=IDTS110-F220D --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "normalizeDeveloperProfileInput rejects two responsibilities with the same componentCategoryID and sapModuleID scope, regardless of responsibility level, with DUPLICATE_DEVELOPER_RESPONSIBILITY.",
+  "expectedResult": "normalizeDeveloperProfileInput rejects two responsibilities with the same componentCategoryID and sapModuleID scope, regardless of responsibility level, with DUPLICATE_DEVELOPER_RESPONSIBILITY.",
+  "actualResult": "normalizeDeveloperProfileInput rejects two responsibilities with the same componentCategoryID and sapModuleID scope, regardless of responsibility level, with DUPLICATE_DEVELOPER_RESPONSIBILITY.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "normalizeDeveloperProfileInput"
+    },
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "DUPLICATE_DEVELOPER_RESPONSIBILITY"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-function",
+    "checks": 0
+  },
+  "afterState": {
+    "checks": 1
+  },
+  "reloadState": {
+    "fixture": "pure-function",
+    "checks": 1
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F220D-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

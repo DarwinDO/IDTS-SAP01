@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F206",
+  "mentorNumber": 201,
+  "title": "matching SAP identity verifies one onboarding invitation",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:07.185Z",
+  "completedAt": "2026-09-05T10:05:07.876Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F206-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F206 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid invitation with a matching SAP identity is consumed once, queues standard access, records one operation/audit, and omits identity fields from the result.",
+  "expectedResult": "A valid invitation with a matching SAP identity is consumed once, queues standard access, records one operation/audit, and omits identity fields from the result.",
+  "actualResult": "A valid invitation with a matching SAP identity is consumed once, queues standard access, records one operation/audit, and omits identity fields from the result.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "verifySapIdentity"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "verifyInvitationToken"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "identitySnapshotFrom"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "consumed": true,
+    "operationState": "PENDING",
+    "operationRows": 1,
+    "deliveryRows": 1,
+    "replayRejected": true,
+    "auditRows": 1,
+    "identityFieldsOmitted": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F206-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "9c01b45d783d3ca6d86c39d7b5401f0492d35b153eca3862f400f545737161da",
+    "before-database.png": "779175688b4d432cb1f76d94c797fc49c5bb0d617186edd7e5aa1d44fb235307",
+    "after-database.png": "0bfe8f07d5797a51a5f4dcc6de25a3a25a6cd6827ccfee44b68da5545d02a62c",
+    "reload-readback.png": "2d1540ef42814dc2ec429c8a7031735b28d2a829452378d68496aeb78c165416"
+  },
+  "resultSha256": "021da1afcc71faf28345926ff90cfda5c02bf7fd157982609afdeb6c1312f384",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

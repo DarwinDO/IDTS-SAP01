@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F226",
+  "mentorNumber": 226,
+  "title": "PM creates one valid Component Category pair",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:24.395Z",
+  "completedAt": "2026-09-05T10:05:25.276Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F226-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F226 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "CREATE of one nonduplicate Component Category with two active parents persists one pair with a server UUID and a safe audit.",
+  "expectedResult": "CREATE of one nonduplicate Component Category with two active parents persists one pair with a server UUID and a safe audit.",
+  "actualResult": "CREATE of one nonduplicate Component Category with two active parents persists one pair with a server UUID and a safe audit.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "assertActivePairParents"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "CATALOG_PAIR_EXISTS"
+    },
+    {
+      "file": "srv/user-admin.cds",
+      "symbol": "CatalogComponentCategories"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "pairRowsBefore": 32,
+    "pairRowsAfter": 33
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F226-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "47256de80918cb65b00bf339c97e59bddcb5ee62d96bd91624d476ec96d57767",
+    "before-database.png": "c30c7b74aacd32f32b044da0644389f21b812229a376e12ad2a83a37b75ecfb8",
+    "after-database.png": "bcc0ec731cd755ca518d06358b65a67934766208a7d6805489cafde7556823a0",
+    "reload-readback.png": "346c3050200dbbe3bc87732f9e448d9fe601b66a7fcbcef0f4d687a6fa103752"
+  },
+  "resultSha256": "c01c3169734b16d128d0b7cb254c1026a8baca658f8da044cb047ecbbf623082",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

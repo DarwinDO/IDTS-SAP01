@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F211",
+  "mentorNumber": 207,
+  "title": "role change fails closed before provider reconciliation",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:10.966Z",
+  "completedAt": "2026-09-05T10:05:11.633Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F211-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F211 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An authorized role change marks local access inactive, revokes active sessions, queues CHANGE_ROLE, and leaves provider completion unclaimed.",
+  "expectedResult": "An authorized role change marks local access inactive, revokes active sessions, queues CHANGE_ROLE, and leaves provider completion unclaimed.",
+  "actualResult": "An authorized role change marks local access inactive, revokes active sessions, queues CHANGE_ROLE, and leaves provider completion unclaimed.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requestRoleChange"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "queueFailClosedAccessChange"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "localAccessInactive": true,
+    "sessionsRevoked": true,
+    "queuedOperation": "CHANGE_ROLE",
+    "providerCompletionClaimed": false
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F211-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "d0a139b7583e0f513553663ab3fc422d0c79acb26ec027dfb3aee4bd704e0b52",
+    "before-database.png": "44c57671ca0c43453a1fc57f3d2c7941f86784b52a007656156f5cddaaebb261",
+    "after-database.png": "43cd16e5080dd0180d0292ddeaeea04b8e5e5cfd2acc1f2e4ef5b7f4c5aaa8cb",
+    "reload-readback.png": "32b4b52d2171112b9a95ebd268e5b353b1be67d8306ee3a23f956bf444d375c5"
+  },
+  "resultSha256": "56516a1b6cda68dca7f6b829cb0fa4871d2a3e01bad5269216c77863787b6eeb",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

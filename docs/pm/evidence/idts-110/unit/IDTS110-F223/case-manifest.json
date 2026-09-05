@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F223",
+  "mentorNumber": 223,
+  "title": "zero-load and inactive backlog workload rows remain truthful",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:22.310Z",
+  "completedAt": "2026-09-05T10:05:23.206Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F223-A1",
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-F223 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated developer workload fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An active Developer with zero open Bugs remains visible, an inactive Developer with an open backlog remains visible, and an inactive zero-backlog row is omitted.",
+  "expectedResult": "An active Developer with zero open Bugs remains visible, an inactive Developer with an open backlog remains visible, and an inactive zero-backlog row is omitted.",
+  "actualResult": "An active Developer with zero open Bugs remains visible, an inactive Developer with an open backlog remains visible, and an inactive zero-backlog row is omitted.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "emptyDeveloperWorkloadRow"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "filter(row => row.active || row.openOwnedBugCount > 0)"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "visibleRows": 5,
+    "omittedInactiveZeroBacklog": true
+  },
+  "reloadState": {
+    "visibleRows": 5,
+    "omittedInactiveZeroBacklog": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F223-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "5dbebc3e3e5de6757cc6f2eaab076db281dd53f7271fb847983a75a818fa4d6c",
+    "before-database.png": "0b0e3e9c33162c263a14d2083c16a9b7f4532045a7b966bba3c4b228d25fd4d2",
+    "after-database.png": "ba515da1cce831bfdb022413f205bdba782cbbcda3cf82a2e14bec45efd03929",
+    "reload-readback.png": "d72b0392b040b8bf9a7d651462a9e112c00fd3e5f1c4fdf3c9fb025c8de05761"
+  },
+  "resultSha256": "402973e3f6c53ec17150b16b288a71f3651468c08f8df644a76b6b49958f6a2a",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

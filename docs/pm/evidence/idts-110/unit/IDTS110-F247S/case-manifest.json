@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F247S",
+  "mentorNumber": 260,
+  "title": "scheduled discovery emits urgent SLA at four hours",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:03.924Z",
+  "completedAt": "2026-09-05T15:59:04.800Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F247S-A1",
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F247S --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A Critical or Blocker Pending Assignment emits its SLA event at exactly four hours and not before.",
+  "expectedResult": "A Critical or Blocker Pending Assignment emits its SLA event at exactly four hours and not before.",
+  "actualResult": "A Critical or Blocker Pending Assignment emits its SLA event at exactly four hours and not before.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "discoverScheduledNotifications"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "isSlaDue"
+    }
+  ],
+  "beforeState": {
+    "notificationCount": 0,
+    "notificationIDs": [],
+    "bugIDs": [],
+    "eventTypes": [],
+    "sourceKeys": [],
+    "recipientIDs": [],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "afterState": {
+    "notificationCount": 5,
+    "notificationIDs": [
+      "7bd86eef-f2f3-46c8-8234-f85beef76aeb",
+      "edab52ff-9a2d-4f54-906c-6efba1896395",
+      "b7d63c73-0931-40bd-a621-67d5710f0514",
+      "2d30872b-08dc-4b2e-bbe2-ef8f82554b0a",
+      "5bca8c4b-769c-4b5a-962f-ae03787f63a4"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000001",
+      "a3000000-0000-4000-8000-000000000012",
+      "a3000000-0000-4000-8000-000000000013",
+      "a3000000-0000-4000-8000-000000000001",
+      "a3000000-0000-4000-8000-000000000012"
+    ],
+    "eventTypes": [
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT"
+    ],
+    "sourceKeys": [
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000001",
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000012:a1000000-0000-4000-8000-000000000001",
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000013:a1000000-0000-4000-8000-000000000001",
+      "SLA:a3000000-0000-4000-8000-000000000001:4h:a1000000-0000-4000-8000-000000000001",
+      "SLA:a3000000-0000-4000-8000-000000000012:4h:a1000000-0000-4000-8000-000000000001"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001"
+    ],
+    "deliveryCount": 4,
+    "deliveryStatuses": [
+      "PENDING",
+      "PENDING",
+      "PENDING",
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "reloadState": {
+    "notificationCount": 5,
+    "notificationIDs": [
+      "7bd86eef-f2f3-46c8-8234-f85beef76aeb",
+      "edab52ff-9a2d-4f54-906c-6efba1896395",
+      "b7d63c73-0931-40bd-a621-67d5710f0514",
+      "2d30872b-08dc-4b2e-bbe2-ef8f82554b0a",
+      "5bca8c4b-769c-4b5a-962f-ae03787f63a4"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000001",
+      "a3000000-0000-4000-8000-000000000012",
+      "a3000000-0000-4000-8000-000000000013",
+      "a3000000-0000-4000-8000-000000000001",
+      "a3000000-0000-4000-8000-000000000012"
+    ],
+    "eventTypes": [
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT",
+      "PENDING_ASSIGNMENT"
+    ],
+    "sourceKeys": [
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000001",
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000012:a1000000-0000-4000-8000-000000000001",
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000013:a1000000-0000-4000-8000-000000000001",
+      "SLA:a3000000-0000-4000-8000-000000000001:4h:a1000000-0000-4000-8000-000000000001",
+      "SLA:a3000000-0000-4000-8000-000000000012:4h:a1000000-0000-4000-8000-000000000001"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001",
+      "a1000000-0000-4000-8000-000000000001"
+    ],
+    "deliveryCount": 4,
+    "deliveryStatuses": [
+      "PENDING",
+      "PENDING",
+      "PENDING",
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0,
+      0,
+      0,
+      0
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F247S-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "c962488bbe5efb7f59e14dbb91cf3064bc229ce896e35589819d6eb8efd88d59",
+    "reload-readback.png": "9fa9061e280ed0dd9687d1e9aa77c663a0203da13ea326f0bfe66f218b0a9f67"
+  },
+  "resultSha256": "adde311828faef11f70432bd8a939a78cbfbe262603a33b9efdbb7df15c7d2fc",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

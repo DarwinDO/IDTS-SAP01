@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F250L",
+  "mentorNumber": 269,
+  "assertionId": "IDTS110-F250L-A1",
+  "title": "digest snapshot orders items deterministically",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:18.190Z",
+  "completedAt": "2026-09-05T15:59:19.139Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F250L --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A digest snapshot orders its included items with the server comparator before rendering.",
+  "expectedResult": "A digest snapshot orders its included items with the server comparator before rendering.",
+  "actualResult": "A digest snapshot orders its included items with the server comparator before rendering.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "buildDigestSnapshot"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "compareDigestItems"
+    }
+  ],
+  "beforeState": {
+    "itemCount": 4,
+    "firstID": "b3000000-0000-4000-8000-000000000002"
+  },
+  "afterState": {
+    "itemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000007"
+    ],
+    "priorities": [
+      "CRITICAL",
+      "HIGH",
+      "HIGH",
+      "MEDIUM"
+    ]
+  },
+  "reloadState": {
+    "itemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000007"
+    ],
+    "priorities": [
+      "CRITICAL",
+      "HIGH",
+      "HIGH",
+      "MEDIUM"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F250L-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

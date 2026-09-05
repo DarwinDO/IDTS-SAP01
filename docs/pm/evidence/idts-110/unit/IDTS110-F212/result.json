@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F212",
+  "mentorNumber": 208,
+  "assertionId": "IDTS110-F212-A1",
+  "title": "local suspension revokes sessions and creates its access delivery",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:11.755Z",
+  "completedAt": "2026-09-05T10:05:12.505Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-access-lifecycle.js",
+  "testCommand": "node scripts/qa/test-user-admin-access-lifecycle.js --idts110-case=IDTS110-F212 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Suspending an ACTIVE user changes local state to SUSPENDED, revokes every unrevoked session, records QUEUED then APPLIED audit rows, and creates the APPLIED SUSPEND access delivery.",
+  "expectedResult": "Suspending an ACTIVE user changes local state to SUSPENDED, revokes every unrevoked session, records QUEUED then APPLIED audit rows, and creates the APPLIED SUSPEND access delivery.",
+  "actualResult": "Suspending an ACTIVE user changes local state to SUSPENDED, revokes every unrevoked session, records QUEUED then APPLIED audit rows, and creates the APPLIED SUSPEND access delivery.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "requestSuspend"
+    },
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "revokeActiveSessions"
+    },
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "writeUserAccessDelivery"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "state": "ACTIVE"
+  },
+  "afterState": {
+    "openSessionsBefore": 2,
+    "revokedSessionsAfter": 2,
+    "delivery": "ACCESS_SUSPENDED"
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F212-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

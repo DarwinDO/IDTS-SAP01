@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F207",
+  "mentorNumber": 202,
+  "title": "tampered invitation is rejected before consumption",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:08.004Z",
+  "completedAt": "2026-09-05T10:05:08.006Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F207-A1",
+  "testFile": "scripts/qa/test-user-onboarding-contract.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-contract.js --idts110-case=IDTS110-F207 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A tampered invitation signature returns INVALID_INVITATION and leaves the invitation unconsumed with no access operation.",
+  "expectedResult": "A tampered invitation signature returns INVALID_INVITATION and leaves the invitation unconsumed with no access operation.",
+  "actualResult": "A tampered invitation signature returns INVALID_INVITATION and leaves the invitation unconsumed with no access operation.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "verifyInvitationToken"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "invitationTokenSegments"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-invitation"
+  },
+  "afterState": {
+    "code": "INVALID_INVITATION",
+    "invitationUnconsumed": true
+  },
+  "reloadState": {
+    "invitationUnchanged": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F207-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "fe9a5c2c9d071961665b543f34478e74e6c343eb048f7aa934edfa2f06a67c7e",
+    "before-database.png": "b85c85930fd42bcff5648adf7b856af15ea260558730779678b8a9984722f3d3",
+    "after-database.png": "da342c46baa9593290a0a222e8e72f889e3826ed566fdfeeef8fab7abcafbec2",
+    "reload-readback.png": "ee28f5de61ecbe720212ff1a1e3a5da4e1a7a7588d5111e7f71fbabc15425fcb"
+  },
+  "resultSha256": "6807b0d90019c8910aaea3fe79a2e79ad74b6b7cdd0b1372f6870e278a0e5713",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

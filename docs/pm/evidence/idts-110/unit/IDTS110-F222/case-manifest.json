@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F222",
+  "mentorNumber": 222,
+  "title": "workload aggregates decimal effort without mutation",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:21.322Z",
+  "completedAt": "2026-09-05T10:05:22.181Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F222-A1",
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-F222 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated developer workload fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The workload row sums Decimal/string effort to two decimals while persisted Bug effort values remain unchanged after the read.",
+  "expectedResult": "The workload row sums Decimal/string effort to two decimals while persisted Bug effort values remain unchanged after the read.",
+  "actualResult": "The workload row sums Decimal/string effort to two decimals while persisted Bug effort values remain unchanged after the read.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "estimatedEffortHoursTotal"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "roundToTwoDecimals"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "estimatedEffortHoursTotal": 19.5,
+    "formattedEstimatedEffortHoursTotal": "19.50",
+    "persistedEffortUnchanged": true
+  },
+  "reloadState": {
+    "estimatedEffortHoursTotal": 19.5,
+    "formattedEstimatedEffortHoursTotal": "19.50",
+    "persistedEffortUnchanged": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F222-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "e4b0a8c40752527efe111d18cd5bb7838e92bf71a01411255183bbd7ef32f525",
+    "before-database.png": "0ea3709a1e8529499fad9cdca74700a8b6221b75ed0187299bffa0477696bfa6",
+    "after-database.png": "e0f8b921485e2be471dd7bfc6fd12498e083e73f61080dc80a19afae2694ea05",
+    "reload-readback.png": "91dc0476033444493912028fd505789316c555c7a85915e1b8840de2fec441e2"
+  },
+  "resultSha256": "4c45262f95a1f8f4caaa182f1237f0904500a631f51eeb757dea42d8185672e3",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

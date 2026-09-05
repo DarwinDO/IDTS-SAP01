@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F246",
+  "mentorNumber": 256,
+  "title": "successful CAP request registers one post-commit email kick",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:21.850Z",
+  "completedAt": "2026-09-05T13:42:22.670Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F246-A1",
+  "testFile": "scripts/qa/test-email-immediate-kick.js",
+  "testCommand": "node scripts/qa/test-email-immediate-kick.js --idts110-case=IDTS110-F246 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A successful CAP request with a PENDING onboarding or access delivery registers one post-commit email outbox kick.",
+  "expectedResult": "A successful CAP request with a PENDING onboarding or access delivery registers one post-commit email outbox kick.",
+  "actualResult": "A successful CAP request with a PENDING onboarding or access delivery registers one post-commit email outbox kick.",
+  "sourceTrace": [
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "scheduleImmediateEmailOutbox"
+    },
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "writeNotificationAndSchedule"
+    }
+  ],
+  "beforeState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "spawnCount": 0,
+    "batchCount": 0,
+    "providerCalls": 0
+  },
+  "afterState": {
+    "notificationRows": 1,
+    "notificationIDs": [
+      "d96c82cb-d575-40de-ba65-2479d3dd0b01"
+    ],
+    "sourceKeys": [
+      "ATOMIC_KICK:IDTS110-F246"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "308d734b-010c-4898-bac2-718306c2d4ed"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "writePath": "writeNotificationAndSchedule",
+    "pendingDeliveryRows": 1,
+    "kickCount": 1,
+    "spawnCount": 1,
+    "providerCalls": 0
+  },
+  "reloadState": {
+    "notificationRows": 1,
+    "notificationIDs": [
+      "d96c82cb-d575-40de-ba65-2479d3dd0b01"
+    ],
+    "sourceKeys": [
+      "ATOMIC_KICK:IDTS110-F246"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "308d734b-010c-4898-bac2-718306c2d4ed"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F246-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "4476d9bcf09b1d1e8abe808ef59614d4e56a8c9303b158d6150a253aa68d78c4",
+    "before-database.png": "f0f126f02105f2bb6573cc48501e52785e4b936abc58e7d3bd0fcddadf945759",
+    "after-database.png": "a666809eba878a006a1c24182504a6f05a206d9e75f16615a54e4295bc0ad11a",
+    "reload-readback.png": "f65bf45bd3e2c267e34359d27ad88d4f69d5030c30ec4ee3938dd0826ddd321c"
+  },
+  "resultSha256": "a8593e22cf78907e6c5910f2bac6b6dd4679db04a5be34b44daacc119716db48",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

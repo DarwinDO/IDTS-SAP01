@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F210",
+  "mentorNumber": 205,
+  "assertionId": "IDTS110-F210-A1",
+  "title": "provisioning approval succeeds at the current version",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:09.211Z",
+  "completedAt": "2026-09-05T10:05:09.888Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F210 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Approval of one current-version PENDING_APPROVAL request queues provisioning, inserts one PENDING operation, and appends one audit.",
+  "expectedResult": "Approval of one current-version PENDING_APPROVAL request queues provisioning, inserts one PENDING operation, and appends one audit.",
+  "actualResult": "Approval of one current-version PENDING_APPROVAL request queues provisioning, inserts one PENDING operation, and appends one audit.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "approveProvisioning"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "insertAccessOperation"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "status": "PROVISION_QUEUED",
+    "provisioningVersion": 2,
+    "operationRows": 1,
+    "operationType": "PROVISION",
+    "operationState": "PENDING",
+    "auditRows": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F210-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

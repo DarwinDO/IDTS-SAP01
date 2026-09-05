@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F249T",
+  "mentorNumber": 267,
+  "title": "scheduled page failure does not advance its cursor",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:13.355Z",
+  "completedAt": "2026-09-05T15:59:16.878Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F249T-A1",
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F249T --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A failed page transaction rolls back its writes and leaves the committed cursor unchanged so the same page can be retried.",
+  "expectedResult": "A failed page transaction rolls back its writes and leaves the committed cursor unchanged so the same page can be retried.",
+  "actualResult": "A failed page transaction rolls back its writes and leaves the committed cursor unchanged so the same page can be retried.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "createPageTransactionRunner"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "mergeScheduleResult"
+    }
+  ],
+  "beforeState": {
+    "persistedNotificationCount": 0,
+    "cursor": null
+  },
+  "afterState": {
+    "persistedNotificationCount": 500,
+    "committedPages": [
+      1
+    ],
+    "failedPagePersistedCount": 0,
+    "attemptedPageTwoCursor": "f4000000-0000-4000-8000-000000000500"
+  },
+  "reloadState": {
+    "persistedNotificationCount": 501,
+    "uniqueSourceKeyCount": 501,
+    "retriedPageTwoRowCount": 1,
+    "retriedPageTwoCursor": "f4000000-0000-4000-8000-000000000500"
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F249T-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "11af1aba670e52e1f2c38356671bbdf0bf3591d3744dd22694dc7848c0828819",
+    "before-database.png": "4faea4518cfd91b0d51ab715ebf8ead796fee6545a3b6ee6d0f299348fc67ca4",
+    "after-database.png": "b31bee0bfc3998e801845dbec7182e964d8bf7b5cd7bfb034a118054c1c13343",
+    "reload-readback.png": "79dab61c728e5d637221a89ca62368f5fe5ce77980b1ac3f34e5f95e3c090a9a"
+  },
+  "resultSha256": "fe602163e5253bf7efc943134968f74e54b1e7ebae877b3173cf491aafd57c58",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F249K",
+  "mentorNumber": 266,
+  "title": "scheduled discovery advances by ID keyset",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:10.108Z",
+  "completedAt": "2026-09-05T15:59:13.204Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F249K-A1",
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F249K --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The second candidate and PM page uses ID greater-than keyset ordering rather than OFFSET and remains bounded by the page limit.",
+  "expectedResult": "The second candidate and PM page uses ID greater-than keyset ordering rather than OFFSET and remains bounded by the page limit.",
+  "actualResult": "The second candidate and PM page uses ID greater-than keyset ordering rather than OFFSET and remains bounded by the page limit.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "readCandidatePage"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "forEachActivePMPage"
+    }
+  ],
+  "beforeState": {
+    "notificationCount": 0,
+    "firstSourceKey": null,
+    "lastSourceKey": null,
+    "deliveryCount": 0,
+    "candidateSourceRows": 501,
+    "activePMSourceRows": 501
+  },
+  "afterState": {
+    "notificationCount": 501,
+    "firstSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000001",
+    "lastSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:c4000000-0000-4000-8000-000000000500",
+    "deliveryCount": 0,
+    "candidatePages": 2,
+    "pmPages": 2
+  },
+  "reloadState": {
+    "notificationCount": 501,
+    "firstSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000001",
+    "lastSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:c4000000-0000-4000-8000-000000000500",
+    "deliveryCount": 0,
+    "candidateRowsObservedOnce": 501,
+    "pmRowsObservedOnce": 501
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F249K-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "329db589a1806258bd2433f32a147b79078aaf93da993e43e2f9a7fa4cf1eeef",
+    "before-database.png": "8f6c6022cd159b0a5fa65ec3e91d75dad7c9744da15671c6aa6df9a65514af1d",
+    "after-database.png": "8a171fa49ab7ea45423ad2a547f555989e863c153b067561584e3359084f8a3b",
+    "reload-readback.png": "865b3c2f5363039507ae45538e51e1416714ec3bf40d422336656716de50caf4"
+  },
+  "resultSha256": "72762f0c2fd1d2c5004bc134e2a844efa5d3655cfeb3ead0c0bf6cb77627d512",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

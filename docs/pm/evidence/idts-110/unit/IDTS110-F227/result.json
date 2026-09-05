@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F227",
+  "mentorNumber": 227,
+  "assertionId": "IDTS110-F227-A1",
+  "title": "catalog read exposes safe rows only to PM UserAdmin",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:25.403Z",
+  "completedAt": "2026-09-05T10:05:26.236Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F227 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "PM/UserAdmin receives only the declared catalog projection fields, while unauthorized callers receive 403 before a catalog table read.",
+  "expectedResult": "PM/UserAdmin receives only the declared catalog projection fields, while unauthorized callers receive 403 before a catalog table read.",
+  "actualResult": "PM/UserAdmin receives only the declared catalog projection fields, while unauthorized callers receive 403 before a catalog table read.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "registerCatalogHandlers"
+    },
+    {
+      "file": "srv/user-admin.cds",
+      "symbol": "@Capabilities.DeleteRestrictions.Deletable"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "CATALOG_ENTITIES"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "safeReadRows": 1,
+    "unauthorizedReads": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F227-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

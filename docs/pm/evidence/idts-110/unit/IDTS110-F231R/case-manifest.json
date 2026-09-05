@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F231R",
+  "mentorNumber": 233,
+  "title": "catalog reactivation is audited",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:31.156Z",
+  "completedAt": "2026-09-05T10:05:31.998Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F231R-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F231R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid inactive-to-active update persists REACTIVATE and exactly one safe audit event after reload.",
+  "expectedResult": "A valid inactive-to-active update persists REACTIVATE and exactly one safe audit event after reload.",
+  "actualResult": "A valid inactive-to-active update persists REACTIVATE and exactly one safe audit event after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "REACTIVATE"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "recordCatalogAudit"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "reactivated": true,
+    "safeAuditsAfterReload": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F231R-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "308024418b83d052fc5a61c3392033e0ec1e45a5643f43d4437f4f24a796cac4",
+    "before-database.png": "e7fc94ab3e99d1148152202a513e42e75528bf4aa84997dc8dc609ceacc7c111",
+    "after-database.png": "2fd8cf907c1a7c34de0bd2e49aa3cf14f926cb1979f9f572e328c32ecc128855",
+    "reload-readback.png": "a8c6271f30b29df863ebb0b46a1f4cebd9f37dd56e2c1a1527810e4f565d8cc0"
+  },
+  "resultSha256": "f0e146c9803c7c44d19581cbdc6854e41c8b9e64b87d9fe25d13a084257eab0a",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

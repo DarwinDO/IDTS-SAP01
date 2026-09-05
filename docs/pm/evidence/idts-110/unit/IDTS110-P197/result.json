@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P197",
+  "mentorNumber": 195,
+  "assertionId": "IDTS110-P197-A1",
+  "title": "inactive catalog parent blocks Component Category creation",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:01.514Z",
+  "completedAt": "2026-09-05T10:05:02.344Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-P197 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert CatalogComponentCategories CREATE rejects an inactive component or defect-category parent with INACTIVE_CATALOG_PARENT before persistence.",
+  "expectedResult": "Assert CatalogComponentCategories CREATE rejects an inactive component or defect-category parent with INACTIVE_CATALOG_PARENT before persistence.",
+  "actualResult": "Assert CatalogComponentCategories CREATE rejects an inactive component or defect-category parent with INACTIVE_CATALOG_PARENT before persistence.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "assertActivePairParents"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "prepareCatalogCreate"
+    },
+    {
+      "file": "srv/bug-service/bug-write.js",
+      "symbol": "deriveOrValidateComponentCategory"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "rejectedParent": true,
+    "pairRows": 32
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P197-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

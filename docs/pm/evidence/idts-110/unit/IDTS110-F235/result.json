@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F235",
+  "mentorNumber": 237,
+  "assertionId": "IDTS110-F235-A1",
+  "title": "single notification read succeeds with current version",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:52.652Z",
+  "completedAt": "2026-09-05T10:55:53.511Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F235 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A caller marks its own unread row read with the exact current modifiedAt and the persisted row is read after reload.",
+  "expectedResult": "A caller marks its own unread row read with the exact current modifiedAt and the persisted row is read after reload.",
+  "actualResult": "A caller marks its own unread row read with the exact current modifiedAt and the persisted row is read after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "markMyNotificationRead"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "NOTIFICATION_VERSION_CONFLICT"
+    }
+  ],
+  "beforeState": {
+    "ID": "d4000031-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:53.360Z"
+  },
+  "afterState": {
+    "ID": "d4000031-0000-4000-8000-000000000001",
+    "readAt": "2026-09-05T10:55:53.507Z",
+    "modifiedAt": "2026-09-05T10:55:53.507Z"
+  },
+  "reloadState": {
+    "ID": "d4000031-0000-4000-8000-000000000001",
+    "readAt": "2026-09-05T10:55:53.507Z",
+    "modifiedAt": "2026-09-05T10:55:53.507Z"
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F235-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

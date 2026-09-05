@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F231",
+  "mentorNumber": 232,
+  "title": "catalog DELETE is forbidden",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:30.199Z",
+  "completedAt": "2026-09-05T10:05:31.028Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F231-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F231 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "DELETE returns CATALOG_DELETE_FORBIDDEN and leaves the catalog row present and unchanged.",
+  "expectedResult": "DELETE returns CATALOG_DELETE_FORBIDDEN and leaves the catalog row present and unchanged.",
+  "actualResult": "DELETE returns CATALOG_DELETE_FORBIDDEN and leaves the catalog row present and unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "CATALOG_DELETE_FORBIDDEN"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "deleteRejected": true,
+    "rowPreserved": true,
+    "successfulAuditsUnchanged": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F231-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "89d250f0a376d3f730f8c3e28ee277d1d6cceb44d868df5604091a6d8a6c615c",
+    "before-database.png": "ce04a18e93b84fad5fec7c919e8fa50e9facbed9de423f2d768cb4b0ebbc16da",
+    "after-database.png": "aed0efa253a017d44108f77f8503b0899f94f53ffdc6d104a35906640ff94a75",
+    "reload-readback.png": "3f193b3411bb9ac6359253af0068e331f54498fbe280d00499fd936b66842497"
+  },
+  "resultSha256": "821280c8d1a299d30ed1630ca118ed6462e3ecdaa770876479b885d6afc2ae90",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

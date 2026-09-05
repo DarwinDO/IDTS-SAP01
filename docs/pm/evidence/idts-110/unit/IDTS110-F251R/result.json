@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F251R",
+  "mentorNumber": 274,
+  "assertionId": "IDTS110-F251R-A1",
+  "title": "digest scheduling resumes after a page failure",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:23.870Z",
+  "completedAt": "2026-09-05T15:59:25.166Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F251R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A late-page failure leaves earlier committed pages intact and resumes the remaining recipient pages without duplicating their rows.",
+  "expectedResult": "A late-page failure leaves earlier committed pages intact and resumes the remaining recipient pages without duplicating their rows.",
+  "actualResult": "A late-page failure leaves earlier committed pages intact and resumes the remaining recipient pages without duplicating their rows.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "scheduleNotificationDigests"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "createDigestTransactionRunner"
+    }
+  ],
+  "beforeState": {
+    "persistedRowCount": 0,
+    "sourceRecipientPageCount": 0
+  },
+  "afterState": {
+    "persistedRowCount": 99,
+    "firstPagePersistedCount": 99,
+    "failedPagePersistedCount": 0,
+    "failedPageSourceCount": 100
+  },
+  "reloadState": {
+    "persistedRowCount": 201,
+    "uniqueRecipientCount": 201,
+    "retriedPageSourceCount": 100,
+    "retriedPageMatchesFailedPage": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F251R-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

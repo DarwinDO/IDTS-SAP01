@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F249K",
+  "mentorNumber": 266,
+  "assertionId": "IDTS110-F249K-A1",
+  "title": "scheduled discovery advances by ID keyset",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:10.108Z",
+  "completedAt": "2026-09-05T15:59:13.204Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F249K --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The second candidate and PM page uses ID greater-than keyset ordering rather than OFFSET and remains bounded by the page limit.",
+  "expectedResult": "The second candidate and PM page uses ID greater-than keyset ordering rather than OFFSET and remains bounded by the page limit.",
+  "actualResult": "The second candidate and PM page uses ID greater-than keyset ordering rather than OFFSET and remains bounded by the page limit.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "readCandidatePage"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "forEachActivePMPage"
+    }
+  ],
+  "beforeState": {
+    "notificationCount": 0,
+    "firstSourceKey": null,
+    "lastSourceKey": null,
+    "deliveryCount": 0,
+    "candidateSourceRows": 501,
+    "activePMSourceRows": 501
+  },
+  "afterState": {
+    "notificationCount": 501,
+    "firstSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000001",
+    "lastSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:c4000000-0000-4000-8000-000000000500",
+    "deliveryCount": 0,
+    "candidatePages": 2,
+    "pmPages": 2
+  },
+  "reloadState": {
+    "notificationCount": 501,
+    "firstSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000001",
+    "lastSourceKey": "PENDING_ASSIGNMENT:c3000000-0000-4000-8000-000000000001:c4000000-0000-4000-8000-000000000500",
+    "deliveryCount": 0,
+    "candidateRowsObservedOnce": 501,
+    "pmRowsObservedOnce": 501
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F249K-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

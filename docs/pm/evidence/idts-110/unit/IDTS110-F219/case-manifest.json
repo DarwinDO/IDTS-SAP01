@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F219",
+  "mentorNumber": 216,
+  "title": "Developer Profile update persists responsibility lifecycle",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:18.892Z",
+  "completedAt": "2026-09-05T10:05:19.859Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F219-A1",
+  "testFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile-actions.js --idts110-case=IDTS110-F219 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid Developer Profile update persists availability/workload, deactivates removed responsibilities without deletion, and writes bounded administration audits after reload.",
+  "expectedResult": "A valid Developer Profile update persists availability/workload, deactivates removed responsibilities without deletion, and writes bounded administration audits after reload.",
+  "actualResult": "A valid Developer Profile update persists availability/workload, deactivates removed responsibilities without deletion, and writes bounded administration audits after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "updateDeveloperProfile"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "persistDesiredDeveloperProfile"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "DEVELOPER_RESPONSIBILITY_DEACTIVATED"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "responsibilities": 1
+  },
+  "afterState": {
+    "beforeResponsibilities": 1,
+    "afterResponsibilities": 2,
+    "activeResponsibilities": 1,
+    "persistedWorkloadLimit": 2,
+    "auditActions": 3
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F219-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "ebf433e37bd60a953c3c8146986ef13a0f3f634c2ccd73817c39a7d0ce267b9d",
+    "before-database.png": "e3601ee73b9981955c01ac1a1cffbc793b1ed69ec952cccce2ad02a1b2d5f7ce",
+    "after-database.png": "99d85446a8cfd73bb4375800a4e4bbdc4f0b81072806cdde26c7fe28f5c02f47",
+    "reload-readback.png": "320c6fbb230105cb0a6d135fdad142d8099ad4c7e1e51b9b02c4f264a3a7fb30"
+  },
+  "resultSha256": "2a13df431f9df63ef0c77f034baf91a506de6206267c320262b9cb11091cb125",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

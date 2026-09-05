@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F235C",
+  "mentorNumber": 239,
+  "title": "stale notification read is rejected",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:54.640Z",
+  "completedAt": "2026-09-05T10:55:55.501Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F235C-A1",
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F235C --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A notification read with a stale modifiedAt returns NOTIFICATION_VERSION_CONFLICT without changing the row.",
+  "expectedResult": "A notification read with a stale modifiedAt returns NOTIFICATION_VERSION_CONFLICT without changing the row.",
+  "actualResult": "A notification read with a stale modifiedAt returns NOTIFICATION_VERSION_CONFLICT without changing the row.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "markMyNotificationRead"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "NOTIFICATION_VERSION_CONFLICT"
+    }
+  ],
+  "beforeState": {
+    "ID": "d4000033-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:55.346Z"
+  },
+  "afterState": {
+    "ID": "d4000033-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:55.346Z"
+  },
+  "reloadState": {
+    "ID": "d4000033-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:55.346Z"
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F235C-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "23bb2ec80a4a2c8be7ec2243ba2d1e71adfade6b896881e7da3c5a40f68bd155",
+    "before-database.png": "01b8df6763fcfbc0a72d60d55762e90c5964e5e1f36c31203fa8b974c401b01e",
+    "after-database.png": "ae75e3ff2dc16b09ab6686071cccafb55f139d4110613d40d9df8d25f56b5930",
+    "reload-readback.png": "4b81c54c946e16c0b7760813fe81a584bffca0cca277747f2b66205d10f9a4fd"
+  },
+  "resultSha256": "c6f88fb222821c7108c960a1ae0d4fdaa9e7e0ba4d07767160da9ce583cd2547",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

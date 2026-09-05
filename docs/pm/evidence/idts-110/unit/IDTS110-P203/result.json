@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P203",
+  "mentorNumber": 198,
+  "assertionId": "IDTS110-P203-A1",
+  "title": "PM-only status metrics enforce the authorization boundary",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:04.408Z",
+  "completedAt": "2026-09-05T10:05:05.232Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+  "testCommand": "node scripts/qa/test-pm-monitoring-programmatic.js --idts110-case=IDTS110-P203 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert PM receives the full current status metric set with zero-count rows preserved.",
+  "expectedResult": "Assert PM receives the full current status metric set with zero-count rows preserved. Assert Developer and Tester receive HTTP 403 and no status metric payload.",
+  "actualResult": "Assert PM receives the full current status metric set with zero-count rows preserved. Assert Developer and Tester receive HTTP 403 and no status metric payload.",
+  "sourceTrace": [
+    {
+      "file": "srv/service.cds",
+      "symbol": "readBugStatusMetrics"
+    },
+    {
+      "file": "srv/bug-service/status-metrics.js",
+      "symbol": "readBugStatusMetrics"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "metricRows": 10,
+    "zeroCountRows": 9,
+    "unauthorizedRoles": 2
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P203-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

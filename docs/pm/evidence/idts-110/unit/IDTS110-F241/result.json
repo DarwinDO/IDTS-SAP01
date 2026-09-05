@@ -1,0 +1,113 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F241",
+  "mentorNumber": 251,
+  "assertionId": "IDTS110-F241-A1",
+  "title": "applied access delivery skips an invalid application URL",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:17.213Z",
+  "completedAt": "2026-09-05T13:42:17.780Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-access-notifications.js",
+  "testCommand": "node scripts/qa/test-user-access-notifications.js --idts110-case=IDTS110-F241 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An APPLIED access audit with an invalid application URL creates a SKIPPED access delivery with EMAIL_BASE_URL_INVALID and makes no provider call.",
+  "expectedResult": "An APPLIED access audit with an invalid application URL creates a SKIPPED access delivery with EMAIL_BASE_URL_INVALID and makes no provider call.",
+  "actualResult": "An APPLIED access audit with an invalid application URL creates a SKIPPED access delivery with EMAIL_BASE_URL_INVALID and makes no provider call.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "writeUserAccessDelivery"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "skippedAccessDeliveryReason"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "buildAccessApplicationLink"
+    }
+  ],
+  "beforeState": {
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliverySourceAuditEventIDs": [],
+    "deliveryTargetUserIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "deliveryErrorCodes": [],
+    "deliveryProviderMessages": [],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": []
+  },
+  "afterState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "5a61fcbf-4cca-4898-9fea-ec0df9609d4e"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryErrorCodes": [
+      "EMAIL_BASE_URL_INVALID"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ],
+    "inboxRows": 1,
+    "inboxAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ],
+    "senderCalls": 0,
+    "providerWorkStarted": false
+  },
+  "reloadState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "5a61fcbf-4cca-4898-9fea-ec0df9609d4e"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryErrorCodes": [
+      "EMAIL_BASE_URL_INVALID"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ],
+    "inboxRows": 1,
+    "inboxAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F241-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

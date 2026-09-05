@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P200",
+  "mentorNumber": 196,
+  "assertionId": "IDTS110-P200-A1",
+  "title": "overdue monitoring uses the due-date boundary and excludes Closed Bugs",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:02.479Z",
+  "completedAt": "2026-09-05T10:05:03.291Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+  "testCommand": "node scripts/qa/test-pm-monitoring-programmatic.js --idts110-case=IDTS110-P200 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert an open Bug before today is overdue while a Bug due today is not overdue.",
+  "expectedResult": "Assert an open Bug before today is overdue while a Bug due today is not overdue. Assert a CLOSED Bug remains not overdue and no SLA threshold calculation is claimed.",
+  "actualResult": "Assert an open Bug before today is overdue while a Bug due today is not overdue. Assert a CLOSED Bug remains not overdue and no SLA threshold calculation is claimed.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "isOverdueBug"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "buildDeveloperWorkloadRows"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "overdueBeforeToday": true,
+    "dueTodayNotOverdue": true,
+    "closedExcluded": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P200-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

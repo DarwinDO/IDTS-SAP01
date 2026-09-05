@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F221",
+  "mentorNumber": 221,
+  "assertionId": "IDTS110-F221-A1",
+  "title": "Developer workload identity readiness fails closed",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:20.321Z",
+  "completedAt": "2026-09-05T10:05:21.195Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-F221 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated developer workload fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A workload row is ready only for one exact linked active identity; unmapped, inactive, hash-mismatched, and duplicate-active-request identities are not ready.",
+  "expectedResult": "A workload row is ready only for one exact linked active identity; unmapped, inactive, hash-mismatched, and duplicate-active-request identities are not ready.",
+  "actualResult": "A workload row is ready only for one exact linked active identity; unmapped, inactive, hash-mismatched, and duplicate-active-request identities are not ready.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "identityAccessReady"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "readActiveIdentityAccessByUser"
+    },
+    {
+      "file": "scripts/qa/test-developer-workload-programmatic.js",
+      "symbol": "Duplicate matching ACTIVE requests are not ready"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "readyRows": 1,
+    "notReadyRows": 4
+  },
+  "reloadState": {
+    "readyRows": 1,
+    "notReadyRows": 4
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F221-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

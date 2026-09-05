@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F227",
+  "mentorNumber": 227,
+  "title": "catalog read exposes safe rows only to PM UserAdmin",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:25.403Z",
+  "completedAt": "2026-09-05T10:05:26.236Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F227-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F227 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "PM/UserAdmin receives only the declared catalog projection fields, while unauthorized callers receive 403 before a catalog table read.",
+  "expectedResult": "PM/UserAdmin receives only the declared catalog projection fields, while unauthorized callers receive 403 before a catalog table read.",
+  "actualResult": "PM/UserAdmin receives only the declared catalog projection fields, while unauthorized callers receive 403 before a catalog table read.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "registerCatalogHandlers"
+    },
+    {
+      "file": "srv/user-admin.cds",
+      "symbol": "@Capabilities.DeleteRestrictions.Deletable"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "CATALOG_ENTITIES"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "safeReadRows": 1,
+    "unauthorizedReads": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F227-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "cd90a870c0163eff49018dc4bb4535480ba7ec873f476528abf2d7cb3300dc71",
+    "reload-readback.png": "7e7b751cd967766b75fa67ec6d4c95db61efc350507dd355f6eaa4b77adf6f85"
+  },
+  "resultSha256": "9252c08e53a26419266139945a3ec35de0d14d27207aac3854f27107f46be4a1",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

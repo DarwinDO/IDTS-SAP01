@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F246B",
+  "mentorNumber": 258,
+  "assertionId": "IDTS110-F246B-A1",
+  "title": "CAP rollback starts no provider work",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:23.883Z",
+  "completedAt": "2026-09-05T13:42:24.683Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-email-immediate-kick.js",
+  "testCommand": "node scripts/qa/test-email-immediate-kick.js --idts110-case=IDTS110-F246B --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A failed CAP request rolls back its post-commit registration and starts no provider work.",
+  "expectedResult": "A failed CAP request rolls back its post-commit registration and starts no provider work.",
+  "actualResult": "A failed CAP request rolls back its post-commit registration and starts no provider work.",
+  "sourceTrace": [
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "scheduleImmediateEmailOutbox"
+    },
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "writeNotificationAndSchedule"
+    }
+  ],
+  "beforeState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "spawnCount": 0,
+    "batchCount": 0,
+    "providerCalls": 0
+  },
+  "afterState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "writePath": "writeNotificationAndSchedule",
+    "rolledBack": true,
+    "providerCalls": 0,
+    "kickCount": 0,
+    "scheduleResults": [
+      "REGISTERED"
+    ]
+  },
+  "reloadState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F246B-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

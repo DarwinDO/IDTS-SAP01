@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F210S",
+  "mentorNumber": 206,
+  "assertionId": "IDTS110-F210S-A1",
+  "title": "stale provisioning approval is rejected without mutation",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:10.092Z",
+  "completedAt": "2026-09-05T10:05:10.761Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F210S --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Approval with a stale request version returns the safe version conflict and leaves request, operation, and audit state unchanged.",
+  "expectedResult": "Approval with a stale request version returns the safe version conflict and leaves request, operation, and audit state unchanged.",
+  "actualResult": "Approval with a stale request version returns the safe version conflict and leaves request, operation, and audit state unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "approveProvisioning"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "assertExpectedVersion"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "conflictCode": "ONBOARDING_VERSION_CONFLICT",
+    "requestUnchanged": true,
+    "operationsUnchanged": true,
+    "auditsUnchanged": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F210S-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

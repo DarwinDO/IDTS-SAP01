@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F232",
+  "mentorNumber": 234,
+  "assertionId": "IDTS110-F232-A1",
+  "title": "My Notifications search is caller-scoped and stably ordered",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:49.628Z",
+  "completedAt": "2026-09-05T10:55:50.533Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F232 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The inbox returns only the authenticated caller’s rows, applies bounded filters and paging, and orders rows by occurredAt desc then ID desc for equal timestamps.",
+  "expectedResult": "The inbox returns only the authenticated caller’s rows, applies bounded filters and paging, and orders rows by occurredAt desc then ID desc for equal timestamps.",
+  "actualResult": "The inbox returns only the authenticated caller’s rows, applies bounded filters and paging, and orders rows by occurredAt desc then ID desc for equal timestamps.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "searchMyNotifications"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "readInboxPage"
+    }
+  ],
+  "beforeState": {
+    "callerRows": 4,
+    "otherCallerRows": 1,
+    "pmRows": 0,
+    "userAdminRows": 0
+  },
+  "afterState": {
+    "firstPageIDs": [
+      "d4000004-0000-4000-8000-000000000001",
+      "d4000003-0000-4000-8000-000000000001"
+    ],
+    "secondPageIDs": [
+      "d4000002-0000-4000-8000-000000000001",
+      "d4000001-0000-4000-8000-000000000001"
+    ],
+    "unreadRows": 3
+  },
+  "reloadState": {
+    "uniquePagedRows": 4,
+    "callerBRows": 1,
+    "callerPMRows": 0,
+    "callerUserAdminRows": 0
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F232-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

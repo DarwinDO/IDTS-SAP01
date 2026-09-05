@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F246R",
+  "mentorNumber": 257,
+  "assertionId": "IDTS110-F246R-A1",
+  "title": "repeated post-commit registration is idempotent",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:22.873Z",
+  "completedAt": "2026-09-05T13:42:23.674Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-email-immediate-kick.js",
+  "testCommand": "node scripts/qa/test-email-immediate-kick.js --idts110-case=IDTS110-F246R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Registering the same PENDING delivery twice results in one post-commit email outbox kick registration.",
+  "expectedResult": "Registering the same PENDING delivery twice results in one post-commit email outbox kick registration.",
+  "actualResult": "Registering the same PENDING delivery twice results in one post-commit email outbox kick registration.",
+  "sourceTrace": [
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "scheduleImmediateEmailOutbox"
+    },
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "writeNotificationAndSchedule"
+    }
+  ],
+  "beforeState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "spawnCount": 0,
+    "batchCount": 0,
+    "providerCalls": 0
+  },
+  "afterState": {
+    "notificationRows": 1,
+    "notificationIDs": [
+      "31c01eaf-cffd-4173-9902-2fd2c784f6c0"
+    ],
+    "sourceKeys": [
+      "ATOMIC_KICK:IDTS110-F246R"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "ac826867-22f8-4823-94a8-b739eaa04e40"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "writePath": "writeNotificationAndSchedule",
+    "scheduleResults": [
+      "REGISTERED",
+      "DUPLICATE_IGNORED"
+    ],
+    "kickCount": 1,
+    "providerCalls": 0
+  },
+  "reloadState": {
+    "notificationRows": 1,
+    "notificationIDs": [
+      "31c01eaf-cffd-4173-9902-2fd2c784f6c0"
+    ],
+    "sourceKeys": [
+      "ATOMIC_KICK:IDTS110-F246R"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "ac826867-22f8-4823-94a8-b739eaa04e40"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F246R-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

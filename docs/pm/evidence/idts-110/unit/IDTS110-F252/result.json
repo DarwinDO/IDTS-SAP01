@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F252",
+  "mentorNumber": 275,
+  "assertionId": "IDTS110-F252-A1",
+  "title": "digest send skips an inactive recipient",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:25.387Z",
+  "completedAt": "2026-09-05T15:59:26.269Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F252 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A claimed digest row is SKIPPED without provider call when its recipient is inactive before send.",
+  "expectedResult": "A claimed digest row is SKIPPED without provider call when its recipient is inactive before send.",
+  "actualResult": "A claimed digest row is SKIPPED without provider call when its recipient is inactive before send.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "processNotificationDigestDeliveries"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "readDigestSendRecipient"
+    }
+  ],
+  "beforeState": {
+    "status": "PENDING",
+    "recipientActive": true,
+    "role": "DEVELOPER",
+    "profileActive": true,
+    "senderCalls": 0
+  },
+  "afterState": {
+    "status": "SKIPPED",
+    "lastErrorCode": "RECIPIENT_EMAIL_INVALID",
+    "attemptCount": 1,
+    "lockCleared": true,
+    "senderCalls": 0
+  },
+  "reloadState": {
+    "status": "SKIPPED",
+    "lastErrorCode": "RECIPIENT_EMAIL_INVALID",
+    "senderCalls": 0
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F252-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

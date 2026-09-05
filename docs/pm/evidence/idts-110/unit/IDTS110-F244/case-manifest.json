@@ -1,0 +1,189 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F244",
+  "mentorNumber": 254,
+  "title": "onboarding invitation email keeps link and security boundaries",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:19.939Z",
+  "completedAt": "2026-09-05T13:42:20.654Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F244-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F244 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The invitation text and HTML use an HTTPS fragment token link plus official SAP account/registration links, omit query-token links and credentials, and preserve requested role/expiry.",
+  "expectedResult": "The invitation text and HTML use an HTTPS fragment token link plus official SAP account/registration links, omit query-token links and credentials, and preserve requested role/expiry.",
+  "actualResult": "The invitation text and HTML use an HTTPS fragment token link plus official SAP account/registration links, omit query-token links and credentials, and preserve requested role/expiry.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "buildInvitationMessage"
+    },
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "SAP_ACCOUNT_URL"
+    },
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "IDTS will never ask for your SAP password"
+    }
+  ],
+  "beforeState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "c9bd2c31-5f1d-49a8-b3b6-2cf30c5b041e"
+    ],
+    "requestStatuses": [
+      "INVITED"
+    ],
+    "requestVersions": [
+      0
+    ],
+    "requestErrorCodes": [
+      null
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:20.636Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "20e29ff0-e1c9-4a26-b77d-153f228ee826"
+    ],
+    "deliveryRequestIDs": [
+      "c9bd2c31-5f1d-49a8-b3b6-2cf30c5b041e"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      null
+    ]
+  },
+  "afterState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "c9bd2c31-5f1d-49a8-b3b6-2cf30c5b041e"
+    ],
+    "requestStatuses": [
+      "INVITED"
+    ],
+    "requestVersions": [
+      0
+    ],
+    "requestErrorCodes": [
+      null
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:20.636Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "20e29ff0-e1c9-4a26-b77d-153f228ee826"
+    ],
+    "deliveryRequestIDs": [
+      "c9bd2c31-5f1d-49a8-b3b6-2cf30c5b041e"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      null
+    ],
+    "htmlQueryLinkOmitted": true,
+    "textOfficialSapUrls": true,
+    "maliciousSuffixDetected": true,
+    "htmlOfficialSapLinks": true,
+    "htmlRoleAndExpiry": true,
+    "htmlExpiryExact": true,
+    "htmlFragmentLinkOnly": true,
+    "htmlEscaped": true
+  },
+  "reloadState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "c9bd2c31-5f1d-49a8-b3b6-2cf30c5b041e"
+    ],
+    "requestStatuses": [
+      "INVITED"
+    ],
+    "requestVersions": [
+      0
+    ],
+    "requestErrorCodes": [
+      null
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:20.636Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "20e29ff0-e1c9-4a26-b77d-153f228ee826"
+    ],
+    "deliveryRequestIDs": [
+      "c9bd2c31-5f1d-49a8-b3b6-2cf30c5b041e"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      null
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F244-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "8068b2e2e49b54b2aed48cdce671b3437d12a5c0eb537225195d8e591c9d08aa",
+    "before-database.png": "0cabd8f4eca9d68bb20085aed4d54e1b99d80359d2a3c360e80346942ef11cd4",
+    "after-database.png": "fcf7a97bfeff1e11a46dc082a0406ac70f7da3ee63d4cd8b9338b5de17603f27",
+    "reload-readback.png": "f5cca6dc2670c29dbc5252a227812797b9c88f4d5c9168c03cb862eb055a54d3"
+  },
+  "resultSha256": "f981d9f4013e19ea5c2b656ec2b1d4880ed8ad629dad68f1ee630768ca75ed43",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

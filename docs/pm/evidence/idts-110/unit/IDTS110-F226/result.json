@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F226",
+  "mentorNumber": 226,
+  "assertionId": "IDTS110-F226-A1",
+  "title": "PM creates one valid Component Category pair",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:24.395Z",
+  "completedAt": "2026-09-05T10:05:25.276Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F226 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "CREATE of one nonduplicate Component Category with two active parents persists one pair with a server UUID and a safe audit.",
+  "expectedResult": "CREATE of one nonduplicate Component Category with two active parents persists one pair with a server UUID and a safe audit.",
+  "actualResult": "CREATE of one nonduplicate Component Category with two active parents persists one pair with a server UUID and a safe audit.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "assertActivePairParents"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "CATALOG_PAIR_EXISTS"
+    },
+    {
+      "file": "srv/user-admin.cds",
+      "symbol": "CatalogComponentCategories"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "pairRowsBefore": 32,
+    "pairRowsAfter": 33
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F226-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

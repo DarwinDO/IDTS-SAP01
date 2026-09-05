@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F213",
+  "mentorNumber": 209,
+  "title": "reactivation stays inactive until queued operation completes",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:12.632Z",
+  "completedAt": "2026-09-05T10:05:13.378Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F213-A1",
+  "testFile": "scripts/qa/test-user-admin-access-lifecycle.js",
+  "testCommand": "node scripts/qa/test-user-admin-access-lifecycle.js --idts110-case=IDTS110-F213 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Reactivation increments the request version and queues REACTIVATE while the local user remains inactive until provider proof.",
+  "expectedResult": "Reactivation increments the request version and queues REACTIVATE while the local user remains inactive until provider proof.",
+  "actualResult": "Reactivation increments the request version and queues REACTIVATE while the local user remains inactive until provider proof.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "requestReactivate"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "insertAccessOperation"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "state": "SUSPENDED"
+  },
+  "afterState": {
+    "status": "SUSPENDED",
+    "version": 9,
+    "operation": "REACTIVATE",
+    "operationState": "PENDING"
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F213-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "6acf194066749abd6e9ba9133b7e7cec9c296f2ff467b2e2fe409ecdfd0f0042",
+    "before-database.png": "aae1b7bdd1c75a4288b0129c8f09f9a2ffc04d48a985887367a10c4a5a086044",
+    "after-database.png": "21c3368dd173904d729a045e988dfd792d95840001c47fb6ee0573add984a69e",
+    "reload-readback.png": "6ce3294813c4faa3fdbfdeccdf08fabd8e84c91cb3f4ec69accdff63f146422b"
+  },
+  "resultSha256": "98ba37d549bfe68baaf264cf958a1d51567ed5e4368d1b27e11cf2964baecc50",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

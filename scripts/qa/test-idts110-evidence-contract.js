@@ -1,0 +1,156 @@
+'use strict'
+
+const assert = require('node:assert/strict')
+const crypto = require('node:crypto')
+const fs = require('node:fs')
+const path = require('node:path')
+
+const root = path.resolve(__dirname, '../..')
+const generator = require('./generate-idts110-evidence')
+const cards = require('./generate-idts110-mentor-cards')
+const atomic = require('./idts110-atomic-runner')
+
+const BASELINE = '6eb6f73840d7150598a993f8656d2b44e5b0cd4b'
+const catalogPath = path.join(root, 'docs/qa/idts-110-unit-test-catalog.json')
+const numberMapPath = path.join(root, 'docs/qa/idts-110-case-number-map.json')
+const approvalPath = path.join(root, 'docs/pm/evidence/idts-110/catalog-approval.json')
+const unitRoot = path.join(root, 'docs/pm/evidence/idts-110/unit')
+const cardRoot = path.join(root, 'docs/pm/evidence/idts-110/cards')
+const sourcePaths = [
+  path.join(root, '.tmp/idts-110/review-round3-fresh.json'),
+  path.join(root, '.tmp/idts-110/task5-fix-round1-review.json'),
+  path.join(root, '.tmp/idts-110/ui-results.json'),
+  path.join(root, '.tmp/idts-110/f224-fix-round1.json'),
+  path.join(root, '.tmp/idts-110/review-task7-fix3-results.json'),
+  path.join(root, '.tmp/idts-110/review-task8-fix2-results.json')
+]
+
+function readJson (file) {
+  return JSON.parse(fs.readFileSync(file, 'utf8'))
+}
+
+function sha256 (file) {
+  return crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex')
+}
+
+function pngSignature (file) {
+  return fs.readFileSync(file).subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]))
+}
+
+function assertNoSecret (value) {
+  assert.doesNotMatch(JSON.stringify(value), /(?:password|passwd|pwd|token|api[-_ ]?key|secret)\s*[:=]\s*[^,}\s]+|Bearer\s+[^\s"']+|postgres(?:ql)?:\/\//i)
+}
+
+;(async () => {
+  const catalog = readJson(catalogPath)
+  const numberMap = readJson(numberMapPath)
+  const approval = readJson(approvalPath)
+
+  assert.equal(typeof generator.aggregateAtomicResults, 'function')
+  assert.equal(typeof generator.writeAtomicEvidence, 'function')
+  assert.equal(typeof cards.buildCardModels, 'function')
+
+  const batch = generator.aggregateAtomicResults({
+    inputPaths: sourcePaths,
+    catalogPath,
+    numberMapPath,
+    approvalPath
+  })
+
+assert.equal(batch.sourceBaselineSha, BASELINE)
+assert.deepEqual(batch.approvalReference, approval.approvalReference)
+assert.equal(batch.results.length, 90)
+assert.equal(new Set(batch.results.map(row => row.caseKey)).size, 90)
+assert.deepEqual(
+  batch.results.map(row => row.caseKey),
+  catalog.cases.slice(188).map(row => row.caseId)
+)
+for (const row of batch.results) {
+  assert.equal(row.assertionId, `${row.caseKey}-A1`)
+  assert.notEqual(row.status, 'MAPPING_ONLY')
+  assert.equal(row.sourceBaselineSha, BASELINE)
+  assert.equal(row.reviewStatus, 'PENDING_DONHV_REVIEW')
+  assertNoSecret(row)
+}
+assert.equal(batch.results.find(row => row.caseKey === 'IDTS110-F224').evidenceKind, 'UI_RUNTIME')
+assert.equal(batch.results.find(row => row.caseKey === 'IDTS110-F224').status, 'PASS')
+
+assert.throws(
+  () => generator.aggregateAtomicResults({
+    inputPaths: [...sourcePaths, path.join(root, '.tmp/idts-110/user-admin-results-fix-round2-final.json')],
+    catalogPath,
+    numberMapPath,
+    approvalPath
+  }),
+  /duplicate|exactly 90|historical|selected/i
+)
+
+  await generator.writeAtomicEvidence({ batch, catalogPath, numberMapPath, approvalPath, evidenceRoot: unitRoot })
+  const models = cards.buildCardModels({ catalogPath, numberMapPath, approvalPath, results: batch, evidenceRoot: unitRoot })
+assert.equal(models.length, 278)
+for (const model of models) {
+  assert.match(model.visibleText, /^Case \d+\n/)
+  assert.doesNotMatch(model.visibleText, /IDTS110-|UT-[A-Z]+-/)
+  assert.doesNotMatch(model.visibleText, /undefined|password|Bearer |api[-_ ]?key|postgres(?:ql)?:\/\//i)
+  assert.doesNotMatch(model.visibleText, /MAPPING_ONLY.*PASS|PASS.*MAPPING_ONLY/i)
+}
+assert.equal(models.filter(model => model.mentorNumber <= 188 && model.status.startsWith('Candidate PASS')).length, 40)
+assert.equal(models.filter(model => model.mentorNumber <= 188 && model.status.startsWith('Mapping Only')).length, 135)
+assert.equal(models.filter(model => model.mentorNumber <= 188 && model.status.startsWith('Blocked')).length, 13)
+
+const newKeys = new Set(batch.results.map(row => row.caseKey))
+assert.deepEqual(
+  fs.readdirSync(unitRoot).filter(name => fs.statSync(path.join(unitRoot, name)).isDirectory()).sort(),
+  [...newKeys].sort()
+)
+for (const row of batch.results) {
+  const dir = path.join(unitRoot, row.caseKey)
+  const resultPath = path.join(dir, 'result.json')
+  const manifestPath = path.join(dir, 'case-manifest.json')
+  assert.ok(fs.existsSync(resultPath), `${row.caseKey} result.json`)
+  assert.ok(fs.existsSync(manifestPath), `${row.caseKey} case-manifest.json`)
+  const result = readJson(resultPath)
+  const manifest = readJson(manifestPath)
+  if (row.evidenceKind === 'UI_RUNTIME') {
+    // The shared atomic runner validates live UI paths under .tmp/idts-110;
+    // the packaged result intentionally points at its committed copy instead.
+    atomic.validateAtomicResult({ ...result, runtimeEvidence: row.runtimeEvidence })
+  } else {
+    atomic.validateAtomicResult(result)
+  }
+  assert.equal(manifest.caseKey, row.caseKey)
+  assert.equal(manifest.resultSha256, sha256(resultPath))
+  assertNoSecret(manifest)
+  for (const file of manifest.evidenceFiles) {
+    const artifact = path.join(dir, file)
+    assert.ok(fs.existsSync(artifact), `${row.caseKey}/${file}`)
+    assert.ok(pngSignature(artifact), `${row.caseKey}/${file} PNG signature`)
+    assert.equal(manifest.artifactHashes[file], sha256(artifact), `${row.caseKey}/${file} hash`)
+  }
+  assert.deepEqual(
+    fs.readdirSync(dir).filter(file => file.endsWith('.png')).sort(),
+    [...manifest.evidenceFiles].sort(),
+    `${row.caseKey} has no orphan PNGs`
+  )
+  if (row.evidenceKind === 'UI_RUNTIME') {
+    assert.ok(manifest.evidenceFiles.includes('runtime.png'))
+    assert.equal(result.runtimeEvidence.screenshotPath, `unit/${row.caseKey}/runtime.png`)
+    assert.equal(result.runtimeEvidence.manifestPath, `unit/${row.caseKey}/case-manifest.json`)
+  } else {
+    assert.ok(manifest.evidenceFiles.includes('result.png'))
+  }
+}
+
+  await cards.writeCards({ models, outputRoot: cardRoot })
+  const cardFiles = fs.readdirSync(cardRoot).filter(name => /^Case-\d{3}\.png$/.test(name))
+assert.equal(cardFiles.length, 278)
+for (const file of cardFiles) {
+  assert.ok(pngSignature(path.join(cardRoot, file)), `${file} PNG signature`)
+  assert.ok(fs.statSync(path.join(cardRoot, file)).size > 100, `${file} is not empty`)
+}
+
+  console.log('IDTS-110 evidence contract PASS: 90 selected atomic results, 90 case packages, 278 number-only cards, and valid PNG hashes.')
+})().catch(error => {
+  console.error(error.stack || error)
+  process.exitCode = 1
+})

@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P190",
+  "mentorNumber": 190,
+  "assertionId": "IDTS110-P190-A1",
+  "title": "inactive Developer profile read returns no profile data",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:04:57.489Z",
+  "completedAt": "2026-09-05T10:04:58.428Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile-actions.js --idts110-case=IDTS110-P190 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Read an inactive Developer and assert the documented not-found status and error code.",
+  "expectedResult": "Read an inactive Developer and assert the documented not-found status and error code. Read back the fixture and assert no profile payload was exposed or changed.",
+  "actualResult": "Read an inactive Developer and assert the documented not-found status and error code. Read back the fixture and assert no profile payload was exposed or changed.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "readDeveloperProfile"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "readDeveloperTarget"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "developerProfileResult"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "responsibilities": 1
+  },
+  "afterState": {
+    "inactiveUserFound": true,
+    "profilePayloadExposed": false
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P190-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

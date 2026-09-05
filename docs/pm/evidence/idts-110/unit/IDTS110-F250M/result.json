@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F250M",
+  "mentorNumber": 270,
+  "assertionId": "IDTS110-F250M-A1",
+  "title": "digest snapshot enforces the render limit",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:19.352Z",
+  "completedAt": "2026-09-05T15:59:20.220Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F250M --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A digest snapshot renders no more than the normalized limit and preserves the full itemCount for remaining items.",
+  "expectedResult": "A digest snapshot renders no more than the normalized limit and preserves the full itemCount for remaining items.",
+  "actualResult": "A digest snapshot renders no more than the normalized limit and preserves the full itemCount for remaining items.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "buildDigestSnapshot"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "normalizeLimit"
+    }
+  ],
+  "beforeState": {
+    "sourceBugCount": 11
+  },
+  "afterState": {
+    "sourceBugCountAfterInsert": 32,
+    "sourceBugCountAfterSnapshot": 32,
+    "itemCount": 25,
+    "renderedCount": 20,
+    "remainder": 5,
+    "cappedRenderedCount": 20
+  },
+  "reloadState": {
+    "sourceBugCount": 32,
+    "itemCount": 25,
+    "renderedCount": 20,
+    "remainder": 5
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F250M-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

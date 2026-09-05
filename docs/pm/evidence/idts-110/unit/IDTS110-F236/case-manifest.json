@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F236",
+  "mentorNumber": 240,
+  "title": "mark-all read honors a frozen occurrence snapshot",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:55.624Z",
+  "completedAt": "2026-09-05T10:55:56.480Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F236-A1",
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F236 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "markAllMyNotificationsRead updates only the caller’s unread rows with occurredAt at or before throughOccurredAt, leaving a later notification unread after reload.",
+  "expectedResult": "markAllMyNotificationsRead updates only the caller’s unread rows with occurredAt at or before throughOccurredAt, leaving a later notification unread after reload.",
+  "actualResult": "markAllMyNotificationsRead updates only the caller’s unread rows with occurredAt at or before throughOccurredAt, leaving a later notification unread after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "markAllMyNotificationsRead"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "throughOccurredAt"
+    }
+  ],
+  "beforeState": {
+    "count": 4,
+    "IDs": [
+      "d4000041-0000-4000-8000-000000000001",
+      "d4000042-0000-4000-8000-000000000001",
+      "d4000043-0000-4000-8000-000000000001",
+      "d4000044-0000-4000-8000-000000000001"
+    ],
+    "unread": 4,
+    "read": 0
+  },
+  "afterState": {
+    "count": 4,
+    "IDs": [
+      "d4000041-0000-4000-8000-000000000001",
+      "d4000042-0000-4000-8000-000000000001",
+      "d4000043-0000-4000-8000-000000000001",
+      "d4000044-0000-4000-8000-000000000001"
+    ],
+    "unread": 2,
+    "read": 2
+  },
+  "reloadState": {
+    "updatedBeforeSnapshot": 2,
+    "laterUnread": true,
+    "otherCallerUnread": true,
+    "pmCount": 0,
+    "userAdminCount": 0
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F236-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "6ffa95b566c969c11786cc70350863a937b8d686441ea2d3956c36495d46e080",
+    "before-database.png": "4b0107501a3fbae80f1fff07378e114c56f01dde27da0ee8f0c81de170bc52fd",
+    "after-database.png": "1e6d581d80f7f954f7e5841c117f05e4ce0e93ea5bbec988be82dfa21229c7d8",
+    "reload-readback.png": "82a2196120d83d3680225b7639e5ece9b8425a8875bc7899a207dcd28adc3214"
+  },
+  "resultSha256": "cee23b4b3b510c223f6cccbdd7b31d2cef91902bfff707ce7fa78d5b0592c6e9",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

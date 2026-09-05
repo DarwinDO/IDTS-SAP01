@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P196",
+  "mentorNumber": 194,
+  "title": "non-PM callers cannot modify catalog entities",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:00.560Z",
+  "completedAt": "2026-09-05T10:05:01.389Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P196-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-P196 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Attempt CREATE and UPDATE as TESTER and DEVELOPER and assert HTTP 403.",
+  "expectedResult": "Attempt CREATE and UPDATE as TESTER and DEVELOPER and assert HTTP 403. Read back catalog and audit fixtures to prove rejected calls did not mutate business state.",
+  "actualResult": "Attempt CREATE and UPDATE as TESTER and DEVELOPER and assert HTTP 403. Read back catalog and audit fixtures to prove rejected calls did not mutate business state.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "prepareCatalogCreate"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requireActiveUserAdministrator"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "rejectedCalls": 4,
+    "catalogRows": 5,
+    "successfulAuditsUnchanged": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P196-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "b124e2df3b8f26395633be76c8e668b2f834153e09c43bafa740f7e0b6f06db3",
+    "before-database.png": "e773161244db8aea1249931eb5c28ddd4487852f5b83161af4e66699b20114ea",
+    "after-database.png": "e38590dc369dfe9558fc69485960d1e3aa920ef5552b4043949d1fbbc5a91688",
+    "reload-readback.png": "461f21cd81f9cad353ddc01368798ef6e9e19dabaf9f08870fab245f00f74217"
+  },
+  "resultSha256": "8c9292ebf2835e553cb7ab3082c4503a401f4f974db5dd3ac24d5211a053d003",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

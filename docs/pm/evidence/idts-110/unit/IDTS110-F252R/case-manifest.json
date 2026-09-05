@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F252R",
+  "mentorNumber": 276,
+  "title": "digest send skips a changed role",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:26.478Z",
+  "completedAt": "2026-09-05T15:59:27.340Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F252R-A1",
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F252R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A claimed digest row is SKIPPED without provider call when its recipient role no longer matches the stored digest type.",
+  "expectedResult": "A claimed digest row is SKIPPED without provider call when its recipient role no longer matches the stored digest type.",
+  "actualResult": "A claimed digest row is SKIPPED without provider call when its recipient role no longer matches the stored digest type.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "processNotificationDigestDeliveries"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "isSendPersonaValid"
+    }
+  ],
+  "beforeState": {
+    "status": "PENDING",
+    "recipientActive": true,
+    "role": "DEVELOPER",
+    "profileActive": true,
+    "senderCalls": 0
+  },
+  "afterState": {
+    "status": "SKIPPED",
+    "lastErrorCode": "RECIPIENT_PERSONA_INVALID",
+    "attemptCount": 1,
+    "lockCleared": true,
+    "senderCalls": 0
+  },
+  "reloadState": {
+    "status": "SKIPPED",
+    "lastErrorCode": "RECIPIENT_PERSONA_INVALID",
+    "senderCalls": 0
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F252R-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "1c892cc73543d04a98f3f70047be255d289c50c332e3451a4fd313f3c7d15183",
+    "before-database.png": "b66050ad66ff989f5001aa9f673584b04311ee868e26060d714ac3becc960d3f",
+    "after-database.png": "c2bd887af1b52279d3cb1ae68fd74da83c01e8520bfafa7a414b0c551ee2cee8",
+    "reload-readback.png": "6f88dc15f24b356e9e5c6263183e58a63b886f0ac57a1cea3fdea41f5a4e6ef8"
+  },
+  "resultSha256": "a727c7b6ad7e0b1e08fdc25c341c6c17e66b04472382d3e291dc8a3cbb3e580b",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

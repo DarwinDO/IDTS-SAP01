@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F253",
+  "mentorNumber": 278,
+  "assertionId": "IDTS110-F253-A1",
+  "title": "digest delivery row records a sanitized provider failure",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:28.620Z",
+  "completedAt": "2026-09-05T15:59:29.472Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F253 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A NotificationDigestDeliveries row whose stored digest snapshot fails provider send becomes FAILED with sanitized error state, bounded nextAttemptAt when attempts remain, cleared lock fields, and unchanged snapshot body.",
+  "expectedResult": "A NotificationDigestDeliveries row whose stored digest snapshot fails provider send becomes FAILED with sanitized error state, bounded nextAttemptAt when attempts remain, cleared lock fields, and unchanged snapshot body.",
+  "actualResult": "A NotificationDigestDeliveries row whose stored digest snapshot fails provider send becomes FAILED with sanitized error state, bounded nextAttemptAt when attempts remain, cleared lock fields, and unchanged snapshot body.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "DIGESTS"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "processNotificationDigestDeliveries"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "sanitizeTransportError"
+    }
+  ],
+  "beforeState": {
+    "status": "PENDING",
+    "attemptCount": 0,
+    "bodyLength": 28
+  },
+  "afterState": {
+    "status": "FAILED",
+    "lastErrorCode": "ESOCKET",
+    "retryScheduled": true,
+    "lockCleared": true,
+    "snapshotUnchanged": true,
+    "senderCalls": 1
+  },
+  "reloadState": {
+    "status": "FAILED",
+    "lastErrorCode": "ESOCKET",
+    "retryScheduled": true,
+    "lockCleared": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F253-RESULT"
+  ],
+  "limitation": "Injected sender failure is local-only; no real provider or email delivery was attempted.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

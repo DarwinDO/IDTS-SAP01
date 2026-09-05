@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F235C",
+  "mentorNumber": 239,
+  "assertionId": "IDTS110-F235C-A1",
+  "title": "stale notification read is rejected",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:54.640Z",
+  "completedAt": "2026-09-05T10:55:55.501Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F235C --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A notification read with a stale modifiedAt returns NOTIFICATION_VERSION_CONFLICT without changing the row.",
+  "expectedResult": "A notification read with a stale modifiedAt returns NOTIFICATION_VERSION_CONFLICT without changing the row.",
+  "actualResult": "A notification read with a stale modifiedAt returns NOTIFICATION_VERSION_CONFLICT without changing the row.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "markMyNotificationRead"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "NOTIFICATION_VERSION_CONFLICT"
+    }
+  ],
+  "beforeState": {
+    "ID": "d4000033-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:55.346Z"
+  },
+  "afterState": {
+    "ID": "d4000033-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:55.346Z"
+  },
+  "reloadState": {
+    "ID": "d4000033-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:55.346Z"
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F235C-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

@@ -1,0 +1,198 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F243",
+  "mentorNumber": 252,
+  "assertionId": "IDTS110-F243-A1",
+  "title": "missing or expired onboarding invitation is skipped",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:18.005Z",
+  "completedAt": "2026-09-05T13:42:18.734Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F243 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "When the onboarding request is missing or expired, the worker marks its delivery SKIPPED with a safe code and makes no provider call.",
+  "expectedResult": "When the onboarding request is missing or expired, the worker marks its delivery SKIPPED with a safe code and makes no provider call.",
+  "actualResult": "When the onboarding request is missing or expired, the worker marks its delivery SKIPPED with a safe code and makes no provider call.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "processUserOnboardingDeliveries"
+    },
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "Invitation is no longer eligible for delivery"
+    }
+  ],
+  "beforeState": {
+    "requestRows": 2,
+    "requestIDs": [
+      "8b4ada1e-81a2-4026-965f-d82ebad2bd32",
+      "7413e7d9-2ae4-4741-8ae7-50074d3b965a"
+    ],
+    "requestStatuses": [
+      "INVITED",
+      "INVITED"
+    ],
+    "requestVersions": [
+      0,
+      0
+    ],
+    "requestErrorCodes": [
+      null,
+      null
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:18.703Z",
+      "2026-09-04T00:00:00.000Z"
+    ],
+    "deliveryRows": 2,
+    "deliveryIDs": [
+      "8a52f3c4-fc90-4b13-b47b-f6725f83cc63",
+      "a0364944-188b-4513-8241-b57450a8b729"
+    ],
+    "deliveryRequestIDs": [
+      "71000000-0000-4000-8000-000000000099",
+      "7413e7d9-2ae4-4741-8ae7-50074d3b965a"
+    ],
+    "deliveryStatuses": [
+      "PENDING",
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0,
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null,
+      null
+    ],
+    "deliveryErrorCodes": [
+      null,
+      null
+    ],
+    "deliveryProviderMessages": [
+      null,
+      null
+    ]
+  },
+  "afterState": {
+    "requestRows": 2,
+    "requestIDs": [
+      "8b4ada1e-81a2-4026-965f-d82ebad2bd32",
+      "7413e7d9-2ae4-4741-8ae7-50074d3b965a"
+    ],
+    "requestStatuses": [
+      "INVITED",
+      "INVITED"
+    ],
+    "requestVersions": [
+      0,
+      0
+    ],
+    "requestErrorCodes": [
+      null,
+      "INVITATION_EXPIRED"
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:18.703Z",
+      "2026-09-04T00:00:00.000Z"
+    ],
+    "deliveryRows": 2,
+    "deliveryIDs": [
+      "8a52f3c4-fc90-4b13-b47b-f6725f83cc63",
+      "a0364944-188b-4513-8241-b57450a8b729"
+    ],
+    "deliveryRequestIDs": [
+      "71000000-0000-4000-8000-000000000099",
+      "7413e7d9-2ae4-4741-8ae7-50074d3b965a"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED",
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0,
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null,
+      null
+    ],
+    "deliveryErrorCodes": [
+      "INVITATION_NOT_FOUND",
+      "INVITATION_EXPIRED"
+    ],
+    "deliveryProviderMessages": [
+      null,
+      null
+    ],
+    "skippedMissing": true,
+    "skippedExpired": true,
+    "senderCalls": 0
+  },
+  "reloadState": {
+    "requestRows": 2,
+    "requestIDs": [
+      "8b4ada1e-81a2-4026-965f-d82ebad2bd32",
+      "7413e7d9-2ae4-4741-8ae7-50074d3b965a"
+    ],
+    "requestStatuses": [
+      "INVITED",
+      "INVITED"
+    ],
+    "requestVersions": [
+      0,
+      0
+    ],
+    "requestErrorCodes": [
+      null,
+      "INVITATION_EXPIRED"
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:18.703Z",
+      "2026-09-04T00:00:00.000Z"
+    ],
+    "deliveryRows": 2,
+    "deliveryIDs": [
+      "8a52f3c4-fc90-4b13-b47b-f6725f83cc63",
+      "a0364944-188b-4513-8241-b57450a8b729"
+    ],
+    "deliveryRequestIDs": [
+      "71000000-0000-4000-8000-000000000099",
+      "7413e7d9-2ae4-4741-8ae7-50074d3b965a"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED",
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0,
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null,
+      null
+    ],
+    "deliveryErrorCodes": [
+      "INVITATION_NOT_FOUND",
+      "INVITATION_EXPIRED"
+    ],
+    "deliveryProviderMessages": [
+      null,
+      null
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F243-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

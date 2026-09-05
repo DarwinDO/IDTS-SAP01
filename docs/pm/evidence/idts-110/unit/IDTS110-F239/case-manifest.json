@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F239",
+  "mentorNumber": 245,
+  "title": "notification shell refreshes unread count on visible change signals",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T11:50:31.776Z",
+  "completedAt": "2026-09-05T11:50:32.952Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F239-A1",
+  "testFile": "scripts/qa/test-my-notifications-shell.js",
+  "testCommand": "node scripts/qa/test-my-notifications-shell.js --idts110-case=IDTS110-F239 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-ui-1788609025467-971346abf2c775b094e8645f --idts110-nonce=bb5b7bf4cef185d3d447193a35260414",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A visible notification-change signal refreshes the unread count once through the shell listener.",
+  "expectedResult": "A visible notification-change signal refreshes the unread count once through the shell listener.",
+  "actualResult": "A visible notification-change signal refreshes the unread count once through the shell listener.",
+  "sourceTrace": [
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "bindVisibility"
+    }
+  ],
+  "beforeState": {
+    "unreadCalls": 1,
+    "searchCalls": 0,
+    "timerDelay": 30000,
+    "timerCallbacks": 1,
+    "clearCalls": 0,
+    "listenersAdded": 3,
+    "listenersRemoved": 0
+  },
+  "afterState": {
+    "unreadCalls": 2,
+    "searchCalls": 0,
+    "timerDelay": 30000,
+    "timerCallbacks": 1,
+    "clearCalls": 0,
+    "listenersAdded": 3,
+    "listenersRemoved": 0
+  },
+  "reloadState": {
+    "route": "/idtsbugmanagementui/index.html",
+    "fixture": "visible-signal"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "visible-signal",
+    "route": "/idtsbugmanagementui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F239/runtime.png",
+    "screenshotSha256": "feb2455a2ed594c280d8737a9598b06efa5535c28b962d460c16a19a724fdb66",
+    "manifestPath": "unit/IDTS110-F239/case-manifest.json",
+    "caseKey": "IDTS110-F239",
+    "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+    "nonce": "bb5b7bf4cef185d3d447193a35260414",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T11:50:32.947Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F239",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "nonce": "bb5b7bf4cef185d3d447193a35260414",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T11:50:32.947Z"
+    },
+    "domChecks": {
+      "signalDispatched": true,
+      "unreadCallsBefore": 1,
+      "unreadCallsAfter": 2
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-my-notifications-shell.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F239-RESULT",
+    "IDTS110-F239-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "feb2455a2ed594c280d8737a9598b06efa5535c28b962d460c16a19a724fdb66"
+  },
+  "resultSha256": "b8c7d1b85b0cf90818286d9b1978b12d238b2cd3c5c6c7bbd52ddee4602c51cd",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

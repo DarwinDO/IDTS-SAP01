@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F222",
+  "mentorNumber": 222,
+  "assertionId": "IDTS110-F222-A1",
+  "title": "workload aggregates decimal effort without mutation",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:21.322Z",
+  "completedAt": "2026-09-05T10:05:22.181Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-F222 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated developer workload fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The workload row sums Decimal/string effort to two decimals while persisted Bug effort values remain unchanged after the read.",
+  "expectedResult": "The workload row sums Decimal/string effort to two decimals while persisted Bug effort values remain unchanged after the read.",
+  "actualResult": "The workload row sums Decimal/string effort to two decimals while persisted Bug effort values remain unchanged after the read.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "estimatedEffortHoursTotal"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "roundToTwoDecimals"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "estimatedEffortHoursTotal": 19.5,
+    "formattedEstimatedEffortHoursTotal": "19.50",
+    "persistedEffortUnchanged": true
+  },
+  "reloadState": {
+    "estimatedEffortHoursTotal": 19.5,
+    "formattedEstimatedEffortHoursTotal": "19.50",
+    "persistedEffortUnchanged": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F222-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

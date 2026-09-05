@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F246R",
+  "mentorNumber": 257,
+  "title": "repeated post-commit registration is idempotent",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:22.873Z",
+  "completedAt": "2026-09-05T13:42:23.674Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F246R-A1",
+  "testFile": "scripts/qa/test-email-immediate-kick.js",
+  "testCommand": "node scripts/qa/test-email-immediate-kick.js --idts110-case=IDTS110-F246R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Registering the same PENDING delivery twice results in one post-commit email outbox kick registration.",
+  "expectedResult": "Registering the same PENDING delivery twice results in one post-commit email outbox kick registration.",
+  "actualResult": "Registering the same PENDING delivery twice results in one post-commit email outbox kick registration.",
+  "sourceTrace": [
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "scheduleImmediateEmailOutbox"
+    },
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "writeNotificationAndSchedule"
+    }
+  ],
+  "beforeState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "spawnCount": 0,
+    "batchCount": 0,
+    "providerCalls": 0
+  },
+  "afterState": {
+    "notificationRows": 1,
+    "notificationIDs": [
+      "31c01eaf-cffd-4173-9902-2fd2c784f6c0"
+    ],
+    "sourceKeys": [
+      "ATOMIC_KICK:IDTS110-F246R"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "ac826867-22f8-4823-94a8-b739eaa04e40"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "writePath": "writeNotificationAndSchedule",
+    "scheduleResults": [
+      "REGISTERED",
+      "DUPLICATE_IGNORED"
+    ],
+    "kickCount": 1,
+    "providerCalls": 0
+  },
+  "reloadState": {
+    "notificationRows": 1,
+    "notificationIDs": [
+      "31c01eaf-cffd-4173-9902-2fd2c784f6c0"
+    ],
+    "sourceKeys": [
+      "ATOMIC_KICK:IDTS110-F246R"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "ac826867-22f8-4823-94a8-b739eaa04e40"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F246R-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "995a33c7562b6b8ded5642d77a9f668affba499b2c6dc577b1023608b8748fa9",
+    "before-database.png": "6a2d14aba71d76d41bff7804e5fae8b8027fe49307e11bd8e3874d442c35592b",
+    "after-database.png": "b548138e000e2ba75293c927652c038b72613ac38231a1719d02d9ec89859a6e",
+    "reload-readback.png": "9c7fa0c974617f863e89192ecc8c929283a49673491168aa3d2be137223b4d5d"
+  },
+  "resultSha256": "34cad089189c428f8a66f964ea834e0d30497eef8f50bced9b3a867d4391f853",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

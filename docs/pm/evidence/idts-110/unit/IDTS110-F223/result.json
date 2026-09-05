@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F223",
+  "mentorNumber": 223,
+  "assertionId": "IDTS110-F223-A1",
+  "title": "zero-load and inactive backlog workload rows remain truthful",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:22.310Z",
+  "completedAt": "2026-09-05T10:05:23.206Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-F223 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated developer workload fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An active Developer with zero open Bugs remains visible, an inactive Developer with an open backlog remains visible, and an inactive zero-backlog row is omitted.",
+  "expectedResult": "An active Developer with zero open Bugs remains visible, an inactive Developer with an open backlog remains visible, and an inactive zero-backlog row is omitted.",
+  "actualResult": "An active Developer with zero open Bugs remains visible, an inactive Developer with an open backlog remains visible, and an inactive zero-backlog row is omitted.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "emptyDeveloperWorkloadRow"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "filter(row => row.active || row.openOwnedBugCount > 0)"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "visibleRows": 5,
+    "omittedInactiveZeroBacklog": true
+  },
+  "reloadState": {
+    "visibleRows": 5,
+    "omittedInactiveZeroBacklog": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F223-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

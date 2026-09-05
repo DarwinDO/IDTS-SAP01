@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F216",
+  "mentorNumber": 212,
+  "assertionId": "IDTS110-F216-A1",
+  "title": "retry accepts only a bounded retryable access failure",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:15.418Z",
+  "completedAt": "2026-09-05T10:05:16.113Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F216 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Retry accepts only a bounded retryable access-operation failure with the expected version, resets it to PENDING with a new correlation, and appends one audit.",
+  "expectedResult": "Retry accepts only a bounded retryable access-operation failure with the expected version, resets it to PENDING with a new correlation, and appends one audit.",
+  "actualResult": "Retry accepts only a bounded retryable access-operation failure with the expected version, resets it to PENDING with a new correlation, and appends one audit.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "retryAccessOperation"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "assertExpectedVersion"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "invalidStateRejected": true,
+    "invalidVersionRejected": true,
+    "recoveryAction": "RETRY_ACCESS_OPERATION",
+    "state": "PENDING",
+    "auditFromState": "RETRYABLE_FAILURE",
+    "auditToState": "PROVISION_QUEUED",
+    "newCorrelation": true,
+    "auditRows": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F216-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

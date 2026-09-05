@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F234",
+  "mentorNumber": 236,
+  "assertionId": "IDTS110-F234-A1",
+  "title": "unread count is isolated to the active caller",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:51.659Z",
+  "completedAt": "2026-09-05T10:55:52.525Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F234 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "getMyUnreadNotificationCount counts only unread rows for the resolved active caller and denies inactive, unmapped, or unauthorized identities.",
+  "expectedResult": "getMyUnreadNotificationCount counts only unread rows for the resolved active caller and denies inactive, unmapped, or unauthorized identities.",
+  "actualResult": "getMyUnreadNotificationCount counts only unread rows for the resolved active caller and denies inactive, unmapped, or unauthorized identities.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "getMyUnreadNotificationCount"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "recipient_ID: actor.ID"
+    }
+  ],
+  "beforeState": {
+    "inboxRows": 5,
+    "callerAUnread": 2,
+    "callerBUnread": 2,
+    "inactiveRows": 0,
+    "pmRows": 0,
+    "userAdminRows": 0
+  },
+  "afterState": {
+    "callerAUnread": 2,
+    "callerBUnread": 2,
+    "pmUnread": 0,
+    "userAdminUnread": 0
+  },
+  "reloadState": {
+    "rowsUnchanged": true,
+    "deniedStatuses": [
+      401,
+      403,
+      403,
+      403
+    ],
+    "safeNoPayload": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F234-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}
