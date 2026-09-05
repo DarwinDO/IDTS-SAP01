@@ -9,6 +9,12 @@ const path = require('node:path')
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
 const { identityKeyHash } = require('../../srv/auth/identity-map')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const root = path.resolve(__dirname, '../..')
 const servicePath = path.join(root, 'srv/notification.cds')
@@ -20,6 +26,50 @@ const INACTIVE = 'd1000000-0000-4000-8000-000000000003'
 const BUG_ID = '90000000-0000-0000-0000-000000000001'
 const ACCESS_AUDIT = 'd2000000-0000-4000-8000-000000000001'
 
+const atomicCases = new Map([
+  ['IDTS110-F232', runAtomicSearchCase],
+  ['IDTS110-F233', runAtomicHydrationCase],
+  ['IDTS110-F234', runAtomicUnreadCountCase],
+  ['IDTS110-F235', runAtomicReadCase],
+  ['IDTS110-F235I', runAtomicIdempotentReadCase],
+  ['IDTS110-F235C', runAtomicStaleReadCase],
+  ['IDTS110-F236', runAtomicMarkAllCase]
+])
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+async function runAtomicSelector (options) {
+  assert.deepEqual([...atomicCases.keys()], [
+    'IDTS110-F232', 'IDTS110-F233', 'IDTS110-F234', 'IDTS110-F235',
+    'IDTS110-F235I', 'IDTS110-F235C', 'IDTS110-F236'
+  ])
+  const executeCase = atomicCases.get(options.caseKey)
+  if (!executeCase) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-my-notifications-service.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      ...await executeCase(),
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
 function user (email, role = 'TESTER') {
   return new cds.User({ id: email, roles: ['authenticated-user', role] })
 }
@@ -29,7 +79,354 @@ async function expectRejected (promise, status, code) {
     Number(error?.status || error?.statusCode || error?.code) === status && (!code || error?.code === code))
 }
 
+function atomicID (prefix, index) {
+  return `${prefix}${String(index).padStart(6, '0')}-0000-4000-8000-000000000001`
+}
+
+function atomicNotification (index, overrides = {}) {
+  return {
+    ID: atomicID('d3', index),
+    bug_ID: BUG_ID,
+    recipient_ID: USER_A,
+    eventType_code: 'ASSIGNED',
+    channel_code: 'IN_APP',
+    deliveryStatus_code: 'SENT',
+    message: `Atomic notification ${index}`,
+    sourceKey: `ATOMIC:${index}`,
+    ...overrides
+  }
+}
+
+function atomicInbox (index, overrides = {}) {
+  return {
+    ID: atomicID('d4', index),
+    recipient_ID: USER_A,
+    bugNotification_ID: atomicID('d3', index),
+    accessAuditEvent_ID: null,
+    occurredAt: '2026-08-27T01:00:00.000Z',
+    readAt: null,
+    ...overrides
+  }
+}
+
+function atomicAudit (index, overrides = {}) {
+  return {
+    ID: atomicID('d2', index),
+    targetUser_ID: USER_A,
+    action: 'CHANGE_ROLE',
+    result: 'APPLIED',
+    correlationId: atomicID('d2', index),
+    detailsSummary: 'Private audit detail must not enter the notification DTO.',
+    ...overrides
+  }
+}
+
+async function createAtomicFixture ({ notifications = [], inboxEntries = [], audits = [] } = {}) {
+  const csn = await cds.load('srv/service.cds')
+  const db = await cds.deploy(csn).to('sqlite::memory:')
+  cds.db = db
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    { ID: USER_A, displayName: 'Notification User A', email: 'notification.a@example.invalid', role_code: 'TESTER', active: true },
+    { ID: USER_B, displayName: 'Notification User B', email: 'notification.b@example.invalid', role_code: 'DEVELOPER', active: true },
+    { ID: INACTIVE, displayName: 'Inactive Notification User', email: 'notification.inactive@example.invalid', role_code: 'TESTER', active: false }
+  ]))
+  if (audits.length) await db.run(INSERT.into('idts.cap.UserIdentityAuditEvents').entries(audits))
+  if (notifications.length) await db.run(INSERT.into('idts.cap.Notifications').entries(notifications))
+  if (inboxEntries.length) await db.run(INSERT.into('idts.cap.UserNotificationInboxEntries').entries(inboxEntries))
+  const service = await cds.serve('NotificationService').from('srv/notification.cds')
+  return {
+    db,
+    service,
+    actorA: user('notification.a@example.invalid'),
+    actorB: user('notification.b@example.invalid', 'DEVELOPER'),
+    inactiveActor: user('notification.inactive@example.invalid')
+  }
+}
+
+function rowSnapshot (row) {
+  return row ? { ID: row.ID, readAt: row.readAt || null, modifiedAt: row.modifiedAt } : null
+}
+
+function rowsSnapshot (rows) {
+  return {
+    count: rows.length,
+    IDs: rows.map(row => row.ID),
+    unread: rows.filter(row => !row.readAt).length,
+    read: rows.filter(row => Boolean(row.readAt)).length
+  }
+}
+
+async function runAtomicSearchCase () {
+  const notifications = [1, 2, 3, 4, 5].map(index => atomicNotification(index, {
+    recipient_ID: index === 5 ? USER_B : USER_A
+  }))
+  const inboxEntries = [
+    atomicInbox(1),
+    atomicInbox(2, { readAt: '2026-08-27T01:05:00.000Z' }),
+    atomicInbox(3),
+    atomicInbox(4, { occurredAt: '2026-08-27T02:00:00.000Z' }),
+    atomicInbox(5, { recipient_ID: USER_B })
+  ]
+  const fixture = await createAtomicFixture({ notifications, inboxEntries })
+  const page1 = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'BUG', readState: 'ALL', skip: 0, top: 2 },
+    user: fixture.actorA
+  })
+  const page2 = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'BUG', readState: 'ALL', skip: 2, top: 2 },
+    user: fixture.actorA
+  })
+  assert.deepEqual(page1.map(row => row.notificationID), [atomicID('d4', 4), atomicID('d4', 3)])
+  assert.deepEqual(page2.map(row => row.notificationID), [atomicID('d4', 2), atomicID('d4', 1)])
+  const pagedIDs = [...page1, ...page2].map(row => row.notificationID)
+  assert.equal(new Set(pagedIDs).size, pagedIDs.length, 'paged caller results do not duplicate a row')
+  assert.equal(page1.some(row => page2.some(other => other.notificationID === row.notificationID)), false)
+  assert.ok([...page1, ...page2].every(row => row.bugNumber === 'BUG-0001'))
+  const unread = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'BUG', readState: 'UNREAD', skip: 0, top: 100 },
+    user: fixture.actorA
+  })
+  assert.deepEqual(unread.map(row => row.notificationID), [atomicID('d4', 4), atomicID('d4', 3), atomicID('d4', 1)])
+  const userBRows = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'ALL', readState: 'ALL', skip: 0, top: 100 },
+    user: fixture.actorB
+  })
+  assert.deepEqual(userBRows.map(row => row.notificationID), [atomicID('d4', 5)])
+  assert.equal((await fixture.db.run(SELECT.from('idts.cap.UserNotificationInboxEntries').where({ recipient_ID: USER_B }))).length, 1)
+  return {
+    beforeState: { callerRows: 4, otherCallerRows: 1 },
+    afterState: { firstPageIDs: page1.map(row => row.notificationID), secondPageIDs: page2.map(row => row.notificationID), unreadRows: unread.length },
+    reloadState: { uniquePagedRows: new Set(pagedIDs).size, callerBRows: userBRows.length }
+  }
+}
+
+async function runAtomicHydrationCase () {
+  const notifications = [
+    atomicNotification(11),
+    atomicNotification(12, { recipient_ID: USER_B }),
+    atomicNotification(13)
+  ]
+  const audits = [
+    atomicAudit(11),
+    atomicAudit(12, { result: 'FAILED' }),
+    atomicAudit(13, { action: 'UNSUPPORTED' }),
+    atomicAudit(14)
+  ]
+  const missingNotificationID = atomicID('d3', 99)
+  const inboxEntries = [
+    atomicInbox(11, { occurredAt: '2026-08-27T01:00:00.000Z' }),
+    atomicInbox(14, { bugNotification_ID: null, accessAuditEvent_ID: atomicID('d2', 11) }),
+    atomicInbox(12, { bugNotification_ID: atomicID('d3', 12) }),
+    atomicInbox(13, { bugNotification_ID: atomicID('d3', 13), accessAuditEvent_ID: atomicID('d2', 12) }),
+    atomicInbox(15, { bugNotification_ID: null, accessAuditEvent_ID: atomicID('d2', 13) }),
+    atomicInbox(16, { bugNotification_ID: missingNotificationID })
+  ]
+  const fixture = await createAtomicFixture({ notifications, inboxEntries, audits })
+  const rows = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'ALL', readState: 'ALL', skip: 0, top: 100 },
+    user: fixture.actorA
+  })
+  const byID = new Map(rows.map(row => [row.notificationID, row]))
+  const validBug = byID.get(atomicID('d4', 11))
+  assert.equal(validBug.category, 'BUG')
+  assert.equal(validBug.eventType, 'ASSIGNED')
+  assert.equal(validBug.title, 'Assigned')
+  assert.equal(validBug.bugNumber, 'BUG-0001')
+  assert.equal(validBug.bugTitle, 'List report filters do not show defect category value help')
+  assert.equal(validBug.targetPath, `/idtsbugmanagementui/index.html#/Bugs(ID=${BUG_ID},IsActiveEntity=true)`)
+  const validAccess = byID.get(atomicID('d4', 14))
+  assert.equal(validAccess.category, 'ACCESS')
+  assert.equal(validAccess.eventType, 'CHANGE_ROLE')
+  assert.equal(validAccess.title, 'Access role changed')
+  assert.equal(validAccess.summary, 'Your access role changed.')
+  assert.equal(validAccess.targetPath, '/idtsbugmanagementui/index.html')
+  for (const id of [atomicID('d4', 12), atomicID('d4', 13), atomicID('d4', 15), atomicID('d4', 16)]) {
+    const unavailable = byID.get(id)
+    assert.equal(unavailable.eventType, 'UNAVAILABLE')
+    assert.equal(unavailable.summary, null)
+    assert.equal(unavailable.targetPath, null)
+  }
+  for (const row of rows) {
+    for (const forbidden of ['recipientEmail', 'detailsSummary', 'providerMessageId', 'lockToken', 'sourceAuditEvent']) {
+      assert.equal(Object.hasOwn(row, forbidden), false, `DTO omits ${forbidden}`)
+    }
+  }
+  return {
+    beforeState: { sourceRows: 6, validBugSources: 2, validAccessSources: 1 },
+    afterState: { dtoRows: rows.length, unavailableRows: rows.filter(row => row.eventType === 'UNAVAILABLE').length },
+    reloadState: { safeProjectionRows: rows.length, privateFieldsExposed: false }
+  }
+}
+
+async function runAtomicUnreadCountCase () {
+  const notifications = [21, 22, 23, 24, 25].map(index => atomicNotification(index, {
+    recipient_ID: index >= 24 ? USER_B : USER_A
+  }))
+  const inboxEntries = [
+    atomicInbox(21, { readAt: '2026-08-27T01:01:00.000Z' }),
+    atomicInbox(22),
+    atomicInbox(23),
+    atomicInbox(24, { recipient_ID: USER_B }),
+    atomicInbox(25, { recipient_ID: USER_B })
+  ]
+  const fixture = await createAtomicFixture({ notifications, inboxEntries })
+  assert.deepEqual(await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.actorA }), { count: 2 })
+  assert.deepEqual(await fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.actorB }), { count: 2 })
+  await expectRejected(
+    fixture.service.send({ event: 'getMyUnreadNotificationCount', user: fixture.inactiveActor }),
+    403,
+    'NOTIFICATION_ACTOR_REQUIRED'
+  )
+  await expectRejected(
+    fixture.service.send({ event: 'getMyUnreadNotificationCount', user: user('unmapped.notification@example.invalid') }),
+    403,
+    'NOTIFICATION_ACTOR_REQUIRED'
+  )
+  return {
+    beforeState: { callerAUnread: 2, callerBUnread: 2, inactiveCallerRows: 0 },
+    afterState: { callerAUnread: 2, callerBUnread: 2, crossCallerRead: false },
+    reloadState: { activeCallerCountsStable: true, inactiveDenied: true, unmappedDenied: true }
+  }
+}
+
+async function runAtomicReadCase () {
+  const fixture = await createAtomicFixture({
+    notifications: [atomicNotification(31)],
+    inboxEntries: [atomicInbox(31)]
+  })
+  const before = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: atomicID('d4', 31) }))
+  const [current] = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'BUG', readState: 'UNREAD', skip: 0, top: 1 },
+    user: fixture.actorA
+  })
+  const marked = await fixture.service.send({
+    event: 'markMyNotificationRead',
+    data: { notificationID: current.notificationID, expectedModifiedAt: current.modifiedAt },
+    user: fixture.actorA
+  })
+  assert.ok(marked.readAt)
+  const after = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  const reload = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  assert.ok(after.readAt)
+  assert.equal(reload.readAt, after.readAt)
+  assert.equal(after.readAt, marked.readAt)
+  return {
+    beforeState: rowSnapshot(before),
+    afterState: rowSnapshot(after),
+    reloadState: rowSnapshot(reload)
+  }
+}
+
+async function runAtomicIdempotentReadCase () {
+  const fixture = await createAtomicFixture({
+    notifications: [atomicNotification(32)],
+    inboxEntries: [atomicInbox(32)]
+  })
+  const [current] = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'BUG', readState: 'UNREAD', skip: 0, top: 1 },
+    user: fixture.actorA
+  })
+  const first = await fixture.service.send({
+    event: 'markMyNotificationRead',
+    data: { notificationID: current.notificationID, expectedModifiedAt: current.modifiedAt },
+    user: fixture.actorA
+  })
+  const afterFirst = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  const repeated = await fixture.service.send({
+    event: 'markMyNotificationRead',
+    data: { notificationID: current.notificationID, expectedModifiedAt: first.modifiedAt },
+    user: fixture.actorA
+  })
+  const afterRepeat = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  assert.equal(repeated.readAt, first.readAt)
+  assert.equal(repeated.modifiedAt, first.modifiedAt)
+  assert.equal(afterRepeat.readAt, afterFirst.readAt)
+  assert.equal(afterRepeat.modifiedAt, afterFirst.modifiedAt)
+  return {
+    beforeState: { ID: current.notificationID, unread: true, modifiedAtPresent: Boolean(current.modifiedAt) },
+    afterState: rowSnapshot(afterFirst),
+    reloadState: rowSnapshot(afterRepeat)
+  }
+}
+
+async function runAtomicStaleReadCase () {
+  const fixture = await createAtomicFixture({
+    notifications: [atomicNotification(33)],
+    inboxEntries: [atomicInbox(33)]
+  })
+  const [current] = await fixture.service.send({
+    event: 'searchMyNotifications',
+    data: { category: 'BUG', readState: 'UNREAD', skip: 0, top: 1 },
+    user: fixture.actorA
+  })
+  const before = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  await expectRejected(
+    fixture.service.send({
+      event: 'markMyNotificationRead',
+      data: { notificationID: current.notificationID, expectedModifiedAt: '2026-01-01T00:00:00.000Z' },
+      user: fixture.actorA
+    }),
+    409,
+    'NOTIFICATION_VERSION_CONFLICT'
+  )
+  const after = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  const reload = await fixture.db.run(SELECT.one.from('idts.cap.UserNotificationInboxEntries').where({ ID: current.notificationID }))
+  assert.equal(after.readAt, null)
+  assert.equal(after.modifiedAt, before.modifiedAt)
+  assert.deepEqual(rowSnapshot(reload), rowSnapshot(before))
+  return {
+    beforeState: rowSnapshot(before),
+    afterState: rowSnapshot(after),
+    reloadState: rowSnapshot(reload)
+  }
+}
+
+async function runAtomicMarkAllCase () {
+  const notifications = [41, 42, 43, 44].map(index => atomicNotification(index, {
+    recipient_ID: index === 44 ? USER_B : USER_A
+  }))
+  const inboxEntries = [
+    atomicInbox(41, { occurredAt: '2026-08-27T01:00:00.000Z' }),
+    atomicInbox(42, { occurredAt: '2026-08-27T01:30:00.000Z' }),
+    atomicInbox(43, { occurredAt: '2026-08-27T02:00:00.000Z' }),
+    atomicInbox(44, { recipient_ID: USER_B, occurredAt: '2026-08-27T01:00:00.000Z' })
+  ]
+  const fixture = await createAtomicFixture({ notifications, inboxEntries })
+  const beforeRows = await fixture.db.run(SELECT.from('idts.cap.UserNotificationInboxEntries').orderBy('ID asc'))
+  const marked = await fixture.service.send({
+    event: 'markAllMyNotificationsRead',
+    data: { throughOccurredAt: '2026-08-27T01:30:00.000Z' },
+    user: fixture.actorA
+  })
+  assert.deepEqual(marked, { count: 2 })
+  const afterRows = await fixture.db.run(SELECT.from('idts.cap.UserNotificationInboxEntries').orderBy('ID asc'))
+  const byID = new Map(afterRows.map(row => [row.ID, row]))
+  assert.ok(byID.get(atomicID('d4', 41)).readAt)
+  assert.ok(byID.get(atomicID('d4', 42)).readAt)
+  assert.equal(byID.get(atomicID('d4', 43)).readAt, null)
+  assert.equal(byID.get(atomicID('d4', 44)).readAt, null)
+  const reloadRows = await fixture.db.run(SELECT.from('idts.cap.UserNotificationInboxEntries').orderBy('ID asc'))
+  assert.deepEqual(reloadRows.map(row => row.readAt), afterRows.map(row => row.readAt))
+  return {
+    beforeState: rowsSnapshot(beforeRows),
+    afterState: rowsSnapshot(afterRows),
+    reloadState: { updatedBeforeSnapshot: 2, laterUnread: byID.get(atomicID('d4', 43)).readAt === null, otherCallerUnread: byID.get(atomicID('d4', 44)).readAt === null }
+  }
+}
+
 async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
   const model = await cds.load('srv/notification.cds')
   const serviceDefinition = model.definitions.NotificationService
   const searchDefinition = model.definitions['NotificationService.searchMyNotifications']
