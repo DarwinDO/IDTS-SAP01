@@ -214,6 +214,57 @@ function readAtomicOptions (argv = process.argv.slice(2)) {
   return { caseKey, baselineSha, executor, mode, outputPath }
 }
 
+function unavailableAtomicDefinition (caseKey, plannedTestFile) {
+  try {
+    const catalog = JSON.parse(fs.readFileSync(path.join(PROJECT_ROOT, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+    const approved = Array.isArray(catalog.cases) && catalog.cases.find(definition => definition.caseId === caseKey)
+    if (approved) return approved
+  } catch {}
+  return {
+    caseId: caseKey,
+    mentorNumber: 278,
+    assertionId: `${caseKey}-A1`,
+    title: 'Unknown IDTS-110 selector',
+    preconditions: 'Reject the selector before broad suite setup.',
+    input: 'An unknown selector is supplied to the runner.',
+    expectedResult: 'The unknown selector is rejected before broad suite setup.',
+    plannedTestFile,
+    plannedAssertions: ['Reject the selector before broad suite setup.'],
+    sourceTrace: [{ file: plannedTestFile, symbol: 'runAtomicSelector' }],
+    evidenceRequirements: [],
+    acceptanceMode: 'PROGRAMMATIC_ATOMIC',
+    environment: 'LOCAL',
+    reviewStatus: 'PENDING_DONHV_REVIEW'
+  }
+}
+
+async function runAtomicUnavailableCase ({ caseKey, baselineSha, executor, plannedTestFile, reason = null, emit = true }) {
+  if (typeof caseKey !== 'string' || !/^IDTS110-[A-Z0-9]+$/.test(caseKey)) fail('case must be a safe IDTS-110 internal key')
+  const definition = unavailableAtomicDefinition(caseKey, plannedTestFile)
+  const message = `ATOMIC_ADAPTER_UNAVAILABLE: ${reason || `selector ${caseKey} is not owned by this runner`}.`
+  const evidenceIds = [`${caseKey}-RESULT`]
+  const requirements = Array.isArray(definition.evidenceRequirements) ? definition.evidenceRequirements.join(' ') : ''
+  if (definition.acceptanceMode === 'UI_RUNTIME_VISUAL' || /browser\/runtime|rendered UI|screenshot|UI runtime/i.test(requirements)) evidenceIds.push(`${caseKey}-VISUAL`)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${caseKey}-A1`,
+    baselineSha,
+    executor,
+    execute: async () => ({
+      status: 'BLOCKED',
+      assertionPassed: false,
+      actualResult: message,
+      limitation: message,
+      evidenceIds
+    })
+  })
+  if (emit) {
+    console.log(formatAtomicMarker(result))
+    process.exitCode = 1
+  }
+  return result
+}
+
 function caseKeyFor (definition) {
   const key = definition?.caseId || definition?.internalCaseKey || definition?.caseKey
   return requireNonEmptyString(key, 'definition.caseId')
@@ -846,6 +897,7 @@ module.exports = {
   parseAtomicMarker,
   readAtomicOptions,
   runAtomicCase,
+  runAtomicUnavailableCase,
   validateAtomicResult,
   formatAtomicMarker,
   writeAtomicBatch,

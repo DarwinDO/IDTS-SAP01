@@ -10,10 +10,11 @@ const path = require('node:path')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
-const { assertActivePairParents, assertCatalogTargetIdentity } = require('../../srv/user-admin/catalogs')
+const { assertActivePairParents, assertCatalogTargetIdentity, registerCatalogHandlers } = require('../../srv/user-admin/catalogs')
 
 const IDS = {
   admin: '85000000-0000-4000-8000-000000000001',
@@ -122,6 +123,10 @@ async function runAtomicCatalogCase (caseKey) {
       const created = await createCatalog(service, 'CatalogApplicationComponents', { code: '  atomic-app  ', name: '  Atomic App Component  ', componentType: 'CAP', active: true }, administrator)
       assert.equal(created.code, 'ATOMIC-APP')
       assert.equal(created.name, 'Atomic App Component')
+      const persisted = await db.run(SELECT.one.from('idts.cap.ApplicationComponents').where({ ID: created.ID }))
+      assert.equal(persisted.active, true)
+      const successAudits = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'CREATE', result: 'SUCCEEDED' }))
+      assert.equal(successAudits.length, 1)
       await expectRejected(createCatalog(service, 'CatalogApplicationComponents', { code: 'ATOMIC-DENIED', name: 'Denied', componentType: 'CAP', active: true }, user(['TESTER'])), 403)
       assert.equal((await db.run(SELECT.from('idts.cap.ApplicationComponents'))).length, before + 1)
       return { createdRows: 1, unauthorizedRows: 0 }
@@ -131,17 +136,28 @@ async function runAtomicCatalogCase (caseKey) {
       const created = await createCatalog(service, 'CatalogDefectCategories', { code: '  atomic-defect  ', name: '  Atomic Defect Category  ', categoryType: 'FUNCTIONAL', active: true }, administrator)
       assert.equal(created.code, 'ATOMIC-DEFECT')
       assert.equal(created.name, 'Atomic Defect Category')
+      const persisted = await db.run(SELECT.one.from('idts.cap.DefectCategories').where({ ID: created.ID }))
+      assert.equal(persisted.active, true)
+      const successAudits = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'CREATE', result: 'SUCCEEDED' }))
+      assert.equal(successAudits.length, 1)
       await expectRejected(createCatalog(service, 'CatalogDefectCategories', { code: 'ATOMIC-DENIED', name: 'Denied', categoryType: 'FUNCTIONAL', active: true }, user(['DEVELOPER'])), 403)
       assert.equal((await db.run(SELECT.from('idts.cap.DefectCategories'))).length, before + 1)
       return { createdRows: 1, unauthorizedRows: 0 }
     }
     if (caseKey === 'IDTS110-P196') {
       const before = (await db.run(SELECT.from('idts.cap.SAPModules'))).length
+      const beforeModule = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
+      const successAuditsBefore = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
       await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'ATOMIC-TESTER', name: 'Denied' }, user(['TESTER'])), 403)
       await expectRejected(createCatalog(service, 'CatalogSAPModules', { code: 'ATOMIC-DEVELOPER', name: 'Denied' }, user(['DEVELOPER'])), 403)
       await expectRejected(updateCatalog(service, 'CatalogSAPModules', IDS.module, { name: 'Denied update' }, user(['TESTER'])), 403)
+      await expectRejected(updateCatalog(service, 'CatalogSAPModules', IDS.module, { name: 'Denied developer update' }, user(['DEVELOPER'])), 403)
       assert.equal((await db.run(SELECT.from('idts.cap.SAPModules'))).length, before)
-      return { rejectedCalls: 3, catalogRows: before }
+      const afterModule = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
+      assert.deepEqual(afterModule, beforeModule)
+      const successAuditsAfter = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
+      assert.equal(successAuditsAfter.length, successAuditsBefore.length)
+      return { rejectedCalls: 4, catalogRows: before, successfulAuditsUnchanged: true }
     }
     if (caseKey === 'IDTS110-P197') {
       const inactiveID = '85300000-0000-4000-8000-000000000099'
@@ -156,6 +172,7 @@ async function runAtomicCatalogCase (caseKey) {
       assert.notEqual(created.ID, undefined)
       assert.equal(created.code, 'ATOMIC-MODULE')
       const persisted = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))
+      assert.equal(persisted.name, 'Atomic Module Created')
       const audit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'CREATE', result: 'SUCCEEDED' }))
       assert.equal(persisted.active, true)
       assert.ok(audit)
@@ -170,36 +187,75 @@ async function runAtomicCatalogCase (caseKey) {
       const created = await createCatalog(service, 'CatalogComponentCategories', { component_ID: componentID, defectCategory_ID: defectID, active: true }, administrator)
       assert.equal((await db.run(SELECT.from('idts.cap.ComponentCategories'))).length, before + 1)
       assert.notEqual(created.ID, undefined)
+      const audits = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'CREATE', result: 'SUCCEEDED' }))
+      assert.equal(audits.length, 1)
+      assert.equal(audits[0].reason, null)
       return { pairRowsBefore: before, pairRowsAfter: before + 1 }
     }
     if (caseKey === 'IDTS110-F227') {
       const rows = await service.send({ event: 'READ', query: SELECT.from('UserAdministrationService.CatalogSAPModules').where({ ID: IDS.module }), user: administrator })
       assert.equal(rows.length, 1)
       assert.deepEqual(Object.keys(rows[0]).sort(), ['ID', 'active', 'code', 'createdAt', 'modifiedAt', 'name'])
-      await expectRejected(service.send({ event: 'READ', query: SELECT.from('UserAdministrationService.CatalogSAPModules'), user: user(['PM']) }), 403)
+      let catalogRead = false
+      const originalRun = db.run.bind(db)
+      db.run = async query => {
+        if (JSON.stringify(query).includes('SAPModules')) catalogRead = true
+        return originalRun(query)
+      }
+      try {
+        await expectRejected(service.send({ event: 'READ', query: SELECT.from('UserAdministrationService.CatalogSAPModules'), user: user(['PM']) }), 403)
+      } finally {
+        db.run = originalRun
+      }
+      assert.equal(catalogRead, false, 'authorization must reject before reading catalog rows')
       return { safeReadRows: rows.length, unauthorizedReads: 1 }
     }
     if (caseKey === 'IDTS110-F228') {
       const before = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
       const mismatchID = '85200000-0000-4000-8000-000000000099'
-      assert.throws(() => assertCatalogTargetIdentity(IDS.module, mismatchID), error => error?.code === 'CATALOG_ID_IMMUTABLE')
+      let updateHandler
+      registerCatalogHandlers({
+        before: (event, _target, handler) => {
+          if (event === 'UPDATE') updateHandler = handler
+        },
+        after: () => {},
+        on: () => {}
+      }, { authorize: async () => ({ ID: IDS.admin }) })
+      const routeRequest = {
+        event: 'UPDATE',
+        target: { name: 'UserAdministrationService.CatalogSAPModules' },
+        data: { ID: mismatchID, name: 'Route mismatch' },
+        params: [{ ID: IDS.module }],
+        headers: {},
+        user: administrator,
+        on: () => {}
+      }
+      await expectRejected(updateHandler(routeRequest), 400, 'CATALOG_ID_IMMUTABLE')
       const after = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
-      assert.equal(after.name, before.name)
+      assert.deepEqual(after, before)
       return { unchanged: true, routePayloadConflict: 'CATALOG_ID_IMMUTABLE' }
     }
     if (caseKey === 'IDTS110-F228E') {
       const before = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
+      const successAuditsBefore = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
       await expectRejected(updateCatalog(service, 'CatalogSAPModules', IDS.module, { name: 'Stale ETag' }, administrator, { 'if-match': 'W/"1900-01-01T00:00:00.0000000Z"' }), 412)
       const after = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
-      assert.equal(after.name, before.name)
-      return { unchanged: true, etag: 'stale-rejected' }
+      const successAuditsAfter = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
+      assert.deepEqual(after, before)
+      assert.deepEqual(successAuditsAfter, successAuditsBefore)
+      return { unchanged: true, successfulAuditsUnchanged: true, etag: 'stale-rejected' }
     }
     if (caseKey === 'IDTS110-F229') {
       const before = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
+      const successAuditsBefore = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
+      const impact = await service.send({ event: 'readCatalogImpact', data: { catalogType: 'SAP_MODULE', catalogID: IDS.module }, user: administrator })
+      assert.equal(impact.bugReferenceCount, 1)
       await expectRejected(updateCatalog(service, 'CatalogSAPModules', IDS.module, { active: false, administrationReason: 'Referenced module must remain active.' }, administrator), 409, 'CATALOG_HAS_ACTIVE_DEPENDENCIES')
       const after = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
-      assert.equal(after.active, before.active)
-      return { active: true, dependencyGuard: 'CATALOG_HAS_ACTIVE_DEPENDENCIES' }
+      const successAuditsAfter = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
+      assert.deepEqual(after, before)
+      assert.deepEqual(successAuditsAfter, successAuditsBefore)
+      return { active: true, bugReferenceCount: impact.bugReferenceCount, dependencyGuard: 'CATALOG_HAS_ACTIVE_DEPENDENCIES' }
     }
     if (caseKey === 'IDTS110-F230') {
       const impact = await service.send({ event: 'readCatalogImpact', data: { catalogType: 'SAP_MODULE', catalogID: IDS.module }, user: administrator })
@@ -208,17 +264,34 @@ async function runAtomicCatalogCase (caseKey) {
       return { boundedCounts: true, invalidTargetRejected: true }
     }
     if (caseKey === 'IDTS110-F231') {
-      await assert.rejects(service.send({ event: 'DELETE', data: { ID: IDS.module }, query: DELETE.from('UserAdministrationService.CatalogSAPModules').where({ ID: IDS.module }), user: administrator }), error => Number(error?.status || error?.statusCode) === 405 || error?.code === 'CATALOG_DELETE_FORBIDDEN' || error?.message === 'ENTITY_IS_NOT_CRUD' || error?.code === 'ENTITY_IS_NOT_CRUD' || error?.cause?.code === 'ENTITY_IS_NOT_CRUD' || error?.cause?.message === 'ENTITY_IS_NOT_CRUD')
-      assert.ok(await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module })))
-      return { deleteRejected: true, rowPreserved: true }
+      const before = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
+      const successAuditsBefore = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
+      let deleteHandler
+      registerCatalogHandlers({
+        before: (event, _target, handler) => {
+          if (event === 'DELETE') deleteHandler = handler
+        },
+        after: () => {},
+        on: () => {}
+      }, { authorize: async () => ({ ID: IDS.admin }) })
+      await assert.rejects(deleteHandler({ event: 'DELETE', target: { name: 'UserAdministrationService.CatalogSAPModules' }, data: { ID: IDS.module }, user: administrator, on: () => {} }), error => Number(error?.status || error?.statusCode) === 405 && error?.code === 'CATALOG_DELETE_FORBIDDEN')
+      const after = await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: IDS.module }))
+      const successAuditsAfter = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: IDS.module, result: 'SUCCEEDED' }))
+      assert.deepEqual(after, before)
+      assert.deepEqual(successAuditsAfter, successAuditsBefore)
+      return { deleteRejected: true, rowPreserved: true, successfulAuditsUnchanged: true }
     }
     if (caseKey === 'IDTS110-F231R') {
       const created = await createCatalog(service, 'CatalogSAPModules', { code: 'ATOMIC-REACTIVATE', name: 'Atomic Reactivate', active: false }, administrator)
       await updateCatalog(service, 'CatalogSAPModules', created.ID, { active: true }, administrator)
-      const audit = await db.run(SELECT.one.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'REACTIVATE' }))
+      const reactivationAudits = await db.run(SELECT.from('idts.cap.CatalogAdministrationAuditEvents').where({ targetID: created.ID, action: 'REACTIVATE', result: 'SUCCEEDED' }))
+      assert.equal(reactivationAudits.length, 1)
+      const audit = reactivationAudits[0]
       assert.equal((await db.run(SELECT.one.from('idts.cap.SAPModules').where({ ID: created.ID }))).active, true)
       assert.ok(audit)
-      return { reactivated: true, audit: true }
+      assert.equal(audit.reason, null)
+      assert.equal(audit.afterSummary, 'ATOMIC-REACTIVATE: Atomic Reactivate')
+      return { reactivated: true, safeAuditsAfterReload: reactivationAudits.length }
     }
     throw new Error(`Unknown IDTS-110 case ${caseKey}`)
   } finally {
@@ -230,7 +303,10 @@ async function runAtomicCatalogCase (caseKey) {
 
 async function runAtomicSelector (options) {
   const atomicCases = new Set(['IDTS110-P194', 'IDTS110-P195', 'IDTS110-P196', 'IDTS110-P197', 'IDTS110-F225', 'IDTS110-F226', 'IDTS110-F227', 'IDTS110-F228', 'IDTS110-F228E', 'IDTS110-F229', 'IDTS110-F230', 'IDTS110-F231', 'IDTS110-F231R'])
-  if (!atomicCases.has(options.caseKey)) throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  if (!atomicCases.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-catalogs.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,

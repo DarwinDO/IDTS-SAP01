@@ -360,7 +360,7 @@ function fallbackDefinition (definition, index = 0) {
   }
 }
 
-async function fallbackResult (definition, options, status, message, index = 0) {
+async function fallbackResult (definition, options, status, message, index = 0, limitation = null) {
   const target = definition && definition.caseId ? definition : fallbackDefinition(definition, index)
   try {
     return await runAtomicCase({
@@ -368,11 +368,13 @@ async function fallbackResult (definition, options, status, message, index = 0) 
       assertionId: `${target.caseId}-A1`,
       baselineSha: options.baselineSha,
       executor: options.executor,
-      execute: async () => {
-        const error = new Error(message)
-        error.atomicStatus = status
-        throw error
-      }
+      execute: async () => ({
+        status,
+        assertionPassed: false,
+        actualResult: message,
+        limitation: limitation || (status === 'BLOCKED' ? message : undefined),
+        evidenceIds: [`${target.caseId}-RESULT`]
+      })
     })
   } catch {
     const safeDefinition = fallbackDefinition(definition, index)
@@ -381,11 +383,13 @@ async function fallbackResult (definition, options, status, message, index = 0) 
       assertionId: `${safeDefinition.caseId}-A1`,
       baselineSha: options.baselineSha,
       executor: options.executor,
-      execute: async () => {
-        const error = new Error(message)
-        error.atomicStatus = status
-        throw error
-      }
+      execute: async () => ({
+        status,
+        assertionPassed: false,
+        actualResult: message,
+        limitation: limitation || (status === 'BLOCKED' ? message : undefined),
+        evidenceIds: [`${safeDefinition.caseId}-RESULT`]
+      })
     })
   }
 }
@@ -466,9 +470,9 @@ async function runOneCase (definition, options) {
   const commandFailure = commandStatus(child)
   if (commandFailure) {
     const detail = child.error?.code === 'ETIMEDOUT' || child.signal
-      ? 'Atomic child process timed out before producing a result marker; browser or fixture execution is blocked.'
-      : 'Atomic child process could not start; the planned runner or fixture is unavailable.'
-    return fallbackResult(definition, options, 'BLOCKED', detail, options.index)
+      ? `ATOMIC_ADAPTER_UNAVAILABLE: atomic child process timed out before producing a result marker for ${definition.caseId}.`
+      : `ATOMIC_ADAPTER_UNAVAILABLE: atomic child process could not start; the planned runner or fixture for ${definition.caseId} is unavailable.`
+    return fallbackResult(definition, options, 'BLOCKED', detail, options.index, detail)
   }
 
   let marker
@@ -484,10 +488,12 @@ async function runOneCase (definition, options) {
       preexistingPaths
     })
   } catch (error) {
-    const detail = error.message.includes('exactly one')
-      ? `Atomic child did not emit exactly one case marker for ${definition.caseId}; suite-only output is not atomic evidence.`
+    const markerCount = markerOutput(child).split(/\r?\n/).filter(line => line.trim().startsWith('IDTS110_ATOMIC_RESULT')).length
+    const detail = markerCount === 0
+      ? `ATOMIC_ADAPTER_UNAVAILABLE: atomic child did not emit a case marker for ${definition.caseId}; the adapter is unavailable and suite-only output is not atomic evidence.`
       : `Atomic child emitted an invalid result for ${definition.caseId}; no PASS was inferred from its exit code.`
-    return fallbackResult(definition, options, definitionRequiresExternal(definition) ? 'BLOCKED' : 'FAIL', detail, options.index)
+    const status = markerCount === 0 || definitionRequiresExternal(definition) ? 'BLOCKED' : 'FAIL'
+    return fallbackResult(definition, options, status, detail, options.index, markerCount === 0 ? detail : null)
   }
 
   if (child.status !== 0 && marker.status === 'PASS') {

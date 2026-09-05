@@ -8,7 +8,8 @@ const cds = require('@sap/cds')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 const {
   assertRequestedAccess,
@@ -96,7 +97,10 @@ function runRoleChecks () {
 }
 
 async function runAtomicSelector (options) {
-  if (options.caseKey !== 'IDTS110-P191') throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  if (options.caseKey !== 'IDTS110-P191') {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-role-contract.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,

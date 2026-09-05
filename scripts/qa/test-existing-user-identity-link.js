@@ -7,7 +7,8 @@ const path = require('node:path')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 
 const root = path.resolve(__dirname, '../..')
@@ -124,12 +125,30 @@ async function runAtomicExistingLinkCase () {
   }
   try {
     await seedFixture(cds, db)
-    const context = await assertExistingLinkRequest(cds, db)
-    const request = await db.run(cds.ql.SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: context.request.ID }))
-    const deliveries = await db.run(cds.ql.SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: context.request.ID }))
+    const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
+    const administrator = new cds.User({ id: 'fixture.pm@example.invalid', roles: ['authenticated-user', 'PM', 'UserAdmin'] })
+    const originalSpawn = cds.spawn
+    cds.spawn = () => ({ on () { return this } })
+    let created
+    try {
+      created = await service.send({
+        event: 'requestExistingUserIdentityLink',
+        data: { userID: IDS.targetDeveloper, email: TARGET_EMAIL },
+        user: administrator
+      })
+    } finally {
+      cds.spawn = originalSpawn
+    }
+    assert.equal(created.status, 'INVITED')
+    assert.equal(created.requestedRole, 'DEVELOPER')
+    assert.equal(Object.hasOwn(created, 'identitySubject'), false)
+    const request = await db.run(cds.ql.SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID }))
+    const deliveries = await db.run(cds.ql.SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: created.ID }))
     assert.equal(request.linkTargetUser_ID, IDS.targetDeveloper)
     assert.equal(request.linkSourceEmailNormalized, 'legacy.developer@example.local')
+    assert.equal(request.requestedRole_code, 'DEVELOPER')
     assert.equal(deliveries.length, 1)
+    assert.equal(deliveries[0].templateKey, 'IDTS_EXISTING_USER_IDENTITY_LINK_V1')
     return { linkedTarget: true, sourceEmailSnapshotted: true, deliveries: deliveries.length }
   } finally {
     cds.env.idts = previousIdts
@@ -1229,7 +1248,10 @@ async function assertAssignmentReadinessContract (db) {
 }
 
 async function runAtomicSelector (options) {
-  if (options.caseKey !== 'IDTS110-F214') throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  if (options.caseKey !== 'IDTS110-F214') {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-existing-user-identity-link.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,
@@ -1239,7 +1261,7 @@ async function runAtomicSelector (options) {
     execute: async () => ({
       assertionPassed: true,
       actualResult: definition.expectedResult,
-      beforeState: { fixture: 'isolated-sqlite', requests: 0 },
+      beforeState: { fixture: 'isolated-sqlite' },
       afterState: await runAtomicExistingLinkCase(),
       reloadState: { requestHistoryPreserved: true },
       evidenceIds: [`${options.caseKey}-RESULT`]

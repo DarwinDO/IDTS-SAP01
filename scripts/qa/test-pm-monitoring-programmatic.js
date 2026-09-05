@@ -18,7 +18,16 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
-const { INSERT, SELECT } = cds.ql
+const assert = require('node:assert/strict')
+const { DELETE, INSERT, SELECT } = cds.ql
+const fs = require('node:fs')
+const path = require('node:path')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const {
   enrichBugDisplayFields,
@@ -33,6 +42,14 @@ const BUG_PENDING = 'BUG-0001'
 const BUG_IN_PROGRESS = 'BUG-0003'
 const BUG_REJECTED = 'BUG-0004'
 const BUG_CLOSED = 'BUG-QA-CLOSED-001'
+const root = path.resolve(__dirname, '../..')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
 
 function rec (label, pass, detail = '') {
   const icon = pass ? 'PASS' : 'FAIL'
@@ -51,7 +68,105 @@ function expectArrayEqual (label, actual, expected) {
   rec(label, actualText === expectedText, `actual=${actualText} expected=${expectedText}`)
 }
 
-async function main () {
+async function runAtomicMonitoringCase (caseKey) {
+  const csn = await cds.load('srv/service.cds')
+  const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
+  await cds.deploy(csn).to(db)
+  const service = await cds.serve('BugService').from(csn)
+  if (caseKey === 'IDTS110-P200') {
+    const today = new Date().toISOString().slice(0, 10)
+    const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
+    const fixture = overrides => ({
+      ID: `93000000-0000-4000-8000-${String(overrides.suffix).padStart(12, '0')}`,
+      bugNumber: overrides.bugNumber,
+      title: 'Atomic PM monitoring fixture',
+      description: 'Controlled local monitoring fixture.',
+      status_code: overrides.status_code,
+      priority_code: 'LOW',
+      severity_code: 'MINOR',
+      environment_code: 'QAS',
+      environmentDetail: 'Local CAP SQLite QA',
+      stepsToReproduce: 'Open the controlled fixture.',
+      actualResult: 'Fixture actual result.',
+      expectedResult: 'Fixture expected result.',
+      applicationComponent_ID: '40000000-0000-0000-0000-000000000001',
+      defectCategory_ID: '50000000-0000-0000-0000-000000000001',
+      componentCategory_ID: '60000000-0000-0000-0000-000000000001',
+      reporter_ID: '10000000-0000-0000-0000-000000000004',
+      dueDate: overrides.dueDate,
+      estimatedEffortHours: '1.00'
+    })
+    await db.run(INSERT.into('idts.cap.Bugs').entries([
+      fixture({ suffix: 201, bugNumber: 'ATOMIC-P200-OVERDUE', status_code: 'IN_PROGRESS', dueDate: yesterday }),
+      fixture({ suffix: 202, bugNumber: 'ATOMIC-P200-TODAY', status_code: 'IN_PROGRESS', dueDate: today }),
+      fixture({ suffix: 203, bugNumber: 'ATOMIC-P200-CLOSED', status_code: 'CLOSED', dueDate: yesterday })
+    ]))
+    const rows = await db.run(SELECT.from('BugService.Bugs').columns('bugNumber', 'status_code', 'dueDate', 'isOverdue').where({ bugNumber: { in: ['ATOMIC-P200-OVERDUE', 'ATOMIC-P200-TODAY', 'ATOMIC-P200-CLOSED'] } }).orderBy('bugNumber'))
+    const byNumber = new Map(rows.map(row => [row.bugNumber, row]))
+    assert.equal(byNumber.get('ATOMIC-P200-OVERDUE')?.isOverdue, true)
+    assert.equal(byNumber.get('ATOMIC-P200-TODAY')?.isOverdue, false)
+    assert.equal(byNumber.get('ATOMIC-P200-CLOSED')?.isOverdue, false)
+    return { overdueBeforeToday: true, dueTodayNotOverdue: true, closedExcluded: true }
+  }
+  await db.run(DELETE.from('idts.cap.Bugs'))
+  await db.run(INSERT.into('idts.cap.Bugs').entries({
+    ID: '93000000-0000-4000-8000-000000000204',
+    bugNumber: 'ATOMIC-P203-ONE',
+    title: 'Atomic status metric fixture',
+    description: 'Controlled local status metric fixture.',
+    status_code: 'PENDING_ASSIGNMENT',
+    priority_code: 'LOW',
+    severity_code: 'MINOR',
+    environment_code: 'QAS',
+    environmentDetail: 'Local CAP SQLite QA',
+    stepsToReproduce: 'Open the controlled fixture.',
+    actualResult: 'Fixture actual result.',
+    expectedResult: 'Fixture expected result.',
+    applicationComponent_ID: '40000000-0000-0000-0000-000000000001',
+    defectCategory_ID: '50000000-0000-0000-0000-000000000001',
+    componentCategory_ID: '60000000-0000-0000-0000-000000000001',
+    reporter_ID: '10000000-0000-0000-0000-000000000004'
+  }))
+  const pm = new cds.User({ id: 'pm.monitoring@example.invalid', roles: ['PM', 'authenticated-user'] })
+  const metrics = await service.send({ event: 'readBugStatusMetrics', data: {}, user: pm })
+  assert.equal(metrics.length, 10)
+  assert.equal(new Set(metrics.map(row => row.statusCode)).size, 10)
+  assert.equal(metrics.find(row => row.statusCode === 'PENDING_ASSIGNMENT')?.bugCount, 1)
+  assert.ok(metrics.some(row => row.bugCount === 0), 'zero-count statuses must remain in the metric set')
+  for (const role of ['DEVELOPER', 'TESTER']) {
+    await assert.rejects(
+      service.send({ event: 'readBugStatusMetrics', data: {}, user: new cds.User({ id: `${role.toLowerCase()}.monitoring@example.invalid`, roles: [role, 'authenticated-user'] }) }),
+      error => Number(error?.code || error?.status || error?.statusCode) === 403
+    )
+  }
+  return { metricRows: metrics.length, zeroCountRows: metrics.filter(row => row.bugCount === 0).length, unauthorizedRoles: 2 }
+}
+
+async function runAtomicSelector (options) {
+  if (!['IDTS110-P200', 'IDTS110-P203'].includes(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-pm-monitoring-programmatic.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      beforeState: { fixture: 'isolated-sqlite' },
+      afterState: await runAtomicMonitoringCase(options.caseKey),
+      reloadState: { readback: true },
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function runRegressionChecks () {
   console.log('')
   console.log('==============================================')
   console.log(' IDTS-21 PM Monitoring Backend Verification')
@@ -206,6 +321,15 @@ async function main () {
     }
     process.exit(1)
   }
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runRegressionChecks()
 }
 
 main().catch(err => {

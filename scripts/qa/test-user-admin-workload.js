@@ -6,7 +6,8 @@ const path = require('node:path')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 
 const root = path.resolve(__dirname, '../..')
@@ -351,7 +352,10 @@ async function verifyPagingAndReadContracts () {
 }
 
 async function runAtomicSelector (options) {
-  if (options.caseKey !== 'IDTS110-F224') throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  if (options.caseKey !== 'IDTS110-F224') {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-workload.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,

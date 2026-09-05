@@ -15,6 +15,7 @@ const {
   redactText,
   readAtomicOptions,
   runAtomicCase,
+  runAtomicUnavailableCase,
   validateAtomicResult,
   writeAtomicBatch,
   formatAtomicMarker
@@ -541,10 +542,24 @@ async function main () {
   })
   assert.equal(calls.length, definitions.length)
   assert.equal(orchestrated.results.length, definitions.length)
-  assert.deepEqual(orchestrated.results.map(item => item.status), ['PASS', 'FAIL', 'FAIL', 'BLOCKED'])
+  assert.deepEqual(orchestrated.results.map(item => item.status), ['PASS', 'FAIL', 'BLOCKED', 'BLOCKED'])
+  assert.match(orchestrated.results[2].actualResult, /ATOMIC_ADAPTER_UNAVAILABLE/)
+  assert.match(orchestrated.results[2].limitation, /ATOMIC_ADAPTER_UNAVAILABLE/)
+  assert.match(orchestrated.results[3].actualResult, /ATOMIC_ADAPTER_UNAVAILABLE/)
   assert.ok(calls.every(call => call.args.includes(`--baseline=${BASELINE_SHA}`)))
   assert.ok(calls.every(call => call.args.some(arg => arg.startsWith('--idts110-case='))))
   assert.doesNotMatch(JSON.stringify(orchestrated), /broad suite PASS.*status.*PASS/i)
+
+  const unknownSelector = await runAtomicUnavailableCase({
+    caseKey: 'IDTS110-UNKNOWN',
+    baselineSha: BASELINE_SHA,
+    executor: 'Codex-agent-assisted',
+    plannedTestFile: 'scripts/qa/test-user-admin-catalogs.js',
+    emit: false
+  })
+  assert.equal(unknownSelector.status, 'BLOCKED', 'unknown selectors must be blocked')
+  assert.match(unknownSelector.actualResult, /ATOMIC_ADAPTER_UNAVAILABLE/)
+  assert.match(unknownSelector.limitation, /ATOMIC_ADAPTER_UNAVAILABLE/)
 
   const forged = { ...childPass, expectedResult: 'forged expected result', actualResult: 'forged expected result' }
   const forgedBatch = await orchestrator.runNewCases({

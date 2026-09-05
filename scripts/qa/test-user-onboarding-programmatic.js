@@ -7,7 +7,15 @@ process.env.IDTS_EMAIL_ENABLED = 'false'
 const assert = require('node:assert/strict')
 const { EventEmitter } = require('node:events')
 const cds = require('@sap/cds')
+const fs = require('node:fs')
+const path = require('node:path')
 const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const {
   createInvitationToken,
@@ -19,6 +27,14 @@ const { requiresProvisioningApproval } = require('../../srv/user-admin')
 
 const SIGNING_KEY = 'local-programmatic-invitation-signing-key-123456789'
 const PM_ID = '71000000-0000-4000-8000-000000000001'
+const root = path.resolve(__dirname, '../..')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
 
 function xsuaaUser ({
   email = 'controlled.test@example.invalid',
@@ -48,7 +64,7 @@ async function expectRejected (operation, status, code) {
   await assert.rejects(operation, error => Number(error?.status || error?.statusCode) === status && error?.code === code)
 }
 
-async function main () {
+async function runRegressionChecks () {
   assert.equal(requiresProvisioningApproval({ requestedRole_code: 'TESTER', userAdminRequested: false }), false)
   assert.equal(requiresProvisioningApproval({ requestedRole_code: 'DEVELOPER', userAdminRequested: false }), false)
   assert.equal(requiresProvisioningApproval({ requestedRole_code: 'PM', userAdminRequested: false }), true)
@@ -900,6 +916,283 @@ async function main () {
   cds.spawn = originalSpawn
 
   console.log('IDTS user onboarding programmatic checks: PASS')
+}
+
+async function createAtomicOnboardingFixture () {
+  const db = await cds.deploy('db').to('sqlite::memory:')
+  const previousDb = cds.db
+  const previousIdts = cds.env.idts
+  const previousSpawn = cds.spawn
+  cds.db = db
+  cds.env.idts = {
+    ...(previousIdts || {}),
+    userAdmin: {
+      ...((previousIdts && previousIdts.userAdmin) || {}),
+      invitationSigningKey: SIGNING_KEY,
+      invitationTtlMinutes: 60,
+      invitationBaseUrl: 'https://idts.example.invalid/onboarding/continue'
+    }
+  }
+  cds.spawn = () => ({ on () { return this } })
+  const administratorEmail = 'atomic.programmatic.pm@example.invalid'
+  await db.run(INSERT.into('idts.cap.Users').entries({
+    ID: PM_ID,
+    displayName: 'Atomic Programmatic PM',
+    email: administratorEmail,
+    role_code: 'PM',
+    active: true
+  }))
+  const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
+  const administrator = new cds.User({ id: administratorEmail, roles: ['authenticated-user', 'PM', 'UserAdmin'] })
+  return {
+    db,
+    service,
+    administrator,
+    restore: async () => {
+      cds.spawn = previousSpawn
+      cds.env.idts = previousIdts
+      if (previousDb === undefined) delete cds.db
+      else cds.db = previousDb
+      if (typeof db.disconnect === 'function') await db.disconnect()
+    }
+  }
+}
+
+async function activeComponentCategory (db) {
+  const row = await db.run(SELECT.one.from('idts.cap.ComponentCategories').columns('ID').where({ active: true }))
+  assert.ok(row?.ID)
+  return row.ID
+}
+
+async function createStandardInvitation (fixture, options = {}) {
+  const email = options.email || 'atomic.standard@example.invalid'
+  const role = options.role || 'TESTER'
+  const created = await fixture.service.send({
+    event: 'requestOnboarding',
+    data: {
+      displayName: options.displayName || 'Atomic Standard User',
+      email,
+      requestedRole: role,
+      userAdminRequested: options.userAdminRequested === true,
+      developerProfile: options.developerProfile
+    },
+    user: fixture.administrator
+  })
+  const row = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: created.ID }))
+  const token = createInvitationToken({
+    invitationID: row.ID,
+    targetEmail: row.targetEmailNormalized,
+    expiresAt: row.expiresAt,
+    signingKey: SIGNING_KEY,
+    nonce: row.tokenNonce
+  }).token
+  return { created, row, token, email }
+}
+
+async function verifyStandardInvitation (fixture, invitation, options = {}) {
+  return fixture.service.send({
+    event: 'verifySapIdentity',
+    data: { token: invitation.token },
+    user: xsuaaUser({
+      email: invitation.email,
+      userUuid: options.userUuid || 'atomic-standard-subject',
+      platformUserId: options.platformUserId || '71000000-0000-4000-8000-000000000020'
+    })
+  })
+}
+
+async function runAtomicOnboardingCase (caseKey) {
+  const fixture = await createAtomicOnboardingFixture()
+  try {
+    if (caseKey === 'IDTS110-F205') {
+      const componentCategoryID = await activeComponentCategory(fixture.db)
+      const desiredProfile = {
+        availabilityStatusCode: 'AVAILABLE',
+        workloadLimit: 3,
+        responsibilities: [{ componentCategoryID, sapModuleID: null, responsibilityLevelCode: 'PRIMARY' }]
+      }
+      const invitation = await createStandardInvitation(fixture, {
+        email: 'atomic.desired.developer@example.invalid',
+        displayName: '  Atomic Desired Developer  ',
+        role: 'DEVELOPER',
+        developerProfile: desiredProfile
+      })
+      assert.equal(invitation.created.targetEmail, 'atomic.desired.developer@example.invalid')
+      assert.equal(invitation.created.status, 'INVITED')
+      assert.equal(Object.hasOwn(invitation.created, 'tokenHash'), false)
+      assert.equal(invitation.row.requestedDisplayName, 'Atomic Desired Developer')
+      assert.equal(invitation.row.requestedRole_code, 'DEVELOPER')
+      assert.equal(invitation.row.tokenHash.length, 64)
+      const desired = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingDeveloperProfiles').where({ onboardingRequest_ID: invitation.row.ID }))
+      const responsibilities = await fixture.db.run(SELECT.from('idts.cap.UserOnboardingDeveloperResponsibilities').where({ onboardingRequest_ID: invitation.row.ID }))
+      const delivery = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: invitation.row.ID }))
+      assert.equal(desired.workloadLimit, 3)
+      assert.equal(desired.availabilityStatus_code, 'AVAILABLE')
+      assert.equal(responsibilities.length, 1)
+      assert.equal(delivery.status_code, 'PENDING')
+      return { normalizedEmail: invitation.row.targetEmailNormalized, normalizedDisplayName: invitation.row.requestedDisplayName, tokenHashLength: invitation.row.tokenHash.length, desiredProfilePersisted: true, pendingDeliveries: 1 }
+    }
+    if (caseKey === 'IDTS110-F206') {
+      const invitation = await createStandardInvitation(fixture, { email: 'atomic.identity@example.invalid' })
+      const verified = await verifyStandardInvitation(fixture, invitation, { userUuid: 'atomic-matching-subject' })
+      assert.equal(verified.status, 'PROVISION_QUEUED')
+      assert.equal(Object.hasOwn(verified, 'identitySubject'), false)
+      const request = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.row.ID }))
+      const operation = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: request.ID }))
+      const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: request.ID, action: 'AUTO_APPROVE_PROVISIONING', result: 'QUEUED' }))
+      assert.ok(request.consumedAt)
+      assert.ok(request.verifiedAt)
+      assert.equal(request.status_code, 'PROVISION_QUEUED')
+      assert.equal(operation.operationType, 'PROVISION')
+      assert.equal(operation.state, 'PENDING')
+      assert.equal(audits.length, 1)
+      return { consumed: true, operationState: operation.state, auditRows: audits.length, identityFieldsOmitted: true }
+    }
+    if (caseKey === 'IDTS110-F209') {
+      const invitation = await createStandardInvitation(fixture, { email: 'atomic.search@example.invalid' })
+      const rows = await fixture.service.send({ event: 'searchOnboarding', data: { query: 'ATOMIC.SEARCH' }, user: fixture.administrator })
+      assert.equal(rows.length, 1)
+      assert.equal(rows[0].targetEmailNormalized, invitation.row.targetEmailNormalized)
+      assert.equal(rows[0].status_code, 'INVITED')
+      assert.equal(rows[0].cancelEligible, true)
+      for (const forbidden of ['tokenHash', 'tokenNonce', 'identitySubject', 'identityIssuer', 'identityOrigin', 'identityPlatformUserId']) assert.equal(Object.hasOwn(rows[0], forbidden), false)
+      return { boundedRows: rows.length, cancelEligible: rows[0].cancelEligible, sensitiveFieldsOmitted: true }
+    }
+    if (caseKey === 'IDTS110-F210' || caseKey === 'IDTS110-F210S') {
+      const invitation = await createStandardInvitation(fixture, { email: `atomic.approval.${caseKey.slice(-1).toLowerCase()}@example.invalid`, role: 'PM', userAdminRequested: true })
+      const verified = await verifyStandardInvitation(fixture, invitation, { userUuid: `atomic-approval-${caseKey}` })
+      assert.equal(verified.status, 'PENDING_APPROVAL')
+      assert.equal(verified.provisioningVersion, 1)
+      const beforeRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.row.ID }))
+      const beforeOperations = await fixture.db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: invitation.row.ID }))
+      const beforeAudits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: invitation.row.ID }))
+      if (caseKey === 'IDTS110-F210S') {
+        await expectRejected(fixture.service.send({ event: 'approveProvisioning', data: { requestID: invitation.row.ID, expectedVersion: 0 }, user: fixture.administrator }), 409, 'ONBOARDING_VERSION_CONFLICT')
+        const afterRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.row.ID }))
+        const afterOperations = await fixture.db.run(SELECT.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: invitation.row.ID }))
+        const afterAudits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: invitation.row.ID }))
+        assert.deepEqual(afterRequest, beforeRequest)
+        assert.deepEqual(afterOperations, beforeOperations)
+        assert.deepEqual(afterAudits, beforeAudits)
+        return { conflictCode: 'ONBOARDING_VERSION_CONFLICT', requestUnchanged: true, operationsUnchanged: true, auditsUnchanged: true }
+      }
+      const approved = await fixture.service.send({ event: 'approveProvisioning', data: { requestID: invitation.row.ID, expectedVersion: 1 }, user: fixture.administrator })
+      assert.equal(approved.status, 'PROVISION_QUEUED')
+      assert.equal(approved.provisioningVersion, 2)
+      const afterRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.row.ID }))
+      const operation = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: invitation.row.ID }))
+      const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: invitation.row.ID, action: 'APPROVE_PROVISIONING', result: 'QUEUED' }))
+      assert.equal(afterRequest.status_code, 'PROVISION_QUEUED')
+      assert.equal(afterRequest.latestOperation_ID, operation.ID)
+      assert.equal(operation.state, 'PENDING')
+      assert.equal(audits.length, 1)
+      return { status: afterRequest.status_code, provisioningVersion: afterRequest.provisioningVersion, operationState: operation.state, auditRows: audits.length }
+    }
+    if (caseKey === 'IDTS110-F211') {
+      const componentCategoryID = await activeComponentCategory(fixture.db)
+      const targetID = '71000000-0000-4000-8000-000000000021'
+      const requestID = '71000000-0000-4000-8000-000000000022'
+      const sessionID = '71000000-0000-4000-8000-000000000023'
+      await fixture.db.run(INSERT.into('idts.cap.Users').entries({ ID: targetID, displayName: 'Atomic Role Target', email: 'atomic.role.target@example.invalid', role_code: 'TESTER', active: true }))
+      await fixture.db.run(INSERT.into('idts.cap.UserOnboardingRequests').entries({ ID: requestID, targetEmailNormalized: 'atomic.role.target@example.invalid', requestedRole_code: 'TESTER', userAdminRequested: false, status_code: 'ACTIVE', requestedBy_ID: PM_ID, expiresAt: '2026-10-01T00:00:00.000Z', tokenNonce: 'atomic-role-nonce', tokenHash: 'a'.repeat(64), provisioningVersion: 2, activeUser_ID: targetID, correlationId: requestID }))
+      await fixture.db.run(INSERT.into('idts.cap.AuthSessions').entries({ ID: sessionID, user_ID: targetID, tokenHash: 'b'.repeat(64), issuedAt: '2026-09-05T00:00:00.000Z', expiresAt: '2026-10-05T00:00:00.000Z' }))
+      const desiredProfile = { availabilityStatusCode: 'AVAILABLE', workloadLimit: 3, responsibilities: [{ componentCategoryID, sapModuleID: null, responsibilityLevelCode: 'PRIMARY' }] }
+      const changed = await fixture.service.send({ event: 'requestRoleChange', data: { userID: targetID, requestedRole: 'DEVELOPER', userAdminRequested: false, developerProfile: desiredProfile, reason: 'Move into the controlled developer workflow.', expectedVersion: 2 }, user: fixture.administrator })
+      assert.equal(changed.status, 'ROLE_CHANGE_QUEUED')
+      assert.equal(changed.provisioningVersion, 3)
+      const user = await fixture.db.run(SELECT.one.from('idts.cap.Users').where({ ID: targetID }))
+      const session = await fixture.db.run(SELECT.one.from('idts.cap.AuthSessions').where({ ID: sessionID }))
+      const request = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: requestID }))
+      const operation = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: requestID, operationType: 'CHANGE_ROLE' }))
+      assert.equal(user.active, false)
+      assert.ok(session.revokedAt)
+      assert.equal(request.status_code, 'ROLE_CHANGE_QUEUED')
+      assert.equal(request.requestedRole_code, 'DEVELOPER')
+      assert.equal(operation.state, 'PENDING')
+      assert.equal(operation.safeResultCode, null)
+      return { localAccessInactive: true, sessionsRevoked: true, queuedOperation: operation.operationType, providerCompletionClaimed: false }
+    }
+    if (caseKey === 'IDTS110-F215') {
+      const targetID = '71000000-0000-4000-8000-000000000024'
+      await fixture.db.run(INSERT.into('idts.cap.Users').entries({ ID: targetID, displayName: 'Atomic Legacy Target', email: 'atomic.legacy@example.local', role_code: 'DEVELOPER', active: true }))
+      const invitation = await fixture.service.send({ event: 'requestExistingUserIdentityLink', data: { userID: targetID, email: 'atomic.link.destination@example.invalid' }, user: fixture.administrator })
+      const beforeRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.ID }))
+      const beforeDeliveries = await fixture.db.run(SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: invitation.ID }))
+      const cancelled = await fixture.service.send({ event: 'cancelExistingUserIdentityLink', data: { requestID: invitation.ID, expectedVersion: beforeRequest.provisioningVersion }, user: fixture.administrator })
+      assert.equal(cancelled.status, 'FAILED')
+      const afterRequest = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.ID }))
+      const afterDeliveries = await fixture.db.run(SELECT.from('idts.cap.UserOnboardingDeliveries').where({ onboardingRequest_ID: invitation.ID }))
+      const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: invitation.ID, action: 'CANCEL_LINK_INVITATION', result: 'APPLIED' }))
+      assert.equal(afterRequest.openRequestKey, null)
+      assert.equal(afterRequest.lastErrorCode, 'INVITATION_CANCELLED')
+      assert.equal(afterDeliveries.length, beforeDeliveries.length)
+      assert.equal(afterDeliveries[0].status_code, 'SKIPPED')
+      assert.equal(audits.length, 1)
+      return { status: afterRequest.status_code, deliveryStatus: afterDeliveries[0].status_code, historyPreserved: true, auditRows: audits.length }
+    }
+    if (caseKey === 'IDTS110-F216' || caseKey === 'IDTS110-F216R') {
+      const invitation = await createStandardInvitation(fixture, { email: `atomic.recovery.${caseKey.slice(-1).toLowerCase()}@example.invalid` })
+      await verifyStandardInvitation(fixture, invitation, { userUuid: `atomic-recovery-${caseKey}` })
+      const requestBefore = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: invitation.row.ID }))
+      const operationBefore = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ onboardingRequest_ID: invitation.row.ID }))
+      const failureState = caseKey === 'IDTS110-F216' ? 'RETRYABLE_FAILURE' : 'BLOCKED_MANUAL_REVIEW'
+      const safeCode = caseKey === 'IDTS110-F216' ? 'PROVIDER_TEMPORARY_FAILURE' : 'AMBIGUOUS_PROVIDER_OUTCOME'
+      await fixture.db.run(UPDATE('idts.cap.UserAccessOperations').set({ state: failureState, safeResultCode: safeCode, safeResultSummary: 'Controlled recovery fixture.', completedAt: '2026-09-05T00:00:00.000Z' }).where({ ID: operationBefore.ID }))
+      await fixture.db.run(UPDATE('idts.cap.UserOnboardingRequests').set({ status_code: failureState, lastErrorCode: safeCode, lastErrorSummary: 'Controlled recovery fixture.' }).where({ ID: requestBefore.ID }))
+      const event = caseKey === 'IDTS110-F216' ? 'retryAccessOperation' : 'reconcileAccessOperation'
+      const recovered = await fixture.service.send({ event, data: { operationID: operationBefore.ID, expectedVersion: requestBefore.provisioningVersion }, user: fixture.administrator })
+      assert.equal(recovered.status, 'PROVISION_QUEUED')
+      assert.equal(recovered.provisioningVersion, requestBefore.provisioningVersion + 1)
+      const operationAfter = await fixture.db.run(SELECT.one.from('idts.cap.UserAccessOperations').where({ ID: operationBefore.ID }))
+      const requestAfter = await fixture.db.run(SELECT.one.from('idts.cap.UserOnboardingRequests').where({ ID: requestBefore.ID }))
+      const action = caseKey === 'IDTS110-F216' ? 'RETRY_ACCESS_OPERATION' : 'RECONCILE_ACCESS_OPERATION'
+      const audits = await fixture.db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ onboardingRequest_ID: requestBefore.ID, action, result: 'QUEUED' }))
+      assert.equal(operationAfter.state, 'PENDING')
+      assert.equal(operationAfter.safeResultCode, null)
+      assert.notEqual(operationAfter.correlationId, operationBefore.correlationId)
+      assert.notEqual(operationAfter.idempotencyKey, operationBefore.idempotencyKey)
+      assert.equal(requestAfter.status_code, 'PROVISION_QUEUED')
+      assert.equal(audits.length, 1)
+      return { recoveryAction: action, state: operationAfter.state, newCorrelation: true, auditRows: audits.length }
+    }
+    throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  } finally {
+    await fixture.restore()
+  }
+}
+
+async function runAtomicSelector (options) {
+  const supported = new Set(['IDTS110-F205', 'IDTS110-F206', 'IDTS110-F209', 'IDTS110-F210', 'IDTS110-F210S', 'IDTS110-F211', 'IDTS110-F215', 'IDTS110-F216', 'IDTS110-F216R'])
+  if (!supported.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-onboarding-programmatic.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      beforeState: { fixture: 'isolated-sqlite' },
+      afterState: await runAtomicOnboardingCase(options.caseKey),
+      reloadState: { readback: true },
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runRegressionChecks()
 }
 
 main().catch(error => {

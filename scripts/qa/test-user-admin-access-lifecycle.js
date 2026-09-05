@@ -10,7 +10,8 @@ const cds = require('@sap/cds')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 const { INSERT, SELECT } = cds.ql
 const { executeAccessChange } = require('../../broker/lib/access-provisioning')
@@ -570,7 +571,10 @@ async function runAtomicSelector (options) {
     ['IDTS110-F212', 'suspend'],
     ['IDTS110-F213', 'reactivate']
   ])
-  if (!atomicCases.has(options.caseKey)) throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  if (!atomicCases.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-access-lifecycle.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,

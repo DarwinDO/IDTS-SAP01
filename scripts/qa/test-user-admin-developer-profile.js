@@ -7,7 +7,8 @@ const path = require('node:path')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 const {
   normalizeDeveloperProfileInput,
@@ -68,6 +69,17 @@ function runRegressionChecks () {
 }
 
 const atomicCases = new Map([
+  ['IDTS110-F220', () => {
+    assert.throws(
+      () => normalizeDeveloperProfileInput({
+        availabilityStatusCode: 'AVAILABLE',
+        workloadLimit: -1,
+        responsibilities: []
+      }),
+      error => error?.code === 'INVALID_DEVELOPER_WORKLOAD_LIMIT'
+    )
+    return { rejectedWorkloadLimit: true }
+  }],
   ['IDTS110-F220D', () => {
     const responsibility = {
       componentCategoryID: '60000000-0000-4000-8000-000000000001',
@@ -111,7 +123,10 @@ const atomicCases = new Map([
 
 async function runAtomicSelector (options) {
   const executeCase = atomicCases.get(options.caseKey)
-  if (!executeCase) throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  if (!executeCase) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-developer-profile.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,

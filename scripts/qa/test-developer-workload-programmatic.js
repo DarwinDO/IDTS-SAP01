@@ -23,7 +23,8 @@ const path = require('node:path')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../../srv/access/identity-readiness')
@@ -174,12 +175,24 @@ async function runAtomicWorkloadCase (caseKey) {
     assert.equal(rows.find(row => row.developerName === 'LegacyDev')?.openOwnedBugCount, 1)
     return { visibleRows: rows.length, omittedInactiveZeroBacklog: true }
   }
+  if (caseKey === 'IDTS110-F222') {
+    const beforeEffort = await db.run(SELECT.from('idts.cap.Bugs').columns('ID', 'estimatedEffortHours').where({ assignee_ID: PROFILES.SANG }).orderBy('ID'))
+    const rows = await runAs(pmUser, SELECT.from('BugService.DeveloperWorkloads').where({ developerUserID: USERS.SANG }))
+    assert.equal(rows.length, 1)
+    assert.equal(Number(rows[0].estimatedEffortHoursTotal), 19.5)
+    const afterEffort = await db.run(SELECT.from('idts.cap.Bugs').columns('ID', 'estimatedEffortHours').where({ assignee_ID: PROFILES.SANG }).orderBy('ID'))
+    assert.deepEqual(afterEffort, beforeEffort)
+    return { estimatedEffortHoursTotal: 19.5, persistedEffortUnchanged: true }
+  }
   throw new Error(`Unknown IDTS-110 case ${caseKey}`)
 }
 
 async function runAtomicSelector (options) {
-  const supported = new Set(['IDTS110-P202', 'IDTS110-F221', 'IDTS110-F223'])
-  if (!supported.has(options.caseKey)) throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  const supported = new Set(['IDTS110-P202', 'IDTS110-F221', 'IDTS110-F222', 'IDTS110-F223'])
+  if (!supported.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-developer-workload-programmatic.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,
@@ -191,7 +204,7 @@ async function runAtomicSelector (options) {
       return {
         assertionPassed: true,
         actualResult: definition.expectedResult,
-        beforeState: { fixture: 'isolated-sqlite', rows: 0 },
+        beforeState: { fixture: 'isolated-sqlite' },
         afterState: snapshot,
         reloadState: { ...snapshot },
         evidenceIds: [`${options.caseKey}-RESULT`]

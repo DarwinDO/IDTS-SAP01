@@ -10,7 +10,8 @@ const path = require('node:path')
 const {
   formatAtomicMarker,
   readAtomicOptions,
-  runAtomicCase
+  runAtomicCase,
+  runAtomicUnavailableCase
 } = require('./idts110-atomic-runner')
 const { INSERT, SELECT, UPDATE } = cds.ql
 
@@ -128,7 +129,11 @@ async function runAtomicProfileActionCase (caseKey) {
   })
   assert.equal(updated.administrationVersion, 1)
   assert.equal(updated.availabilityStatusCode, 'BUSY')
+  assert.equal(updated.workloadLimit, 2)
   assert.equal(updated.activeResponsibilityCount, 1)
+  const persistedProfile = await db.run(SELECT.one.from('idts.cap.DeveloperProfiles').where({ ID: PROFILE_ID }))
+  assert.equal(persistedProfile.availabilityStatus_code, 'BUSY')
+  assert.equal(persistedProfile.workloadLimit, 2)
   const afterRows = await db.run(SELECT.from('idts.cap.DeveloperResponsibilities').where({ developerProfile_ID: PROFILE_ID }))
   assert.equal(afterRows.length, 2)
   assert.equal(afterRows.filter(row => row.active).length, 1)
@@ -142,6 +147,7 @@ async function runAtomicProfileActionCase (caseKey) {
     beforeResponsibilities: beforeRows.length,
     afterResponsibilities: afterRows.length,
     activeResponsibilities: afterRows.filter(row => row.active).length,
+    persistedWorkloadLimit: persistedProfile.workloadLimit,
     auditActions: auditActions.filter(action => action.startsWith('DEVELOPER_')).length
   }
 }
@@ -369,7 +375,10 @@ async function runAtomicSelector (options) {
     ['IDTS110-F219', runAtomicProfileActionCase]
   ])
   const executeCase = atomicCases.get(options.caseKey)
-  if (!executeCase) throw new Error(`Unknown IDTS-110 case ${options.caseKey}`)
+  if (!executeCase) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-developer-profile-actions.js' })
+    return
+  }
   const definition = readDefinition(options.caseKey)
   const result = await runAtomicCase({
     definition,
