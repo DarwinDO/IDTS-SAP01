@@ -287,7 +287,9 @@ const build = () => {
   const catalog = readJson(paths.catalog)
   const matrix = readJson(paths.matrix)
   const inventory = readJson(paths.inventory)
-  assert.equal(catalog.cases.length, 188)
+  const existingCatalogCases = catalog.cases.slice(0, 188)
+  assert.equal(existingCatalogCases.length, 188)
+  assert.ok(catalog.cases.length === 188 || catalog.cases.length === 278)
   assert.equal(matrix.baseSha, GAP_BASELINE)
   assert.equal(matrix.proposals.length, 15)
   assert.equal(inventory.baseSha, GAP_BASELINE)
@@ -375,7 +377,7 @@ const build = () => {
     },
     externalMutations: []
   }
-  const entries = catalog.cases.map((row, index) => ({
+  const entries = existingCatalogCases.map((row, index) => ({
     mentorNumber: index + 1,
     internalCaseKey: row.caseId,
     sourceProposalSequence: null,

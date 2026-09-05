@@ -153,7 +153,7 @@ for (const row of rows.filter(row => visualKeys.has(row.internalCaseKey))) {
   assert.match(evidenceText, /screenshot/i)
 }
 
-assert.deepEqual(numberMap.entries.slice(0, 188).map(row => row.internalCaseKey), catalog.cases.map(row => row.caseId))
+assert.deepEqual(numberMap.entries.map(row => row.internalCaseKey), catalog.cases.map(row => row.caseId))
 assert.deepEqual(numberMap.entries.slice(188).map(row => row.internalCaseKey), rows.map(row => row.internalCaseKey))
 assert.deepEqual(numberMap.entries.slice(188).map(row => row.mentorNumber), rows.map(row => row.mentorNumber))
 assert.deepEqual(numberMap.entries.slice(188).map(row => row.sourceProposalSequence), rows.map(row => row.sourceProposalSequence))
