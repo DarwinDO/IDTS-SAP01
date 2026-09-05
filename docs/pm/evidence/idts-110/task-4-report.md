@@ -1,5 +1,35 @@
 # IDTS-110 Task 4 report — User Administration atomic execution
 
+## Latest authoritative summary (Fix round 2/5)
+
+This is the sole current execution authority for Task 4. Sections explicitly
+marked historical below are retained for audit context only; their earlier
+counts and blocker lists are superseded by this summary.
+
+- Source/execution baseline: `6eb6f73840d7150598a993f8656d2b44e5b0cd4b`.
+- Fix-round starting head: `ca1605e08c70a52c3500c4fd0aab23f5e65b76b3`.
+- Final implementation commit: `730bffd2b72d7aa82d677912596b89908183451e` (`fix: complete IDTS-110 Task 4 evidence clauses`).
+- Latest authoritative run: `idts110-1788600936349-c8c3d52d17d135550138d70554ea86da`.
+- Matrix: **45 total — 44 PASS, 0 FAIL, 1 BLOCKED** (`IDTS110-F224` only).
+- Missing/unimplemented selector keys: **none**.
+- BLOCKED boundary: `IDTS110-F224` programmatic/native-control precheck only;
+  Task 6 owns the authoritative rendered UI result.
+- Status: **DONE_WITH_CONCERNS — F224 BLOCKED FOR TASK 6 UI EVIDENCE**.
+
+The 44 PASS keys are:
+
+```text
+IDTS110-P189, IDTS110-P190, IDTS110-P191, IDTS110-P194, IDTS110-P195,
+IDTS110-P196, IDTS110-P197, IDTS110-P200, IDTS110-P202, IDTS110-P203,
+IDTS110-F204, IDTS110-F205, IDTS110-F206, IDTS110-F207, IDTS110-F208,
+IDTS110-F209, IDTS110-F210, IDTS110-F210S, IDTS110-F211, IDTS110-F212,
+IDTS110-F213, IDTS110-F214, IDTS110-F215, IDTS110-F216, IDTS110-F216R,
+IDTS110-F217, IDTS110-F218, IDTS110-F219, IDTS110-F220, IDTS110-F220D,
+IDTS110-F220R, IDTS110-F220N, IDTS110-F221, IDTS110-F222, IDTS110-F223,
+IDTS110-F225, IDTS110-F226, IDTS110-F227, IDTS110-F228, IDTS110-F228E,
+IDTS110-F229, IDTS110-F230, IDTS110-F231, IDTS110-F231R
+```
+
 ## Scope and source boundary
 
 - Task: integrate the retained User Administration programmatic selectors and
@@ -15,7 +45,7 @@
   dependency, BTP/HANA, provider, email, Drive, Jira, or other external state
   was changed.
 
-## RED → GREEN evidence
+## Historical initial RED → GREEN evidence (superseded)
 
 ### Protocol RED
 
@@ -55,7 +85,7 @@ definition. LOCAL cases cannot carry BTP/provider evidence or a deployed SHA;
 visual cases still require UI-runtime screenshot evidence; external evidence
 is available only to an approved external definition.
 
-## Implemented atomic selectors
+## Historical initial implemented-selector inventory (superseded)
 
 Each selector accepts the existing explicit baseline/executor options, runs one
 case through `runAtomicCase` with assertion ID `<caseKey>-A1`, uses an isolated
@@ -78,7 +108,10 @@ requires persistence or reload proof. F224 deliberately returns BLOCKED with a
 safe limitation and both result/visual evidence IDs; it does not claim a
 rendered screenshot.
 
-## Authoritative orchestrator result
+## Historical initial orchestrator result (superseded by latest summary)
+
+The following 26 PASS / 18 FAIL / 1 BLOCKED record predates the complete
+adapter implementation and is not authoritative for the current matrix.
 
 Command:
 
@@ -105,7 +138,7 @@ F212, F213, F214, F219, F220D, F220R, F220N, F221, F223,
 F225, F226, F227, F228, F228E, F229, F230, F231, F231R
 ```
 
-## Remaining keys and concerns
+## Historical initial remaining keys and concerns (superseded)
 
 The following 18 keys are exact blockers for completing the 45-row Task 4
 matrix. They remain truthful FAIL records because their runners do not yet emit
@@ -122,7 +155,7 @@ BLOCKED until Task 6 captures the required rendered UI screenshot and runtime
 evidence. No browser, provider, BTP, or live execution was claimed in this
 task.
 
-## Focused verification
+## Historical initial focused verification (superseded)
 
 The required no-argument focused runners all passed:
 
@@ -143,7 +176,7 @@ The required no-argument focused runners all passed:
 | `node --check` on all changed runners/helper/orchestrator/contract | PASS |
 | `git diff --check` | PASS |
 
-## Status and handoff boundary
+## Historical initial status and handoff boundary (superseded)
 
 Overall Task 4 status: **DONE_WITH_CONCERNS — BLOCKED FOR REMAINING KEYS**.
 
@@ -153,7 +186,7 @@ deployment, release, browser acceptance, provider/BTP evidence, or DonHV
 review approval. The final report commit SHA and final branch head are stated
 in the handoff after this report-only commit.
 
-## Fix round 1/5 — complete selectors and evidence-strengthening review
+## Historical Fix round 1/5 — complete selectors and evidence-strengthening review (superseded)
 
 - Fix-round starting head: `029bf316a43796849ed398ba3315dfe17cce4a5a`.
 - Fix-round implementation commit: `32752d4091021646b23d468ad65fb06e84833165`.
@@ -222,3 +255,59 @@ screenshot and authoritative UI result. This remains
 **DONE_WITH_CONCERNS — F224 BLOCKED FOR TASK 6 UI EVIDENCE**; the 44 local
 programmatic results are PASS, but the 45-row batch is not an overall PASS until
 the UI lane replaces the precheck record.
+
+## Fix round 2/5 — clause-complete atomic evidence
+
+- Fix-round starting head: `ca1605e08c70a52c3500c4fd0aab23f5e65b76b3`.
+- Implementation commit: `730bffd2b72d7aa82d677912596b89908183451e`.
+- Source/execution baseline: `6eb6f73840d7150598a993f8656d2b44e5b0cd4b`.
+
+### RED and repair evidence
+
+The exact clause assertions were added before the final matrix rerun. The first
+F209 focused execution correctly failed its case-bound fixture assertion
+(`Expected values to be strictly equal: 6 !== 7`) because the invited fixture
+email was outside the bounded `atomic.cancel` search. The fixture was corrected
+to use the selected query scope; the rerun passed. No product behavior
+contradicted the approved definition.
+
+The recovery assertions also exercised invalid state and stale-version calls
+before the valid transition. They require the documented rejection codes,
+unchanged request/operation readbacks, and the resulting audit transition; both
+F216 and F216R passed those checks.
+
+### GREEN result
+
+The fresh authoritative orchestrator run is:
+
+```text
+node scripts/qa/run-idts110-new-cases.js --scope=USER_ADMIN_PROGRAMMATIC --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --output=.tmp/idts-110/user-admin-results-fix-round2-final.json
+runId: idts110-1788600936349-c8c3d52d17d135550138d70554ea86da
+total: 45
+PASS: 44
+FAIL: 0
+BLOCKED: 1 (IDTS110-F224 only; Task 6 UI-runtime ownership)
+```
+
+The clause-complete adapters now assert full safe projections and ordered
+scoped content (P189, P202), exact status/denial boundaries (P203), persisted
+invitation/delivery and replay behavior (F205, F206, F208, F209), role-matrix
+linking and pending deliveries (F214), derived history preservation (F215),
+invalid recovery state/version and audit transitions (F216, F216R), audit
+reason (F217), zero and negative workload limits (F220), exact decimal
+formatting (F222), and catalog UUID/parent readback (F225, F226).
+
+All no-argument focused suites passed, including the P191 role runner. The
+atomic protocol contract, syntax checks for all changed runners/helper/
+orchestrator, and `git diff --check` passed. The matrix contains no missing or
+unimplemented selector keys. No product source, catalog, workbook/template,
+dependency, database/schema/seed, BTP/HANA, provider, email, Drive, Jira, or
+other external state was changed.
+
+### Current status and handoff
+
+Only `IDTS110-F224` remains BLOCKED, with the programmatic/native-control
+precheck preserved and the rendered screenshot/result explicitly owned by Task
+6. The current status is **DONE_WITH_CONCERNS — F224 BLOCKED FOR TASK 6 UI
+EVIDENCE**; this is not an overall release, merge, deployment, browser-
+acceptance, or DonHV approval claim.
