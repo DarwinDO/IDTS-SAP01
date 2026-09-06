@@ -7,7 +7,6 @@ const crypto = require('node:crypto')
 const { execFileSync, spawnSync } = require('node:child_process')
 
 const BASELINE_SHA = '6eb6f73840d7150598a993f8656d2b44e5b0cd4b'
-const REVIEW_HEAD = 'f8cc71009f4a69db9bc45e446ebdf54e09948e29'
 const APPROVAL_REFERENCE = { pullRequest: 388, mergeSha: BASELINE_SHA }
 const CATALOG_TOTAL = 278
 const EXISTING_TOTAL = 188
@@ -15,7 +14,6 @@ const NEW_TOTAL = 90
 const UA_TOTAL = 45
 const NOTIFICATION_TOTAL = 45
 const NOTIFICATION_VISUAL_TOTAL = 8
-const TEMPLATE_SHA = '5764937D3CF12EF7FBA107BB1104A018CB509D2DB7E4D2F6793A7FF245A0A334'
 
 function fail(message) {
   throw new Error(`IDTS-110 final report: ${message}`)
@@ -76,12 +74,22 @@ function commandAvailable(command) {
   return lookup.status === 0 && Boolean(String(lookup.stdout || '').trim())
 }
 
-function gitHead(root) {
+function gitText(root, args) {
   try {
-    return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: root, encoding: 'utf8' }).trim()
+    return execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
   } catch (error) {
-    fail(`cannot resolve Git HEAD: ${error.message}`)
+    fail(`git ${args.join(' ')} failed: ${error.message}`)
   }
+}
+
+function assertReceiptBoundary(root, receipt, options) {
+  const receiptPaths = [options.receiptManifest, options.workbookReceipt, options.reviewReceipt, options.output].map(file => relative(root, file))
+  const ancestor = spawnSync('git', ['merge-base', '--is-ancestor', receipt.reviewedHead, 'HEAD'], { cwd: root, encoding: 'utf8' })
+  assertThat(ancestor.status === 0, `receipt reviewed head ${receipt.reviewedHead} is not reachable from HEAD`)
+  const changed = gitText(root, ['diff', '--name-only', `${receipt.reviewedHead}..HEAD`]).split(/\r?\n/).filter(Boolean)
+  assertThat(changed.every(file => receiptPaths.includes(file)), `receipt is stale because reviewed source changed: ${changed.filter(file => !receiptPaths.includes(file)).join(', ')}`)
+  const dirty = gitText(root, ['status', '--porcelain']).split(/\r?\n/).filter(Boolean).map(line => line.slice(3).replaceAll('\\', '/'))
+  assertThat(dirty.every(file => file === relative(root, options.output)), `receipt inputs are dirty: ${dirty.filter(file => file !== relative(root, options.output)).join(', ')}`)
 }
 
 function validateStatusCounts(catalog, historical, results) {
@@ -97,6 +105,45 @@ function validateStatusCounts(catalog, historical, results) {
   return expected
 }
 
+function verifyReceipts(options) {
+  const receiptHashes = options.receiptHashes || {}
+  assertThat(typeof receiptHashes.workbook === 'string' && /^[A-F0-9]{64}$/i.test(receiptHashes.workbook), 'missing workbook receipt SHA')
+  assertThat(typeof receiptHashes.review === 'string' && /^[A-F0-9]{64}$/i.test(receiptHashes.review), 'missing review receipt SHA')
+  assertThat(fileSha256(options.workbookReceipt) === receiptHashes.workbook.toUpperCase(), 'workbook receipt SHA does not match the immutable receipt manifest')
+  assertThat(fileSha256(options.reviewReceipt) === receiptHashes.review.toUpperCase(), 'review receipt SHA does not match the immutable receipt manifest')
+
+  const workbook = readJson(options.workbookReceipt)
+  const review = readJson(options.reviewReceipt)
+  assertThat(workbook.kind === 'idts-110-workbook-validation-receipt' && workbook.schemaVersion === 1, 'workbook receipt schema is invalid')
+  assertThat(review.kind === 'idts-110-independent-review-receipt' && review.schemaVersion === 1, 'review receipt schema is invalid')
+  assertThat(workbook.worktreeClean === true && review.worktreeClean === true, 'receipt records a dirty review worktree')
+  assertThat(typeof workbook.reviewedHead === 'string' && /^[0-9a-f]{40}$/i.test(workbook.reviewedHead), 'workbook receipt reviewed head is invalid')
+  assertThat(review.reviewedHead === workbook.reviewedHead, 'receipt reviewed heads do not match')
+  if (options.expectedReviewedHead) assertThat(workbook.reviewedHead === options.expectedReviewedHead, 'receipt reviewed head does not match the required head')
+  assertThat(fileSha256(options.workbook) === String(workbook.candidate?.fileSha256 || '').toUpperCase(), 'candidate workbook SHA does not match its validation receipt')
+  assertThat(fileSha256(options.template) === String(workbook.template?.fileSha256 || '').toUpperCase(), 'official template SHA does not match its validation receipt')
+  if (options.workbookValidator) assertThat(fileSha256(options.workbookValidator) === String(workbook.validatorSha256 || '').toUpperCase(), 'workbook validator SHA does not match its validation receipt')
+  assertThat(fileSha256(options.reviewArtifact) === String(review.artifactSha256 || '').toUpperCase(), 'independent review artifact SHA does not match its receipt')
+
+  const statuses = workbook.statuses || {}
+  const normalizedStatuses = {
+    candidatePass: Number(statuses['Candidate PASS']),
+    mappingOnly: Number(statuses['Mapping Only']),
+    blocked: Number(statuses.Blocked)
+  }
+  normalizedStatuses.total = normalizedStatuses.candidatePass + normalizedStatuses.mappingOnly + normalizedStatuses.blocked
+  assertThat(normalizedStatuses.candidatePass === 130 && normalizedStatuses.mappingOnly === 135 && normalizedStatuses.blocked === 13 && normalizedStatuses.total === CATALOG_TOTAL, 'workbook receipt status totals are not 130/135/13/278')
+  assertThat(Number(workbook.hyperlinks?.ut) === CATALOG_TOTAL && Number(workbook.hyperlinks?.evidence) === CATALOG_TOTAL, 'workbook receipt native-link totals are not 278/278')
+  assertThat(Array.isArray(workbook.officeCli?.introducedIssues) && workbook.officeCli.introducedIssues.length === 0, 'workbook receipt has introduced OfficeCLI issues')
+  assertThat(Number(workbook.officeCli?.baselineIssues) === 15 && Number(workbook.officeCli?.candidateIssues) === 15 && workbook.officeCli?.validation === 'PASS', 'workbook receipt OfficeCLI result is not the frozen 15-warning PASS')
+  assertThat(workbook.fidelity?.status === 'PASS' && Array.isArray(workbook.findings) && workbook.findings.length === 0, 'workbook receipt fidelity or validator findings are not clean')
+
+  const counts = review.counts || {}
+  assertThat(Number(counts.critical) === 0 && Number(counts.major) === 0 && Number(counts.important) === 0, 'independent review has Critical, Major, or Important findings')
+  assertThat(Number.isInteger(Number(counts.deferredMinors)) && Number(counts.deferredMinors) >= 0, 'independent review deferred Minor count is invalid')
+  return { workbook: { ...workbook, statuses: normalizedStatuses }, review: { ...review, counts: { critical: Number(counts.critical), major: Number(counts.major), important: Number(counts.important), deferredMinors: Number(counts.deferredMinors) } } }
+}
+
 function validateInputs(options) {
   const catalog = readJson(options.catalog)
   const numberMap = readJson(options.numberMap)
@@ -104,6 +151,7 @@ function validateInputs(options) {
   const extension = readJson(options.extension)
   const ledger = readJson(options.ledger)
   const approval = readJson(options.approval)
+  const receiptManifest = readJson(options.receiptManifest)
 
   const catalogSha = canonicalSha256(catalog)
   const mapSha = canonicalSha256(numberMap)
@@ -120,6 +168,17 @@ function validateInputs(options) {
   assertThat(ledger.approvalReference?.mergeSha === BASELINE_SHA && ledger.approvalReference?.pullRequest === 388, 'source ledger approval reference is not PR #388 at the approved base')
   assertThat(Array.isArray(ledger.externalMutations) && ledger.externalMutations.length === 0, 'source ledger externalMutations is not []')
   if (catalog.externalMutations !== undefined) assertThat(Array.isArray(catalog.externalMutations) && catalog.externalMutations.length === 0, 'catalog externalMutations is not []')
+  assertThat(receiptManifest.kind === 'idts-110-final-report-receipt-manifest' && receiptManifest.schemaVersion === 1, 'receipt manifest schema is invalid')
+  const receipts = verifyReceipts({
+    workbook: options.workbook,
+    template: options.template,
+    workbookValidator: options.workbookValidator,
+    reviewArtifact: options.reviewArtifact,
+    workbookReceipt: options.workbookReceipt,
+    reviewReceipt: options.reviewReceipt,
+    receiptHashes: receiptManifest.receiptSha256
+  })
+  assertReceiptBoundary(options.root, receipts.review, options)
 
   const cases = Array.isArray(catalog.cases) ? catalog.cases : []
   const entries = Array.isArray(numberMap.entries) ? numberMap.entries : []
@@ -168,7 +227,7 @@ function validateInputs(options) {
   }, {})
   assertThat(historicalFiles.length === EXISTING_TOTAL, `historical manifest count is ${historicalFiles.length}, expected 188`)
   assertThat(historical.PASS === 40 && historical.MAPPING_ONLY_CANDIDATE === 135 && historical.BLOCKED === 13, 'historical results are not 40 PASS / 135 mapping-only / 13 blocked')
-  const statusCounts = validateStatusCounts(catalog, historical, results.totals)
+  validateStatusCounts(catalog, historical, results.totals)
 
   const evidenceManifestFiles = walkFiles(options.evidence).filter(file => path.basename(file) === 'case-manifest.json')
   const evidenceResultFiles = walkFiles(options.evidence).filter(file => path.basename(file) === 'result.json')
@@ -189,8 +248,6 @@ function validateInputs(options) {
   const cardHashLines = cardFiles.map(file => `${path.basename(file)}:${fileSha256(file)}`).sort().join('\n') + '\n'
   const cardSetSha = crypto.createHash('sha256').update(cardHashLines).digest('hex').toUpperCase()
 
-  const actualHead = gitHead(options.root)
-  assertThat(actualHead === REVIEW_HEAD, `review head is ${actualHead}, expected ${REVIEW_HEAD}`)
   const officeCli = commandAvailable('officecli')
   const aiDevkit = commandAvailable('ai-devkit')
   return {
@@ -201,11 +258,11 @@ function validateInputs(options) {
     notifications: { caseCount: notificationTotal, visualCaseCount: notificationVisualTotal },
     visualCaseCount: visualTotal,
     historical: { caseCount: historicalFiles.length, pass: historical.PASS, mappingOnly: historical.MAPPING_ONLY_CANDIDATE, blocked: historical.BLOCKED },
-    workbook: { fileSha256: fileSha256(options.workbook), templateSha256: TEMPLATE_SHA, candidatePass: statusCounts.candidatePass, mappingOnly: statusCounts.mappingOnly, blocked: statusCounts.blocked, total: statusCounts.total, utEvidenceLinks: 278, evidenceCardLinks: 278 },
+    workbook: { fileSha256: fileSha256(options.workbook), templateSha256: fileSha256(options.template), candidatePass: receipts.workbook.statuses.candidatePass, mappingOnly: receipts.workbook.statuses.mappingOnly, blocked: receipts.workbook.statuses.blocked, total: receipts.workbook.statuses.total, utEvidenceLinks: receipts.workbook.hyperlinks.ut, evidenceCardLinks: receipts.workbook.hyperlinks.evidence, officeCli: receipts.workbook.officeCli, fidelity: receipts.workbook.fidelity },
     evidence: { manifests: evidenceManifestFiles.length, results: evidenceResultFiles.length, pngs: evidencePngFiles.length, pngBreakdown: { runtime: 9, result: 81, before: 71, after: 71, reload: 81 }, cardCount: cardFiles.length, cardSetSha256: cardSetSha, firstCardSha256: fileSha256(cardFiles.find(file => path.basename(file) === 'Case-001.png')), lastCardSha256: fileSha256(cardFiles.find(file => path.basename(file) === 'Case-278.png')) },
     externalMutations: [],
-    authority: { baseSha: BASELINE_SHA, reviewHead: REVIEW_HEAD, pullRequest: 388 },
-    independentReview: { critical: 0, major: 0, important: 0, deferredMinors: 2 },
+    authority: { baseSha: BASELINE_SHA, reviewHead: receipts.review.reviewedHead, pullRequest: 388 },
+    independentReview: receipts.review.counts,
     tooling: { officeCliAvailable: officeCli, aiDevkitAvailable: aiDevkit }
   }
 }
@@ -226,7 +283,7 @@ function makeMarkdown(report, root) {
 | Result review status | \`PENDING_DONHV_REVIEW\` |
 | External mutations | \`[]\` |
 
-The source base is the PR #388 merge. The independent review found 0 Critical, 0 Major, and 0 Important findings; 2 Minor findings remain explicitly deferred. The clean review does not approve any result, workbook, merge, deployment, Drive replacement, Jira update, or release.
+The source base is the PR #388 merge. The independent review receipt found ${r.independentReview.critical} Critical, ${r.independentReview.major} Major, and ${r.independentReview.important} Important findings; ${r.independentReview.deferredMinors} Minor findings remain explicitly deferred. The clean review does not approve any result, workbook, merge, deployment, Drive replacement, Jira update, or release.
 
 ## Frozen inputs and hashes
 
@@ -274,10 +331,10 @@ Independent review and the package/card checks found no secret values, PII/email
 
 | Severity | Count | Disposition |
 | --- | ---: | --- |
-| Critical | 0 | none found |
-| Major | 0 | none found |
-| Important | 0 | none found |
-| Minor | 2 | deferred, non-blocking |
+| Critical | ${r.independentReview.critical} | none found |
+| Major | ${r.independentReview.major} | none found |
+| Important | ${r.independentReview.important} | none found |
+| Minor | ${r.independentReview.deferredMinors} | deferred, non-blocking |
 
 Deferred minors are source-trace symbol hygiene for six approved literal assertion snippets and Task 5 report prose that does not print its final fix head even though Git binds it to \`67838224\`. Neither changes result or workbook truth.
 
@@ -304,6 +361,12 @@ function defaults(root) {
     numberMap: path.join(root, 'docs/qa/idts-110-case-number-map.json'),
     results: path.join(root, '.tmp/idts-110/all-results.json'),
     workbook: path.join(root, 'docs/sap490/generated/Unit_Test_IDTS_SAP01_en_v0.5_candidate.xlsx'),
+    template: path.join(root, 'docs/sap490/templates/Deliverable_template/Unit_Test.xlsx'),
+    workbookValidator: path.join(root, 'scripts/sap490/test-idts110-unit-test-workbook.mjs'),
+    workbookReceipt: path.join(root, 'docs/pm/evidence/idts-110/workbook-validation-receipt.json'),
+    reviewReceipt: path.join(root, 'docs/pm/evidence/idts-110/independent-review-receipt.json'),
+    reviewArtifact: path.join(root, '.superpowers/sdd/2026-09-05-idts-110-atomic-execution-and-workbook/task-11-independent-review.md'),
+    receiptManifest: path.join(root, 'docs/pm/evidence/idts-110/final-report-receipt-manifest.json'),
     output: path.join(root, 'docs/pm/evidence/idts-110/final-execution-report.md'),
     extension: path.join(root, 'docs/qa/idts-110-extension-cases.json'),
     ledger: path.join(root, 'docs/pm/evidence/idts-110/source-result-ledger.json'),
@@ -327,4 +390,4 @@ function main() {
 
 if (require.main === module) main()
 
-module.exports = { buildReport: validateInputs, makeMarkdown, parseArgs }
+module.exports = { buildReport: validateInputs, makeMarkdown, parseArgs, verifyReceipts }

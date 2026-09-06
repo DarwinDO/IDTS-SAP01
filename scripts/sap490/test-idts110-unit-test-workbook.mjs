@@ -2,6 +2,8 @@
 
 import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
+import crypto from "node:crypto";
+import fsSync from "node:fs";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { FileBlob, SpreadsheetFile } from "@oai/artifact-tool";
@@ -320,6 +322,41 @@ function runFidelityGate(templatePath, candidatePath, policyPath) {
     stdout: (result.stdout || "").trim(),
     stderr: (result.stderr || "").trim()
   };
+}
+
+function sha256(filePath) {
+  return crypto.createHash("sha256").update(fsSync.readFileSync(filePath)).digest("hex").toUpperCase();
+}
+
+function gitValue(args) {
+  const result = spawnSync("git", args, { encoding: "utf8" });
+  if (result.status !== 0) throw new Error(`git ${args.join(" ")} failed: ${result.stderr || result.stdout}`);
+  return String(result.stdout || "").trim();
+}
+
+async function writeValidationReceipt(receiptPath, report, { templatePath, candidatePath, baselinePath, catalogPath, numberMapPath, resultsPath }) {
+  const receipt = {
+    kind: "idts-110-workbook-validation-receipt",
+    schemaVersion: 1,
+    reviewedHead: gitValue(["rev-parse", "HEAD"]),
+    worktreeClean: gitValue(["status", "--porcelain"]) === "",
+    validatorSha256: sha256(path.resolve(process.argv[1])),
+    candidate: { fileSha256: sha256(candidatePath) },
+    template: { fileSha256: sha256(templatePath) },
+    inputs: {
+      baselineSha256: sha256(baselinePath),
+      catalogSha256: sha256(catalogPath),
+      numberMapSha256: sha256(numberMapPath),
+      resultsSha256: sha256(resultsPath)
+    },
+    statuses: report.statuses,
+    hyperlinks: report.hyperlinks,
+    officeCli: { ...report.officeCli, validation: "PASS" },
+    fidelity: { status: "PASS", output: report.fidelity.stdout },
+    findings: report.findings
+  };
+  await fs.mkdir(path.dirname(receiptPath), { recursive: true });
+  await fs.writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
 }
 
 function assertLayoutContract(baseline, templateWorkbook, candidateWorkbook, findings) {
@@ -773,6 +810,11 @@ try {
   if (missingBaseline.length) fail("officecli-baseline", "Candidate lost an authority-template issue", missingBaseline);
   if (candidateIssues.length !== baselineIssues.length) fail("officecli-count", "Candidate issue count differs from the frozen baseline", { baseline: baselineIssues.length, candidate: candidateIssues.length });
 
+  const officeValidation = spawnSync("officecli", ["validate", candidatePath], { encoding: "utf8" });
+  if (officeValidation.status !== 0) fail("officecli-validate", "OfficeCLI validation did not pass", officeValidation.stderr || officeValidation.stdout);
+  else report.officeCli.validation = "PASS";
+
+  if (!findings.length && args.receipt) await writeValidationReceipt(args.receipt, report, { templatePath, candidatePath, baselinePath, catalogPath, numberMapPath, resultsPath });
   assertNoFindings(findings, report);
 } catch (error) {
   fail("validator-error", error?.stack || String(error));
