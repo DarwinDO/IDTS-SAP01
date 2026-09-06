@@ -8,11 +8,11 @@
 | --- | --- |
 | Jira | IDTS-110 |
 | Approved source base / PR | `6eb6f73840d7150598a993f8656d2b44e5b0cd4b` / PR #388 merge |
-| Independent review head | `f8cc71009f4a69db9bc45e446ebdf54e09948e29` |
+| Independent review head | `9d573e1a61933bc503e80d38e7f9555cfa58eceb` |
 | Result review status | `PENDING_DONHV_REVIEW` |
 | External mutations | `[]` |
 
-The source base is the PR #388 merge. The independent review found 0 Critical, 0 Major, and 0 Important findings; 2 Minor findings remain explicitly deferred. The clean review does not approve any result, workbook, merge, deployment, Drive replacement, Jira update, or release.
+The source base is the PR #388 merge. The independent review receipt found 0 Critical, 0 Major, and 0 Important findings; 2 Minor findings remain explicitly deferred. The clean review does not approve any result, workbook, merge, deployment, Drive replacement, Jira update, or release.
 
 ## Frozen inputs and hashes
 
