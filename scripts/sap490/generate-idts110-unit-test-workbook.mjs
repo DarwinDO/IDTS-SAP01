@@ -12,6 +12,15 @@ const DATA_END_ROW = 285;
 const EVIDENCE_START_ROW = 2;
 const DATA_MERGES = ["B:D", "E:X", "Y:AW", "AX:BC", "BD:BI", "BJ:BK", "BL:BR"];
 const CARD_RELATIVE_ROOT = "../../pm/evidence/idts-110/cards";
+const HISTORY_BASE_ROW_HEIGHT = 19.5;
+const HISTORY_CHARS_PER_LINE = 60;
+const HISTORY_LINE_HEIGHT = 14.5;
+const UT_MIN_ROW_HEIGHT = 14.25;
+const UT_MAX_ROW_HEIGHT = 370;
+const UT_TEST_CHARS_PER_LINE = 39;
+const UT_RESULT_CHARS_PER_LINE = 58;
+const UT_LINE_HEIGHT = 14.25;
+const UT_ROW_PADDING = 10;
 
 function parseArgs(argv) {
   return Object.fromEntries(argv.slice(2).map((arg) => {
@@ -66,7 +75,7 @@ function historicalTestLabel(manifest) {
   return `${file} — ${label}${assertions.length > 1 ? ` (+${assertions.length - 1} checks)` : ""}`;
 }
 
-function caseText(caseDefinition, actual, limitation) {
+function caseText(caseDefinition) {
   const steps = Array.isArray(caseDefinition.steps)
     ? caseDefinition.steps.map((step, index) => `${index + 1}. ${step}`).join(" ")
     : "N/A";
@@ -76,6 +85,28 @@ function caseText(caseDefinition, actual, limitation) {
     `Input: ${clean(caseDefinition.input)}`,
     `Steps: ${steps}`
   ].join(" ");
+}
+
+function normalizedText(value) {
+  return clean(value).replace(/\s+/g, " ").trim();
+}
+
+function estimateWrappedLines(value, charsPerLine) {
+  return Math.max(1, Math.ceil(normalizedText(value).length / charsPerLine));
+}
+
+function expectedUtRowHeight(requirement, expectedActual) {
+  const lines = Math.max(
+    2,
+    estimateWrappedLines(requirement, UT_TEST_CHARS_PER_LINE),
+    estimateWrappedLines(expectedActual, UT_RESULT_CHARS_PER_LINE)
+  );
+  return Math.min(UT_MAX_ROW_HEIGHT, Math.max(UT_MIN_ROW_HEIGHT, lines * UT_LINE_HEIGHT + UT_ROW_PADDING));
+}
+
+function expectedHistoryRowHeight(description) {
+  const lines = Math.max(1, Math.ceil(normalizedText(description).length / HISTORY_CHARS_PER_LINE));
+  return Math.max(HISTORY_BASE_ROW_HEIGHT, lines * HISTORY_LINE_HEIGHT);
 }
 
 function resultText(expected, actual, limitation) {
@@ -91,18 +122,6 @@ function resultText(expected, actual, limitation) {
 
 function cardFile(mentorNumber) {
   return `Case-${String(mentorNumber).padStart(3, "0")}.png`;
-}
-
-function escapeFormulaText(value) {
-  return String(value).replaceAll('"', '""');
-}
-
-function cardFormula(mentorNumber) {
-  return `=HYPERLINK("${escapeFormulaText(`${CARD_RELATIVE_ROOT}/${cardFile(mentorNumber)}`)}","Card")`;
-}
-
-function caseFormula(evidenceRow, mentorNumber) {
-  return `=HYPERLINK("#Evidence!A${evidenceRow}","Case ${mentorNumber}")`;
 }
 
 async function loadHistoricalRecords(evidenceRoot, mapEntries, catalogByKey) {
@@ -327,7 +346,10 @@ async function main() {
   histories.getRange("F3:F6").values = [[createdDate], [createdDate], [createdDate], [createdDate]];
   histories.getRange("F3:F6").format.numberFormat = "yyyy/mm/dd";
   histories.getRange("G3:G6").values = [["Codex"], [null], [null], [null]];
-  histories.getRange("A3:Z6").format.rowHeight = 45;
+  for (let row = 3; row <= 6; row += 1) {
+    const description = histories.getRange(`D${row}`).values[0][0];
+    histories.getRange(`A${row}:Z${row}`).format.rowHeight = expectedHistoryRowHeight(description);
+  }
 
   // Clone the official row-8 body style for every candidate row, then fill only the approved fields.
   const sourceBody = ut.getRange("A8:BV8");
@@ -338,14 +360,15 @@ async function main() {
       const [start, end] = merge.split(":");
       ut.mergeCells(`${start}${row}:${end}${row}`);
     }
-    // The official row is a compact one-line row. A local 60pt body row keeps the required
-    // requirement/result fields legible without changing columns, fonts, fills, or print setup.
     const expectedActualText = resultText(record.definition.expectedResult, record.actualResult, record.limitation);
-    // Merged E:X cells cannot auto-fit in Excel. The full requirement/precondition/input/
-    // numbered-step contract needs one bounded tall row so it remains readable at normal zoom.
-    ut.getRange(`A${row}:BV${row}`).format.rowHeight = 380;
+    // Merged E:X/Y:AW cells cannot auto-fit in Excel. Use the smallest bounded height
+    // derived from the two reader-facing text blocks, retaining the authority columns/styles.
+    ut.getRange(`A${row}:BV${row}`).format.rowHeight = expectedUtRowHeight(
+      caseText(record.definition),
+      expectedActualText
+    );
     setMergedValue(ut, `B${row}:D${row}`, String(record.mentorNumber));
-    setMergedValue(ut, `E${row}`, caseText(record.definition, record.actualResult, record.limitation));
+    setMergedValue(ut, `E${row}`, caseText(record.definition));
     setMergedValue(ut, `Y${row}:AW${row}`, expectedActualText);
     setMergedValue(ut, `AX${row}:BC${row}`, record.executor);
     setMergedValue(ut, `BD${row}:BI${row}`, formatExecutionTime(record.executedAt));

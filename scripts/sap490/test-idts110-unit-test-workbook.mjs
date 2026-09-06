@@ -64,6 +64,209 @@ function issueSignature(issue) {
   });
 }
 
+const HISTORY_BASE_ROW_HEIGHT = 19.5;
+const HISTORY_CHARS_PER_LINE = 60;
+const HISTORY_LINE_HEIGHT = 14.5;
+const UT_MIN_ROW_HEIGHT = 14.25;
+const UT_MAX_ROW_HEIGHT = 370;
+const UT_TEST_CHARS_PER_LINE = 39;
+const UT_RESULT_CHARS_PER_LINE = 58;
+const UT_LINE_HEIGHT = 14.25;
+const UT_ROW_PADDING = 10;
+
+const DEFAULT_FIDELITY_POLICY = {
+  preserve_sheet_order: true,
+  preserve_sheet_visibility: true,
+  sheets: {
+    Cover: { show_gridlines: false, preserve_page_setup: true, preserve_merges: true },
+    Histories: { show_gridlines: false, preserve_page_setup: true, preserve_merges: true },
+    UT: { show_gridlines: false, preserve_page_setup: true, preserve_merges: false },
+    Evidence: { show_gridlines: true, preserve_page_setup: true, preserve_merges: true }
+  }
+};
+
+function normalizedText(value) {
+  return clean(value).replace(/\s+/g, " ").trim();
+}
+
+function estimateWrappedLines(value, charsPerLine) {
+  return Math.max(1, Math.ceil(normalizedText(value).length / charsPerLine));
+}
+
+function expectedUtRowHeight(requirement, expectedActual) {
+  const lines = Math.max(
+    2,
+    estimateWrappedLines(requirement, UT_TEST_CHARS_PER_LINE),
+    estimateWrappedLines(expectedActual, UT_RESULT_CHARS_PER_LINE)
+  );
+  return Math.min(UT_MAX_ROW_HEIGHT, Math.max(UT_MIN_ROW_HEIGHT, lines * UT_LINE_HEIGHT + UT_ROW_PADDING));
+}
+
+function expectedHistoryRowHeight(description) {
+  const lines = Math.max(1, Math.ceil(normalizedText(description).length / HISTORY_CHARS_PER_LINE));
+  return Math.max(HISTORY_BASE_ROW_HEIGHT, lines * HISTORY_LINE_HEIGHT);
+}
+
+function approximatelyEqual(actual, expected, tolerance = 0.1) {
+  return Math.abs(Number(actual) - Number(expected)) <= tolerance;
+}
+
+function columnNumber(column) {
+  return [...column].reduce((number, letter) => number * 26 + letter.charCodeAt(0) - 64, 0);
+}
+
+function columnName(number) {
+  let result = "";
+  for (let value = number; value > 0; value = Math.floor((value - 1) / 26)) {
+    result = String.fromCharCode(65 + ((value - 1) % 26)) + result;
+  }
+  return result;
+}
+
+function expandColumnSpec(spec) {
+  const [start, end = start] = spec.split(":");
+  const first = columnNumber(start);
+  const last = columnNumber(end);
+  return Array.from({ length: last - first + 1 }, (_, index) => columnName(first + index));
+}
+
+function rowHeightFromBaseline(sheetBaseline, row) {
+  for (const entry of sheetBaseline.rowHeights || []) {
+    for (const segment of String(entry.rows).split(",")) {
+      const [start, end = start] = segment.split(":").map(Number);
+      if (row >= start && row <= end) return Number(entry.height);
+    }
+  }
+  return Number(sheetBaseline.defaultRowHeight);
+}
+
+async function ensureFidelityPolicy(policyPath) {
+  try {
+    await fs.access(policyPath);
+  } catch {
+    await fs.mkdir(path.dirname(policyPath), { recursive: true });
+    await fs.writeFile(policyPath, `${JSON.stringify(DEFAULT_FIDELITY_POLICY, null, 2)}\n`, "utf8");
+  }
+}
+
+function runFidelityGate(templatePath, candidatePath, policyPath) {
+  const fidelityScript = path.resolve(".agents/skills/idts-sap490-xlsx-fidelity/scripts/audit_xlsx_fidelity.py");
+  const result = spawnSync("python", [
+    fidelityScript,
+    "validate",
+    "--reference", path.resolve(templatePath),
+    "--candidate", path.resolve(candidatePath),
+    "--policy", path.resolve(policyPath)
+  ], { encoding: "utf8", maxBuffer: 16 * 1024 * 1024 });
+  if (result.error) throw result.error;
+  return {
+    status: result.status,
+    stdout: (result.stdout || "").trim(),
+    stderr: (result.stderr || "").trim()
+  };
+}
+
+function assertLayoutContract(baseline, templateWorkbook, candidateWorkbook, findings) {
+  const sheetNames = ["Cover", "Histories", "UT"];
+  const sampleRows = {
+    Cover: [1, 2, 8, 11, 14, 18, 19, 20, 25],
+    Histories: [1, 2, 3, 4, 5, 6, 7, 10],
+    UT: [1, 2, 3, 6, 7, 8, 9, 14, 15, 16, 285, 958]
+  };
+
+  for (const sheetName of sheetNames) {
+    const sheetBaseline = baseline.sheets[sheetName];
+    const templateSheet = templateWorkbook.worksheets.getItem(sheetName);
+    const candidateSheet = candidateWorkbook.worksheets.getItem(sheetName);
+
+    for (const widthEntry of sheetBaseline.columnWidths || []) {
+      for (const column of expandColumnSpec(widthEntry.columns)) {
+        const templateWidth = templateSheet.getRange(`${column}1`).format.columnWidth;
+        const candidateWidth = candidateSheet.getRange(`${column}1`).format.columnWidth;
+        if (!approximatelyEqual(candidateWidth, templateWidth)) {
+          findings.push({
+            code: "candidate-column-width-drift",
+            message: `${sheetName}!${column} column width drifted from frozen baseline`,
+            details: { expected: templateWidth, actual: candidateWidth, recordedBaseline: Number(widthEntry.width) }
+          });
+        }
+      }
+    }
+
+    for (const row of sampleRows[sheetName]) {
+      const expectedTemplateHeight = rowHeightFromBaseline(sheetBaseline, row);
+      const templateHeight = templateSheet.getRange(`A${row}:BV${row}`).format.rowHeight;
+      if (!approximatelyEqual(templateHeight, expectedTemplateHeight)) {
+        findings.push({
+          code: "template-row-height-contract",
+          message: `${sheetName} row ${row} template height differs from frozen baseline`,
+          details: { expected: expectedTemplateHeight, actual: templateHeight }
+        });
+      }
+      if (sheetName === "Histories" && row >= 3 && row <= 6) {
+        const description = candidateSheet.getRange(`D${row}`).values[0][0];
+        const expectedCandidateHeight = expectedHistoryRowHeight(description);
+        const candidateHeight = candidateSheet.getRange(`A${row}:Z${row}`).format.rowHeight;
+        if (!approximatelyEqual(candidateHeight, expectedCandidateHeight)) {
+          findings.push({
+            code: "history-row-height-drift",
+            message: `Histories row ${row} is not the bounded content-derived height`,
+            details: { expected: expectedCandidateHeight, actual: candidateHeight }
+          });
+        }
+      } else if (sheetName === "UT" && row >= 8 && row <= 285) {
+        const requirement = candidateSheet.getRange(`E${row}`).values[0][0];
+        const expectedActual = candidateSheet.getRange(`Y${row}`).values[0][0];
+        const expectedCandidateHeight = expectedUtRowHeight(requirement, expectedActual);
+        const candidateHeight = candidateSheet.getRange(`A${row}:BV${row}`).format.rowHeight;
+        if (!approximatelyEqual(candidateHeight, expectedCandidateHeight)) {
+          findings.push({
+            code: "ut-row-height-drift",
+            message: `UT row ${row} is not the bounded content-derived height`,
+            details: { expected: expectedCandidateHeight, actual: candidateHeight }
+          });
+        }
+        if (candidateHeight > UT_MAX_ROW_HEIGHT) {
+          findings.push({
+            code: "ut-row-height-bound",
+            message: `UT row ${row} exceeds the bounded content-height exception`,
+            details: { max: UT_MAX_ROW_HEIGHT, actual: candidateHeight }
+          });
+        }
+      } else {
+        const candidateHeight = candidateSheet.getRange(`A${row}:BV${row}`).format.rowHeight;
+        if (!approximatelyEqual(candidateHeight, expectedTemplateHeight)) {
+          findings.push({
+            code: "candidate-row-height-drift",
+            message: `${sheetName} row ${row} height drifted from frozen baseline`,
+            details: { expected: expectedTemplateHeight, actual: candidateHeight }
+          });
+        }
+      }
+    }
+
+    if (sheetName === "UT") {
+      const driftRows = [];
+      for (let row = 8; row <= 285; row += 1) {
+        const requirement = candidateSheet.getRange(`E${row}`).values[0][0];
+        const expectedActual = candidateSheet.getRange(`Y${row}`).values[0][0];
+        const expectedCandidateHeight = expectedUtRowHeight(requirement, expectedActual);
+        const candidateHeight = candidateSheet.getRange(`A${row}:BV${row}`).format.rowHeight;
+        if (!approximatelyEqual(candidateHeight, expectedCandidateHeight) || candidateHeight > UT_MAX_ROW_HEIGHT) {
+          driftRows.push({ row, expected: expectedCandidateHeight, actual: candidateHeight });
+        }
+      }
+      if (driftRows.length) {
+        findings.push({
+          code: "ut-row-height-all-cases",
+          message: "UT rows must use the bounded content-derived layout exception",
+          details: { count: driftRows.length, samples: driftRows.slice(0, 5) }
+        });
+      }
+    }
+  }
+}
+
 function assertNoFindings(findings, report) {
   report.findings = findings;
   console.log(JSON.stringify(report, null, 2));
@@ -87,6 +290,7 @@ const catalogPath = args.catalog || "docs/qa/idts-110-unit-test-catalog.json";
 const numberMapPath = args["number-map"] || "docs/qa/idts-110-case-number-map.json";
 const resultsPath = args.results || ".tmp/idts-110/all-results.json";
 const evidenceRoot = args["evidence-root"] || "docs/pm/evidence/idts-110";
+const fidelityPolicyPath = args["fidelity-policy"] || ".tmp/idts-110/unit-test-policy.json";
 const findings = [];
 const report = {
   candidate: candidatePath,
@@ -96,6 +300,7 @@ const report = {
   officeCli: { introducedIssues: [], baselineIssues: 0, candidateIssues: 0 },
   statuses: {},
   hyperlinks: { ut: 0, evidence: 0 },
+  fidelity: null,
   findings
 };
 const fail = (code, message, details = undefined) => findings.push({ code, message, ...(details ? { details } : {}) });
@@ -107,6 +312,8 @@ try {
     readJson(numberMapPath),
     readJson(resultsPath)
   ]);
+  await ensureFidelityPolicy(fidelityPolicyPath);
+  const templateWorkbook = await SpreadsheetFile.importXlsx(await FileBlob.load(templatePath));
   const workbook = await SpreadsheetFile.importXlsx(await FileBlob.load(candidatePath));
   const sheetNames = workbook.worksheets.items.map((sheet) => sheet.name);
   try { assert.deepEqual(sheetNames, ["Cover", "Histories", "UT", "Evidence"]); } catch { fail("sheet-order", "Candidate sheets do not match the official four-sheet order", sheetNames); }
@@ -156,6 +363,21 @@ try {
   report.statuses = Object.fromEntries(utStatuses.reduce((counts, label) => counts.set(label, (counts.get(label) || 0) + 1), new Map()));
   if (JSON.stringify(report.statuses) !== JSON.stringify(expectedStatusCounts)) fail("truthful-status", "Workbook status labels do not match result/manifests", { expected: expectedStatusCounts, actual: report.statuses });
   try { assert.deepEqual(utStatuses, evidenceStatuses); } catch { fail("status-parity", "UT and Evidence status labels differ"); }
+  for (let index = 0; index < 278; index += 1) {
+    const expectedLabel = expectedLabels.get(index + 1);
+    if (utStatuses[index] !== expectedLabel) {
+      fail("truthful-status-case", `UT Case ${index + 1} has the wrong result label`, { expected: expectedLabel, actual: utStatuses[index] });
+    }
+    if (evidenceStatuses[index] !== expectedLabel) {
+      fail("truthful-status-case", `Evidence Case ${index + 1} has the wrong result label`, { expected: expectedLabel, actual: evidenceStatuses[index] });
+    }
+  }
+
+  assertLayoutContract(baseline, templateWorkbook, workbook, findings);
+  report.fidelity = runFidelityGate(templatePath, candidatePath, fidelityPolicyPath);
+  if (report.fidelity.status !== 0 || !report.fidelity.stdout.includes("PASS: XLSX structure and critical-range fidelity policy satisfied")) {
+    fail("fidelity-policy", "Template fidelity policy did not pass", report.fidelity);
+  }
 
   const visibleValues = [
     ...flattenTexts(cover.getRange("A1:AQ25").values),
