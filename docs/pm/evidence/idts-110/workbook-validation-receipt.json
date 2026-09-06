@@ -1,0 +1,39 @@
+{
+  "kind": "idts-110-workbook-validation-receipt",
+  "schemaVersion": 1,
+  "reviewedHead": "72dff9f7ea30284adfef47a65c9f5f6ed239f6a5",
+  "worktreeClean": true,
+  "validatorSha256": "AB8FE392A23A13F0204D90F12D123073F4A6BBF61945CF28929F17F6129D3EFB",
+  "candidate": {
+    "fileSha256": "C0C49CE78A6AF43FD59CC634CB5DBE56919EF10937300217F5BDEF763D2D2A5D"
+  },
+  "template": {
+    "fileSha256": "5764937D3CF12EF7FBA107BB1104A018CB509D2DB7E4D2F6793A7FF245A0A334"
+  },
+  "inputs": {
+    "baselineSha256": "09319A5A7E029FBD9FEA92477544F3B2F370904D84A6A31348FCDC4756DE9E0E",
+    "catalogSha256": "1C72CAD523371D795A61892EE1267260BE182DA6627945764940572928FD3D4F",
+    "numberMapSha256": "51B83E3520143A01A9C1AAD51C5EA3F030AD4BCA3AEBB8B66FB95C0D14017A1D",
+    "resultsSha256": "659AD9613A63BB7A5C9FAC2A56D3BCAF7F42133F8095215851D892ECA130730D"
+  },
+  "statuses": {
+    "Candidate PASS": 130,
+    "Mapping Only": 135,
+    "Blocked": 13
+  },
+  "hyperlinks": {
+    "ut": 278,
+    "evidence": 278
+  },
+  "officeCli": {
+    "introducedIssues": [],
+    "baselineIssues": 15,
+    "candidateIssues": 15,
+    "validation": "PASS"
+  },
+  "fidelity": {
+    "status": "PASS",
+    "output": "PASS: XLSX structure and critical-range fidelity policy satisfied"
+  },
+  "findings": []
+}
