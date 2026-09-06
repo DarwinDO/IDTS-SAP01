@@ -4,6 +4,7 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { FileBlob, SpreadsheetFile } from "@oai/artifact-tool";
+import JSZip from "jszip";
 
 const TASK_BASE = "2fc7c6e70ca2136e42a43ac9024878e41908f5b2";
 const CREATED_DATE = "2026-09-06";
@@ -21,6 +22,7 @@ const UT_TEST_CHARS_PER_LINE = 39;
 const UT_RESULT_CHARS_PER_LINE = 58;
 const UT_LINE_HEIGHT = 14.25;
 const UT_ROW_PADDING = 10;
+const GENERATION_STARTED_AT = Date.now();
 
 function parseArgs(argv) {
   return Object.fromEntries(argv.slice(2).map((arg) => {
@@ -227,31 +229,42 @@ function rawSet(outputPath, sheetName, xpath, action, xml) {
   return result;
 }
 
+function stopOwnedOfficeCliProcesses() {
+  if (process.platform !== "win32") return;
+  const cutoff = new Date(GENERATION_STARTED_AT).toISOString();
+  const command = `$cutoff = [DateTime]::Parse('${cutoff}'); Get-Process officecli -ErrorAction SilentlyContinue | Where-Object { $_.StartTime -ge $cutoff } | Stop-Process -Force`;
+  spawnSync("powershell.exe", ["-NoProfile", "-Command", command], { encoding: "utf8", maxBuffer: 2 * 1024 * 1024 });
+}
+
 function restoreTemplatePrintSetup(outputPath) {
   const setups = {
     Cover: {
-      sheetPr: '<sheetPr><pageSetUpPr fitToPage="true" /></sheetPr>',
+      sheetPr: '<sheetPr filterMode="false" />',
+      fitToPage: "true",
       margins: '<pageMargins left="0.39375" right="0.39375" top="0.7875" bottom="0.7875" header="0.511811023622047" footer="0" />',
       pageSetup: '<pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
       printOptions: '<printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false" />',
       headerFooter: '<headerFooter differentFirst="false" differentOddEven="false"><oddHeader></oddHeader><oddFooter>&amp;L&amp;F&amp;R&amp;P / </oddFooter></headerFooter>'
     },
     Histories: {
-      sheetPr: '<sheetPr><pageSetUpPr fitToPage="true" /></sheetPr>',
+      sheetPr: '<sheetPr filterMode="false" />',
+      fitToPage: "true",
       margins: '<pageMargins left="0.39375" right="0.39375" top="0.7875" bottom="0.7875" header="0.511811023622047" footer="0" />',
       pageSetup: '<pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
       printOptions: '<printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false" />',
       headerFooter: '<headerFooter differentFirst="false" differentOddEven="false"><oddHeader></oddHeader><oddFooter>&amp;L&amp;F&amp;R&amp;P / </oddFooter></headerFooter>'
     },
     UT: {
-      sheetPr: '<sheetPr><pageSetUpPr fitToPage="true" /></sheetPr>',
+      sheetPr: '<sheetPr filterMode="false" />',
+      fitToPage: "true",
       margins: '<pageMargins left="0.590277777777778" right="0.39375" top="0.590277777777778" bottom="0.590277777777778" header="0" footer="0" />',
       pageSetup: '<pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="0" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
       printOptions: '<printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false" />',
       headerFooter: '<headerFooter differentFirst="false" differentOddEven="false"><oddHeader>&amp;L文書ID：F400&amp;R単体テスト仕様書 - &amp;A</oddHeader><oddFooter>&amp;C&amp;P / </oddFooter></headerFooter>'
     },
     Evidence: {
-      sheetPr: '<sheetPr><pageSetUpPr fitToPage="false" /></sheetPr>',
+      sheetPr: '<sheetPr filterMode="false" />',
+      fitToPage: "false",
       margins: '<pageMargins left="0.747916666666667" right="0.747916666666667" top="0.984027777777778" bottom="0.984027777777778" header="0.511811023622047" footer="0.511811023622047" />',
       pageSetup: '<pageSetup paperSize="1" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="portrait" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
       printOptions: '<printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false" />',
@@ -264,6 +277,8 @@ function restoreTemplatePrintSetup(outputPath) {
       const inserted = rawSet(outputPath, sheetName, "//x:sheetViews", "insertbefore", setup.sheetPr);
       if (inserted.status !== 0) throw new Error(`OfficeCLI sheet properties restoration failed for ${sheetName}: ${inserted.stderr || inserted.stdout}`);
     }
+    const pageSetUpPr = rawSet(outputPath, sheetName, "//x:sheetPr", "append", `<pageSetUpPr fitToPage="${setup.fitToPage}" />`);
+    if (pageSetUpPr.status !== 0) throw new Error(`OfficeCLI page-set-up property restoration failed for ${sheetName}: ${pageSetUpPr.stderr || pageSetUpPr.stdout}`);
     const printOptions = rawSet(outputPath, sheetName, "//x:printOptions", "replace", setup.printOptions);
     if (printOptions.status !== 0) {
       const inserted = rawSet(outputPath, sheetName, "//x:pageMargins", "insertbefore", setup.printOptions);
@@ -284,6 +299,66 @@ function restoreTemplatePrintSetup(outputPath) {
       if (inserted.status !== 0) throw new Error(`OfficeCLI header/footer restoration failed for ${sheetName}: ${inserted.stderr || inserted.stdout}`);
     }
   }
+}
+
+async function restoreWorksheetDimensions(outputPath) {
+  const dimensions = {
+    Cover: "A1:AQ1000",
+    Histories: "A1:Z1000",
+    UT: "A1:BV1048576",
+    Evidence: "A1:K279"
+  };
+  const sheetProperties = {
+    Cover: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="true" /></x:sheetPr>',
+    Histories: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="true" /></x:sheetPr>',
+    UT: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="true" /></x:sheetPr>',
+    Evidence: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="false" /></x:sheetPr>'
+  };
+  const printOptions = '<x:printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false" />';
+  const pageMargins = {
+    Cover: '<x:pageMargins left="0.39375" right="0.39375" top="0.7875" bottom="0.7875" header="0.511811023622047" footer="0" />',
+    Histories: '<x:pageMargins left="0.39375" right="0.39375" top="0.7875" bottom="0.7875" header="0.511811023622047" footer="0" />',
+    UT: '<x:pageMargins left="0.590277777777778" right="0.39375" top="0.590277777777778" bottom="0.590277777777778" header="0" footer="0" />',
+    Evidence: '<x:pageMargins left="0.747916666666667" right="0.747916666666667" top="0.984027777777778" bottom="0.984027777777778" header="0.511811023622047" footer="0.511811023622047" />'
+  };
+  const pageSetups = {
+    Cover: '<x:pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
+    Histories: '<x:pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
+    UT: '<x:pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="0" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
+    Evidence: '<x:pageSetup paperSize="1" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="portrait" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />'
+  };
+  const headerFooters = {
+    Cover: '<x:headerFooter differentFirst="false" differentOddEven="false"><x:oddHeader></x:oddHeader><x:oddFooter>&amp;L&amp;F&amp;R&amp;P / </x:oddFooter></x:headerFooter>',
+    Histories: '<x:headerFooter differentFirst="false" differentOddEven="false"><x:oddHeader></x:oddHeader><x:oddFooter>&amp;L&amp;F&amp;R&amp;P / </x:oddFooter></x:headerFooter>',
+    UT: '<x:headerFooter differentFirst="false" differentOddEven="false"><x:oddHeader>&amp;L文書ID：F400&amp;R単体テスト仕様書 - &amp;A</x:oddHeader><x:oddFooter>&amp;C&amp;P / </x:oddFooter></x:headerFooter>',
+    Evidence: '<x:headerFooter differentFirst="false" differentOddEven="false"><x:oddHeader></x:oddHeader><x:oddFooter></x:oddFooter></x:headerFooter>'
+  };
+  const zip = await JSZip.loadAsync(await fs.readFile(outputPath));
+  for (const [index, sheetName] of ["Cover", "Histories", "UT", "Evidence"].entries()) {
+    const part = `xl/worksheets/sheet${index + 1}.xml`;
+    let xml = await zip.file(part).async("string");
+    const dimension = `<x:dimension ref="${dimensions[sheetName]}" />`;
+    const replaceOrInsert = (tag, replacement, beforeTag) => {
+      const paired = new RegExp(`<x:${tag}\\b[\\s\\S]*?<\\/x:${tag}>`, "i");
+      const selfClosing = new RegExp(`<x:${tag}\\b[^>]*\\/>`, "i");
+      if (paired.test(xml)) xml = xml.replace(paired, replacement);
+      else if (selfClosing.test(xml)) xml = xml.replace(selfClosing, replacement);
+      else {
+        const anchor = new RegExp(`<x:${beforeTag}\\b`, "i");
+        if (anchor.test(xml)) xml = xml.replace(anchor, `${replacement}<x:${beforeTag}`);
+        else xml = xml.replace(/<\/x:worksheet>/i, `${replacement}</x:worksheet>`);
+      }
+    };
+    replaceOrInsert("sheetPr", sheetProperties[sheetName], "dimension");
+    replaceOrInsert("dimension", dimension, "sheetViews");
+    replaceOrInsert("printOptions", printOptions, "pageMargins");
+    replaceOrInsert("pageMargins", pageMargins[sheetName], "pageSetup");
+    replaceOrInsert("pageSetup", pageSetups[sheetName], "headerFooter");
+    const headerFooter = headerFooters[sheetName];
+    replaceOrInsert("headerFooter", headerFooter, "legacyDrawing");
+    zip.file(part, xml);
+  }
+  await fs.writeFile(outputPath, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 }
 
 async function main() {
@@ -444,6 +519,8 @@ async function main() {
   // hyperlink setter and HYPERLINK formulas are not evaluated by OfficeCLI.
   applyNativeHyperlinks(outputPath, records);
   restoreTemplatePrintSetup(outputPath);
+  stopOwnedOfficeCliProcesses();
+  await restoreWorksheetDimensions(outputPath);
   await fs.rm(`${outputPath}.inspect.ndjson`, { force: true });
   console.log(JSON.stringify({
     output: outputPath,

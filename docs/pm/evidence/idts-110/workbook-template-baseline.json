@@ -138,9 +138,9 @@
         { "columns": "X:X", "width": 0.38 },
         { "columns": "Y:AV", "width": 2.63 },
         { "columns": "AW:AW", "width": 3.5 },
-        { "columns": "AX:BC", "width": 2.63 },
-        { "columns": "BD:BD", "width": 5.63 },
-        { "columns": "BE:BJ", "width": 2.63 },
+        { "columns": "AX:BB", "width": 2.63 },
+        { "columns": "BC:BC", "width": 5.63 },
+        { "columns": "BD:BJ", "width": 2.63 },
         { "columns": "BK:BK", "width": 4.26 },
         { "columns": "BL:BR", "width": 2.63 }
       ],
@@ -293,6 +293,85 @@
       "footer": "",
       "dataValidations": [],
       "autoFilter": null
+    }
+  },
+  "contract": {
+    "generatedGeometry": {
+      "Histories": {
+        "rows": "3:6",
+        "heightRule": {
+          "base": 19.5,
+          "charsPerLine": 60,
+          "lineHeight": 14.5
+        }
+      },
+      "UT": {
+        "rows": "8:285",
+        "heightRule": {
+          "min": 14.25,
+          "max": 370,
+          "testCharsPerLine": 39,
+          "resultCharsPerLine": 58,
+          "lineHeight": 14.25,
+          "padding": 10
+        },
+        "mergePattern": ["B:D", "E:X", "Y:AW", "AX:BC", "BD:BI", "BJ:BK", "BL:BR"]
+      },
+      "Evidence": {
+        "dimension": "A1:K279",
+        "rows": [
+          { "rows": "1:1", "height": 30 },
+          { "rows": "2:279", "height": 72 }
+        ],
+        "columnWidths": [
+          { "columns": "A:A", "width": 14 },
+          { "columns": "B:B", "width": 10 },
+          { "columns": "C:C", "width": 32 },
+          { "columns": "D:D", "width": 52 },
+          { "columns": "E:E", "width": 45 },
+          { "columns": "F:F", "width": 18 },
+          { "columns": "G:G", "width": 48 },
+          { "columns": "H:H", "width": 18 },
+          { "columns": "I:I", "width": 58 },
+          { "columns": "J:J", "width": 58 },
+          { "columns": "K:K", "width": 16 }
+        ]
+      }
+    },
+    "mergeContracts": {
+      "Cover": "template",
+      "Histories": "template",
+      "UT": "header-template-plus-generated-row-pattern",
+      "Evidence": "template"
+    },
+    "styleInvariants": {
+      "UT": {
+        "anchors": ["B8", "E8", "Y8", "AX8", "BD8", "BJ8", "BL8"],
+        "fields": [
+          "font.bold",
+          "font.color",
+          "font.size",
+          "font.name",
+          "border.left",
+          "border.right",
+          "border.top",
+          "border.bottom",
+          "numberformat",
+          "numFmtId",
+          "protection.locked",
+          "protection.hidden"
+        ]
+      }
+    },
+    "validationContracts": {
+      "UT": [
+        {
+          "sqref": "BJ8:BJ16",
+          "type": "list",
+          "formula1": "\"O,X,-\""
+        }
+      ],
+      "Evidence": []
     }
   },
   "definedNames": [

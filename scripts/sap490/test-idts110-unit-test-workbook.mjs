@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { FileBlob, SpreadsheetFile } from "@oai/artifact-tool";
+import JSZip from "jszip";
 
 function parseArgs(argv) {
   return Object.fromEntries(argv.slice(2).map((arg) => {
@@ -29,6 +30,154 @@ function officeJson(args) {
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`officecli ${args.join(" ")} failed: ${result.stderr || result.stdout}`);
   return parseOfficeJson(result.stdout);
+}
+
+function decodeXml(value) {
+  return String(value ?? "")
+    .replaceAll("&quot;", '"')
+    .replaceAll("&apos;", "'")
+    .replaceAll("&lt;", "<")
+    .replaceAll("&gt;", ">")
+    .replaceAll("&amp;", "&");
+}
+
+function xmlAttributes(text) {
+  const attributes = {};
+  for (const match of String(text || "").matchAll(/([A-Za-z_][\w:.-]*)="([^"]*)"/g)) {
+    attributes[match[1]] = decodeXml(match[2]);
+  }
+  return attributes;
+}
+
+function xmlTagAttributes(xml, name) {
+  const match = String(xml).match(new RegExp(`<(?:(?:[A-Za-z_][\\w.-]*):)?${name}\\b([^>]*)>`, "i"));
+  return match ? xmlAttributes(match[1]) : null;
+}
+
+function xmlAllTagAttributes(xml, name) {
+  const expression = new RegExp(`<(?:(?:[A-Za-z_][\\w.-]*):)?${name}\\b([^>]*)/?>`, "gi");
+  return [...String(xml).matchAll(expression)].map((match) => xmlAttributes(match[1]));
+}
+
+function xmlInnerText(xml, name) {
+  const match = String(xml).match(new RegExp(`<(?:(?:[A-Za-z_][\\w.-]*):)?${name}\\b[^>]*>([\\s\\S]*?)</(?:(?:[A-Za-z_][\\w.-]*):)?${name}>`, "i"));
+  return match ? decodeXml(match[1]) : "";
+}
+
+function normalizeContractValue(value) {
+  if (value == null) return null;
+  const text = String(value);
+  if (text === "1" || text.toLowerCase() === "true") return true;
+  if (text === "0" || text.toLowerCase() === "false") return false;
+  return text;
+}
+
+function normalizeContractAttrs(value, keys = null) {
+  const source = value || {};
+  const selected = keys || Object.keys(source);
+  return Object.fromEntries(selected
+    .filter((key) => Object.prototype.hasOwnProperty.call(source, key))
+    .sort()
+    .map((key) => [key, normalizeContractValue(source[key])]));
+}
+
+function normalizeDefinedNames(names) {
+  return (names || []).map((entry) => ({
+    name: entry.name || "",
+    body: String(entry.body || "").trim(),
+    localSheetId: entry.localSheetId == null ? null : String(entry.localSheetId)
+  })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+}
+
+function normalizeValidationContracts(entries) {
+  return (entries || []).map((entry) => ({
+    sqref: entry.sqref || "",
+    type: entry.type || "",
+    formula1: String(entry.formula1 || "")
+  })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+}
+
+async function readXlsxContract(filePath) {
+  const zip = await JSZip.loadAsync(await fs.readFile(filePath));
+  const workbookXml = await zip.file("xl/workbook.xml").async("string");
+  const definedNames = [...workbookXml.matchAll(/<(?:(?:[A-Za-z_][\w.-]*):)?definedName\b([^>]*)>([\s\S]*?)<\/(?:(?:[A-Za-z_][\w.-]*):)?definedName>/gi)]
+    .map((match) => ({ ...xmlAttributes(match[1]), body: decodeXml(match[2]) }));
+  const sheets = [];
+  for (let index = 1; index <= 4; index += 1) {
+    const worksheetXml = await zip.file(`xl/worksheets/sheet${index}.xml`).async("string");
+    const sheetPr = xmlTagAttributes(worksheetXml, "sheetPr") || {};
+    const pageSetUpPr = xmlTagAttributes(xmlInnerText(worksheetXml, "sheetPr"), "pageSetUpPr") || xmlTagAttributes(worksheetXml, "pageSetUpPr") || {};
+    const sheetView = xmlTagAttributes(worksheetXml, "sheetView") || {};
+    const validations = [...worksheetXml.matchAll(/<(?:(?:[A-Za-z_][\w.-]*):)?dataValidation\b([^>]*)>([\s\S]*?)<\/(?:(?:[A-Za-z_][\w.-]*):)?dataValidation>/gi)]
+      .map((match) => ({ ...xmlAttributes(match[1]), formula1: xmlInnerText(match[2], "formula1") }));
+    sheets.push({
+      index,
+      dimension: xmlTagAttributes(worksheetXml, "dimension")?.ref || null,
+      sheetFormatPr: xmlTagAttributes(worksheetXml, "sheetFormatPr") || {},
+      sheetPr,
+      pageSetUpPr,
+      sheetView,
+      columns: xmlAllTagAttributes(worksheetXml, "col"),
+      rows: xmlAllTagAttributes(worksheetXml, "row"),
+      merges: xmlAllTagAttributes(worksheetXml, "mergeCell").map((entry) => entry.ref).filter(Boolean).sort(),
+      printOptions: xmlTagAttributes(worksheetXml, "printOptions") || {},
+      pageMargins: xmlTagAttributes(worksheetXml, "pageMargins") || {},
+      pageSetup: xmlTagAttributes(worksheetXml, "pageSetup") || {},
+      headerFooter: xmlTagAttributes(worksheetXml, "headerFooter") || {},
+      headerFooterValues: Object.fromEntries(["oddHeader", "oddFooter", "evenHeader", "evenFooter", "firstHeader", "firstFooter"].map((name) => [name, xmlInnerText(worksheetXml, name)])),
+      validations,
+      hasAutoFilter: /<(?:(?:[A-Za-z_][\w.-]*):)?autoFilter\b/i.test(worksheetXml),
+      hasTableParts: /<(?:(?:[A-Za-z_][\w.-]*):)?tableParts\b/i.test(worksheetXml)
+    });
+  }
+  return { definedNames, sheets };
+}
+
+function effectiveColumnWidth(sheet, columnNumberValue) {
+  const matching = (sheet.columns || []).filter((entry) => columnNumberValue >= Number(entry.min) && columnNumberValue <= Number(entry.max));
+  const width = matching.at(-1)?.width;
+  return width == null ? Number(sheet.sheetFormatPr.defaultColWidth) : Number(width);
+}
+
+function effectiveRowHeight(sheet, rowNumber) {
+  const matching = (sheet.rows || []).find((entry) => Number(entry.r) === rowNumber);
+  return matching?.ht == null ? Number(sheet.sheetFormatPr.defaultRowHeight) : Number(matching.ht);
+}
+
+function expandRowSpec(spec) {
+  const rows = [];
+  for (const segment of String(spec).split(",")) {
+    const [start, end = start] = segment.split(":").map(Number);
+    rows.push({ start, end });
+  }
+  return rows;
+}
+
+function rowsForContract(sheetBaseline, limit = 1000) {
+  const rows = new Set();
+  for (const entry of sheetBaseline.rowHeights || []) {
+    for (const range of expandRowSpec(entry.rows)) {
+      rows.add(range.start);
+      rows.add(Math.min(range.end, limit));
+    }
+  }
+  return [...rows].filter((row) => row > 0 && row <= limit).sort((a, b) => a - b);
+}
+
+function expectedGeneratedMerges(baseline) {
+  const header = (baseline.sheets.UT.merges || []).filter((ref) => {
+    const match = ref.match(/(\d+)/);
+    return match && Number(match[1]) < 8;
+  });
+  const pattern = baseline.contract.generatedGeometry.UT.mergePattern;
+  const generated = [];
+  for (let row = 8; row <= 285; row += 1) {
+    for (const merge of pattern) {
+      const [start, end] = merge.split(":");
+      generated.push(`${start}${row}:${end}${row}`);
+    }
+  }
+  return [...header, ...generated].sort();
 }
 
 function clean(value) {
@@ -75,12 +224,18 @@ const UT_LINE_HEIGHT = 14.25;
 const UT_ROW_PADDING = 10;
 
 const DEFAULT_FIDELITY_POLICY = {
+  contractVersion: 2,
   preserve_sheet_order: true,
   preserve_sheet_visibility: true,
   sheets: {
     Cover: { show_gridlines: false, preserve_page_setup: true, preserve_merges: true },
     Histories: { show_gridlines: false, preserve_page_setup: true, preserve_merges: true },
-    UT: { show_gridlines: false, preserve_page_setup: true, preserve_merges: false },
+    UT: {
+      show_gridlines: false,
+      preserve_page_setup: true,
+      preserve_merges: false,
+      generated_merge_pattern: ["B:D", "E:X", "Y:AW", "AX:BC", "BD:BI", "BJ:BK", "BL:BR"]
+    },
     Evidence: { show_gridlines: true, preserve_page_setup: true, preserve_merges: true }
   }
 };
@@ -142,11 +297,12 @@ function rowHeightFromBaseline(sheetBaseline, row) {
 
 async function ensureFidelityPolicy(policyPath) {
   try {
-    await fs.access(policyPath);
+    const current = await fs.readFile(policyPath, "utf8");
+    if (current.includes('"contractVersion": 2')) return;
   } catch {
-    await fs.mkdir(path.dirname(policyPath), { recursive: true });
-    await fs.writeFile(policyPath, `${JSON.stringify(DEFAULT_FIDELITY_POLICY, null, 2)}\n`, "utf8");
   }
+  await fs.mkdir(path.dirname(policyPath), { recursive: true });
+  await fs.writeFile(policyPath, `${JSON.stringify(DEFAULT_FIDELITY_POLICY, null, 2)}\n`, "utf8");
 }
 
 function runFidelityGate(templatePath, candidatePath, policyPath) {
@@ -267,6 +423,163 @@ function assertLayoutContract(baseline, templateWorkbook, candidateWorkbook, fin
   }
 }
 
+function assertEqualContract(findings, code, message, expected, actual) {
+  if (JSON.stringify(expected) !== JSON.stringify(actual)) {
+    findings.push({ code, message, details: { expected, actual } });
+  }
+}
+
+function assertPackageContract(baseline, templatePackage, candidatePackage, candidateWorkbook, findings) {
+  const sheetNames = ["Cover", "Histories", "UT", "Evidence"];
+  const generated = baseline.contract.generatedGeometry;
+  const pageSetupFields = ["paperSize", "scale", "fitToWidth", "fitToHeight", "pageOrder", "orientation", "blackAndWhite", "draft", "cellComments", "horizontalDpi", "verticalDpi", "copies"];
+  const marginFields = ["left", "right", "top", "bottom", "header", "footer"];
+  const printOptionFields = ["headings", "gridLines", "gridLinesSet", "horizontalCentered", "verticalCentered"];
+  const sheetPrFields = ["filterMode"];
+  const pageSetUpPrFields = ["fitToPage"];
+  const headerFooterFields = ["differentOddEven", "differentFirst", "alignWithMargins", "scaleWithDoc"];
+
+  for (let index = 0; index < sheetNames.length; index += 1) {
+    const sheetName = sheetNames[index];
+    const sheetBaseline = baseline.sheets[sheetName];
+    const templateSheet = templatePackage.sheets[index];
+    const candidateSheet = candidatePackage.sheets[index];
+    const generatedSheet = generated[sheetName];
+    const expectedDimension = generatedSheet?.dimension || sheetBaseline.dimension;
+    if (candidateSheet.dimension !== expectedDimension) {
+      findings.push({ code: "dimension-contract", message: `${sheetName} dimension drifted from the frozen/generated contract`, details: { expected: expectedDimension, actual: candidateSheet.dimension } });
+    }
+    const expectedDefaultColumnWidth = Number(sheetBaseline.defaultColumnWidth);
+    const expectedDefaultRowHeight = Number(sheetBaseline.defaultRowHeight);
+    if (!approximatelyEqual(Number(candidateSheet.sheetFormatPr.defaultColWidth), expectedDefaultColumnWidth)) {
+      findings.push({ code: "default-column-width", message: `${sheetName} default column width drifted`, details: { expected: expectedDefaultColumnWidth, actual: candidateSheet.sheetFormatPr.defaultColWidth } });
+    }
+    if (!approximatelyEqual(Number(candidateSheet.sheetFormatPr.defaultRowHeight), expectedDefaultRowHeight)) {
+      findings.push({ code: "default-row-height", message: `${sheetName} default row height drifted`, details: { expected: expectedDefaultRowHeight, actual: candidateSheet.sheetFormatPr.defaultRowHeight } });
+    }
+    if (normalizeContractValue(candidateSheet.sheetView.showGridLines) !== normalizeContractValue(String(sheetBaseline.showGridLines))) {
+      findings.push({ code: "gridlines-contract", message: `${sheetName} gridline state drifted in package metadata`, details: { expected: sheetBaseline.showGridLines, actual: candidateSheet.sheetView.showGridLines } });
+    }
+    if (candidateSheet.hasAutoFilter || candidateSheet.hasTableParts) {
+      findings.push({ code: "filter-table-contract", message: `${sheetName} contains an unauthorized AutoFilter or table part` });
+    }
+
+    const widthRanges = generatedSheet?.columnWidths || sheetBaseline.columnWidths || [];
+    for (const widthEntry of widthRanges) {
+      for (const column of expandColumnSpec(widthEntry.columns)) {
+        const columnNumberValue = columnNumber(column);
+        const expectedWidth = sheetName === "Evidence" ? Number(widthEntry.width) : effectiveColumnWidth(templateSheet, columnNumberValue);
+        const actualWidth = effectiveColumnWidth(candidateSheet, columnNumberValue);
+        if (!approximatelyEqual(actualWidth, expectedWidth)) {
+          findings.push({ code: "column-width-contract", message: `${sheetName}!${column} width drifted`, details: { expected: expectedWidth, actual: actualWidth } });
+        }
+      }
+    }
+
+    if (Array.isArray(generatedSheet?.rows)) {
+      for (const rowEntry of generatedSheet.rows) {
+        for (const range of expandRowSpec(rowEntry.rows)) {
+          for (const row of [range.start, range.end]) {
+            const actualHeight = effectiveRowHeight(candidateSheet, row);
+            if (!approximatelyEqual(actualHeight, Number(rowEntry.height))) {
+              findings.push({ code: "generated-row-height-contract", message: `${sheetName} row ${row} height drifted`, details: { expected: Number(rowEntry.height), actual: actualHeight } });
+            }
+          }
+        }
+      }
+    } else {
+      for (const row of rowsForContract(sheetBaseline, 1048576)) {
+        if (sheetName === "Histories" && row >= 3 && row <= 6) continue;
+        if (sheetName === "UT" && row >= 8 && row <= 285) continue;
+        const expectedHeight = effectiveRowHeight(templateSheet, row);
+        const actualHeight = effectiveRowHeight(candidateSheet, row);
+        if (!approximatelyEqual(actualHeight, expectedHeight)) {
+          findings.push({ code: "row-height-contract", message: `${sheetName} row ${row} height drifted`, details: { expected: expectedHeight, actual: actualHeight } });
+        }
+      }
+      if (sheetName === "UT") {
+        const heightRule = generated.UT.heightRule;
+        const missingRows = [];
+        for (let row = 8; row <= 285; row += 1) {
+          const explicit = candidateSheet.rows.some((entry) => Number(entry.r) === row);
+          const actualHeight = effectiveRowHeight(candidateSheet, row);
+          if (!explicit || actualHeight < Number(heightRule.min) || actualHeight > Number(heightRule.max)) missingRows.push({ row, explicit, actualHeight });
+        }
+        if (missingRows.length) findings.push({ code: "generated-ut-row-contract", message: "UT generated rows do not all have bounded explicit geometry", details: { count: missingRows.length, samples: missingRows.slice(0, 5) } });
+      }
+    }
+
+    const expectedMerges = sheetName === "UT" ? expectedGeneratedMerges(baseline) : [...(sheetBaseline.merges || [])].sort();
+    assertEqualContract(findings, "merge-contract", `${sheetName} merge contract drifted`, expectedMerges, candidateSheet.merges);
+
+    for (const field of pageSetupFields) {
+      if (normalizeContractValue(candidateSheet.pageSetup[field]) !== normalizeContractValue(templateSheet.pageSetup[field])) {
+        findings.push({ code: "page-setup-contract", message: `${sheetName} pageSetup.${field} drifted`, details: { expected: templateSheet.pageSetup[field], actual: candidateSheet.pageSetup[field] } });
+      }
+    }
+    for (const field of marginFields) {
+      if (!approximatelyEqual(Number(candidateSheet.pageMargins[field]), Number(templateSheet.pageMargins[field]))) {
+        findings.push({ code: "page-margin-contract", message: `${sheetName} page margin ${field} drifted`, details: { expected: templateSheet.pageMargins[field], actual: candidateSheet.pageMargins[field] } });
+      }
+    }
+    for (const field of printOptionFields) {
+      if (normalizeContractValue(candidateSheet.printOptions[field]) !== normalizeContractValue(templateSheet.printOptions[field])) {
+        findings.push({ code: "print-options-contract", message: `${sheetName} printOptions.${field} drifted`, details: { expected: templateSheet.printOptions[field], actual: candidateSheet.printOptions[field] } });
+      }
+    }
+    for (const field of sheetPrFields) {
+      if (normalizeContractValue(candidateSheet.sheetPr[field]) !== normalizeContractValue(templateSheet.sheetPr[field])) {
+        findings.push({ code: "sheet-properties-contract", message: `${sheetName} sheetPr.${field} drifted`, details: { expected: templateSheet.sheetPr[field], actual: candidateSheet.sheetPr[field] } });
+      }
+    }
+    for (const field of pageSetUpPrFields) {
+      if (normalizeContractValue(candidateSheet.pageSetUpPr[field]) !== normalizeContractValue(templateSheet.pageSetUpPr[field])) {
+        findings.push({ code: "page-setup-properties-contract", message: `${sheetName} pageSetUpPr.${field} drifted`, details: { expected: templateSheet.pageSetUpPr[field], actual: candidateSheet.pageSetUpPr[field] } });
+      }
+    }
+    for (const field of headerFooterFields) {
+      if (normalizeContractValue(candidateSheet.headerFooter[field]) !== normalizeContractValue(templateSheet.headerFooter[field])) {
+        findings.push({ code: "header-footer-contract", message: `${sheetName} headerFooter.${field} drifted`, details: { expected: templateSheet.headerFooter[field], actual: candidateSheet.headerFooter[field] } });
+      }
+    }
+    assertEqualContract(findings, "header-footer-values", `${sheetName} header/footer text drifted`, templateSheet.headerFooterValues, candidateSheet.headerFooterValues);
+  }
+
+  assertEqualContract(findings, "defined-names-contract", "Defined-name set or formulas drifted from the frozen authority baseline", normalizeDefinedNames(baseline.definedNames), normalizeDefinedNames(candidatePackage.definedNames));
+  const expectedValidations = baseline.contract.validationContracts;
+  for (const sheetName of ["UT", "Evidence"]) {
+    const sheet = candidatePackage.sheets[sheetNames.indexOf(sheetName)];
+    assertEqualContract(findings, "validation-contract", `${sheetName} validation ranges/formulas drifted`, normalizeValidationContracts(expectedValidations[sheetName]), normalizeValidationContracts(sheet.validations));
+  }
+}
+
+async function assertStyleContract(baseline, templatePath, candidatePath, findings) {
+  const styleContract = baseline.contract.styleInvariants;
+  for (const [sheetName, config] of Object.entries(styleContract)) {
+    const rangeStart = config.anchors[0];
+    const rangeEnd = config.anchors.at(-1);
+    const templateChildren = officeJson(["get", templatePath, `/${sheetName}/${rangeStart}:${rangeEnd}`, "--depth", "0", "--json"]).data.results[0].children || [];
+    const candidateChildren = officeJson(["get", candidatePath, `/${sheetName}/${rangeStart}:${rangeEnd}`, "--depth", "0", "--json"]).data.results[0].children || [];
+    const templateByPath = new Map(templateChildren.map((cell) => [cell.path, cell.format || {}]));
+    const candidateByPath = new Map(candidateChildren.map((cell) => [cell.path, cell.format || {}]));
+    for (const anchor of config.anchors) {
+      const key = `/${sheetName}/${anchor}`;
+      const expected = templateByPath.get(key) || {};
+      const actual = candidateByPath.get(key) || {};
+      const normalizeStyleField = (field, value) => {
+        if (value == null && field === "protection.locked") return true;
+        if (value == null && field === "protection.hidden") return false;
+        return normalizeContractValue(value);
+      };
+      const expectedFields = Object.fromEntries(config.fields.map((field) => [field, normalizeStyleField(field, expected[field])]));
+      const actualFields = Object.fromEntries(config.fields.map((field) => [field, normalizeStyleField(field, actual[field])]));
+      if (JSON.stringify(expectedFields) !== JSON.stringify(actualFields)) {
+        findings.push({ code: "style-invariant-contract", message: `${sheetName}!${anchor} cloned-row style drifted`, details: { expected: expectedFields, actual: actualFields } });
+      }
+    }
+  }
+}
+
 function assertNoFindings(findings, report) {
   report.findings = findings;
   console.log(JSON.stringify(report, null, 2));
@@ -315,6 +628,10 @@ try {
   await ensureFidelityPolicy(fidelityPolicyPath);
   const templateWorkbook = await SpreadsheetFile.importXlsx(await FileBlob.load(templatePath));
   const workbook = await SpreadsheetFile.importXlsx(await FileBlob.load(candidatePath));
+  const [templatePackage, candidatePackage] = await Promise.all([
+    readXlsxContract(templatePath),
+    readXlsxContract(candidatePath)
+  ]);
   const sheetNames = workbook.worksheets.items.map((sheet) => sheet.name);
   try { assert.deepEqual(sheetNames, ["Cover", "Histories", "UT", "Evidence"]); } catch { fail("sheet-order", "Candidate sheets do not match the official four-sheet order", sheetNames); }
   const cover = workbook.worksheets.getItem("Cover");
@@ -374,6 +691,8 @@ try {
   }
 
   assertLayoutContract(baseline, templateWorkbook, workbook, findings);
+  assertPackageContract(baseline, templatePackage, candidatePackage, workbook, findings);
+  await assertStyleContract(baseline, templatePath, candidatePath, findings);
   report.fidelity = runFidelityGate(templatePath, candidatePath, fidelityPolicyPath);
   if (report.fidelity.status !== 0 || !report.fidelity.stdout.includes("PASS: XLSX structure and critical-range fidelity policy satisfied")) {
     fail("fidelity-policy", "Template fidelity policy did not pass", report.fidelity);
