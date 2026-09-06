@@ -31,8 +31,10 @@ try {
   fs.copyFileSync(path.join(sourceRoot, 'scripts', 'qa', 'generate-idts110-final-report.js'), path.join(clone, 'scripts', 'qa', 'generate-idts110-final-report.js'))
   git(clone, ['config', 'user.email', 'idts110-test@example.invalid'])
   git(clone, ['config', 'user.name', 'IDTS-110 receipt lifecycle test'])
-  git(clone, ['add', 'scripts/qa/generate-idts110-final-report.js'])
-  git(clone, ['commit', '-m', 'test: stage current final report generator'])
+  if (git(clone, ['status', '--porcelain', '--', 'scripts/qa/generate-idts110-final-report.js'])) {
+    git(clone, ['add', 'scripts/qa/generate-idts110-final-report.js'])
+    git(clone, ['commit', '-m', 'test: stage current final report generator'])
+  }
   fs.mkdirSync(path.join(clone, '.tmp', 'idts-110'), { recursive: true })
   fs.copyFileSync(path.join(sourceRoot, '.tmp', 'idts-110', 'all-results.json'), path.join(clone, '.tmp', 'idts-110', 'all-results.json'))
 
