@@ -207,3 +207,23 @@ The same end-to-end test retains the official-template substitution, missing
 manifest, review artifact/receipt/manifest tampering, and unrelated source
 drift negatives. No receipt, manifest, candidate report, ledger, or external
 state was fabricated or changed in this follow-up.
+
+### Final executable-path correction
+
+The Terra re-review identified that the default lifecycle test had exercised
+`buildReport(config)` only. This follow-up now removes the cloned default
+report before generation, uses `spawnSync(process.execPath,
+['scripts/qa/generate-idts110-final-report.js'], { cwd: clone })`, checks exit
+zero, confirms the output was absent then exists, parses CLI JSON for the exact
+default output path and receipt-derived review head, and verifies the written
+Markdown remains candidate-only with `PENDING_DONHV_REVIEW` and exact
+`130/135/13/278` plus `278/278` link totals.
+
+TDD RED first exposed a porcelain parser error: the first status line's leading
+space was stripped, parsing the allowed report path as `ocs/...`. The report
+gate now preserves raw `git status --porcelain` output. A second fixture RED
+showed that an already-committed clone does not need a staging commit for an
+identical generator; the clone only overlays/commits the generator when the
+source generator is currently dirty. The executable lifecycle test is green
+after both corrections. No review receipt, manifest, candidate report, ledger,
+or external state was created or changed.
