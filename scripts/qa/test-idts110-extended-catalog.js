@@ -30,7 +30,7 @@ assert.equal(catalog.cases.slice(0, 188).length, 188)
 assert.deepEqual(catalog.cases.slice(0, 188).map(row => row.caseId), catalog.existingCaseOrder)
 assert.equal(
   crypto.createHash('sha256').update(JSON.stringify(catalog.cases.slice(0, 188))).digest('hex'),
-  'd63468390bad54ae9e6af97a7a847937d5981b48e2ad0944273e0a8005fe4484'
+  'fb88127158ab2cf9bd3d8d9095f1c3a60869e1489b19b786d79fdf5127d191da'
 )
 
 const catalogByKey = new Map(catalog.cases.map(row => [row.caseId, row]))

@@ -49,7 +49,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AUTH-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated authentication fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call AuthService.me with a valid local bearer token.",
       "expectedResult": "The public profile is returned without passwordHash, tokenHash, or private session data.",
       "sourceAssertions": [
@@ -77,7 +77,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AUTH-008",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated authentication fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call a protected endpoint with an expired session token.",
       "expectedResult": "HTTP 401 is returned and no protected Bug data is exposed.",
       "sourceAssertions": [
@@ -105,7 +105,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AUTH-009",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated authentication fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call a protected endpoint with a revoked session token.",
       "expectedResult": "HTTP 401 is returned and the revoked session remains revoked.",
       "sourceAssertions": [
@@ -135,7 +135,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AUTH-010",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated authentication fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated authentication fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Logout with a valid token and then reuse the same token.",
       "expectedResult": "Logout succeeds, the session is revoked, and subsequent use returns HTTP 401.",
       "sourceAssertions": [
@@ -163,7 +163,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Create a NEW Bugs draft as Tester.",
       "expectedResult": "A draft is created and reporter_ID is derived from the authenticated Tester.",
       "sourceAssertions": [
@@ -186,18 +186,19 @@
       "mentorNumber": 17,
       "internalCaseKey": "UT-BUG-002",
       "domain": "Bug",
-      "title": "PM creates a NEW draft with server-owned reporter",
+      "title": "PM cannot create a NEW draft",
       "testLevel": "CAP_COMPONENT",
       "catalogEnvironment": "HYBRID_BTP",
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Create a NEW Bugs draft as PM.",
-      "expectedResult": "A draft is created and reporter_ID is derived from the authenticated PM.",
+      "expectedResult": "HTTP 403 is returned and no draft or active Bug is created.",
       "sourceAssertions": [
-        "srv/bug-service/drafts.js#prepareDraftNew",
-        "srv/bug-service/drafts.js#handleDraftSave"
+        "srv/service.js#BugService",
+        "srv/bug-service/permissions.js#assertBugCreatePermission",
+        "srv/bug-service/drafts.js#prepareDraftNew"
       ],
       "evidenceRequirements": [
         "case-specific result image",
@@ -221,7 +222,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-003",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Create a NEW Bugs draft as Developer.",
       "expectedResult": "HTTP 403 is returned and no draft or active Bug is created.",
       "sourceAssertions": [
@@ -252,7 +253,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-004",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "PATCH only title on an existing draft.",
       "expectedResult": "The new title is merged with the old draft and unrelated fields remain unchanged.",
       "sourceAssertions": [
@@ -280,7 +281,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-005",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "SAVE a complete draft with assignee_ID null.",
       "expectedResult": "The active Bug is PENDING_ASSIGNMENT, assignee remains null, and PM is the next processor.",
       "sourceAssertions": [
@@ -311,7 +312,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-006",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "SAVE a complete draft with a valid available responsible assignee.",
       "expectedResult": "The active Bug is ASSIGNED and the assigned Developer is the next processor.",
       "sourceAssertions": [
@@ -342,7 +343,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "CREATE an active Bug while supplying client-owned bugNumber and reporter_ID values.",
       "expectedResult": "Server-generated bugNumber and authenticated reporter values replace the forged input.",
       "sourceAssertions": [
@@ -371,7 +372,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-008",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "UPDATE title and severity without changing status or assignee.",
       "expectedResult": "Only submitted fields change and one EDIT history event contains both field logs.",
       "sourceAssertions": [
@@ -402,7 +403,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-009",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "PATCH a Bug as a role that lacks write permission.",
       "expectedResult": "HTTP 403 is returned before transition validation and no data or side effect changes.",
       "sourceAssertions": [
@@ -433,7 +434,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-010",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "UPDATE a syntactically valid Bug ID that does not exist.",
       "expectedResult": "HTTP 404 is returned and no history, notification, or delivery row is created.",
       "sourceAssertions": [
@@ -464,7 +465,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-BUG-011",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated bug write fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated bug write fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "PATCH status_code to a transition that is not allowed from the stored status.",
       "expectedResult": "HTTP 400 is returned and status, history, and notification remain unchanged.",
       "sourceAssertions": [
@@ -495,7 +496,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-VAL-PAIR-VALID",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated classification fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Submit an active Application Component and Defect Category pair with an active bridge.",
       "expectedResult": "The matching componentCategory_ID is derived and persisted.",
       "sourceAssertions": [
@@ -524,7 +525,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-VAL-PAIR-NOMAP",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated classification fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Submit two active codes whose Component Category bridge does not exist or is inactive.",
       "expectedResult": "HTTP 400 targets classification and no stale derived value is retained.",
       "sourceAssertions": [
@@ -553,7 +554,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-VAL-PAIR-CHANGE",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated classification fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "PATCH both classification inputs from one valid pair to another.",
       "expectedResult": "The new derived componentCategory_ID is persisted with the pair in one transaction.",
       "sourceAssertions": [
@@ -582,7 +583,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-VAL-PAIR-PARTIAL",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated classification fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated classification fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "PATCH only one classification input and leave the pair incomplete.",
       "expectedResult": "The stale componentCategory_ID is cleared and final Save remains blocked until the pair is valid.",
       "sourceAssertions": [
@@ -611,7 +612,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Assign an active, available Developer with a matching active responsibility.",
       "expectedResult": "The Bug becomes ASSIGNED; assignee and next processor persist with exact assignment history.",
       "sourceAssertions": [
@@ -642,7 +643,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Reassign an active Bug as PM to another eligible Developer.",
       "expectedResult": "The new assignee is persisted and the exact reassignment audit identifies PM as actor.",
       "sourceAssertions": [
@@ -673,7 +674,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-003",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call assignToDeveloper without assigneeID.",
       "expectedResult": "HTTP 400 targets assignee and no assignment side effect occurs.",
       "sourceAssertions": [
@@ -704,7 +705,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-004",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Assign a syntactically valid DeveloperProfile ID that does not exist.",
       "expectedResult": "HTTP 400 is returned and assignment state remains unchanged.",
       "sourceAssertions": [
@@ -735,7 +736,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-005",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Assign a DeveloperProfile whose user or profile is inactive.",
       "expectedResult": "HTTP 400 is returned and assignment state remains unchanged.",
       "sourceAssertions": [
@@ -766,7 +767,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-006",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Assign a candidate whose availability status is UNAVAILABLE.",
       "expectedResult": "HTTP 400 is returned and no assignment/history/notification occurs.",
       "sourceAssertions": [
@@ -797,7 +798,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Assign a Developer without an active responsibility for the derived Component Category.",
       "expectedResult": "HTTP 400 is returned and no mutation occurs.",
       "sourceAssertions": [
@@ -828,7 +829,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-008",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Assign a Developer whose responsibility SAP Module conflicts with the Bug SAP Module.",
       "expectedResult": "HTTP 400 is returned and no mutation occurs.",
       "sourceAssertions": [
@@ -859,7 +860,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-009",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Assign a Developer with a matching category responsibility and no module restriction.",
       "expectedResult": "Assignment succeeds when the other eligibility rules pass.",
       "sourceAssertions": [
@@ -890,7 +891,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-010",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call assignToDeveloper as Developer.",
       "expectedResult": "HTTP 403 is returned and status, assignee, history, notification, and delivery remain unchanged.",
       "sourceAssertions": [
@@ -921,7 +922,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ASN-011",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated assignment fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated assignment fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Read AssignableDevelopers for one valid classification pair.",
       "expectedResult": "Only active profiles with matching responsibility are returned with safe workload fields.",
       "sourceAssertions": [
@@ -948,7 +949,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-01A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Tester or PM assigns a valid Developer.",
       "expectedResult": "Status becomes ASSIGNED; exact ActionType ASSIGN_TO_DEVELOPER, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -980,7 +981,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-01B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call assignToDeveloper as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1012,7 +1013,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-01C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call assignToDeveloper from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -1044,7 +1045,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-01D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call assignToDeveloper without assigneeID.",
       "expectedResult": "HTTP 400 targets assigneeID and no state changes.",
       "sourceAssertions": [
@@ -1076,7 +1077,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-02A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Tester or PM clears the current assignee.",
       "expectedResult": "Status becomes PENDING_ASSIGNMENT; exact ActionType MOVE_TO_PENDING_ASSIGNMENT, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -1108,7 +1109,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-02B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call moveToPendingAssignment as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1140,7 +1141,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-02C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call moveToPendingAssignment from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -1172,7 +1173,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-03A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "The assigned Developer marks the Bug in review.",
       "expectedResult": "Status becomes IN_REVIEW; exact ActionType MARK_IN_REVIEW, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -1204,7 +1205,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-03B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call markInReview as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1236,7 +1237,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-03C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call markInReview from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -1268,7 +1269,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-03D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call markInReview on an eligible Bug without assignee_ID.",
       "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceAssertions": [
@@ -1300,7 +1301,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-04A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "The assigned Developer submits a nonblank reason.",
       "expectedResult": "Status becomes NEED_MORE_INFORMATION; exact ActionType REQUEST_MORE_INFORMATION, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -1332,7 +1333,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-04B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call requestMoreInformation as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1364,7 +1365,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-04C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call requestMoreInformation from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -1396,7 +1397,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-04D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call requestMoreInformation on an eligible Bug without assignee_ID.",
       "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceAssertions": [
@@ -1428,7 +1429,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-04E",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call requestMoreInformation with a blank reason.",
       "expectedResult": "HTTP 400 targets reason and no state changes.",
       "sourceAssertions": [
@@ -1460,7 +1461,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-05A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Tester or PM resubmits with a nonblank follow-up note.",
       "expectedResult": "Status becomes ASSIGNED; exact ActionType RESUBMIT_TO_DEVELOPER, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -1492,7 +1493,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-05B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resubmitToDeveloper as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1524,7 +1525,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-05C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resubmitToDeveloper from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -1556,7 +1557,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-05D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resubmitToDeveloper with a blank note.",
       "expectedResult": "HTTP 400 targets note and no state changes.",
       "sourceAssertions": [
@@ -1588,7 +1589,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-05E",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resubmitToDeveloper on an eligible Bug without assignee_ID.",
       "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceAssertions": [
@@ -1620,7 +1621,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-06A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "The assigned Developer submits a nonblank rejection reason.",
       "expectedResult": "Status becomes REJECTED; exact ActionType REJECT_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -1652,7 +1653,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-06B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call rejectBug as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1684,7 +1685,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-06C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call rejectBug from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -1716,7 +1717,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-06D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call rejectBug on an eligible Bug without assignee_ID.",
       "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceAssertions": [
@@ -1748,7 +1749,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-06E",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call rejectBug with a blank reason.",
       "expectedResult": "HTTP 400 targets reason and no state changes.",
       "sourceAssertions": [
@@ -1780,7 +1781,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-07A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "The assigned Developer starts progress.",
       "expectedResult": "Status becomes IN_PROGRESS; exact ActionType START_PROGRESS, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -1812,7 +1813,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-07B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call startProgress as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1844,7 +1845,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-07C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call startProgress from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -1876,7 +1877,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-07D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call startProgress on an eligible Bug without assignee_ID.",
       "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceAssertions": [
@@ -1908,7 +1909,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-08A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "The assigned Developer resolves with a nonblank note.",
       "expectedResult": "Status becomes RESOLVED; exact ActionType RESOLVE_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -1940,7 +1941,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-08B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resolveBug as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -1972,7 +1973,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-08C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resolveBug from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -2004,7 +2005,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-08D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resolveBug on an eligible Bug without assignee_ID.",
       "expectedResult": "HTTP 400 targets assignee and no state changes.",
       "sourceAssertions": [
@@ -2036,7 +2037,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-08E",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call resolveBug with a blank note.",
       "expectedResult": "HTTP 400 targets note and no state changes.",
       "sourceAssertions": [
@@ -2068,7 +2069,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-09A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Tester or PM sends a resolved Bug to retest.",
       "expectedResult": "Status becomes RETEST_REQUIRED; exact ActionType SEND_TO_RETEST, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -2100,7 +2101,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-09B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call sendToRetest as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -2132,7 +2133,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-09C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call sendToRetest from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -2164,7 +2165,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-10A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Tester or PM closes an eligible Bug.",
       "expectedResult": "Status becomes CLOSED; exact ActionType CLOSE_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -2196,7 +2197,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-10B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call closeBug as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -2228,7 +2229,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-10C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call closeBug from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -2260,7 +2261,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-11A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Tester or PM reopens with a nonblank reason.",
       "expectedResult": "Status becomes REOPENED; exact ActionType REOPEN_BUG, next processor, history, notification, and reload state match the contract.",
       "sourceAssertions": [
@@ -2292,7 +2293,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-11B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call reopenBug as a role or Developer owner not permitted for the stored Bug.",
       "expectedResult": "HTTP 403 is returned before mutation; Bug, history, notification, delivery, and comment counts remain unchanged.",
       "sourceAssertions": [
@@ -2324,7 +2325,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-11C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call reopenBug from one disallowed stored status while all required input is valid.",
       "expectedResult": "HTTP 400 rejects the transition and the transaction produces no partial side effect.",
       "sourceAssertions": [
@@ -2356,7 +2357,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-LC-11D",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated lifecycle fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated lifecycle fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call reopenBug with a blank reason.",
       "expectedResult": "HTTP 400 targets reason and no state changes.",
       "sourceAssertions": [
@@ -2388,7 +2389,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-CMT-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated comments fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Add a nonblank comment as TESTER.",
       "expectedResult": "The comment persists with authenticated author and role, survives reload, and does not change Bug status.",
       "sourceAssertions": [
@@ -2419,7 +2420,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-CMT-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated comments fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Add a nonblank comment as DEVELOPER.",
       "expectedResult": "The comment persists with authenticated author and role, survives reload, and does not change Bug status.",
       "sourceAssertions": [
@@ -2450,7 +2451,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-CMT-003",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated comments fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Add a nonblank comment as PM.",
       "expectedResult": "The comment persists with authenticated author and role, survives reload, and does not change Bug status.",
       "sourceAssertions": [
@@ -2481,7 +2482,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-CMT-006",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated comments fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Submit comment author_ID and authorRole_code for another user.",
       "expectedResult": "Server-owned actor values are persisted; impersonation data is not accepted.",
       "sourceAssertions": [
@@ -2510,7 +2511,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-CMT-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated comments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated comments fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call the bound addComment action with valid content.",
       "expectedResult": "One comment and one readable comment audit are committed while status and next processor remain unchanged.",
       "sourceAssertions": [
@@ -2541,7 +2542,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ATT-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated attachments fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Select one allowed file on a root NEW draft, then save the Bug.",
       "expectedResult": "No binary is uploaded before SAVE; after activation metadata and binary are linked to the active Bug.",
       "sourceAssertions": [
@@ -2572,7 +2573,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-ATT-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated attachments fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated attachments fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Upload an allowed file below the UI size limit to an active Bug.",
       "expectedResult": "Metadata and bytes persist with the recorded size and safe filename.",
       "sourceAssertions": [
@@ -2603,7 +2604,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-HIS-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated history fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Create a valid Bug.",
       "expectedResult": "One create HistoryEvent identifies the actor and readable summary.",
       "sourceAssertions": [
@@ -2632,7 +2633,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-HIS-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated history fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Update multiple important fields in one transaction.",
       "expectedResult": "One EDIT event contains one HistoryLog per changed field.",
       "sourceAssertions": [
@@ -2661,7 +2662,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-HIS-003",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated history fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Execute each of the eleven lifecycle actions on eligible fixtures.",
       "expectedResult": "Each event stores the exact registered ActionType rather than inferred generic status text.",
       "sourceAssertions": [
@@ -2690,7 +2691,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-HIS-004",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated history fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Read and reload an event containing code, user, status, and attachment values.",
       "expectedResult": "Display labels and values are stable and ordered newest first.",
       "sourceAssertions": [
@@ -2719,7 +2720,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-HIS-005",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated history fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Force a validation rejection before a write.",
       "expectedResult": "No HistoryEvent or HistoryLog is inserted.",
       "sourceAssertions": [
@@ -2748,7 +2749,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-HIS-006",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated history fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Force an authorization rejection before a write.",
       "expectedResult": "No HistoryEvent or HistoryLog is inserted.",
       "sourceAssertions": [
@@ -2777,7 +2778,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-HIS-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated history fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated history fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Inject a controlled history or notification failure after an attempted update.",
       "expectedResult": "Bug, history, comment, and notification changes roll back together.",
       "sourceAssertions": [
@@ -2806,7 +2807,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Trigger a status event with a valid next recipient.",
       "expectedResult": "One IN_APP/SENT notification identifies the correct recipient and event.",
       "sourceAssertions": [
@@ -2837,7 +2838,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Trigger an invalid lifecycle action.",
       "expectedResult": "No notification or email delivery row is inserted.",
       "sourceAssertions": [
@@ -2868,7 +2869,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-003",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Create a notification with email enabled and a valid recipient.",
       "expectedResult": "One EMAIL/PENDING delivery with a safe snapshot is persisted.",
       "sourceAssertions": [
@@ -2899,7 +2900,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-004",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Process notification while email delivery is disabled.",
       "expectedResult": "Delivery is SKIPPED with a safe reason and the Bug workflow remains committed.",
       "sourceAssertions": [
@@ -2930,7 +2931,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-005",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Process an active recipient with no email.",
       "expectedResult": "Delivery is SKIPPED and sendMail is not called.",
       "sourceAssertions": [
@@ -2961,7 +2962,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-006",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Process a notification for an inactive recipient.",
       "expectedResult": "Delivery is SKIPPED and sendMail is not called.",
       "sourceAssertions": [
@@ -2992,7 +2993,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Run one worker against an eligible PENDING delivery.",
       "expectedResult": "Lock and attempt count update atomically; final status is SENT and lock/error are cleared.",
       "sourceAssertions": [
@@ -3023,7 +3024,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-008",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Inject a controlled provider failure on the first attempt.",
       "expectedResult": "Status is FAILED, diagnostic is sanitized, nextAttemptAt is bounded, and workflow remains committed.",
       "sourceAssertions": [
@@ -3054,7 +3055,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-NTF-012",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated notifications and email fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated notifications and email fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Start two controlled workers against the same eligible delivery.",
       "expectedResult": "Only one compare-and-set claim succeeds and exactly one provider send occurs; repeat on HANA for production-parity evidence.",
       "sourceAssertions": [
@@ -3085,7 +3086,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-MON-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated monitoring fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Evaluate open/closed Bugs before, on, and after due date.",
       "expectedResult": "Only open Bugs past due are overdue.",
       "sourceAssertions": [
@@ -3114,7 +3115,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-MON-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated monitoring fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Aggregate seeded pending-assignment Bugs.",
       "expectedResult": "Count matches stored eligible rows.",
       "sourceAssertions": [
@@ -3143,7 +3144,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-MON-003",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated monitoring fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Aggregate open Bugs for each Developer.",
       "expectedResult": "Open counts match stored assignee/status data.",
       "sourceAssertions": [
@@ -3172,7 +3173,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-MON-004",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated monitoring fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Evaluate below, equal, and above workload limits.",
       "expectedResult": "isOverloaded changes at the documented boundary only.",
       "sourceAssertions": [
@@ -3201,7 +3202,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-MON-005",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated monitoring fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Aggregate Bugs across next-processor roles and statuses.",
       "expectedResult": "Only rows currently requiring that Developer action are counted.",
       "sourceAssertions": [
@@ -3230,7 +3231,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-MON-006",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated monitoring fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Apply search, where, orderBy, and limit to the same workload rows.",
       "expectedResult": "The same stable filtered order is returned.",
       "sourceAssertions": [
@@ -3259,7 +3260,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-MON-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated monitoring fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated monitoring fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call readAiOperationalMetrics as Tester and Developer.",
       "expectedResult": "HTTP 403 is returned and no metric payload is exposed.",
       "sourceAssertions": [
@@ -3288,7 +3289,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-008",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Suggest similar Bugs for a persisted source with eligible candidates.",
       "expectedResult": "Grounded candidates are ranked; source Bug is excluded; review audit is safe.",
       "sourceAssertions": [
@@ -3317,7 +3318,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-009",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Use input with no candidate above the threshold.",
       "expectedResult": "An empty/safe result is returned and DuplicateLinks remains unchanged.",
       "sourceAssertions": [
@@ -3346,7 +3347,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-010",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Request classification for a Bug with adequate context.",
       "expectedResult": "Every suggested code maps to an active catalog row and audit remains review-only.",
       "sourceAssertions": [
@@ -3375,7 +3376,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-011",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Request classification with minimal title/description context.",
       "expectedResult": "Unsafe or ungrounded fields return no suggestion or rules-based baseline, not invented codes.",
       "sourceAssertions": [
@@ -3404,7 +3405,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-012",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Summarize a Bug with comments and lifecycle history.",
       "expectedResult": "Summary, comment summary, events, and next action are grounded in stored data.",
       "sourceAssertions": [
@@ -3432,7 +3433,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-013",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Include instruction-like text inside a stored comment.",
       "expectedResult": "The comment is summarized as data and cannot override system constraints.",
       "sourceAssertions": [
@@ -3460,7 +3461,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-014",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Request explanations for the eligible candidate list.",
       "expectedResult": "Every explanation maps by safe candidate reference and no assignment occurs.",
       "sourceAssertions": [
@@ -3488,7 +3489,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-015",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Return an explanation for a candidate not issued by the backend.",
       "expectedResult": "The unknown row is discarded and no Developer ID is accepted from AI.",
       "sourceAssertions": [
@@ -3516,7 +3517,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-016",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Accept a PENDING suggestion as an allowed role.",
       "expectedResult": "Review state, reviewer, and time persist; Bug workflow remains unchanged.",
       "sourceAssertions": [
@@ -3545,7 +3546,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-017",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Reject a PENDING suggestion as an allowed role.",
       "expectedResult": "Review state, reviewer, and time persist; Bug workflow remains unchanged.",
       "sourceAssertions": [
@@ -3574,7 +3575,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-018",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Ignore a PENDING suggestion as an allowed role.",
       "expectedResult": "Review state, reviewer, and time persist; Bug workflow remains unchanged.",
       "sourceAssertions": [
@@ -3603,7 +3604,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-019A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Review an already ACCEPTED suggestion again.",
       "expectedResult": "HTTP 409 is returned and original review/business state remains unchanged.",
       "sourceAssertions": [
@@ -3632,7 +3633,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-019B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Review an already REJECTED suggestion again.",
       "expectedResult": "HTTP 409 is returned and original review/business state remains unchanged.",
       "sourceAssertions": [
@@ -3661,7 +3662,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-019C",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Review an already IGNORED suggestion again.",
       "expectedResult": "HTTP 409 is returned and original review/business state remains unchanged.",
       "sourceAssertions": [
@@ -3690,7 +3691,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-020",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Review a suggestion after expiresAt.",
       "expectedResult": "HTTP 409 is returned and no state is changed.",
       "sourceAssertions": [
@@ -3719,7 +3720,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-021",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Apply one ACCEPTED, unexpired, non-stale classification suggestion as Tester or PM.",
       "expectedResult": "Only classification allowlist fields change atomically; status/assignee/next processor remain unchanged.",
       "sourceAssertions": [
@@ -3749,7 +3750,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-022",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Change source classification after suggestion creation, then Apply.",
       "expectedResult": "HTTP 409 is returned and current classification remains unchanged.",
       "sourceAssertions": [
@@ -3779,7 +3780,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-023",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Confirm one candidate stored in an ACCEPTED Similar Bugs suggestion as Tester or PM.",
       "expectedResult": "One normalized DuplicateLink is committed without lifecycle mutation.",
       "sourceAssertions": [
@@ -3809,7 +3810,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-024",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Confirm the source Bug as its own duplicate.",
       "expectedResult": "HTTP 400 is returned and no DuplicateLink is created.",
       "sourceAssertions": [
@@ -3839,7 +3840,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-025A",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Confirm a pair whose forward link already exists.",
       "expectedResult": "HTTP 409 or the documented idempotent boundary is returned with one stored link only.",
       "sourceAssertions": [
@@ -3869,7 +3870,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-025B",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Confirm a pair whose reverse link already exists.",
       "expectedResult": "HTTP 409 or the documented idempotent boundary is returned with one stored link only.",
       "sourceAssertions": [
@@ -3899,7 +3900,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-AI-026",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated ai fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated ai fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Read 30-day metrics as PM through the OData function.",
       "expectedResult": "Only aggregate capability/status/latency/review counts are returned; prompt/response/error/secret fields are absent. Repeat on BTP for deployed-role confirmation.",
       "sourceAssertions": [
@@ -3929,7 +3930,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-001",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Call protected BugService without authentication.",
       "expectedResult": "HTTP 401 returns no business data.",
       "sourceAssertions": [
@@ -3959,7 +3960,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-002",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Run a Developer-only lifecycle action on another Developer assignee.",
       "expectedResult": "HTTP 403 is returned and no mutation occurs.",
       "sourceAssertions": [
@@ -3988,7 +3989,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-003",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "CREATE, UPDATE, or DELETE a projected code-list entity.",
       "expectedResult": "HTTP 405/403 is returned and the entity remains unchanged.",
       "sourceAssertions": [
@@ -4017,7 +4018,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-004",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "CREATE, UPDATE, or DELETE HistoryEvents, HistoryLogs, AiSuggestions, or Notifications.",
       "expectedResult": "HTTP 405/403 is returned and the entity remains unchanged.",
       "sourceAssertions": [
@@ -4046,7 +4047,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-005",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Read public Users, sessions, notifications, and AI projections.",
       "expectedResult": "passwordHash, tokenHash, lockToken, raw email body, prompt, and response are absent.",
       "sourceAssertions": [
@@ -4076,7 +4077,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-006",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Inject a controlled database exception containing sensitive text.",
       "expectedResult": "Public error and persisted diagnostic omit SQL, credentials, endpoint, and stack.",
       "sourceAssertions": [
@@ -4105,7 +4106,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-007",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Inject a controlled provider exception containing sensitive text.",
       "expectedResult": "Public error and audit diagnostic contain only allowlisted stable tokens.",
       "sourceAssertions": [
@@ -4134,7 +4135,7 @@
       "executionEnvironment": "LOCAL",
       "selector": "--idts110-case=UT-SEC-008",
       "testFile": "scripts/qa/test-idts110-mapping-atomic-execution.js",
-      "precondition": "Use an isolated security fixture at baseline bc0c47e522ae; capture the relevant before-state.",
+      "precondition": "Use an isolated security fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.",
       "action": "Force a failure during an operation that would touch Bug, history, notification, duplicate, classification, or attachment state.",
       "expectedResult": "The transaction leaves all affected business entities consistent with the before-state.",
       "sourceAssertions": [

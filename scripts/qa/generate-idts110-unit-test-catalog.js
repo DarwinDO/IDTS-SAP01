@@ -77,7 +77,7 @@ function add ({
     requirementIds,
     roles,
     coverage,
-    preconditions: `Use an isolated ${domain.toLowerCase()} fixture at baseline ${BASELINE_SHA.slice(0, 12)}; capture the relevant before-state.`,
+    preconditions: `Use an isolated ${domain.toLowerCase()} fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.`,
     input,
     steps: [
       'Prepare the stated precondition and capture the before-state.',
@@ -132,7 +132,7 @@ for (const [id, title, input] of [
 
 // Draft, create, update, and required-field validation.
 add({ caseId: 'UT-BUG-001', domain: 'Bug write', title: 'Tester creates a NEW draft with server-owned reporter', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['TESTER'], input: 'Create a NEW Bugs draft as Tester.', expectedResult: 'A draft is created and reporter_ID is derived from the authenticated Tester.', sourceTrace: source.draft, coverage: ['POSITIVE', 'ROLE', 'PERSISTENCE'] })
-add({ caseId: 'UT-BUG-002', domain: 'Bug write', title: 'PM creates a NEW draft with server-owned reporter', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['PM'], input: 'Create a NEW Bugs draft as PM.', expectedResult: 'A draft is created and reporter_ID is derived from the authenticated PM.', sourceTrace: source.draft, coverage: ['POSITIVE', 'ROLE', 'PERSISTENCE'] })
+add({ caseId: 'UT-BUG-002', domain: 'Bug write', title: 'PM cannot create a NEW draft', classification: 'ROLE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['PM'], input: 'Create a NEW Bugs draft as PM.', expectedResult: 'HTTP 403 is returned and no draft or active Bug is created.', sourceTrace: [{ file: 'srv/service.js', symbol: 'BugService' }, { file: 'srv/bug-service/permissions.js', symbol: 'assertBugCreatePermission' }].concat(source.draft.filter(trace => trace.symbol === 'prepareDraftNew')), coverage: ['ROLE', 'PERSISTENCE'] })
 add({ caseId: 'UT-BUG-003', domain: 'Bug write', title: 'Developer cannot create a NEW draft', classification: 'ROLE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['DEVELOPER'], input: 'Create a NEW Bugs draft as Developer.', expectedResult: 'HTTP 403 is returned and no draft or active Bug is created.', sourceTrace: source.draft.concat(source.permissions), coverage: ['ROLE', 'PERSISTENCE'] })
 add({ caseId: 'UT-BUG-004', domain: 'Bug write', title: 'PATCH preserves fields not included in a partial draft update', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), input: 'PATCH only title on an existing draft.', expectedResult: 'The new title is merged with the old draft and unrelated fields remain unchanged.', sourceTrace: [{ file: 'srv/bug-service/drafts.js', symbol: 'prepareDraftPatch' }], coverage: ['POSITIVE', 'PERSISTENCE'] })
 add({ caseId: 'UT-BUG-005', domain: 'Bug write', title: 'saving an unassigned draft creates Pending Assignment', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001', 'SRS-FR-ASSIGN-003'), input: 'SAVE a complete draft with assignee_ID null.', expectedResult: 'The active Bug is PENDING_ASSIGNMENT, assignee remains null, and PM is the next processor.', sourceTrace: source.draft.concat(source.write), coverage: ['POSITIVE', 'PERSISTENCE'] })

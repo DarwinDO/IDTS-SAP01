@@ -16,6 +16,7 @@ const taxonomy = readJson('docs/pm/evidence/idts-110/donhv-case-taxonomy.json')
 const catalog = readJson('docs/qa/idts-110-unit-test-catalog.json')
 const numberMap = readJson('docs/qa/idts-110-case-number-map.json')
 const approval = readJson('docs/pm/evidence/idts-110/catalog-approval.json')
+const SHA_IN_PRECONDITION = /\b[0-9a-f]{7,40}\b/ig
 
 const approved = taxonomy.cases.filter(item => item.reviewDecision === 'MAPPING_ONLY_NOT_PASS')
 const catalogById = new Map(catalog.cases.map(item => [item.caseId, item]))
@@ -29,6 +30,8 @@ assert.equal(approval.approvedBy, 'DonHV')
 assert.equal(approval.approvedCatalogCount, 278)
 assert.equal(manifest.schemaVersion, '1.0')
 assert.equal(manifest.jiraKey, 'IDTS-110')
+assert.equal(manifest.sourceBaselineSha, catalog.sourceBaselineSha)
+assert.equal(catalog.historicalCatalogBaselineSha, 'bc0c47e522ae208384d4b23dda21535dcc683683')
 assert.equal(manifest.authorization.approvedBy, 'DonHV')
 assert.equal(manifest.authorization.approvalAlreadyGranted, true)
 assert.equal(manifest.authorization.resultsPreApproved, false)
@@ -70,6 +73,7 @@ for (const entry of manifest.entries) {
   assert.deepEqual(entry.allowedTerminalStatuses, ['PASS', 'FAIL'])
   assert.equal(entry.allowedTerminalStatuses.some(status => /MAPPING_ONLY/.test(status)), false)
   assert.equal(entry.precondition, definition.preconditions)
+  assert.deepEqual(entry.precondition.match(SHA_IN_PRECONDITION) || [], [], `${entry.internalCaseKey} precondition must not embed a SHA that can conflict with manifest.sourceBaselineSha`)
   assert.equal(entry.action, definition.input)
   assert.equal(entry.expectedResult, definition.expectedResult)
   assert.deepEqual(entry.sourceAssertions, definition.sourceTrace.map(trace => `${trace.file}#${trace.symbol}`))
@@ -77,5 +81,19 @@ for (const entry of manifest.entries) {
   assert.equal(entry.evidenceRequirements.includes('case-specific result image'), true)
   assert.equal(entry.evidenceRequirements.includes('sanitized case manifest'), true)
 }
+
+const pmBugCreate = manifest.entries.find(entry => entry.internalCaseKey === 'UT-BUG-002')
+assert.deepEqual(
+  {
+    title: pmBugCreate?.title,
+    action: pmBugCreate?.action,
+    expectedResult: pmBugCreate?.expectedResult
+  },
+  {
+    title: 'PM cannot create a NEW draft',
+    action: 'Create a NEW Bugs draft as PM.',
+    expectedResult: 'HTTP 403 is returned and no draft or active Bug is created.'
+  }
+)
 
 console.log('IDTS-110 mapping atomic manifest: PASS — 135 local cases, 121 CAP + 14 OData, zero mapping-only terminal status.')

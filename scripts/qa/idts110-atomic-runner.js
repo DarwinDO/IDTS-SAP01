@@ -11,6 +11,7 @@ const PROJECT_ROOT = path.resolve(__dirname, '../..')
 const ATOMIC_OUTPUT_ROOT = path.join(PROJECT_ROOT, '.tmp', 'idts-110')
 const PACKAGED_EVIDENCE_ROOT = path.join(PROJECT_ROOT, 'docs', 'pm', 'evidence', 'idts-110', 'unit')
 const RESULT_STATUSES = ['PASS', 'FAIL', 'BLOCKED', 'HELD', 'NOT_RUN']
+const CASE_KEY_PATTERN = /^(?:IDTS110|UT)-[A-Z0-9-]+$/
 const EVIDENCE_KINDS = ['LOCAL_ATOMIC', 'UI_RUNTIME', 'BTP_INTEGRATION']
 const MAX_SAFE_STRING_LENGTH = 2000
 const MAX_SAFE_ARRAY_ITEMS = 64
@@ -160,7 +161,10 @@ function assertSafeValue (value, location = 'value', seen = new Set(), depth = 0
   if (depth > MAX_SAFE_DEPTH) fail(`value exceeds depth ${MAX_SAFE_DEPTH} at ${location}`)
   seen.add(value)
   if (Array.isArray(value)) {
-    if (value.length > MAX_SAFE_ARRAY_ITEMS) fail(`array length exceeds ${MAX_SAFE_ARRAY_ITEMS} items at ${location}`)
+    const maxArrayItems = location === 'value.results' && Number.isInteger(options.maxArrayItems) && options.maxArrayItems >= MAX_SAFE_ARRAY_ITEMS
+      ? options.maxArrayItems
+      : MAX_SAFE_ARRAY_ITEMS
+    if (value.length > maxArrayItems) fail(`array length exceeds ${maxArrayItems} items at ${location}`)
     for (let index = 0; index < value.length; index += 1) assertSafeValue(value[index], `${location}[${index}]`, seen, depth + 1, options)
   } else {
     const maxObjectProperties = Number.isInteger(options.maxObjectProperties) && options.maxObjectProperties >= MAX_SAFE_OBJECT_PROPERTIES
@@ -205,7 +209,7 @@ function readAtomicOptions (argv = process.argv.slice(2)) {
   const modeValue = parseFlag(argv, 'mode')
   const outputValue = parseFlag(argv, 'output')
   const caseKey = caseKeyValue === undefined ? null : requireNonEmptyString(caseKeyValue, 'case')
-  if (caseKey !== null && !/^IDTS110-[A-Z0-9]+$/.test(caseKey)) fail('case must be a safe IDTS-110 internal key')
+  if (caseKey !== null && !CASE_KEY_PATTERN.test(caseKey)) fail('case must be a safe IDTS-110 internal key')
   const baselineSha = baselineValue === undefined ? null : assertBaseline(baselineValue)
   const executor = executorValue === undefined ? null : redactText(requireNonEmptyString(executorValue, 'executor'))
   const mode = modeValue === undefined ? 'local' : requireNonEmptyString(modeValue, 'mode')
@@ -243,7 +247,7 @@ function unavailableAtomicDefinition (caseKey, plannedTestFile) {
 }
 
 async function runAtomicUnavailableCase ({ caseKey, baselineSha, executor, plannedTestFile, reason = null, emit = true }) {
-  if (typeof caseKey !== 'string' || !/^IDTS110-[A-Z0-9]+$/.test(caseKey)) fail('case must be a safe IDTS-110 internal key')
+  if (typeof caseKey !== 'string' || !CASE_KEY_PATTERN.test(caseKey)) fail('case must be a safe IDTS-110 internal key')
   const definition = unavailableAtomicDefinition(caseKey, plannedTestFile)
   const message = `ATOMIC_ADAPTER_UNAVAILABLE: ${reason || `selector ${caseKey} is not owned by this runner`}.`
   const evidenceIds = [`${caseKey}-RESULT`]
@@ -562,7 +566,10 @@ function statusFromError (error) {
 
 function safeErrorMessage (error) {
   const message = error && typeof error.message === 'string' ? error.message : String(error || 'Atomic assertion failed.')
-  return redactText(message).slice(0, 1000) || 'Atomic assertion failed.'
+  return redactText(message)
+    .replace(/\bundefined\b/gi, '[UNSPECIFIED]')
+    .replace(/MAPPING_ONLY/gi, '[FORBIDDEN_STATUS]')
+    .slice(0, 1000) || 'Atomic assertion failed.'
 }
 
 function buildResult ({ definition, assertionId, baselineSha, executor, startedAt, completedAt, outcome, statusOverride }) {
@@ -723,7 +730,7 @@ function validateAtomicResult (result, options = {}) {
   for (const field of Object.keys(result)) if (!REQUIRED_RESULT_FIELDS.includes(field)) fail(`result contains unsupported field ${field}`)
   if (result.schemaVersion !== '1.0') fail('result schemaVersion must be 1.0')
   if (result.jiraKey !== 'IDTS-110') fail('result jiraKey must be IDTS-110')
-  if (typeof result.caseKey !== 'string' || !/^IDTS110-[A-Z0-9]+$/.test(result.caseKey)) fail('result caseKey is invalid')
+  if (typeof result.caseKey !== 'string' || !CASE_KEY_PATTERN.test(result.caseKey)) fail('result caseKey is invalid')
   if (!Number.isInteger(result.mentorNumber) || result.mentorNumber < 1 || result.mentorNumber > 278) fail('result mentorNumber is invalid')
   if (result.assertionId !== expectedAssertionId(result.caseKey)) fail('result assertionId must be <caseKey>-A1')
   for (const field of ['title', 'executor', 'testFile', 'testCommand', 'preconditions', 'input', 'expectedResult', 'actualResult', 'limitation', 'reviewStatus']) {
@@ -890,7 +897,7 @@ function writeAtomicBatch ({ runId, sourceBaselineSha, catalogSha, approvalRefer
     totals: Object.fromEntries(RESULT_STATUSES.map(status => [status, safeResults.filter(result => result.status === status).length]))
   }
   assertNoUndefined(batch)
-  assertSafeValue(batch)
+  assertSafeValue(batch, 'value', new Set(), 0, { maxArrayItems: safeResults.length })
   const target = atomicOutputPath(outputPath)
   const temporaryPath = path.join(path.dirname(target), `.${path.basename(target)}.${process.pid}.${Date.now()}.${crypto.randomBytes(8).toString('hex')}.tmp`)
   assertNoReparseAncestors(path.dirname(temporaryPath))

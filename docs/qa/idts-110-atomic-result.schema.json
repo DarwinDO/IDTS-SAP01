@@ -135,7 +135,7 @@
     },
     "caseKey": {
       "type": "string",
-      "pattern": "^IDTS110-[A-Z0-9]+$"
+      "pattern": "^(?:IDTS110|UT)-[A-Z0-9-]+$"
     },
     "mentorNumber": {
       "type": "integer",
@@ -144,7 +144,7 @@
     },
     "assertionId": {
       "type": "string",
-      "pattern": "^IDTS110-[A-Z0-9]+-A1$"
+      "pattern": "^(?:IDTS110|UT)-[A-Z0-9-]+-A1$"
     },
     "title": {
       "type": "string",
@@ -260,7 +260,7 @@
       "items": {
         "type": "string",
         "minLength": 1,
-        "pattern": "^IDTS110-[A-Z0-9]+-(?:RESULT|VISUAL)$"
+        "pattern": "^(?:IDTS110|UT)-[A-Z0-9-]+-(?:RESULT|VISUAL)$"
       }
     },
     "limitation": {
