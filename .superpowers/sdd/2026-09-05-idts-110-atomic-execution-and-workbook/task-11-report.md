@@ -133,3 +133,19 @@ independent review must produce a SHA-bound receipt with its exact reviewed
 head and zero Critical/Major/Important counts; only then can the generator
 emit the receipt-verified candidate report. Candidate review remains
 `PENDING_DONHV_REVIEW` and external mutations remain `[]`.
+
+### Final focused checks for this fix wave
+
+- `node scripts/qa/test-idts110-final-report-receipts.js` — PASS.
+- `node scripts/sap490/test-idts110-workbook-validation-receipt.mjs` — PASS.
+- `node scripts/qa/test-idts110-extension-manifest.js` and
+  `node scripts/qa/test-idts110-extended-catalog.js` — PASS.
+- `NODE_PATH=E:\IDTS-SAP01-worktrees\idts-110-local-primary-harness-donhv\node_modules`
+  with `node scripts/qa/test-idts110-atomic-runner.js` — PASS; no dependency
+  was installed or changed.
+- `officecli validate docs/sap490/generated/Unit_Test_IDTS_SAP01_en_v0.5_candidate.xlsx`
+  — PASS; `ai-devkit lint --json` — PASS; `node scripts/qa/secret-scan.js` and
+  `node scripts/qa/check-agent-rules.js` — PASS; `git diff --check` — PASS.
+- `node scripts/qa/generate-idts110-final-report.js` — expected exit `1`
+  because no pinned independent-review receipt manifest exists. This is the
+  intentional fail-closed proof; it did not alter the previous candidate report.
