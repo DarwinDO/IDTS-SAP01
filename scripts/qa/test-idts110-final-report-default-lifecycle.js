@@ -3,7 +3,7 @@
 
 const assert = require('node:assert/strict')
 const crypto = require('node:crypto')
-const { execFileSync } = require('node:child_process')
+const { execFileSync, spawnSync } = require('node:child_process')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
@@ -28,8 +28,11 @@ const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'idts110-final-report-de
 const clone = path.join(temporary, 'repo')
 try {
   execFileSync('git', ['clone', '--local', '--no-hardlinks', sourceRoot, clone], { stdio: 'pipe' })
+  fs.copyFileSync(path.join(sourceRoot, 'scripts', 'qa', 'generate-idts110-final-report.js'), path.join(clone, 'scripts', 'qa', 'generate-idts110-final-report.js'))
   git(clone, ['config', 'user.email', 'idts110-test@example.invalid'])
   git(clone, ['config', 'user.name', 'IDTS-110 receipt lifecycle test'])
+  git(clone, ['add', 'scripts/qa/generate-idts110-final-report.js'])
+  git(clone, ['commit', '-m', 'test: stage current final report generator'])
   fs.mkdirSync(path.join(clone, '.tmp', 'idts-110'), { recursive: true })
   fs.copyFileSync(path.join(sourceRoot, '.tmp', 'idts-110', 'all-results.json'), path.join(clone, '.tmp', 'idts-110', 'all-results.json'))
 
@@ -55,9 +58,26 @@ try {
   git(clone, ['add', '--force', path.relative(clone, config.reviewArtifact), path.relative(clone, config.workbookReceipt), path.relative(clone, config.reviewReceipt), path.relative(clone, config.receiptManifest)])
   git(clone, ['commit', '-m', 'test: add receipt lifecycle fixtures'])
 
-  const report = buildReport(config)
+  fs.rmSync(config.output, { force: true })
+  assert.equal(fs.existsSync(config.output), false, 'default report output must not preexist the CLI invocation')
+  const generated = spawnSync(process.execPath, ['scripts/qa/generate-idts110-final-report.js'], { cwd: clone, encoding: 'utf8', maxBuffer: 32 * 1024 * 1024 })
+  assert.equal(generated.status, 0, generated.stderr || generated.stdout)
+  assert.equal(fs.existsSync(config.output), true, 'default generator CLI must write its default report output')
+  const report = JSON.parse(generated.stdout)
+  const markdown = fs.readFileSync(config.output, 'utf8')
+  assert.equal(report.output, 'docs/pm/evidence/idts-110/final-execution-report.md')
   assert.equal(report.authority.reviewHead, reviewedHead)
-  assert.equal(fs.existsSync(config.output), true, 'default generator must write its default report output')
+  assert.deepEqual({
+    candidatePass: report.workbook.candidatePass,
+    mappingOnly: report.workbook.mappingOnly,
+    blocked: report.workbook.blocked,
+    total: report.workbook.total,
+    utEvidenceLinks: report.workbook.utEvidenceLinks,
+    evidenceCardLinks: report.workbook.evidenceCardLinks
+  }, { candidatePass: 130, mappingOnly: 135, blocked: 13, total: 278, utEvidenceLinks: 278, evidenceCardLinks: 278 })
+  assert.match(markdown, /Candidate-only handoff\. Result review is \*\*PENDING_DONHV_REVIEW\*\*/)
+  assert.ok(markdown.includes(`| Independent review head | \`${reviewedHead}\` |`))
+  assert.match(markdown, /130 Candidate PASS \/ 135 Mapping Only \/ 13 Blocked \/ 278 total/)
 
   assert.throws(() => buildReport({ ...config, workbook: config.template }), /candidate workbook SHA/i, 'official template substitution must fail')
 

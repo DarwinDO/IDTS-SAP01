@@ -184,3 +184,26 @@ not eligible to become a clean receipt. The next step is a new independent
 review of this second fix head. Only if it has zero Critical/Major/Important
 findings may its artifact and receipt be created, then the manifest helper run,
 then the default final-report generator run.
+
+## Exceptional final fix follow-up — executable default generator proof
+
+The receipt lifecycle test originally called `buildReport(config)`, which only
+validates inputs and does not execute `main()` or write the default Markdown
+output. The test now removes the default output first, proves it does not
+exist, then invokes `node scripts/qa/generate-idts110-final-report.js` through
+`spawnSync(process.execPath, args)` in the disposable clone. It asserts exit
+zero, a newly created default output, the emitted default output path, the
+receipt-derived review head, exact `130/135/13/278` workbook counts and
+`278/278` links, and candidate-only/PENDING_DONHV_REVIEW Markdown content.
+
+TDD RED exposed a real boundary defect: `gitText(...).trim()` stripped the
+leading porcelain status column for the first dirty report-output line, causing
+the allowed default report path to be parsed as `ocs/...` and wrongly rejected.
+The boundary now preserves raw `git status --porcelain` output while retaining
+trimmed Git output for ref/diff commands. GREEN:
+`node scripts/qa/test-idts110-final-report-default-lifecycle.js`.
+
+The same end-to-end test retains the official-template substitution, missing
+manifest, review artifact/receipt/manifest tampering, and unrelated source
+drift negatives. No receipt, manifest, candidate report, ledger, or external
+state was fabricated or changed in this follow-up.

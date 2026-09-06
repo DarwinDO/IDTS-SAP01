@@ -74,9 +74,10 @@ function commandAvailable(command) {
   return lookup.status === 0 && Boolean(String(lookup.stdout || '').trim())
 }
 
-function gitText(root, args) {
+function gitText(root, args, trim = true) {
   try {
-    return execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim()
+    const output = execFileSync('git', args, { cwd: root, encoding: 'utf8' })
+    return trim ? output.trim() : output
   } catch (error) {
     fail(`git ${args.join(' ')} failed: ${error.message}`)
   }
@@ -88,7 +89,7 @@ function assertReceiptBoundary(root, receipt, options) {
   assertThat(ancestor.status === 0, `receipt reviewed head ${receipt.reviewedHead} is not reachable from HEAD`)
   const changed = gitText(root, ['diff', '--name-only', `${receipt.reviewedHead}..HEAD`]).split(/\r?\n/).filter(Boolean)
   assertThat(changed.every(file => receiptPaths.includes(file)), `receipt is stale because reviewed source changed: ${changed.filter(file => !receiptPaths.includes(file)).join(', ')}`)
-  const dirty = gitText(root, ['status', '--porcelain']).split(/\r?\n/).filter(Boolean).map(line => line.slice(3).replaceAll('\\', '/'))
+  const dirty = gitText(root, ['status', '--porcelain'], false).split(/\r?\n/).filter(Boolean).map(line => line.slice(3).replaceAll('\\', '/'))
   assertThat(dirty.every(file => file === relative(root, options.output)), `receipt inputs are dirty: ${dirty.filter(file => file !== relative(root, options.output)).join(', ')}`)
 }
 
