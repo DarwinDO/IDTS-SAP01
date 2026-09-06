@@ -28,10 +28,10 @@ const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'idts110-final-report-de
 const clone = path.join(temporary, 'repo')
 try {
   execFileSync('git', ['clone', '--local', '--no-hardlinks', sourceRoot, clone], { stdio: 'pipe' })
-  fs.copyFileSync(path.join(sourceRoot, 'scripts', 'qa', 'generate-idts110-final-report.js'), path.join(clone, 'scripts', 'qa', 'generate-idts110-final-report.js'))
   git(clone, ['config', 'user.email', 'idts110-test@example.invalid'])
   git(clone, ['config', 'user.name', 'IDTS-110 receipt lifecycle test'])
-  if (git(clone, ['status', '--porcelain', '--', 'scripts/qa/generate-idts110-final-report.js'])) {
+  if (git(sourceRoot, ['status', '--porcelain', '--', 'scripts/qa/generate-idts110-final-report.js'])) {
+    fs.copyFileSync(path.join(sourceRoot, 'scripts', 'qa', 'generate-idts110-final-report.js'), path.join(clone, 'scripts', 'qa', 'generate-idts110-final-report.js'))
     git(clone, ['add', 'scripts/qa/generate-idts110-final-report.js'])
     git(clone, ['commit', '-m', 'test: stage current final report generator'])
   }
