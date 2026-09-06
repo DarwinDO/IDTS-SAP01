@@ -479,7 +479,7 @@ function assertPackageContract(baseline, templatePackage, candidatePackage, cand
     if (Array.isArray(generatedSheet?.rows)) {
       for (const rowEntry of generatedSheet.rows) {
         for (const range of expandRowSpec(rowEntry.rows)) {
-          for (const row of [range.start, range.end]) {
+          for (let row = range.start; row <= range.end; row += 1) {
             const actualHeight = effectiveRowHeight(candidateSheet, row);
             if (!approximatelyEqual(actualHeight, Number(rowEntry.height))) {
               findings.push({ code: "generated-row-height-contract", message: `${sheetName} row ${row} height drifted`, details: { expected: Number(rowEntry.height), actual: actualHeight } });

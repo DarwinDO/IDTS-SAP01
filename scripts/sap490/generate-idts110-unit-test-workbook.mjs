@@ -22,7 +22,6 @@ const UT_TEST_CHARS_PER_LINE = 39;
 const UT_RESULT_CHARS_PER_LINE = 58;
 const UT_LINE_HEIGHT = 14.25;
 const UT_ROW_PADDING = 10;
-const GENERATION_STARTED_AT = Date.now();
 
 function parseArgs(argv) {
   return Object.fromEntries(argv.slice(2).map((arg) => {
@@ -229,11 +228,13 @@ function rawSet(outputPath, sheetName, xpath, action, xml) {
   return result;
 }
 
-function stopOwnedOfficeCliProcesses() {
-  if (process.platform !== "win32") return;
-  const cutoff = new Date(GENERATION_STARTED_AT).toISOString();
-  const command = `$cutoff = [DateTime]::Parse('${cutoff}'); Get-Process officecli -ErrorAction SilentlyContinue | Where-Object { $_.StartTime -ge $cutoff } | Stop-Process -Force`;
-  spawnSync("powershell.exe", ["-NoProfile", "-Command", command], { encoding: "utf8", maxBuffer: 2 * 1024 * 1024 });
+function closeOfficeCliDocument(outputPath) {
+  const result = spawnSync("officecli", ["close", outputPath], {
+    encoding: "utf8",
+    maxBuffer: 2 * 1024 * 1024
+  });
+  if (result.error) throw result.error;
+  if (result.status !== 0) throw new Error(`OfficeCLI document close failed: ${result.stderr || result.stdout}`);
 }
 
 function restoreTemplatePrintSetup(outputPath) {
@@ -519,7 +520,7 @@ async function main() {
   // hyperlink setter and HYPERLINK formulas are not evaluated by OfficeCLI.
   applyNativeHyperlinks(outputPath, records);
   restoreTemplatePrintSetup(outputPath);
-  stopOwnedOfficeCliProcesses();
+  closeOfficeCliDocument(outputPath);
   await restoreWorksheetDimensions(outputPath);
   await fs.rm(`${outputPath}.inspect.ndjson`, { force: true });
   console.log(JSON.stringify({
