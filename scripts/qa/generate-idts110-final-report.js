@@ -83,13 +83,35 @@ function gitText(root, args) {
 }
 
 function assertReceiptBoundary(root, receipt, options) {
-  const receiptPaths = [options.receiptManifest, options.workbookReceipt, options.reviewReceipt, options.output].map(file => relative(root, file))
+  const receiptPaths = [options.reviewArtifact, options.receiptManifest, options.workbookReceipt, options.reviewReceipt, options.output].map(file => relative(root, file))
   const ancestor = spawnSync('git', ['merge-base', '--is-ancestor', receipt.reviewedHead, 'HEAD'], { cwd: root, encoding: 'utf8' })
   assertThat(ancestor.status === 0, `receipt reviewed head ${receipt.reviewedHead} is not reachable from HEAD`)
   const changed = gitText(root, ['diff', '--name-only', `${receipt.reviewedHead}..HEAD`]).split(/\r?\n/).filter(Boolean)
   assertThat(changed.every(file => receiptPaths.includes(file)), `receipt is stale because reviewed source changed: ${changed.filter(file => !receiptPaths.includes(file)).join(', ')}`)
   const dirty = gitText(root, ['status', '--porcelain']).split(/\r?\n/).filter(Boolean).map(line => line.slice(3).replaceAll('\\', '/'))
   assertThat(dirty.every(file => file === relative(root, options.output)), `receipt inputs are dirty: ${dirty.filter(file => file !== relative(root, options.output)).join(', ')}`)
+}
+
+function createReceiptManifest(options) {
+  const workbook = readJson(options.workbookReceipt)
+  const review = readJson(options.reviewReceipt)
+  assertThat(workbook.kind === 'idts-110-workbook-validation-receipt' && workbook.schemaVersion === 1, 'workbook receipt schema is invalid')
+  assertThat(review.kind === 'idts-110-independent-review-receipt' && review.schemaVersion === 1, 'review receipt schema is invalid')
+  assertThat(workbook.worktreeClean === true && review.worktreeClean === true, 'receipt records a dirty review worktree')
+  assertThat(workbook.reviewedHead === review.reviewedHead && /^[0-9a-f]{40}$/i.test(workbook.reviewedHead), 'receipt reviewed heads do not match')
+  assertThat(fileSha256(options.reviewArtifact) === String(review.artifactSha256 || '').toUpperCase(), 'independent review artifact SHA does not match its receipt')
+  const counts = review.counts || {}
+  assertThat(Number(counts.critical) === 0 && Number(counts.major) === 0 && Number(counts.important) === 0, 'independent review has Critical, Major, or Important findings')
+  return {
+    kind: 'idts-110-final-report-receipt-manifest',
+    schemaVersion: 1,
+    reviewedHead: workbook.reviewedHead,
+    reviewArtifact: relative(options.root, options.reviewArtifact),
+    workbookReceipt: relative(options.root, options.workbookReceipt),
+    reviewReceipt: relative(options.root, options.reviewReceipt),
+    reviewArtifactSha256: fileSha256(options.reviewArtifact),
+    receiptSha256: { workbook: fileSha256(options.workbookReceipt), review: fileSha256(options.reviewReceipt) }
+  }
 }
 
 function validateStatusCounts(catalog, historical, results) {
@@ -169,6 +191,10 @@ function validateInputs(options) {
   assertThat(Array.isArray(ledger.externalMutations) && ledger.externalMutations.length === 0, 'source ledger externalMutations is not []')
   if (catalog.externalMutations !== undefined) assertThat(Array.isArray(catalog.externalMutations) && catalog.externalMutations.length === 0, 'catalog externalMutations is not []')
   assertThat(receiptManifest.kind === 'idts-110-final-report-receipt-manifest' && receiptManifest.schemaVersion === 1, 'receipt manifest schema is invalid')
+  assertThat(receiptManifest.reviewedHead === String(receiptManifest.reviewedHead || '').toLowerCase() && /^[0-9a-f]{40}$/.test(receiptManifest.reviewedHead), 'receipt manifest reviewed head is invalid')
+  assertThat(receiptManifest.reviewArtifact === relative(options.root, options.reviewArtifact), 'receipt manifest review artifact path is not the exact default path')
+  assertThat(receiptManifest.workbookReceipt === relative(options.root, options.workbookReceipt) && receiptManifest.reviewReceipt === relative(options.root, options.reviewReceipt), 'receipt manifest receipt paths are not the exact default paths')
+  assertThat(fileSha256(options.reviewArtifact) === String(receiptManifest.reviewArtifactSha256 || '').toUpperCase(), 'review artifact SHA does not match the receipt manifest')
   const receipts = verifyReceipts({
     workbook: options.workbook,
     template: options.template,
@@ -178,6 +204,7 @@ function validateInputs(options) {
     reviewReceipt: options.reviewReceipt,
     receiptHashes: receiptManifest.receiptSha256
   })
+  assertThat(receiptManifest.reviewedHead === receipts.review.reviewedHead, 'receipt manifest reviewed head does not match the review receipt')
   assertReceiptBoundary(options.root, receipts.review, options)
 
   const cases = Array.isArray(catalog.cases) ? catalog.cases : []
@@ -390,4 +417,4 @@ function main() {
 
 if (require.main === module) main()
 
-module.exports = { buildReport: validateInputs, makeMarkdown, parseArgs, verifyReceipts }
+module.exports = { buildReport: validateInputs, makeMarkdown, parseArgs, verifyReceipts, createReceiptManifest, defaults }

@@ -149,3 +149,38 @@ emit the receipt-verified candidate report. Candidate review remains
 - `node scripts/qa/generate-idts110-final-report.js` — expected exit `1`
   because no pinned independent-review receipt manifest exists. This is the
   intentional fail-closed proof; it did not alter the previous candidate report.
+
+## Exceptional final fix wave — operable receipt lifecycle
+
+The scoped re-review found that the first receipt implementation was not
+operable because it referenced no manifest and excluded the review artifact
+from its allowed post-review boundary. The second fix wave makes the future
+lifecycle explicit without creating a false clean review receipt:
+
+- `scripts/qa/create-idts110-final-report-receipt-manifest.js` creates the
+  manifest only from existing clean workbook and independent-review receipts.
+  It rejects dirty receipts, mismatched reviewed heads, artifact-hash drift,
+  and any non-zero Critical/Major/Important count before writing.
+- The final-report generator requires exact root-relative paths for the review
+  artifact and both receipts, validates the artifact hash both in the review
+  receipt and the manifest, and requires the manifest reviewed head to equal
+  the receipts' reviewed head.
+- After that reviewed head, the boundary permits only the exact SHA-bound
+  review artifact, workbook receipt, review receipt, manifest, and report
+  output. During generation, only the report output may be dirty. Any other
+  committed or working-tree source path fails the stale/dirty gate.
+- TDD RED: the end-to-end default-path test initially failed because the
+  generator did not export its default configuration. GREEN:
+  `node scripts/qa/test-idts110-final-report-default-lifecycle.js` creates a
+  disposable local Git clone using the real default path layout and copies,
+  then proves valid lifecycle generation and rejects official-template
+  substitution, a missing manifest, tampered review artifact, review receipt,
+  manifest, and unrelated committed source drift.
+
+No actual `independent-review-receipt.json` or
+`final-report-receipt-manifest.json` was created in this checkout: the current
+scoped re-review is still 0 Critical / 0 Major / 1 Important and therefore is
+not eligible to become a clean receipt. The next step is a new independent
+review of this second fix head. Only if it has zero Critical/Major/Important
+findings may its artifact and receipt be created, then the manifest helper run,
+then the default final-report generator run.
