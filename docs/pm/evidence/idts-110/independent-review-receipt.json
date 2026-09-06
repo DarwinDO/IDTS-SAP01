@@ -1,0 +1,13 @@
+{
+  "kind": "idts-110-independent-review-receipt",
+  "schemaVersion": 1,
+  "reviewedHead": "9d573e1a61933bc503e80d38e7f9555cfa58eceb",
+  "worktreeClean": true,
+  "artifactSha256": "908DDC391CD80E8F692E09F0F03797ABC77243793858F6E18F921A4DC9871290",
+  "counts": {
+    "critical": 0,
+    "major": 0,
+    "important": 0,
+    "deferredMinors": 2
+  }
+}

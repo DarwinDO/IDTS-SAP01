@@ -1,7 +1,7 @@
 {
   "kind": "idts-110-workbook-validation-receipt",
   "schemaVersion": 1,
-  "reviewedHead": "34ca6462806c8d4bb3f9e73b63496316d3f334a2",
+  "reviewedHead": "9d573e1a61933bc503e80d38e7f9555cfa58eceb",
   "worktreeClean": true,
   "validatorSha256": "AB8FE392A23A13F0204D90F12D123073F4A6BBF61945CF28929F17F6129D3EFB",
   "candidate": {

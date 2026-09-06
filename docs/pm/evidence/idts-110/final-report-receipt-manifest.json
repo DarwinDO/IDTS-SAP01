@@ -1,0 +1,13 @@
+{
+  "kind": "idts-110-final-report-receipt-manifest",
+  "schemaVersion": 1,
+  "reviewedHead": "9d573e1a61933bc503e80d38e7f9555cfa58eceb",
+  "reviewArtifact": ".superpowers/sdd/2026-09-05-idts-110-atomic-execution-and-workbook/task-11-independent-review.md",
+  "workbookReceipt": "docs/pm/evidence/idts-110/workbook-validation-receipt.json",
+  "reviewReceipt": "docs/pm/evidence/idts-110/independent-review-receipt.json",
+  "reviewArtifactSha256": "908DDC391CD80E8F692E09F0F03797ABC77243793858F6E18F921A4DC9871290",
+  "receiptSha256": {
+    "workbook": "FBD53CE58C42EAAD6A974487C018449316B749513D6D67E3474A54E71BAE8BA0",
+    "review": "2D839D260301B0E652B5AA8FB6FAB6F59D767319F9B8F56AAFBB5A30CF6C4866"
+  }
+}
