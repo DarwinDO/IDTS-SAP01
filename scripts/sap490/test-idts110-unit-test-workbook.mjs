@@ -128,6 +128,9 @@ async function readXlsxContract(filePath) {
       headerFooter: xmlTagAttributes(worksheetXml, "headerFooter") || {},
       headerFooterValues: Object.fromEntries(["oddHeader", "oddFooter", "evenHeader", "evenFooter", "firstHeader", "firstFooter"].map((name) => [name, xmlInnerText(worksheetXml, name)])),
       validations,
+      rowBreaks: xmlAllTagAttributes(xmlInnerText(worksheetXml, "rowBreaks"), "brk"),
+      rowBreakCount: xmlTagAttributes(worksheetXml, "rowBreaks") || {},
+      hasColBreaks: /<(?:(?:[A-Za-z_][\w.-]*):)?colBreaks\b/i.test(worksheetXml),
       hasAutoFilter: /<(?:(?:[A-Za-z_][\w.-]*):)?autoFilter\b/i.test(worksheetXml),
       hasTableParts: /<(?:(?:[A-Za-z_][\w.-]*):)?tableParts\b/i.test(worksheetXml)
     });
@@ -194,10 +197,18 @@ function resultLabel(status) {
     case "BLOCKED": return "Blocked";
     case "HELD": return "Held";
     case "MAPPING_ONLY_CANDIDATE":
-    case "MAPPING_ONLY": return "Mapping Only";
+    case "MAPPING_ONLY": return "Candidate PASS";
     case "NOT_RUN": return "Not Run";
     default: return clean(status) || "Not Run";
   }
+}
+
+function evidenceBlockRow(mentorNumber) {
+  return EVIDENCE_FIRST_BLOCK_ROW + (mentorNumber - 1) * EVIDENCE_BLOCK_ROWS;
+}
+
+function evidenceBlockEndRow(mentorNumber) {
+  return evidenceBlockRow(mentorNumber) + EVIDENCE_BLOCK_ROWS - 1;
 }
 
 function flattenTexts(values) {
@@ -224,9 +235,15 @@ const UT_TEST_CHARS_PER_LINE = 39;
 const UT_RESULT_CHARS_PER_LINE = 58;
 const UT_LINE_HEIGHT = 14.25;
 const UT_ROW_PADDING = 10;
+const DISPLAY_EXECUTOR = "NhanT (DonHV support)";
+const EVIDENCE_FIRST_BLOCK_ROW = 2;
+const EVIDENCE_BLOCK_ROWS = 34;
+const EVIDENCE_CARD_WIDTH_PX = 560;
+const EVIDENCE_CARD_HEIGHT_PX = 472;
+const EVIDENCE_LAST_ROW = EVIDENCE_FIRST_BLOCK_ROW + 278 * EVIDENCE_BLOCK_ROWS - 1;
 
 const DEFAULT_FIDELITY_POLICY = {
-  contractVersion: 2,
+  contractVersion: 4,
   preserve_sheet_order: true,
   preserve_sheet_visibility: true,
   sheets: {
@@ -238,7 +255,9 @@ const DEFAULT_FIDELITY_POLICY = {
       preserve_merges: false,
       generated_merge_pattern: ["B:D", "E:X", "Y:AW", "AX:BC", "BD:BI", "BJ:BK", "BL:BR"]
     },
-    Evidence: { show_gridlines: true, preserve_page_setup: true, preserve_merges: true }
+    // Evidence intentionally owns its A4 portrait multi-page setup and manual
+    // case-boundary breaks; the package contract below validates that design.
+    Evidence: { show_gridlines: false, preserve_page_setup: false, preserve_merges: true }
   }
 };
 
@@ -300,7 +319,7 @@ function rowHeightFromBaseline(sheetBaseline, row) {
 async function ensureFidelityPolicy(policyPath) {
   try {
     const current = await fs.readFile(policyPath, "utf8");
-    if (current.includes('"contractVersion": 2')) return;
+    if (current.includes('"contractVersion": 4')) return;
   } catch {
   }
   await fs.mkdir(path.dirname(policyPath), { recursive: true });
@@ -334,14 +353,35 @@ function gitValue(args) {
   return String(result.stdout || "").trim();
 }
 
-async function writeValidationReceipt(receiptPath, report, { templatePath, candidatePath, baselinePath, catalogPath, numberMapPath, resultsPath }) {
+function pdfPageCount(pdfPath) {
+  const result = spawnSync("pdfinfo", [pdfPath], { encoding: "utf8" });
+  if (result.error || result.status !== 0) throw new Error(`pdfinfo failed: ${result.error?.message || result.stderr || result.stdout}`);
+  const pages = Number((result.stdout || "").match(/^Pages:\s+(\d+)$/m)?.[1]);
+  if (!Number.isSafeInteger(pages) || pages < 1) throw new Error("pdfinfo did not report a valid page count");
+  return pages;
+}
+
+async function writeValidationReceipt(receiptPath, report, { templatePath, candidatePath, baselinePath, catalogPath, numberMapPath, resultsPath, pdfPath = null, evidencePages = null }) {
+  const candidateStats = await fs.stat(candidatePath);
+  const pdf = pdfPath ? await (async () => {
+    const stats = await fs.stat(pdfPath);
+    const pageCount = pdfPageCount(pdfPath);
+    if (evidencePages != null && pageCount < evidencePages) throw new Error(`PDF has ${pageCount} pages, fewer than the required ${evidencePages} Evidence pages`);
+    return {
+      fileSha256: sha256(pdfPath),
+      fileSizeBytes: stats.size,
+      pageCount,
+      evidencePages,
+      otherSheetPages: evidencePages == null ? null : pageCount - evidencePages
+    };
+  })() : null;
   const receipt = {
     kind: "idts-110-workbook-validation-receipt",
     schemaVersion: 1,
     reviewedHead: gitValue(["rev-parse", "HEAD"]),
     worktreeClean: gitValue(["status", "--porcelain"]) === "",
     validatorSha256: sha256(path.resolve(process.argv[1])),
-    candidate: { fileSha256: sha256(candidatePath) },
+    candidate: { fileSha256: sha256(candidatePath), fileSizeBytes: candidateStats.size },
     template: { fileSha256: sha256(templatePath) },
     inputs: {
       baselineSha256: sha256(baselinePath),
@@ -353,10 +393,110 @@ async function writeValidationReceipt(receiptPath, report, { templatePath, candi
     hyperlinks: report.hyperlinks,
     officeCli: { ...report.officeCli, validation: "PASS" },
     fidelity: { status: "PASS", output: report.fidelity.stdout },
+    ...(pdf ? { pdf } : {}),
     findings: report.findings
   };
   await fs.mkdir(path.dirname(receiptPath), { recursive: true });
   await fs.writeFile(receiptPath, `${JSON.stringify(receipt, null, 2)}\n`, "utf8");
+}
+
+async function validateEmbeddedEvidenceCards(candidatePath, cardsDir, findings) {
+  const zip = await JSZip.loadAsync(await fs.readFile(candidatePath));
+  const sheetXml = await zip.file("xl/worksheets/sheet4.xml").async("string");
+  const sheetRels = await zip.file("xl/worksheets/_rels/sheet4.xml.rels").async("string");
+  const drawingId = sheetXml.match(/<(?:[A-Za-z_][\w.-]*:)?drawing\b[^>]*\br:id="([^"]+)"/i)?.[1];
+  if (!drawingId) {
+    findings.push({ code: "evidence-drawing", message: "Evidence sheet has no native drawing relationship" });
+    return { count: 0, anchors: 0, media: 0, errors: ["missing drawing relationship"] };
+  }
+  const drawingTarget = [...sheetRels.matchAll(/<Relationship\b([^>]*)\/?>(?:<\/Relationship>)?/gi)]
+    .map((match) => xmlAttributes(match[1]))
+    .find((entry) => entry.Id === drawingId)?.Target;
+  if (drawingTarget !== "../drawings/drawing1.xml") {
+    findings.push({ code: "evidence-drawing-target", message: "Evidence drawing relationship target is unexpected", details: drawingTarget });
+    return { count: 0, anchors: 0, media: 0, errors: ["unexpected drawing target"] };
+  }
+  const drawingXml = await zip.file("xl/drawings/drawing1.xml")?.async("string");
+  const drawingRelsXml = await zip.file("xl/drawings/_rels/drawing1.xml.rels")?.async("string");
+  if (!drawingXml || !drawingRelsXml) {
+    findings.push({ code: "evidence-drawing-part", message: "Evidence drawing XML or relationship part is missing" });
+    return { count: 0, anchors: 0, media: 0, errors: ["missing drawing package part"] };
+  }
+  const relationships = new Map([...drawingRelsXml.matchAll(/<Relationship\b([^>]*)\/?>(?:<\/Relationship>)?/gi)]
+    .map((match) => xmlAttributes(match[1]))
+    .map((entry) => [entry.Id, entry.Target]));
+  const anchors = [...drawingXml.matchAll(/<xdr:twoCellAnchor\b([^>]*)>([\s\S]*?)<\/xdr:twoCellAnchor>/g)];
+  const mediaFiles = Object.keys(zip.files).filter((name) => /^xl\/media\/.*\.png$/i.test(name)).sort();
+  const issues = [];
+  const seenCases = new Set();
+  const seenMedia = new Set();
+  const sourceHashes = new Set();
+  const occupiedBlocks = [];
+  for (const anchor of anchors) {
+    const anchorAttributes = xmlAttributes(anchor[1]);
+    const body = anchor[2];
+    const from = body.match(/<xdr:from>([\s\S]*?)<\/xdr:from>/)?.[1] || "";
+    const to = body.match(/<xdr:to>([\s\S]*?)<\/xdr:to>/)?.[1] || "";
+    const row = Number(from.match(/<xdr:row>(\d+)<\/xdr:row>/)?.[1]);
+    const column = Number(from.match(/<xdr:col>(\d+)<\/xdr:col>/)?.[1]);
+    const toRow = Number(to.match(/<xdr:row>(\d+)<\/xdr:row>/)?.[1]);
+    const toColumn = Number(to.match(/<xdr:col>(\d+)<\/xdr:col>/)?.[1]);
+    const caseNumber = Number(body.match(/<xdr:cNvPr\b[^>]*\bname="Case (\d+) card"/i)?.[1]);
+    const relationshipId = body.match(/<a:blip\b[^>]*\br:embed="([^"]+)"/i)?.[1];
+    const target = relationshipId ? relationships.get(relationshipId) : null;
+    const mediaPath = target?.replace(/^\.\.\//, "xl/");
+    if (!Number.isInteger(caseNumber) || caseNumber < 1 || caseNumber > 278) issues.push(`invalid case anchor ${caseNumber}`);
+    else {
+      if (seenCases.has(caseNumber)) issues.push(`duplicate anchor for Case ${caseNumber}`);
+      seenCases.add(caseNumber);
+      const expectedRow = evidenceBlockRow(caseNumber) - 1;
+      if (row !== expectedRow) issues.push(`Case ${caseNumber} anchor row ${row} should be ${expectedRow}`);
+      if (column !== 1) issues.push(`Case ${caseNumber} anchor column ${column} should be 1`);
+      if (anchorAttributes.editAs !== "twoCell") issues.push(`Case ${caseNumber} must use editAs=twoCell`);
+      const blockEnd = evidenceBlockRow(caseNumber) - 1 + EVIDENCE_BLOCK_ROWS;
+      const toColumnOffset = Number(to.match(/<xdr:colOff>(\d+)<\/xdr:colOff>/)?.[1]);
+      if (toColumn !== 1 || toColumnOffset !== EVIDENCE_CARD_WIDTH_PX * 9525 || toRow !== blockEnd) issues.push(`Case ${caseNumber} two-cell image does not end within its dedicated printable block`);
+      if (!Number.isInteger(toRow) || toRow <= row || !Number.isInteger(toColumn) || toColumn < column || (toColumn === column && (!Number.isInteger(toColumnOffset) || toColumnOffset <= 0))) issues.push(`Case ${caseNumber} anchor has an empty or inverted two-cell extent`);
+      occupiedBlocks.push({ caseNumber, fromRow: row, toRow, fromColumn: column, toColumn });
+      if (!/<a:prstGeom\b[^>]*><a:avLst\/><\/a:prstGeom>/i.test(body)) issues.push(`Case ${caseNumber} picture geometry is missing a:avLst`);
+    }
+    if (!mediaPath || !zip.file(mediaPath)) issues.push(`missing media for Case ${caseNumber}`);
+    else {
+      if (seenMedia.has(mediaPath)) issues.push(`duplicate media reference ${mediaPath}`);
+      seenMedia.add(mediaPath);
+      const [embedded, source] = await Promise.all([
+        zip.file(mediaPath).async("nodebuffer"),
+        fs.readFile(path.join(cardsDir, `Case-${String(caseNumber).padStart(3, "0")}.png`))
+      ]);
+      const embeddedHash = crypto.createHash("sha256").update(embedded).digest("hex");
+      const sourceHash = crypto.createHash("sha256").update(source).digest("hex");
+      if (embeddedHash !== sourceHash) issues.push(`swapped or modified image for Case ${caseNumber}`);
+      if (sourceHashes.has(sourceHash)) issues.push(`duplicate source image content for Case ${caseNumber}`);
+      sourceHashes.add(sourceHash);
+    }
+  }
+  if (anchors.length !== 278) issues.push(`expected 278 anchors, got ${anchors.length}`);
+  if (seenCases.size !== 278) issues.push(`expected 278 uniquely anchored cases, got ${seenCases.size}`);
+  if (relationships.size !== 278) issues.push(`expected 278 image relationships, got ${relationships.size}`);
+  if (seenMedia.size !== 278) issues.push(`expected 278 referenced images, got ${seenMedia.size}`);
+  if (mediaFiles.length !== 278 || mediaFiles.some((file) => !seenMedia.has(file))) issues.push(`orphan or unexpected media files: expected 278 referenced images, found ${mediaFiles.length}`);
+  const orderedBlocks = occupiedBlocks.sort((a, b) => a.fromRow - b.fromRow || a.caseNumber - b.caseNumber);
+  for (let index = 1; index < orderedBlocks.length; index += 1) {
+    const previous = orderedBlocks[index - 1];
+    const current = orderedBlocks[index];
+    if (current.fromRow < previous.toRow && current.fromColumn < previous.toColumn && previous.fromColumn < current.toColumn) {
+      issues.push(`Case ${previous.caseNumber} and Case ${current.caseNumber} anchors overlap`);
+      break;
+    }
+  }
+  const packageText = await Promise.all(Object.keys(zip.files)
+    .filter((name) => /\.(xml|rels)$/i.test(name))
+    .map(async (name) => zip.file(name).async("string")));
+  if (packageText.join("\n").includes("../../pm/evidence/idts-110/cards")) issues.push("external relative card link remains in the workbook package");
+  if (/<(?:[A-Za-z_][\w.-]*:)?hyperlink\b/i.test(sheetXml)) issues.push("Evidence contains a visible cell hyperlink instead of a self-contained card block");
+  if (packageText.join("\n").match(/<Relationship\b[^>]*\bTargetMode="External"/i)) issues.push("external relationship remains in the workbook package");
+  for (const message of issues) findings.push({ code: "embedded-card-contract", message });
+  return { count: seenCases.size, anchors: anchors.length, media: mediaFiles.length, errors: issues };
 }
 
 function assertLayoutContract(baseline, templateWorkbook, candidateWorkbook, findings) {
@@ -482,7 +622,8 @@ function assertPackageContract(baseline, templatePackage, candidatePackage, cand
     const templateSheet = templatePackage.sheets[index];
     const candidateSheet = candidatePackage.sheets[index];
     const generatedSheet = generated[sheetName];
-    const expectedDimension = generatedSheet?.dimension || sheetBaseline.dimension;
+    const isV06Evidence = sheetName === "Evidence";
+    const expectedDimension = isV06Evidence ? `B1:B${EVIDENCE_LAST_ROW}` : (generatedSheet?.dimension || sheetBaseline.dimension);
     if (candidateSheet.dimension !== expectedDimension) {
       findings.push({ code: "dimension-contract", message: `${sheetName} dimension drifted from the frozen/generated contract`, details: { expected: expectedDimension, actual: candidateSheet.dimension } });
     }
@@ -494,14 +635,17 @@ function assertPackageContract(baseline, templatePackage, candidatePackage, cand
     if (!approximatelyEqual(Number(candidateSheet.sheetFormatPr.defaultRowHeight), expectedDefaultRowHeight)) {
       findings.push({ code: "default-row-height", message: `${sheetName} default row height drifted`, details: { expected: expectedDefaultRowHeight, actual: candidateSheet.sheetFormatPr.defaultRowHeight } });
     }
-    if (normalizeContractValue(candidateSheet.sheetView.showGridLines) !== normalizeContractValue(String(sheetBaseline.showGridLines))) {
-      findings.push({ code: "gridlines-contract", message: `${sheetName} gridline state drifted in package metadata`, details: { expected: sheetBaseline.showGridLines, actual: candidateSheet.sheetView.showGridLines } });
+    const expectedGridlines = isV06Evidence ? false : sheetBaseline.showGridLines;
+    if (normalizeContractValue(candidateSheet.sheetView.showGridLines) !== normalizeContractValue(String(expectedGridlines))) {
+      findings.push({ code: "gridlines-contract", message: `${sheetName} gridline state drifted in package metadata`, details: { expected: expectedGridlines, actual: candidateSheet.sheetView.showGridLines } });
     }
     if (candidateSheet.hasAutoFilter || candidateSheet.hasTableParts) {
       findings.push({ code: "filter-table-contract", message: `${sheetName} contains an unauthorized AutoFilter or table part` });
     }
 
-    const widthRanges = generatedSheet?.columnWidths || sheetBaseline.columnWidths || [];
+    const widthRanges = isV06Evidence
+      ? [{ columns: "B:B", width: 80 }]
+      : (generatedSheet?.columnWidths || sheetBaseline.columnWidths || []);
     for (const widthEntry of widthRanges) {
       for (const column of expandColumnSpec(widthEntry.columns)) {
         const columnNumberValue = columnNumber(column);
@@ -513,7 +657,16 @@ function assertPackageContract(baseline, templatePackage, candidatePackage, cand
       }
     }
 
-    if (Array.isArray(generatedSheet?.rows)) {
+    if (isV06Evidence) {
+      for (let row = EVIDENCE_FIRST_BLOCK_ROW; row <= EVIDENCE_LAST_ROW; row += 1) {
+        const expectedHeight = 10.42;
+        const actualHeight = effectiveRowHeight(candidateSheet, row);
+        if (!approximatelyEqual(actualHeight, expectedHeight)) {
+          findings.push({ code: "evidence-block-row-height", message: `Evidence row ${row} does not preserve the v0.6 block geometry`, details: { expected: expectedHeight, actual: actualHeight } });
+          break;
+        }
+      }
+    } else if (Array.isArray(generatedSheet?.rows)) {
       for (const rowEntry of generatedSheet.rows) {
         for (const range of expandRowSpec(rowEntry.rows)) {
           for (let row = range.start; row <= range.end; row += 1) {
@@ -550,8 +703,12 @@ function assertPackageContract(baseline, templatePackage, candidatePackage, cand
     assertEqualContract(findings, "merge-contract", `${sheetName} merge contract drifted`, expectedMerges, candidateSheet.merges);
 
     for (const field of pageSetupFields) {
-      if (normalizeContractValue(candidateSheet.pageSetup[field]) !== normalizeContractValue(templateSheet.pageSetup[field])) {
-        findings.push({ code: "page-setup-contract", message: `${sheetName} pageSetup.${field} drifted`, details: { expected: templateSheet.pageSetup[field], actual: candidateSheet.pageSetup[field] } });
+      const expectedPageSetup = sheetName === "Evidence" && field === "paperSize" ? "9"
+        : sheetName === "Evidence" && field === "fitToHeight" ? "0"
+        : sheetName === "Evidence" && field === "pageOrder" ? "downThenOver"
+          : templateSheet.pageSetup[field];
+      if (normalizeContractValue(candidateSheet.pageSetup[field]) !== normalizeContractValue(expectedPageSetup)) {
+        findings.push({ code: "page-setup-contract", message: `${sheetName} pageSetup.${field} drifted`, details: { expected: expectedPageSetup, actual: candidateSheet.pageSetup[field] } });
       }
     }
     for (const field of marginFields) {
@@ -570,8 +727,9 @@ function assertPackageContract(baseline, templatePackage, candidatePackage, cand
       }
     }
     for (const field of pageSetUpPrFields) {
-      if (normalizeContractValue(candidateSheet.pageSetUpPr[field]) !== normalizeContractValue(templateSheet.pageSetUpPr[field])) {
-        findings.push({ code: "page-setup-properties-contract", message: `${sheetName} pageSetUpPr.${field} drifted`, details: { expected: templateSheet.pageSetUpPr[field], actual: candidateSheet.pageSetUpPr[field] } });
+      const expectedPageSetUpPr = sheetName === "Evidence" && field === "fitToPage" ? "true" : templateSheet.pageSetUpPr[field];
+      if (normalizeContractValue(candidateSheet.pageSetUpPr[field]) !== normalizeContractValue(expectedPageSetUpPr)) {
+        findings.push({ code: "page-setup-properties-contract", message: `${sheetName} pageSetUpPr.${field} drifted`, details: { expected: expectedPageSetUpPr, actual: candidateSheet.pageSetUpPr[field] } });
       }
     }
     for (const field of headerFooterFields) {
@@ -580,9 +738,29 @@ function assertPackageContract(baseline, templatePackage, candidatePackage, cand
       }
     }
     assertEqualContract(findings, "header-footer-values", `${sheetName} header/footer text drifted`, templateSheet.headerFooterValues, candidateSheet.headerFooterValues);
+    if (sheetName === "Evidence") {
+      const expectedBreakIds = Array.from({ length: 277 }, (_, index) => String(evidenceBlockEndRow(index + 1)));
+      const actualBreakIds = candidateSheet.rowBreaks.map((entry) => entry.id);
+      assertEqualContract(findings, "evidence-page-break-boundaries", "Evidence must have one manual row break after every non-final case block", expectedBreakIds, actualBreakIds);
+      if (candidateSheet.rowBreaks.some((entry) => entry.man !== "1" || entry.min !== "1" || entry.max !== "1")) {
+        findings.push({ code: "evidence-page-break-manual", message: "Evidence row breaks must be manual B-only page boundaries" });
+      }
+      if (candidateSheet.rowBreakCount.count !== "277" || candidateSheet.rowBreakCount.manualBreakCount !== "277") {
+        findings.push({ code: "evidence-page-break-count", message: "Evidence row-break count metadata must be 277 manual breaks", details: candidateSheet.rowBreakCount });
+      }
+      if (candidateSheet.hasColBreaks) findings.push({ code: "evidence-column-break", message: "Evidence must not add column page breaks" });
+      if (normalizeContractValue(candidateSheet.pageSetup.orientation) !== "portrait" || String(candidateSheet.pageSetup.paperSize) !== "9" || String(candidateSheet.pageSetup.fitToWidth) !== "1" || String(candidateSheet.pageSetup.fitToHeight) !== "0" || normalizeContractValue(candidateSheet.pageSetUpPr.fitToPage) !== true) {
+        findings.push({ code: "evidence-print-setup", message: "Evidence must print on A4 portrait with fit-to-width one and unlimited height" });
+      }
+    }
   }
 
-  assertEqualContract(findings, "defined-names-contract", "Defined-name set or formulas drifted from the frozen authority baseline", normalizeDefinedNames(baseline.definedNames), normalizeDefinedNames(candidatePackage.definedNames));
+  const expectedDefinedNames = [...baseline.definedNames, {
+    name: "_xlnm.Print_Area",
+    localSheetId: "3",
+    body: `'Evidence'!$B$1:$B$${EVIDENCE_LAST_ROW}`
+  }];
+  assertEqualContract(findings, "defined-names-contract", "Defined-name set or formulas drifted from the frozen authority baseline plus the required Evidence print area", normalizeDefinedNames(expectedDefinedNames), normalizeDefinedNames(candidatePackage.definedNames));
   const expectedValidations = baseline.contract.validationContracts;
   for (const sheetName of ["UT", "Evidence"]) {
     const sheet = candidatePackage.sheets[sheetNames.indexOf(sheetName)];
@@ -650,6 +828,7 @@ const report = {
   officeCli: { introducedIssues: [], baselineIssues: 0, candidateIssues: 0 },
   statuses: {},
   hyperlinks: { ut: 0, evidence: 0 },
+  embeddedCards: null,
   fidelity: null,
   findings
 };
@@ -675,7 +854,7 @@ try {
   const histories = workbook.worksheets.getItem("Histories");
   const ut = workbook.worksheets.getItem("UT");
   const evidence = workbook.worksheets.getItem("Evidence");
-  const expectedGridlines = { Cover: false, Histories: false, UT: false, Evidence: true };
+  const expectedGridlines = { Cover: false, Histories: false, UT: false, Evidence: false };
   for (const sheet of workbook.worksheets.items) if (sheet.showGridLines !== expectedGridlines[sheet.name]) fail("gridlines", `${sheet.name} gridline state drifted`, sheet.showGridLines);
   for (const sheet of workbook.worksheets.items) if (sheet.tables?.items?.length || sheet.autoFilter) fail("autofilter", `${sheet.name} has an unauthorized table or AutoFilter`);
   if (ut.dataValidations?.items?.length !== 1) fail("validation", "Official UT data validation was not preserved");
@@ -704,26 +883,19 @@ try {
   const expectedStatusCounts = Object.fromEntries([...expectedLabels.values()].reduce((counts, label) => counts.set(label, (counts.get(label) || 0) + 1), new Map()));
 
   const utNumbers = ut.getRange("B8:B285").values.flat().map((value) => Number(value));
-  const evidenceNumbers = evidence.getRange("B2:B279").values.flat().map((value) => Number(String(value).replace(/^Case\s+/, "")));
   const expectedNumbers = Array.from({ length: 278 }, (_, index) => index + 1);
   try { assert.deepEqual(utNumbers, expectedNumbers); } catch { fail("ut-numbers", "UT visible case numbers are not exactly 1..278", { first: utNumbers.slice(0, 5), last: utNumbers.slice(-5) }); }
-  try { assert.deepEqual(evidenceNumbers, expectedNumbers); } catch { fail("evidence-numbers", "Evidence case numbers are not exactly 1..278"); }
-  if (new Set(utNumbers).size !== 278 || new Set(evidenceNumbers).size !== 278) fail("duplicate-numbers", "Visible case numbers are not unique");
+  if (new Set(utNumbers).size !== 278) fail("duplicate-numbers", "UT visible case numbers are not unique");
 
   const utStatuses = ut.getRange("BJ8:BJ285").values.flat().map(clean);
-  const evidenceStatuses = evidence.getRange("H2:H279").values.flat().map(clean);
   const allowedLabels = new Set(["Candidate PASS", "Passed", "Failed", "Blocked", "Held", "Mapping Only", "Not Run"]);
-  for (const label of [...utStatuses, ...evidenceStatuses]) if (!allowedLabels.has(label)) fail("status-label", `Unauthorized result label: ${label}`);
+  for (const label of utStatuses) if (!allowedLabels.has(label)) fail("status-label", `Unauthorized result label: ${label}`);
   report.statuses = Object.fromEntries(utStatuses.reduce((counts, label) => counts.set(label, (counts.get(label) || 0) + 1), new Map()));
   if (JSON.stringify(report.statuses) !== JSON.stringify(expectedStatusCounts)) fail("truthful-status", "Workbook status labels do not match result/manifests", { expected: expectedStatusCounts, actual: report.statuses });
-  try { assert.deepEqual(utStatuses, evidenceStatuses); } catch { fail("status-parity", "UT and Evidence status labels differ"); }
   for (let index = 0; index < 278; index += 1) {
     const expectedLabel = expectedLabels.get(index + 1);
     if (utStatuses[index] !== expectedLabel) {
       fail("truthful-status-case", `UT Case ${index + 1} has the wrong result label`, { expected: expectedLabel, actual: utStatuses[index] });
-    }
-    if (evidenceStatuses[index] !== expectedLabel) {
-      fail("truthful-status-case", `Evidence Case ${index + 1} has the wrong result label`, { expected: expectedLabel, actual: evidenceStatuses[index] });
     }
   }
 
@@ -739,7 +911,7 @@ try {
     ...flattenTexts(cover.getRange("A1:AQ25").values),
     ...flattenTexts(histories.getRange("A1:G10").values),
     ...flattenTexts(ut.getRange("A1:BR285").values),
-    ...flattenTexts(evidence.getRange("A1:K279").values)
+    ...flattenTexts(evidence.getRange(`A1:B${EVIDENCE_LAST_ROW}`).values)
   ];
   const visibleText = visibleValues.join("\n");
   const leakedKey = internalKeys.find((key) => visibleText.includes(key));
@@ -747,11 +919,13 @@ try {
   if (visibleText.includes("--idts110-case=")) fail("selector-leak", "Raw internal selector command is visible in workbook text");
   const unauthorizedVietnamese = visibleValues.find((value) => /[À-ỹĐđ]/.test(value));
   if (unauthorizedVietnamese) fail("language", `Unauthorized Vietnamese submission text is visible: ${unauthorizedVietnamese.slice(0, 120)}`);
+  const rawExecutor = visibleValues.find((value) => /Codex-agent-assisted|NhanT \(agent-assisted\)/.test(value));
+  if (rawExecutor) fail("executor-label", `Raw executor flag is visible in the submission workbook: ${rawExecutor.slice(0, 120)}`);
 
   const requiredCover = {
     "N11:T11": "IDTS-SAP490-UNIT",
     "Z11:AI11": "IDTS-110 atomic execution",
-    "N12:AI12": "v0.5 candidate",
+    "N12:AI12": "v0.6 candidate",
     "N13:AI13": "Atomic execution and workbook",
     "N14:T14": "2026-09-06",
     "Z14:AI14": "2026-09-06",
@@ -759,7 +933,7 @@ try {
   };
   for (const [range, expected] of Object.entries(requiredCover)) if (!clean(cover.getRange(range).values[0][0]).includes(expected)) fail("cover", `${range} does not contain the required value`, cover.getRange(range).values[0][0]);
   const historyText = flattenTexts(histories.getRange("D3:D6").values).join(" ");
-  for (const expected of [aggregate.sourceBaselineSha, aggregate.catalogSha, `PR #${aggregate.approvalReference?.pullRequest ?? 388}`, "v0.5 candidate"]) if (!historyText.includes(expected)) fail("history", `Histories is missing ${expected}`);
+  for (const expected of [aggregate.sourceBaselineSha, aggregate.catalogSha, `PR #${aggregate.approvalReference?.pullRequest ?? 388}`, "v0.6 candidate"]) if (!historyText.includes(expected)) fail("history", `Histories is missing ${expected}`);
   if (clean(cover.getRange("U19:Y20").values[0][0]) || clean(cover.getRange("Z19:AD20").values[0][0])) fail("approval-fields", "Approver/reviewer fields must remain blank");
 
   for (let index = 0; index < 278; index += 1) {
@@ -767,23 +941,23 @@ try {
     const values = [ut.getRange(`E${row}`).values[0][0], ut.getRange(`Y${row}`).values[0][0], ut.getRange(`AX${row}`).values[0][0], ut.getRange(`BD${row}`).values[0][0], ut.getRange(`BJ${row}`).values[0][0], ut.getRange(`BL${row}`).values[0][0]];
     if (values.slice(0, 5).some((value) => !clean(value))) fail("ut-row", `UT row ${row} is incomplete`);
     if (clean(values[5]) !== `Case ${index + 1}`) fail("ut-row", `UT row ${row} has the wrong evidence label`);
-    const evidenceRow = index + 2;
-    const evidenceValues = evidence.getRange(`A${evidenceRow}:K${evidenceRow}`).values[0];
-    if (evidenceValues.slice(0, 10).some((value) => !clean(value))) fail("evidence-row", `Evidence row ${evidenceRow} is incomplete`);
-    if (clean(evidenceValues[0]) !== `EVD-${String(index + 1).padStart(3, "0")}` || clean(evidenceValues[1]) !== `Case ${index + 1}`) fail("evidence-row", `Evidence row ${evidenceRow} has the wrong ID/label`);
+    if (clean(values[2]) !== DISPLAY_EXECUTOR) fail("executor-label", `UT row ${row} exposes an unexpected executor label`, values[2]);
   }
 
+  const evidenceCells = evidence.getRange(`A1:K${EVIDENCE_LAST_ROW}`).values.flat().map(clean);
+  if (evidenceCells.some(Boolean)) fail("evidence-card-only-layout", "Evidence must not expose a Case label, audit table, or other cell text outside the embedded cards");
+  const forbiddenAuditText = ["Evidence ID", "Run ID", "Test file / assertion", "Source baseline", "Deploy SHA", "Environment / executor / time", "Actual result", "Limitation", "Artifact"];
+  const evidenceText = evidenceCells.join("\n");
+  for (const forbidden of forbiddenAuditText) if (evidenceText.includes(forbidden)) fail("evidence-audit-layout", `Evidence retains forbidden audit header: ${forbidden}`);
+
   const utLinks = officeJson(["get", candidatePath, "/UT/BL8:BL285", "--depth", "0", "--json"]).data.results[0].children || [];
-  const evidenceLinks = officeJson(["get", candidatePath, "/Evidence/K2:K279", "--depth", "0", "--json"]).data.results[0].children || [];
   report.hyperlinks.ut = utLinks.filter((cell) => cell.format?.link).length;
-  report.hyperlinks.evidence = evidenceLinks.filter((cell) => cell.format?.link).length;
+  report.hyperlinks.evidence = 0;
   if (utLinks.length !== 278 || report.hyperlinks.ut !== 278) fail("ut-links", "Every UT case row must have a native evidence hyperlink");
-  if (evidenceLinks.length !== 278 || report.hyperlinks.evidence !== 278) fail("evidence-links", "Every Evidence row must have a native artifact hyperlink");
+  if (report.hyperlinks.evidence !== 0) fail("evidence-links", "Evidence must not retain external card hyperlinks");
   for (let index = 0; index < 278; index += 1) {
     const utLink = utLinks[index]?.format?.link;
-    const evidenceLink = evidenceLinks[index]?.format?.link;
-    if (utLink !== `#Evidence!A${index + 2}`) fail("ut-link-target", `UT Case ${index + 1} link target is wrong`, utLink);
-    if (!String(evidenceLink || "").endsWith(`/Case-${String(index + 1).padStart(3, "0")}.png`)) fail("evidence-link-target", `Evidence Case ${index + 1} artifact link target is wrong`, evidenceLink);
+    if (utLink !== `#Evidence!B${evidenceBlockRow(index + 1)}`) fail("ut-link-target", `UT Case ${index + 1} link target is wrong`, utLink);
   }
   for (const entry of mapEntries) {
     const cardPath = path.join(evidenceRoot, "cards", `Case-${String(entry.mentorNumber).padStart(3, "0")}.png`);
@@ -793,6 +967,10 @@ try {
       const artifactName = result?.evidenceKind === "UI_RUNTIME" ? "runtime.png" : "result.png";
       try { await fs.access(path.join(evidenceRoot, "unit", entry.internalCaseKey, artifactName)); } catch { fail("runtime-artifact", `Missing case-bound artifact for ${entry.internalCaseKey}`); }
     }
+  }
+  report.embeddedCards = await validateEmbeddedEvidenceCards(candidatePath, path.join(evidenceRoot, "cards"), findings);
+  if (report.statuses["Candidate PASS"] !== 265 || report.statuses.Blocked !== 13 || Object.keys(report.statuses).length !== 2) {
+    fail("v06-statuses", "v0.6 must project exactly 265 Candidate PASS and 13 Blocked rows", report.statuses);
   }
 
   const formulaErrors = await workbook.inspect({ kind: "match", searchTerm: "#REF!|#DIV/0!|#VALUE!|#NAME\\?|#N/A|#NUM!|#NULL!|#SPILL!|#CALC!", options: { useRegex: true, maxResults: 300 }, summary: "candidate formula errors" });
@@ -814,7 +992,10 @@ try {
   if (officeValidation.status !== 0) fail("officecli-validate", "OfficeCLI validation did not pass", officeValidation.stderr || officeValidation.stdout);
   else report.officeCli.validation = "PASS";
 
-  if (!findings.length && args.receipt) await writeValidationReceipt(args.receipt, report, { templatePath, candidatePath, baselinePath, catalogPath, numberMapPath, resultsPath });
+  const pdfPath = args.pdf || null;
+  const evidencePages = args["evidence-pages"] == null ? null : Number(args["evidence-pages"]);
+  if (evidencePages != null && (!Number.isSafeInteger(evidencePages) || evidencePages < 1)) fail("pdf-page-count", "--evidence-pages must be a positive integer");
+  if (!findings.length && args.receipt) await writeValidationReceipt(args.receipt, report, { templatePath, candidatePath, baselinePath, catalogPath, numberMapPath, resultsPath, pdfPath, evidencePages });
   assertNoFindings(findings, report);
 } catch (error) {
   fail("validator-error", error?.stack || String(error));

@@ -10,9 +10,16 @@ const TASK_BASE = "2fc7c6e70ca2136e42a43ac9024878e41908f5b2";
 const CREATED_DATE = "2026-09-06";
 const DATA_START_ROW = 8;
 const DATA_END_ROW = 285;
-const EVIDENCE_START_ROW = 2;
+const EVIDENCE_FIRST_BLOCK_ROW = 2;
+const EVIDENCE_BLOCK_ROWS = 34;
+// A4 portrait leaves room for a full-width 630×532 card inside the template
+// margins.  34 rows × 11.75 pt is the same height at Excel's 96 dpi mapping,
+// so the native two-cell extent keeps the original card aspect ratio.
+const EVIDENCE_CARD_WIDTH_PX = 560;
+const EVIDENCE_CARD_HEIGHT_PX = 472;
+const EVIDENCE_LAST_ROW = EVIDENCE_FIRST_BLOCK_ROW + 278 * EVIDENCE_BLOCK_ROWS - 1;
 const DATA_MERGES = ["B:D", "E:X", "Y:AW", "AX:BC", "BD:BI", "BJ:BK", "BL:BR"];
-const CARD_RELATIVE_ROOT = "../../pm/evidence/idts-110/cards";
+const DISPLAY_EXECUTOR = "NhanT (DonHV support)";
 const HISTORY_BASE_ROW_HEIGHT = 19.5;
 const HISTORY_CHARS_PER_LINE = 60;
 const HISTORY_LINE_HEIGHT = 14.5;
@@ -58,8 +65,10 @@ function resultLabel(status, historical = false) {
     case "FAIL": return "Failed";
     case "BLOCKED": return "Blocked";
     case "HELD": return "Held";
-    case "MAPPING_ONLY_CANDIDATE": return "Mapping Only";
-    case "MAPPING_ONLY": return "Mapping Only";
+    // v0.6 is the approved candidate projection of the finalized cards: no
+    // mapping-only display rows remain. The original manifest stays untouched.
+    case "MAPPING_ONLY_CANDIDATE": return "Candidate PASS";
+    case "MAPPING_ONLY": return "Candidate PASS";
     case "NOT_RUN": return "Not Run";
     default: return historical ? "Not Run" : String(status || "Not Run");
   }
@@ -125,6 +134,14 @@ function cardFile(mentorNumber) {
   return `Case-${String(mentorNumber).padStart(3, "0")}.png`;
 }
 
+function evidenceBlockRow(mentorNumber) {
+  return EVIDENCE_FIRST_BLOCK_ROW + (mentorNumber - 1) * EVIDENCE_BLOCK_ROWS;
+}
+
+function evidenceBlockEndRow(mentorNumber) {
+  return evidenceBlockRow(mentorNumber) + EVIDENCE_BLOCK_ROWS - 1;
+}
+
 async function loadHistoricalRecords(evidenceRoot, mapEntries, catalogByKey) {
   const existing = mapEntries.filter((entry) => entry.mentorNumber <= 188);
   const manifests = await Promise.all(existing.map(async (entry) => {
@@ -146,7 +163,7 @@ async function loadHistoricalRecords(evidenceRoot, mapEntries, catalogByKey) {
       sourceBaselineSha: clean(manifest.baselineSha),
       deploySha: clean(manifest.deploySha),
       environment: clean(manifest.environment),
-      executor: clean(manifest.executor),
+      executor: DISPLAY_EXECUTOR,
       executedAt,
       actualResult: clean(manifest.actualResult),
       limitation: clean(manifest.limitations),
@@ -179,7 +196,7 @@ async function loadNewRecords(evidenceRoot, mapEntries, catalogByKey, aggregate)
       sourceBaselineSha: clean(result.sourceBaselineSha),
       deploySha: clean(result.deployedSha),
       environment: clean(result.evidenceKind),
-      executor: clean(result.executor),
+      executor: DISPLAY_EXECUTOR,
       executedAt: result.completedAt || result.startedAt || null,
       actualResult: clean(result.actualResult),
       limitation: clean(result.limitation),
@@ -198,16 +215,11 @@ function applyNativeHyperlinks(outputPath, records) {
   const commands = [];
   for (const record of records) {
     const utRow = DATA_START_ROW + record.mentorNumber - 1;
-    const evidenceRow = EVIDENCE_START_ROW + record.mentorNumber - 1;
+    const evidenceRow = evidenceBlockRow(record.mentorNumber);
     commands.push({
       command: "set",
       path: `/UT/BL${utRow}`,
-      props: { link: `#Evidence!A${evidenceRow}`, display: `Case ${record.mentorNumber}` }
-    });
-    commands.push({
-      command: "set",
-      path: `/Evidence/K${evidenceRow}`,
-      props: { link: `${CARD_RELATIVE_ROOT}/${cardFile(record.mentorNumber)}`, display: "Card" }
+      props: { link: `#Evidence!B${evidenceRow}`, display: `Case ${record.mentorNumber}` }
     });
   }
   const result = spawnSync("officecli", ["batch", outputPath, "--json"], {
@@ -217,6 +229,104 @@ function applyNativeHyperlinks(outputPath, records) {
   });
   if (result.error) throw result.error;
   if (result.status !== 0) throw new Error(`OfficeCLI native hyperlink patch failed: ${result.stderr || result.stdout}`);
+}
+
+function xmlEscape(value) {
+  return String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+}
+
+async function embedEvidenceCards(outputPath, cardsDir, records) {
+  const zip = await JSZip.loadAsync(await fs.readFile(outputPath));
+  const sheetPath = "xl/worksheets/sheet4.xml";
+  const sheetRelsPath = "xl/worksheets/_rels/sheet4.xml.rels";
+  const drawingPath = "xl/drawings/drawing1.xml";
+  const drawingRelsPath = "xl/drawings/_rels/drawing1.xml.rels";
+  const contentTypesPath = "[Content_Types].xml";
+  const sheetXml = await zip.file(sheetPath).async("string");
+  if (/<(?:[A-Za-z_][\w.-]*:)?drawing\b/i.test(sheetXml)) throw new Error("Evidence sheet already contains a drawing; refusing to mix drawing ownership");
+  if (zip.file(drawingPath) || zip.file(drawingRelsPath)) throw new Error("drawing1.xml already exists; refusing to overwrite an unrelated drawing");
+
+  const cardBuffers = await Promise.all(records.map(async (record) => {
+    const imagePath = path.join(cardsDir, cardFile(record.mentorNumber));
+    return { record, buffer: await fs.readFile(imagePath) };
+  }));
+  if (cardBuffers.length !== 278) throw new Error(`Expected 278 cards, got ${cardBuffers.length}`);
+
+  const drawingRelationshipId = "rId1";
+  const relsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="${drawingRelationshipId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing" Target="../drawings/drawing1.xml"/></Relationships>`;
+  zip.file(sheetRelsPath, relsXml);
+
+  const anchors = [];
+  const imageRelationships = [];
+  for (const [index, { record, buffer }] of cardBuffers.entries()) {
+    const imageNumber = index + 1;
+    const imageName = `image${imageNumber}.png`;
+    const relationshipId = `rId${imageNumber}`;
+    const zeroBasedEvidenceRow = evidenceBlockRow(record.mentorNumber) - 1;
+    zip.file(`xl/media/${imageName}`, buffer);
+    imageRelationships.push(`<Relationship Id="${relationshipId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="../media/${imageName}"/>`);
+    const toRow = zeroBasedEvidenceRow + EVIDENCE_BLOCK_ROWS;
+    anchors.push(`<xdr:twoCellAnchor editAs="oneCell"><xdr:from><xdr:col>1</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${zeroBasedEvidenceRow}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from><xdr:to><xdr:col>2</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${toRow}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to><xdr:pic><xdr:nvPicPr><xdr:cNvPr id="${imageNumber}" name="${xmlEscape(`Case ${record.mentorNumber} card`)}" descr="${xmlEscape(`Case ${record.mentorNumber}`)}"/><xdr:cNvPicPr/></xdr:nvPicPr><xdr:blipFill><a:blip r:embed="${relationshipId}"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill><xdr:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${EVIDENCE_CARD_WIDTH_PX * 9525}" cy="${EVIDENCE_CARD_HEIGHT_PX * 9525}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></xdr:spPr></xdr:pic><xdr:clientData/></xdr:twoCellAnchor>`);
+  }
+  const drawingXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">${anchors.join("")}</xdr:wsDr>`;
+  const drawingRelsXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${imageRelationships.join("")}</Relationships>`;
+  zip.file(drawingPath, drawingXml);
+  zip.file(drawingRelsPath, drawingRelsXml);
+
+  let contentTypes = await zip.file(contentTypesPath).async("string");
+  if (!/Extension="png"/i.test(contentTypes)) contentTypes = contentTypes.replace("</Types>", '<Default Extension="png" ContentType="image/png"/></Types>');
+  if (!contentTypes.includes('/xl/drawings/drawing1.xml')) contentTypes = contentTypes.replace("</Types>", '<Override PartName="/xl/drawings/drawing1.xml" ContentType="application/vnd.openxmlformats-officedocument.drawing+xml"/></Types>');
+  zip.file(contentTypesPath, contentTypes);
+
+  const drawingElement = `<x:drawing xmlns:x="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" r:id="${drawingRelationshipId}"/>`;
+  const updatedSheetXml = sheetXml.includes("<legacyDrawing")
+    ? sheetXml.replace("<legacyDrawing", `${drawingElement}<legacyDrawing`)
+    : sheetXml.replace(/<\/(?:[A-Za-z_][\w.-]*:)?worksheet>/i, (tag) => `${drawingElement}${tag}`);
+  if (updatedSheetXml === sheetXml) throw new Error("Could not anchor Evidence drawing in the worksheet XML");
+  zip.file(sheetPath, updatedSheetXml);
+  await fs.writeFile(outputPath, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
+}
+
+async function convertEvidenceImagesToCellAnchors(outputPath) {
+  const zip = await JSZip.loadAsync(await fs.readFile(outputPath));
+  const drawingPath = "xl/drawings/drawing1.xml";
+  const drawingRelsPath = "xl/drawings/_rels/drawing1.xml.rels";
+  let drawingXml = await zip.file(drawingPath).async("string");
+  const anchors = [...drawingXml.matchAll(/<xdr:oneCellAnchor\b[^>]*>([\s\S]*?)<\/xdr:oneCellAnchor>/g)];
+  if (anchors.length !== 278) throw new Error(`Expected 278 API-authored Evidence one-cell anchors, got ${anchors.length}`);
+  for (const [index, match] of anchors.entries()) {
+    const caseNumber = index + 1;
+    const imageStart = evidenceBlockRow(caseNumber) - 1;
+    const imageEnd = imageStart + EVIDENCE_BLOCK_ROWS;
+    let body = match[1]
+      .replace(/<xdr:ext\b[^>]*\/>/i, "")
+      .replace(/<xdr:cNvPr\b[^>]*\bname="[^"]*"/i, `<xdr:cNvPr id="${caseNumber}" name="Case ${caseNumber} card" descr="Case ${caseNumber}"`);
+    const from = `<xdr:from><xdr:col>1</xdr:col><xdr:colOff>0</xdr:colOff><xdr:row>${imageStart}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>`;
+    // Keep the entire native two-cell anchor inside the single printable card
+    // column. Crossing into C caused LibreOffice to emit an empty horizontal
+    // spill page after every manual row-break block.
+    const to = `<xdr:to><xdr:col>1</xdr:col><xdr:colOff>${EVIDENCE_CARD_WIDTH_PX * 9525}</xdr:colOff><xdr:row>${imageEnd}</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:to>`;
+    body = body.replace(/<xdr:from>[\s\S]*?<\/xdr:from>/i, `${from}${to}`);
+    if (!/<a:xfrm\b/i.test(body)) {
+      body = body.replace("<xdr:spPr>", `<xdr:spPr><a:xfrm xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:off x="0" y="0"/><a:ext cx="${EVIDENCE_CARD_WIDTH_PX * 9525}" cy="${EVIDENCE_CARD_HEIGHT_PX * 9525}"/></a:xfrm>`);
+    }
+    body = body.replace(/<a:prstGeom\b([^>]*)\/>/i, '<a:prstGeom$1><a:avLst/></a:prstGeom>');
+    body = body.replace(/<xdr:clientData\s*\/>/i, '<xdr:clientData fLocksWithSheet="0" fPrintsWithSheet="1"/>');
+    drawingXml = drawingXml.replace(match[0], `<xdr:twoCellAnchor editAs="twoCell">${body}</xdr:twoCellAnchor>`);
+  }
+  drawingXml = drawingXml.replace(
+    '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing">',
+    '<xdr:wsDr xmlns:xdr="http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+  );
+  zip.file(drawingPath, drawingXml);
+  // Normalize artifact-tool's package-root media targets to standard drawing-relative
+  // targets. LibreOffice resolves the latter reliably for printed drawings.
+  const drawingRels = await zip.file(drawingRelsPath).async("string");
+  zip.file(drawingRelsPath, drawingRels.replaceAll('Target="/xl/media/', 'Target="../media/'));
+  const sheetRelsPath = "xl/worksheets/_rels/sheet4.xml.rels";
+  const sheetRels = await zip.file(sheetRelsPath).async("string");
+  zip.file(sheetRelsPath, sheetRels.replaceAll('Target="/xl/drawings/', 'Target="../drawings/'));
+  await fs.writeFile(outputPath, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 }
 
 function rawSet(outputPath, sheetName, xpath, action, xml) {
@@ -265,9 +375,9 @@ function restoreTemplatePrintSetup(outputPath) {
     },
     Evidence: {
       sheetPr: '<sheetPr filterMode="false" />',
-      fitToPage: "false",
+      fitToPage: "true",
       margins: '<pageMargins left="0.747916666666667" right="0.747916666666667" top="0.984027777777778" bottom="0.984027777777778" header="0.511811023622047" footer="0.511811023622047" />',
-      pageSetup: '<pageSetup paperSize="1" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="portrait" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
+      pageSetup: '<pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="0" pageOrder="downThenOver" orientation="portrait" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
       printOptions: '<printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false" />',
       headerFooter: '<headerFooter differentFirst="false" differentOddEven="false"><oddHeader></oddHeader><oddFooter></oddFooter></headerFooter>'
     }
@@ -307,13 +417,13 @@ async function restoreWorksheetDimensions(outputPath) {
     Cover: "A1:AQ1000",
     Histories: "A1:Z1000",
     UT: "A1:BV1048576",
-    Evidence: "A1:K279"
+    Evidence: `B1:B${EVIDENCE_LAST_ROW}`
   };
   const sheetProperties = {
     Cover: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="true" /></x:sheetPr>',
     Histories: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="true" /></x:sheetPr>',
     UT: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="true" /></x:sheetPr>',
-    Evidence: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="false" /></x:sheetPr>'
+    Evidence: '<x:sheetPr filterMode="false"><x:pageSetUpPr fitToPage="true" /></x:sheetPr>'
   };
   const printOptions = '<x:printOptions headings="false" gridLines="false" gridLinesSet="true" horizontalCentered="false" verticalCentered="false" />';
   const pageMargins = {
@@ -326,7 +436,7 @@ async function restoreWorksheetDimensions(outputPath) {
     Cover: '<x:pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
     Histories: '<x:pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
     UT: '<x:pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="0" pageOrder="downThenOver" orientation="landscape" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />',
-    Evidence: '<x:pageSetup paperSize="1" scale="100" fitToWidth="1" fitToHeight="1" pageOrder="downThenOver" orientation="portrait" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />'
+    Evidence: '<x:pageSetup paperSize="9" scale="100" fitToWidth="1" fitToHeight="0" pageOrder="downThenOver" orientation="portrait" blackAndWhite="false" draft="false" cellComments="none" horizontalDpi="300" verticalDpi="300" copies="1" />'
   };
   const headerFooters = {
     Cover: '<x:headerFooter differentFirst="false" differentOddEven="false"><x:oddHeader></x:oddHeader><x:oddFooter>&amp;L&amp;F&amp;R&amp;P / </x:oddFooter></x:headerFooter>',
@@ -357,8 +467,44 @@ async function restoreWorksheetDimensions(outputPath) {
     replaceOrInsert("pageSetup", pageSetups[sheetName], "headerFooter");
     const headerFooter = headerFooters[sheetName];
     replaceOrInsert("headerFooter", headerFooter, "legacyDrawing");
+    // artifact-tool may serialize sheetPr after the drawing collection. Excel
+    // requires it as the first worksheet child, ahead of dimension/sheetViews.
+    const sheetPrMatch = xml.match(/<x:sheetPr\b[\s\S]*?<\/x:sheetPr>|<x:sheetPr\b[^>]*\/>/i);
+    if (sheetPrMatch) {
+      xml = xml.replace(sheetPrMatch[0], "");
+      xml = xml.replace(/(<x:worksheet\b[^>]*>)/i, `$1${sheetPrMatch[0]}`);
+    }
+    const pageSetupMatch = xml.match(/<x:pageSetup\b[^>]*\/>/i);
+    if (pageSetupMatch) {
+      xml = xml.replace(pageSetupMatch[0], "");
+      if (/<x:headerFooter\b/i.test(xml)) xml = xml.replace(/<x:headerFooter\b/i, `${pageSetupMatch[0]}<x:headerFooter`);
+      else xml = xml.replace(/<x:drawing\b/i, `${pageSetupMatch[0]}<x:drawing`);
+    }
+    const drawingMatch = xml.match(/<x:drawing\b[^>]*\/>/i);
+    if (drawingMatch) {
+      xml = xml.replace(drawingMatch[0], "");
+      if (/<\/x:headerFooter>/i.test(xml)) xml = xml.replace(/<\/x:headerFooter>/i, `</x:headerFooter>${drawingMatch[0]}`);
+      else xml = xml.replace(/<\/x:worksheet>/i, `${drawingMatch[0]}</x:worksheet>`);
+    }
+    if (sheetName === "Evidence") {
+      const breaks = Array.from({ length: 277 }, (_, index) => {
+        const caseNumber = index + 1;
+        return `<x:brk id="${evidenceBlockEndRow(caseNumber)}" min="1" max="1" man="1" />`;
+      }).join("");
+      const rowBreaks = `<x:rowBreaks count="277" manualBreakCount="277">${breaks}</x:rowBreaks>`;
+      xml = xml.replace(/<x:rowBreaks\b[\s\S]*?<\/x:rowBreaks>/i, "");
+      if (/<x:drawing\b/i.test(xml)) xml = xml.replace(/<x:drawing\b/i, `${rowBreaks}<x:drawing`);
+      else xml = xml.replace(/<\/x:worksheet>/i, `${rowBreaks}</x:worksheet>`);
+    }
     zip.file(part, xml);
   }
+  let workbookXml = await zip.file("xl/workbook.xml").async("string");
+  const evidencePrintArea = `<x:definedName name="_xlnm.Print_Area" localSheetId="3">'Evidence'!$B$1:$B$${EVIDENCE_LAST_ROW}</x:definedName>`;
+  const existingPrintArea = /<x:definedName\b[^>]*\bname="_xlnm\.Print_Area"[^>]*\blocalSheetId="3"[^>]*>[\s\S]*?<\/x:definedName>/i;
+  if (existingPrintArea.test(workbookXml)) workbookXml = workbookXml.replace(existingPrintArea, evidencePrintArea);
+  else if (/<x:definedNames\b[^>]*>/i.test(workbookXml)) workbookXml = workbookXml.replace(/<\/x:definedNames>/i, `${evidencePrintArea}</x:definedNames>`);
+  else workbookXml = workbookXml.replace(/<x:sheets\b/i, `<x:definedNames>${evidencePrintArea}</x:definedNames><x:sheets`);
+  zip.file("xl/workbook.xml", workbookXml);
   await fs.writeFile(outputPath, await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" }));
 }
 
@@ -369,6 +515,7 @@ async function main() {
   const numberMapPath = required(args, "number-map");
   const resultsPath = required(args, "results");
   const evidenceRoot = required(args, "evidence-root");
+  const cardsDir = args["cards-dir"] || path.join(evidenceRoot, "cards");
   const outputPath = required(args, "output");
 
   const [catalog, numberMap, aggregate] = await Promise.all([
@@ -402,7 +549,7 @@ async function main() {
   // Official cover geometry is retained; only the existing metadata cells are populated.
   setMergedValue(cover, "N11:T11", "IDTS-SAP490-UNIT");
   setMergedValue(cover, "Z11:AI11", "IDTS-110 atomic execution");
-  setMergedValue(cover, "N12:AI12", "v0.5 candidate");
+  setMergedValue(cover, "N12:AI12", "v0.6 candidate");
   setMergedValue(cover, "N13:AI13", "Atomic execution and workbook");
   setMergedValue(cover, "N14:T14", CREATED_DATE);
   setMergedValue(cover, "Z14:AI14", CREATED_DATE);
@@ -412,7 +559,7 @@ async function main() {
   histories.getRange("B3:B3").values = [[1]];
   histories.getRange("C3:C6").values = [[0.5], [0.5], [0.5], [0.5]];
   histories.getRange("D3:D6").values = [
-    ["IDTS-110 atomic execution; v0.5 candidate"],
+    ["IDTS-110 atomic execution; v0.6 candidate"],
     [`Source baseline: ${aggregate.sourceBaselineSha}`],
     [`Catalog SHA: ${aggregate.catalogSha}`],
     [`Approval PR #${aggregate.approvalReference?.pullRequest ?? 388}; merge ${aggregate.approvalReference?.mergeSha ?? aggregate.sourceBaselineSha}`]
@@ -459,57 +606,21 @@ async function main() {
     ut.getRange(`BJ${row}:BK${row}`).format.wrapText = true;
   }
 
-  const headers = [[
-    "Evidence ID",
-    "Case",
-    "Run ID",
-    "Test file / assertion",
-    "Source baseline",
-    "Deploy SHA",
-    "Environment / executor / time",
-    "Result",
-    "Actual result",
-    "Limitation",
-    "Artifact"
-  ]];
-  evidence.getRange("A1:K1").values = headers;
-  evidence.getRange("A1:K1").format = {
-    fill: "#BDD6EE",
-    font: { name: "Times New Roman", size: 10, bold: true, color: "#000000" },
-    wrapText: true,
-    horizontalAlignment: "center",
-    verticalAlignment: "center",
-    borders: { preset: "all", style: "thin", color: "#000000" }
-  };
-  evidence.getRange("A1:K1").format.rowHeight = 30;
-  const evidenceRows = records.map((record) => {
-    const evidenceId = `EVD-${String(record.mentorNumber).padStart(3, "0")}`;
-    const environment = `${record.environment}; ${record.executor}; ${formatExecutionTime(record.executedAt)}`;
-    return [
-      evidenceId,
-      `Case ${record.mentorNumber}`,
-      record.runId,
-      record.testFileLabel,
-      record.sourceBaselineSha,
-      record.deploySha,
-      environment,
-      record.status,
-      record.actualResult,
-      record.limitation,
-      "Card"
-    ];
-  });
-  evidence.getRange(`A${EVIDENCE_START_ROW}:K${EVIDENCE_START_ROW + records.length - 1}`).values = evidenceRows;
-  const body = evidence.getRange(`A${EVIDENCE_START_ROW}:K${EVIDENCE_START_ROW + records.length - 1}`);
-  body.format = {
-    font: { name: "Times New Roman", size: 10, color: "#000000" },
-    wrapText: true,
-    verticalAlignment: "top",
-    borders: { preset: "all", style: "thin", color: "#D9D9D9" }
-  };
-  body.format.rowHeight = 72;
-  for (const [column, width] of [["A", 14], ["B", 10], ["C", 32], ["D", 52], ["E", 45], ["F", 18], ["G", 48], ["H", 18], ["I", 58], ["J", 58], ["K", 16]]) {
-    evidence.getRange(`${column}1:${column}${EVIDENCE_START_ROW + records.length - 1}`).format.columnWidth = width;
+  // Evidence is deliberately card-only. Each native card owns an A4 page block;
+  // provenance stays in JSON and the card itself already carries its Case number.
+  evidence.showGridLines = false;
+  evidence.getRange(`A1:K${EVIDENCE_LAST_ROW}`).clear({ applyTo: "contents" });
+  evidence.getRange(`B${EVIDENCE_FIRST_BLOCK_ROW}:B${EVIDENCE_LAST_ROW}`).format.rowHeight = 10.42;
+  evidence.getRange(`B1:B${EVIDENCE_LAST_ROW}`).format.columnWidth = 80;
+  for (const record of records) {
+    const card = await fs.readFile(path.join(cardsDir, cardFile(record.mentorNumber)));
+    evidence.images.add({
+      dataUrl: `data:image/png;base64,${card.toString("base64")}`,
+      anchor: {
+        from: { row: evidenceBlockRow(record.mentorNumber) - 1, col: 1 },
+        extent: { widthPx: EVIDENCE_CARD_WIDTH_PX, heightPx: EVIDENCE_CARD_HEIGHT_PX }
+      }
+    });
   }
 
   await fs.mkdir(path.dirname(outputPath), { recursive: true });
@@ -519,9 +630,11 @@ async function main() {
   // native link attribute is applied after export because artifact-tool has no public
   // hyperlink setter and HYPERLINK formulas are not evaluated by OfficeCLI.
   applyNativeHyperlinks(outputPath, records);
-  restoreTemplatePrintSetup(outputPath);
-  closeOfficeCliDocument(outputPath);
+  // Evidence drawings are authored with artifact-tool. Its drawing part must remain
+  // in worksheet schema order, so page/dimension restoration is performed directly
+  // below without a second OfficeCLI worksheet mutation.
   await restoreWorksheetDimensions(outputPath);
+  await convertEvidenceImagesToCellAnchors(outputPath);
   await fs.rm(`${outputPath}.inspect.ndjson`, { force: true });
   console.log(JSON.stringify({
     output: outputPath,
