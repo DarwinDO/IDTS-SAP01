@@ -37,27 +37,37 @@ try {
   }
   fs.mkdirSync(path.join(clone, '.tmp', 'idts-110'), { recursive: true })
   fs.copyFileSync(path.join(sourceRoot, '.tmp', 'idts-110', 'all-results.json'), path.join(clone, '.tmp', 'idts-110', 'all-results.json'))
+  fs.copyFileSync(path.join(sourceRoot, '.tmp', 'idts-110', 'mapping-atomic-results.json'), path.join(clone, '.tmp', 'idts-110', 'mapping-atomic-results.json'))
+  fs.copyFileSync(path.join(sourceRoot, 'docs', 'qa', 'idts-110-unit-test-catalog.json'), path.join(clone, 'docs', 'qa', 'idts-110-unit-test-catalog.json'))
+  fs.cpSync(path.join(sourceRoot, 'docs', 'pm', 'evidence', 'idts-110', 'cards'), path.join(clone, 'docs', 'pm', 'evidence', 'idts-110', 'cards'), { recursive: true, force: true })
 
   const config = defaults(clone)
-  const reviewedHead = git(clone, ['rev-parse', 'HEAD'])
   fs.mkdirSync(path.dirname(config.reviewArtifact), { recursive: true })
-  fs.copyFileSync(path.join(sourceRoot, '.superpowers', 'sdd', '2026-09-05-idts-110-atomic-execution-and-workbook', 'task-11-independent-review.md'), config.reviewArtifact)
+  fs.copyFileSync(path.join(sourceRoot, '.tmp', 'idts-110', 'workbook-v06-final-rereview.md'), config.reviewArtifact)
+  fs.copyFileSync(path.join(sourceRoot, 'docs', 'pm', 'evidence', 'idts-110', 'mapping-execution-receipt.json'), config.mappingReceipt)
+  fs.copyFileSync(path.join(sourceRoot, 'docs', 'pm', 'evidence', 'idts-110', 'source-result-ledger.json'), config.ledger)
+  git(clone, ['add', '--force', path.relative(clone, config.reviewArtifact), path.relative(clone, config.mappingReceipt), path.relative(clone, config.ledger), 'docs/qa/idts-110-unit-test-catalog.json', 'docs/pm/evidence/idts-110/cards'])
+  git(clone, ['commit', '-m', 'test: add v0.6 mapping fixtures'])
+  const reviewedHead = git(clone, ['rev-parse', 'HEAD'])
   const workbookReceipt = JSON.parse(fs.readFileSync(config.workbookReceipt, 'utf8'))
   workbookReceipt.reviewedHead = reviewedHead
   workbookReceipt.worktreeClean = true
   workbookReceipt.validatorSha256 = sha256(config.workbookValidator)
   writeJson(config.workbookReceipt, workbookReceipt)
   const reviewReceipt = {
-    kind: 'idts-110-independent-review-receipt',
+    kind: 'idts-110-workbook-v06-independent-review-receipt',
     schemaVersion: 1,
     reviewedHead,
-    worktreeClean: true,
-    artifactSha256: sha256(config.reviewArtifact),
-    counts: { critical: 0, major: 0, important: 0, deferredMinors: 2 }
+    candidate: { sha256: workbookReceipt.candidate.fileSha256, sizeBytes: workbookReceipt.candidate.fileSizeBytes },
+    pdf: { sha256: workbookReceipt.pdf.fileSha256, sizeBytes: workbookReceipt.pdf.fileSizeBytes, pageCount: workbookReceipt.pdf.pageCount, evidencePages: workbookReceipt.pdf.evidencePages, otherSheetPages: workbookReceipt.pdf.otherSheetPages },
+    validationReceipt: { sha256: sha256(config.workbookReceipt) },
+    reports: { priorGoReportSha256: sha256(config.reviewArtifact) },
+    severityCounts: { Critical: 0, Major: 0, Important: 0 },
+    verdict: 'GO'
   }
   writeJson(config.reviewReceipt, reviewReceipt)
   writeJson(config.receiptManifest, createReceiptManifest(config))
-  git(clone, ['add', '--force', path.relative(clone, config.reviewArtifact), path.relative(clone, config.workbookReceipt), path.relative(clone, config.reviewReceipt), path.relative(clone, config.receiptManifest)])
+  git(clone, ['add', '--force', path.relative(clone, config.workbookReceipt), path.relative(clone, config.reviewReceipt), path.relative(clone, config.receiptManifest)])
   git(clone, ['commit', '-m', 'test: add receipt lifecycle fixtures'])
 
   fs.rmSync(config.output, { force: true })
@@ -76,23 +86,49 @@ try {
     total: report.workbook.total,
     utEvidenceLinks: report.workbook.utEvidenceLinks,
     evidenceCardLinks: report.workbook.evidenceCardLinks
-  }, { candidatePass: 130, mappingOnly: 135, blocked: 13, total: 278, utEvidenceLinks: 278, evidenceCardLinks: 278 })
+  }, { candidatePass: 265, mappingOnly: 0, blocked: 13, total: 278, utEvidenceLinks: 278, evidenceCardLinks: 0 })
   assert.match(markdown, /Candidate-only handoff\. Result review is \*\*PENDING_DONHV_REVIEW\*\*/)
   assert.ok(markdown.includes(`| Independent review head | \`${reviewedHead}\` |`))
-  assert.match(markdown, /130 Candidate PASS \/ 135 Mapping Only \/ 13 Blocked \/ 278 total/)
+  assert.match(markdown, /265 Candidate PASS \/ 13 Blocked \/ 278 total/)
 
   assert.throws(() => buildReport({ ...config, workbook: config.template }), /candidate workbook SHA/i, 'official template substitution must fail')
+
+  const firstCard = path.join(config.cards, 'Case-001.png')
+  fs.renameSync(firstCard, `${firstCard}.missing`)
+  assert.throws(() => buildReport(config), /card|range|incomplete/i, 'a missing evidence card must fail the final-report gate')
+  fs.renameSync(`${firstCard}.missing`, firstCard)
+
+  const originalCard = fs.readFileSync(firstCard)
+  fs.appendFileSync(firstCard, 'receipt lifecycle card substitution')
+  assert.throws(() => buildReport(config), /receipt inputs are dirty/i, 'a modified canonical card must fail the dirty-worktree boundary')
+  fs.writeFileSync(firstCard, originalCard)
+
+  const unitResult = path.join(config.evidence, 'IDTS110-P189', 'result.json')
+  const originalUnitResult = fs.readFileSync(unitResult)
+  fs.appendFileSync(unitResult, '\nreceipt lifecycle unit substitution\n')
+  assert.throws(() => buildReport(config), /receipt inputs are dirty/i, 'a substituted canonical unit artifact must fail the dirty-worktree boundary')
+  fs.writeFileSync(unitResult, originalUnitResult)
 
   fs.renameSync(config.receiptManifest, `${config.receiptManifest}.missing`)
   assert.throws(() => buildReport(config), /missing input/i, 'missing manifest must fail')
   fs.renameSync(`${config.receiptManifest}.missing`, config.receiptManifest)
+
+  const allowedFixture = path.join(clone, 'scripts', 'qa', 'test-idts110-complete-card-contract.js')
+  fs.appendFileSync(allowedFixture, '\n// receipt lifecycle allowed fixture drift\n')
+  assert.doesNotThrow(() => buildReport(config), 'the exact allowed PEM-redaction fixture may be dirty')
+  fs.truncateSync(allowedFixture, fs.statSync(allowedFixture).size - '\n// receipt lifecycle allowed fixture drift\n'.length)
+
+  const unrelatedDirty = path.join(clone, 'receipt-lifecycle-unrelated.txt')
+  fs.writeFileSync(unrelatedDirty, 'unrelated dirty file\n')
+  assert.throws(() => buildReport(config), /receipt inputs are dirty/i, 'an unrelated dirty path must fail closed')
+  fs.rmSync(unrelatedDirty)
 
   fs.appendFileSync(config.reviewArtifact, '\nreceipt test tamper\n')
   assert.throws(() => buildReport(config), /review artifact SHA/i, 'tampered review artifact must fail')
   fs.truncateSync(config.reviewArtifact, fs.statSync(config.reviewArtifact).size - '\nreceipt test tamper\n'.length)
 
   const alteredReview = JSON.parse(fs.readFileSync(config.reviewReceipt, 'utf8'))
-  alteredReview.counts.important = 1
+  alteredReview.severityCounts.Important = 1
   writeJson(config.reviewReceipt, alteredReview)
   assert.throws(() => buildReport(config), /review receipt SHA/i, 'tampered review receipt must fail')
   writeJson(config.reviewReceipt, reviewReceipt)
@@ -101,7 +137,7 @@ try {
   manifest.receiptSha256.review = '0'.repeat(64)
   writeJson(config.receiptManifest, manifest)
   assert.throws(() => buildReport(config), /review receipt SHA/i, 'tampered manifest must fail')
-  writeJson(config.receiptManifest, { ...manifest, receiptSha256: { workbook: sha256(config.workbookReceipt), review: sha256(config.reviewReceipt) } })
+  writeJson(config.receiptManifest, { ...manifest, receiptSha256: { ...manifest.receiptSha256, workbook: sha256(config.workbookReceipt), review: sha256(config.reviewReceipt) } })
 
   fs.appendFileSync(path.join(clone, 'README.md'), '\nreceipt lifecycle source drift\n')
   git(clone, ['add', 'README.md'])

@@ -2,7 +2,8 @@
   "schemaVersion": "1.0",
   "jiraKey": "IDTS-110",
   "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
-  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "catalogSha": "16603bec649c4e6a09e907b2c7a1fc2b21c393befe7bd5c99b76aea75bb60e30",
+  "sourceCatalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
   "approvalReference": {
     "pullRequest": 388,
     "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"

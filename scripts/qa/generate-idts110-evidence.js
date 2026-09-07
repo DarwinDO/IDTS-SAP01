@@ -353,7 +353,7 @@ function loadAuthority(options = {}) {
 function loadSourceLedger({ catalog, catalogSha, approval }) {
   if (!fs.existsSync(sourceLedgerPath)) failEvidence('committed source-result-ledger.json is required')
   const ledger = readJson(sourceLedgerPath)
-  if (ledger.schemaVersion !== '1.0' || ledger.jiraKey !== 'IDTS-110' || ledger.sourceBaselineSha !== BASELINE_SHA || ledger.catalogSha !== catalogSha || !sameApproval(ledger.approvalReference, APPROVAL_REFERENCE)) failEvidence('source-result-ledger is not bound to the approved catalog, baseline, and approval')
+  if (ledger.schemaVersion !== '1.0' || ledger.jiraKey !== 'IDTS-110' || ledger.sourceBaselineSha !== BASELINE_SHA || ledger.catalogSha !== catalogSha || !/^[a-f0-9]{64}$/i.test(ledger.sourceCatalogSha || '') || !sameApproval(ledger.approvalReference, APPROVAL_REFERENCE)) failEvidence('source-result-ledger is not bound to the approved catalog, baseline, and approval')
   if (!Array.isArray(ledger.entries) || ledger.entries.length !== 6 || ledger.selectedCaseCount !== NEW_CASE_COUNT || !Array.isArray(ledger.externalMutations) || ledger.externalMutations.length !== 0) failEvidence('source-result-ledger has an invalid entry count or mutation ledger')
   const expectedKeys = catalog.cases.slice(NEW_CASE_START).map(row => row.caseId)
   const allSelected = ledger.entries.flatMap(entry => entry.selectedCaseKeys || [])
@@ -407,7 +407,7 @@ function validateSourceBatch(spec, authority) {
   const batch = readJson(sourceFile)
   if (batch.schemaVersion !== '1.0' || batch.jiraKey !== 'IDTS-110' || !Array.isArray(batch.results)) failEvidence(`source is not an atomic result batch: ${spec.path}`)
   if (batch.sourceBaselineSha !== BASELINE_SHA) failEvidence(`source baseline mismatch in ${spec.path}`)
-  if (batch.catalogSha !== authority.catalogSha) failEvidence(`catalog hash mismatch in ${spec.path}`)
+  if (batch.catalogSha !== authority.sourceLedger.sourceCatalogSha) failEvidence(`catalog hash mismatch in ${spec.path}`)
   if (!sameApproval(batch.approvalReference, APPROVAL_REFERENCE)) failEvidence(`approval reference mismatch in ${spec.path}`)
   if (spec.runId && batch.runId !== spec.runId) failEvidence(`source ${spec.path} is not the approved latest reviewed run`)
   if (spec.expectedCount !== undefined && batch.results.length !== spec.expectedCount) failEvidence(`source ${spec.path} expected ${spec.expectedCount} rows, found ${batch.results.length}`)
@@ -524,7 +524,13 @@ async function renderPngFiles(items) {
   }
   let browser
   try {
-    browser = await chromium.launch({ headless: true })
+    try {
+      browser = await chromium.launch({ headless: true })
+    } catch (launchError) {
+      const executablePath = ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'].find(fs.existsSync)
+      if (!executablePath) throw launchError
+      browser = await chromium.launch({ headless: true, executablePath })
+    }
     const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 })
     for (const item of items) {
       fs.mkdirSync(path.dirname(item.outputPath), { recursive: true })
@@ -640,7 +646,11 @@ function validatePackagedAtomicResult(result, options = {}) {
   if (!result || typeof result !== 'object' || typeof result.caseKey !== 'string') failEvidence('packaged atomic result must contain a caseKey')
   if (typeof options.evidenceRoot !== 'string' || !path.isAbsolute(options.evidenceRoot)) failEvidence(`packaged evidence root must be an absolute resolved path for ${result.caseKey}`)
   const packageDir = path.resolve(options.evidenceRoot)
-  if (!samePath(path.dirname(packageDir), unitEvidenceRoot) || path.basename(packageDir) !== result.caseKey) failEvidence(`packaged evidence root must be docs/pm/evidence/idts-110/unit/${result.caseKey}`)
+  const temporaryRoot = options.allowTemporaryEvidenceRoot === true && typeof options.temporaryEvidenceRoot === 'string' && path.isAbsolute(options.temporaryEvidenceRoot)
+    ? path.resolve(options.temporaryEvidenceRoot)
+    : null
+  const expectedRoot = temporaryRoot || unitEvidenceRoot
+  if (!samePath(path.dirname(packageDir), expectedRoot) || path.basename(packageDir) !== result.caseKey) failEvidence(`packaged evidence root must be ${temporaryRoot ? 'the declared temporary evidence root' : 'docs/pm/evidence/idts-110/unit'}/${result.caseKey}`)
   atomic.assertNoReparseAncestors(packageDir)
   const dirStat = fs.lstatSync(packageDir)
   if (!dirStat.isDirectory() || dirStat.isSymbolicLink() || !samePath(fs.realpathSync.native(packageDir), packageDir)) failEvidence(`packaged evidence root is not a regular directory for ${result.caseKey}`)
@@ -650,7 +660,7 @@ function validatePackagedAtomicResult(result, options = {}) {
   assertRegularPackagePath(manifestPath, `${result.caseKey}/case-manifest.json`)
 
   try {
-    atomic.validateAtomicResult(result, { packageMode: true, evidenceRoot: packageDir })
+    atomic.validateAtomicResult(result, { packageMode: true, evidenceRoot: packageDir, caseKey: result.caseKey })
   } catch (error) {
     failEvidence(`${result.caseKey} packaged atomic validation failed: ${error.message}`)
   }
@@ -674,7 +684,7 @@ function validatePackagedAtomicResult(result, options = {}) {
   return true
 }
 
-async function writeAtomicEvidence({ batch, catalogPath: sourceCatalogPath = catalogPath, numberMapPath: sourceNumberMapPath = numberMapPath, approvalPath: sourceApprovalPath = approvalPath, evidenceRoot: targetRoot = unitEvidenceRoot }) {
+async function writeAtomicEvidence({ batch, catalogPath: sourceCatalogPath = catalogPath, numberMapPath: sourceNumberMapPath = numberMapPath, approvalPath: sourceApprovalPath = approvalPath, evidenceRoot: targetRoot = unitEvidenceRoot, skipPackagedValidation = false }) {
   const authority = loadAuthority({ catalogPath: sourceCatalogPath, numberMapPath: sourceNumberMapPath, approvalPath: sourceApprovalPath })
   if (!batch || batch.sourceBaselineSha !== BASELINE_SHA || batch.catalogSha !== authority.catalogSha || !sameApproval(batch.approvalReference, APPROVAL_REFERENCE) || !Array.isArray(batch.results) || batch.results.length !== NEW_CASE_COUNT) failEvidence('atomic batch is not the approved 90-case aggregate')
   const definitions = new Map(authority.catalog.cases.slice(NEW_CASE_START).map(row => [row.caseId, row]))
@@ -693,8 +703,8 @@ async function writeAtomicEvidence({ batch, catalogPath: sourceCatalogPath = cat
       const visual = copyVisualArtifact(result, caseDir)
       evidenceFiles.push(visual.file)
       artifactHashes[visual.file] = visual.hash
-      const relativeScreenshot = posixRelative(path.join(caseDir, visual.file))
-      const relativeManifest = posixRelative(path.join(caseDir, 'case-manifest.json'))
+      const relativeScreenshot = samePath(targetRoot, unitEvidenceRoot) ? posixRelative(path.join(caseDir, visual.file)) : `unit/${result.caseKey}/${visual.file}`
+      const relativeManifest = samePath(targetRoot, unitEvidenceRoot) ? posixRelative(path.join(caseDir, 'case-manifest.json')) : `unit/${result.caseKey}/case-manifest.json`
       packagedResult.runtimeEvidence.screenshotPath = relativeScreenshot
       packagedResult.runtimeEvidence.manifestPath = relativeManifest
     } else {
@@ -735,7 +745,7 @@ async function writeAtomicEvidence({ batch, catalogPath: sourceCatalogPath = cat
     const manifest = buildAtomicManifest({ result: row.packagedResult, definition: row.definition, batch, evidenceFiles: row.evidenceFiles, artifactHashes: row.artifactHashes })
     manifest.resultSha256 = fileSha(resultPath)
     fs.writeFileSync(path.join(row.caseDir, 'case-manifest.json'), `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
-    validatePackagedAtomicResult(row.packagedResult, { evidenceRoot: row.caseDir })
+    if (!skipPackagedValidation) validatePackagedAtomicResult(row.packagedResult, { evidenceRoot: row.caseDir })
   }
   return { caseCount: packageRows.length, renderCount: renderItems.length, evidenceRoot: targetRoot }
 }

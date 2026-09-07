@@ -1,0 +1,63 @@
+{
+  "kind": "idts-110-workbook-v06-independent-review-receipt",
+  "schemaVersion": 1,
+  "reviewedHead": "a82de8e3f8521d5e9d1de4f2f2fc2071669126f0",
+  "reviewedAt": "2026-09-07T11:41:56.0176221+07:00",
+  "reviewer": {
+    "model": "Terra High",
+    "role": "independent reviewer"
+  },
+  "candidate": {
+    "path": "docs/sap490/generated/Unit_Test_IDTS_SAP01_en_v0.6_candidate.xlsx",
+    "sha256": "457BC346BD3C17D687E2AC77A33087C34B3A24F435916E8280F1903FFA266DCC",
+    "sizeBytes": 25649942
+  },
+  "pdf": {
+    "path": ".tmp/idts-110/v06-final-bound/Unit_Test_IDTS_SAP01_en_v0.6_candidate.pdf",
+    "sha256": "6F2B777673187D20CFA7A7D2540D44D1DB20AE460E370D851C5C866BC1871EF6",
+    "sizeBytes": 22358411,
+    "pageCount": 391,
+    "evidencePages": 278,
+    "otherSheetPages": 113
+  },
+  "validationReceipt": {
+    "path": "docs/pm/evidence/idts-110/workbook-v06-validation-receipt.json",
+    "sha256": "97F0152F39AC9FDD1A4997CC26E2162EE1513868F4051F6E89CBCF52E19E956C"
+  },
+  "historicalProvenance": {
+    "task4WorkbookCommit": "9fab786ea7e0d591b2a1ff4c889a5e069db9c749",
+    "previousIndependentReviewHead": "9fab786ea7e0d591b2a1ff4c889a5e069db9c749",
+    "task4ValidationReceiptReviewedHead": "45b61bb669b28cd89d1f1e7547b101c99a354743"
+  },
+  "task6GoogleSheetsAcceptanceChecklist": {
+    "path": "docs/pm/evidence/idts-110/google-sheets-v06-acceptance.md",
+    "commit": "a82de8e3f8521d5e9d1de4f2f2fc2071669126f0",
+    "sha256": "0B8CA1B9F85DFEDF6E5D884018EB0F4F062095350F4C07D517FB82909B68799A",
+    "claimsVerified": [
+      "candidate bytes, sheet order, result totals, anchors, and link totals match the bound Task4 receipt",
+      "Google Sheets steps are manual and approval-gated",
+      "the document authorizes no Drive, Jira, deployment, runtime, or data mutation"
+    ]
+  },
+  "reports": {
+    "validationReportPath": ".tmp/idts-110/workbook-v06-report.md",
+    "priorGoReportPath": ".tmp/idts-110/workbook-v06-final-rereview.md",
+    "priorGoReportSha256": "D33FE211C466F8BFE854F09221A2E4DD4792CC3C84D01A862B97F273DEF6D9BE"
+  },
+  "checks": {
+    "nonResidentOfficeCliValidation": "PASS",
+    "task4WorkbookValidator": "PASS",
+    "v06ReceiptContract": "PASS",
+    "candidatePdfReceiptBinding": "PASS",
+    "priorGoReportBinding": "PASS",
+    "gitDiffCheck": "PASS",
+    "immutableTask4PathComparison": "PASS",
+    "task6AcceptanceChecklistClaims": "PASS"
+  },
+  "severityCounts": {
+    "Critical": 0,
+    "Major": 0,
+    "Important": 0
+  },
+  "verdict": "GO"
+}

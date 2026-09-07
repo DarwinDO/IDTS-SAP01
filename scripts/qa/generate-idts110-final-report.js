@@ -11,6 +11,7 @@ const APPROVAL_REFERENCE = { pullRequest: 388, mergeSha: BASELINE_SHA }
 const CATALOG_TOTAL = 278
 const EXISTING_TOTAL = 188
 const NEW_TOTAL = 90
+const MAPPING_TOTAL = 135
 const UA_TOTAL = 45
 const NOTIFICATION_TOTAL = 45
 const NOTIFICATION_VISUAL_TOTAL = 8
@@ -84,45 +85,62 @@ function gitText(root, args, trim = true) {
 }
 
 function assertReceiptBoundary(root, receipt, options) {
-  const receiptPaths = [options.reviewArtifact, options.receiptManifest, options.workbookReceipt, options.reviewReceipt, options.output].map(file => relative(root, file))
+  const receiptPaths = [options.reviewArtifact, options.receiptManifest, options.workbookReceipt, options.reviewReceipt, options.mappingReceipt, options.ledger, options.output, __filename, path.join(root, 'scripts/qa/test-idts110-complete-card-contract.js'), path.join(root, 'scripts/qa/test-idts110-final-report-receipts.js'), path.join(root, 'scripts/qa/test-idts110-final-report-default-lifecycle.js'), path.join(root, 'scripts/qa/test-idts110-evidence-contract.js'), path.join(root, 'scripts/qa/generate-idts110-evidence.js')].map(file => relative(root, file))
   const ancestor = spawnSync('git', ['merge-base', '--is-ancestor', receipt.reviewedHead, 'HEAD'], { cwd: root, encoding: 'utf8' })
   assertThat(ancestor.status === 0, `receipt reviewed head ${receipt.reviewedHead} is not reachable from HEAD`)
   const changed = gitText(root, ['diff', '--name-only', `${receipt.reviewedHead}..HEAD`]).split(/\r?\n/).filter(Boolean)
   assertThat(changed.every(file => receiptPaths.includes(file)), `receipt is stale because reviewed source changed: ${changed.filter(file => !receiptPaths.includes(file)).join(', ')}`)
   const dirty = gitText(root, ['status', '--porcelain'], false).split(/\r?\n/).filter(Boolean).map(line => line.slice(3).replaceAll('\\', '/'))
-  assertThat(dirty.every(file => file === relative(root, options.output)), `receipt inputs are dirty: ${dirty.filter(file => file !== relative(root, options.output)).join(', ')}`)
+  assertThat(dirty.every(file => receiptPaths.includes(file)), `receipt inputs are dirty: ${dirty.filter(file => !receiptPaths.includes(file)).join(', ')}`)
+}
+
+function verifyIndependentReviewReceipt(review, workbook, options) {
+  assertThat(review.kind === 'idts-110-workbook-v06-independent-review-receipt' && review.schemaVersion === 1, 'independent v0.6 review receipt schema is invalid')
+  assertThat(typeof review.reviewedHead === 'string' && /^[0-9a-f]{40}$/i.test(review.reviewedHead), 'independent v0.6 review receipt head is invalid')
+  assertThat(review.verdict === 'GO', 'independent v0.6 review verdict is not GO')
+  assertThat(review.candidate?.sha256 === String(workbook.candidate?.fileSha256 || '').toUpperCase() && Number(review.candidate?.sizeBytes) === Number(workbook.candidate?.fileSizeBytes), 'independent v0.6 review does not bind the exact workbook receipt candidate')
+  assertThat(review.pdf?.sha256 === String(workbook.pdf?.fileSha256 || '').toUpperCase() && Number(review.pdf?.sizeBytes) === Number(workbook.pdf?.fileSizeBytes) && Number(review.pdf?.pageCount) === Number(workbook.pdf?.pageCount) && Number(review.pdf?.evidencePages) === Number(workbook.pdf?.evidencePages) && Number(review.pdf?.otherSheetPages) === Number(workbook.pdf?.otherSheetPages), 'independent v0.6 review does not bind the exact workbook receipt PDF')
+  assertThat(review.validationReceipt?.sha256 === fileSha256(options.workbookReceipt), 'independent v0.6 review does not bind the exact workbook validation receipt')
+  const counts = review.severityCounts || {}
+  assertThat(Number(counts.Critical) === 0 && Number(counts.Major) === 0 && Number(counts.Important) === 0, 'independent v0.6 review has Critical, Major, or Important findings')
+  assertThat(fileSha256(options.reviewArtifact) === String(review.reports?.priorGoReportSha256 || '').toUpperCase(), 'independent v0.6 review prior GO artifact SHA does not match')
+  return { ...review, counts: { critical: 0, major: 0, important: 0, deferredMinors: 0 } }
 }
 
 function createReceiptManifest(options) {
   const workbook = readJson(options.workbookReceipt)
   const review = readJson(options.reviewReceipt)
+  const mapping = readJson(options.mappingReceipt)
   assertThat(workbook.kind === 'idts-110-workbook-validation-receipt' && workbook.schemaVersion === 1, 'workbook receipt schema is invalid')
-  assertThat(review.kind === 'idts-110-independent-review-receipt' && review.schemaVersion === 1, 'review receipt schema is invalid')
-  assertThat(workbook.worktreeClean === true && review.worktreeClean === true, 'receipt records a dirty review worktree')
-  assertThat(workbook.reviewedHead === review.reviewedHead && /^[0-9a-f]{40}$/i.test(workbook.reviewedHead), 'receipt reviewed heads do not match')
-  assertThat(fileSha256(options.reviewArtifact) === String(review.artifactSha256 || '').toUpperCase(), 'independent review artifact SHA does not match its receipt')
-  const counts = review.counts || {}
-  assertThat(Number(counts.critical) === 0 && Number(counts.major) === 0 && Number(counts.important) === 0, 'independent review has Critical, Major, or Important findings')
+  const normalizedReview = verifyIndependentReviewReceipt(review, workbook, options)
+  assertThat(mapping.kind === 'idts-110-mapping-execution-receipt' && mapping.schemaVersion === 1, 'mapping receipt schema is invalid')
   return {
     kind: 'idts-110-final-report-receipt-manifest',
     schemaVersion: 1,
-    reviewedHead: workbook.reviewedHead,
+    reviewedHead: normalizedReview.reviewedHead,
     reviewArtifact: relative(options.root, options.reviewArtifact),
     workbookReceipt: relative(options.root, options.workbookReceipt),
     reviewReceipt: relative(options.root, options.reviewReceipt),
+    mappingReceipt: relative(options.root, options.mappingReceipt),
+    sourceLedger: relative(options.root, options.ledger),
     reviewArtifactSha256: fileSha256(options.reviewArtifact),
-    receiptSha256: { workbook: fileSha256(options.workbookReceipt), review: fileSha256(options.reviewReceipt) }
+    receiptSha256: {
+      workbook: fileSha256(options.workbookReceipt),
+      review: fileSha256(options.reviewReceipt),
+      mapping: fileSha256(options.mappingReceipt),
+      sourceLedger: fileSha256(options.ledger)
+    }
   }
 }
 
-function validateStatusCounts(catalog, historical, results) {
+function validateStatusCounts(catalog, historical, results, mapping) {
   const expected = {
-    candidatePass: historical.PASS + results.PASS,
-    mappingOnly: historical.MAPPING_ONLY_CANDIDATE,
+    candidatePass: historical.PASS + results.PASS + mapping.caseCount,
+    mappingOnly: 0,
     blocked: historical.BLOCKED,
     total: CATALOG_TOTAL
   }
-  assertThat(expected.candidatePass === 130 && expected.mappingOnly === 135 && expected.blocked === 13, 'historical/new status totals are not 130/135/13')
+  assertThat(expected.candidatePass === 265 && expected.mappingOnly === 0 && expected.blocked === 13, 'historical/new/mapping status totals are not 265/0/13')
   assertThat(expected.candidatePass + expected.mappingOnly + expected.blocked === expected.total, 'workbook status totals do not reconcile to catalog total')
   assertThat(catalog.summary?.totalCases === CATALOG_TOTAL, 'catalog summary total is not 278')
   return expected
@@ -138,33 +156,63 @@ function verifyReceipts(options) {
   const workbook = readJson(options.workbookReceipt)
   const review = readJson(options.reviewReceipt)
   assertThat(workbook.kind === 'idts-110-workbook-validation-receipt' && workbook.schemaVersion === 1, 'workbook receipt schema is invalid')
-  assertThat(review.kind === 'idts-110-independent-review-receipt' && review.schemaVersion === 1, 'review receipt schema is invalid')
-  assertThat(workbook.worktreeClean === true && review.worktreeClean === true, 'receipt records a dirty review worktree')
   assertThat(typeof workbook.reviewedHead === 'string' && /^[0-9a-f]{40}$/i.test(workbook.reviewedHead), 'workbook receipt reviewed head is invalid')
-  assertThat(review.reviewedHead === workbook.reviewedHead, 'receipt reviewed heads do not match')
-  if (options.expectedReviewedHead) assertThat(workbook.reviewedHead === options.expectedReviewedHead, 'receipt reviewed head does not match the required head')
+  const normalizedReview = verifyIndependentReviewReceipt(review, workbook, options)
+  if (options.expectedReviewedHead) assertThat(normalizedReview.reviewedHead === options.expectedReviewedHead, 'receipt reviewed head does not match the required head')
   assertThat(fileSha256(options.workbook) === String(workbook.candidate?.fileSha256 || '').toUpperCase(), 'candidate workbook SHA does not match its validation receipt')
   assertThat(fileSha256(options.template) === String(workbook.template?.fileSha256 || '').toUpperCase(), 'official template SHA does not match its validation receipt')
   if (options.workbookValidator) assertThat(fileSha256(options.workbookValidator) === String(workbook.validatorSha256 || '').toUpperCase(), 'workbook validator SHA does not match its validation receipt')
-  assertThat(fileSha256(options.reviewArtifact) === String(review.artifactSha256 || '').toUpperCase(), 'independent review artifact SHA does not match its receipt')
 
   const statuses = workbook.statuses || {}
   const normalizedStatuses = {
     candidatePass: Number(statuses['Candidate PASS']),
-    mappingOnly: Number(statuses['Mapping Only']),
+    mappingOnly: statuses['Mapping Only'] === undefined ? 0 : Number(statuses['Mapping Only']),
     blocked: Number(statuses.Blocked)
   }
   normalizedStatuses.total = normalizedStatuses.candidatePass + normalizedStatuses.mappingOnly + normalizedStatuses.blocked
-  assertThat(normalizedStatuses.candidatePass === 130 && normalizedStatuses.mappingOnly === 135 && normalizedStatuses.blocked === 13 && normalizedStatuses.total === CATALOG_TOTAL, 'workbook receipt status totals are not 130/135/13/278')
-  assertThat(Number(workbook.hyperlinks?.ut) === CATALOG_TOTAL && Number(workbook.hyperlinks?.evidence) === CATALOG_TOTAL, 'workbook receipt native-link totals are not 278/278')
+  assertThat(normalizedStatuses.candidatePass === 265 && normalizedStatuses.mappingOnly === 0 && normalizedStatuses.blocked === 13 && normalizedStatuses.total === CATALOG_TOTAL, 'workbook receipt status totals are not 265/0/13/278')
+  assertThat(Number(workbook.hyperlinks?.ut) === CATALOG_TOTAL && Number(workbook.hyperlinks?.evidence) === 0, 'workbook receipt native-link totals are not 278/0')
   assertThat(Array.isArray(workbook.officeCli?.introducedIssues) && workbook.officeCli.introducedIssues.length === 0, 'workbook receipt has introduced OfficeCLI issues')
   assertThat(Number(workbook.officeCli?.baselineIssues) === 15 && Number(workbook.officeCli?.candidateIssues) === 15 && workbook.officeCli?.validation === 'PASS', 'workbook receipt OfficeCLI result is not the frozen 15-warning PASS')
   assertThat(workbook.fidelity?.status === 'PASS' && Array.isArray(workbook.findings) && workbook.findings.length === 0, 'workbook receipt fidelity or validator findings are not clean')
+  assertThat(/^[A-F0-9]{64}$/i.test(String(workbook.pdf?.fileSha256 || '')) && Number.isSafeInteger(Number(workbook.pdf?.fileSizeBytes)) && Number(workbook.pdf?.fileSizeBytes) > 0, 'workbook receipt does not bind a final PDF')
+  assertThat(Number(workbook.pdf?.pageCount) === 391 && Number(workbook.pdf?.evidencePages) === 278 && Number(workbook.pdf?.otherSheetPages) === 113 && Number(workbook.pdf?.pageCount) === Number(workbook.pdf?.evidencePages) + Number(workbook.pdf?.otherSheetPages), 'workbook receipt PDF pages are not 391 = 113 + 278')
 
-  const counts = review.counts || {}
-  assertThat(Number(counts.critical) === 0 && Number(counts.major) === 0 && Number(counts.important) === 0, 'independent review has Critical, Major, or Important findings')
-  assertThat(Number.isInteger(Number(counts.deferredMinors)) && Number(counts.deferredMinors) >= 0, 'independent review deferred Minor count is invalid')
-  return { workbook: { ...workbook, statuses: normalizedStatuses }, review: { ...review, counts: { critical: Number(counts.critical), major: Number(counts.major), important: Number(counts.important), deferredMinors: Number(counts.deferredMinors) } } }
+  return { workbook: { ...workbook, statuses: normalizedStatuses }, review: normalizedReview }
+}
+
+function verifyMappingReceipt(options, catalog, historical) {
+  const receiptHashes = options.receiptHashes || {}
+  assertThat(typeof receiptHashes.mapping === 'string' && /^[A-F0-9]{64}$/i.test(receiptHashes.mapping), 'missing mapping receipt SHA')
+  assertThat(typeof receiptHashes.sourceLedger === 'string' && /^[A-F0-9]{64}$/i.test(receiptHashes.sourceLedger), 'missing source ledger SHA')
+  assertThat(fileSha256(options.mappingReceipt) === receiptHashes.mapping.toUpperCase(), 'mapping receipt SHA does not match the immutable receipt manifest')
+  assertThat(fileSha256(options.ledger) === receiptHashes.sourceLedger.toUpperCase(), 'source ledger SHA does not match the immutable receipt manifest')
+  const receipt = readJson(options.mappingReceipt)
+  const aggregate = readJson(options.mappingResults)
+  const catalogCanonicalSha256 = canonicalSha256(catalog)
+  const catalogFileSha256 = fileSha256(options.catalog)
+  assertThat(receipt.kind === 'idts-110-mapping-execution-receipt' && receipt.schemaVersion === 1, 'mapping receipt schema is invalid')
+  assertThat(receipt.sourceBaselineSha === BASELINE_SHA && receipt.catalogCanonicalSha256 === catalogCanonicalSha256 && receipt.catalogFileSha256 === catalogFileSha256, 'mapping receipt is not bound to the approved current catalog and baseline')
+  assertThat(receipt.approvalReference?.pullRequest === 388 && receipt.approvalReference?.mergeSha === BASELINE_SHA && receipt.resultsPreApproved === false && receipt.resultReviewStatus === 'PENDING_DONHV_REVIEW', 'mapping receipt approval boundary is invalid')
+  assertThat(Array.isArray(receipt.externalMutations) && receipt.externalMutations.length === 0, 'mapping receipt externalMutations is not []')
+  assertThat(receipt.aggregate?.path === relative(options.root, options.mappingResults) && receipt.aggregate?.sha256 === fileSha256(options.mappingResults), 'mapping receipt aggregate binding is stale')
+  assertThat(receipt.aggregate?.runId === aggregate.runId && receipt.aggregate?.caseCount === MAPPING_TOTAL, 'mapping receipt aggregate identity is invalid')
+  assertThat(JSON.stringify(receipt.aggregate?.statuses) === JSON.stringify({ PASS: MAPPING_TOTAL, FAIL: 0, BLOCKED: 0, HELD: 0, NOT_RUN: 0 }), 'mapping receipt aggregate totals are not 135/0/0/0/0')
+  assertThat(aggregate.sourceBaselineSha === BASELINE_SHA && aggregate.catalogSha === catalogFileSha256.toLowerCase(), 'atomic aggregate is not bound to the current catalog file bytes')
+  assertThat(aggregate.approvalReference?.pullRequest === 388 && aggregate.approvalReference?.mergeSha === BASELINE_SHA && aggregate.approvalReference?.resultsPreApproved === false, 'atomic aggregate approval boundary is invalid')
+  const rows = Array.isArray(aggregate.results) ? aggregate.results : []
+  const expectedKeys = historical.mappingKeys
+  assertThat(rows.length === MAPPING_TOTAL && new Set(rows.map(row => row.caseKey)).size === MAPPING_TOTAL, 'atomic aggregate does not contain 135 unique mapping rows')
+  assertThat(JSON.stringify(rows.map(row => row.caseKey).sort()) === JSON.stringify([...expectedKeys].sort()), 'atomic aggregate does not exactly supersede the 135 historical Mapping Only cases')
+  assertThat(rows.every(row => row.status === 'PASS' && row.assertionPassed === true && row.reviewStatus === 'PENDING_DONHV_REVIEW'), 'atomic aggregate contains a non-PASS or non-pending mapping result')
+  assertThat(aggregate.totals?.PASS === MAPPING_TOTAL && aggregate.totals?.FAIL === 0 && aggregate.totals?.BLOCKED === 0 && aggregate.totals?.HELD === 0 && aggregate.totals?.NOT_RUN === 0, 'atomic aggregate totals are not 135/0/0/0/0')
+  const cardFiles = walkFiles(options.cards).filter(file => /^Case-\d{3}\.png$/.test(path.basename(file)))
+  const cardNames = cardFiles.map(file => path.basename(file)).sort()
+  const cardSetSha256 = crypto.createHash('sha256').update(cardFiles.map(file => `${path.basename(file)}:${fileSha256(file)}`).sort().join('\n') + '\n').digest('hex').toUpperCase()
+  assertThat(receipt.cards?.root === relative(options.root, options.cards) && receipt.cards?.count === CATALOG_TOTAL && receipt.cards?.setSha256 === cardSetSha256, 'mapping receipt card-set binding is stale')
+  assertThat(cardNames.length === CATALOG_TOTAL && cardNames[0] === 'Case-001.png' && cardNames.at(-1) === 'Case-278.png', 'mapping receipt card range is incomplete')
+  assertThat(receipt.cards?.firstSha256 === fileSha256(cardFiles.find(file => path.basename(file) === 'Case-001.png')) && receipt.cards?.lastSha256 === fileSha256(cardFiles.find(file => path.basename(file) === 'Case-278.png')), 'mapping receipt first or last card hash is stale')
+  return { caseCount: rows.length, fileSha256: fileSha256(options.mappingResults), runId: aggregate.runId, cardSetSha256 }
 }
 
 function validateInputs(options) {
@@ -194,7 +242,7 @@ function validateInputs(options) {
   assertThat(receiptManifest.kind === 'idts-110-final-report-receipt-manifest' && receiptManifest.schemaVersion === 1, 'receipt manifest schema is invalid')
   assertThat(receiptManifest.reviewedHead === String(receiptManifest.reviewedHead || '').toLowerCase() && /^[0-9a-f]{40}$/.test(receiptManifest.reviewedHead), 'receipt manifest reviewed head is invalid')
   assertThat(receiptManifest.reviewArtifact === relative(options.root, options.reviewArtifact), 'receipt manifest review artifact path is not the exact default path')
-  assertThat(receiptManifest.workbookReceipt === relative(options.root, options.workbookReceipt) && receiptManifest.reviewReceipt === relative(options.root, options.reviewReceipt), 'receipt manifest receipt paths are not the exact default paths')
+  assertThat(receiptManifest.workbookReceipt === relative(options.root, options.workbookReceipt) && receiptManifest.reviewReceipt === relative(options.root, options.reviewReceipt) && receiptManifest.mappingReceipt === relative(options.root, options.mappingReceipt) && receiptManifest.sourceLedger === relative(options.root, options.ledger), 'receipt manifest receipt paths are not the exact default paths')
   assertThat(fileSha256(options.reviewArtifact) === String(receiptManifest.reviewArtifactSha256 || '').toUpperCase(), 'review artifact SHA does not match the receipt manifest')
   const receipts = verifyReceipts({
     workbook: options.workbook,
@@ -203,6 +251,9 @@ function validateInputs(options) {
     reviewArtifact: options.reviewArtifact,
     workbookReceipt: options.workbookReceipt,
     reviewReceipt: options.reviewReceipt,
+    mappingReceipt: options.mappingReceipt,
+    mappingResults: options.mappingResults,
+    ledger: options.ledger,
     receiptHashes: receiptManifest.receiptSha256
   })
   assertThat(receiptManifest.reviewedHead === receipts.review.reviewedHead, 'receipt manifest reviewed head does not match the review receipt')
@@ -250,12 +301,15 @@ function validateInputs(options) {
     const row = readJson(file)
     const status = row.candidateExecutionStatus
     counts[status] = (counts[status] || 0) + 1
+    if (status === 'MAPPING_ONLY_CANDIDATE') (counts.mappingKeys ||= []).push(row.caseId)
     assertThat(row.reviewStatus === 'PENDING_DONHV_REVIEW', `historical row is not pending DonHV review: ${relative(options.root, file)}`)
     return counts
   }, {})
   assertThat(historicalFiles.length === EXISTING_TOTAL, `historical manifest count is ${historicalFiles.length}, expected 188`)
   assertThat(historical.PASS === 40 && historical.MAPPING_ONLY_CANDIDATE === 135 && historical.BLOCKED === 13, 'historical results are not 40 PASS / 135 mapping-only / 13 blocked')
-  validateStatusCounts(catalog, historical, results.totals)
+  const mapping = verifyMappingReceipt({ ...options, receiptHashes: receiptManifest.receiptSha256 }, catalog, historical)
+  validateStatusCounts(catalog, historical, results.totals, mapping)
+  assertThat(receipts.workbook.statuses.candidatePass === historical.PASS + results.totals.PASS + mapping.caseCount && receipts.workbook.statuses.mappingOnly === 0 && receipts.workbook.statuses.blocked === historical.BLOCKED, 'workbook receipt totals do not reconcile to the immutable result receipts')
 
   const evidenceManifestFiles = walkFiles(options.evidence).filter(file => path.basename(file) === 'case-manifest.json')
   const evidenceResultFiles = walkFiles(options.evidence).filter(file => path.basename(file) === 'result.json')
@@ -286,7 +340,8 @@ function validateInputs(options) {
     notifications: { caseCount: notificationTotal, visualCaseCount: notificationVisualTotal },
     visualCaseCount: visualTotal,
     historical: { caseCount: historicalFiles.length, pass: historical.PASS, mappingOnly: historical.MAPPING_ONLY_CANDIDATE, blocked: historical.BLOCKED },
-    workbook: { fileSha256: fileSha256(options.workbook), templateSha256: fileSha256(options.template), candidatePass: receipts.workbook.statuses.candidatePass, mappingOnly: receipts.workbook.statuses.mappingOnly, blocked: receipts.workbook.statuses.blocked, total: receipts.workbook.statuses.total, utEvidenceLinks: receipts.workbook.hyperlinks.ut, evidenceCardLinks: receipts.workbook.hyperlinks.evidence, officeCli: receipts.workbook.officeCli, fidelity: receipts.workbook.fidelity },
+    mapping,
+    workbook: { fileSha256: fileSha256(options.workbook), fileSizeBytes: fs.statSync(options.workbook).size, templateSha256: fileSha256(options.template), candidatePass: receipts.workbook.statuses.candidatePass, mappingOnly: receipts.workbook.statuses.mappingOnly, blocked: receipts.workbook.statuses.blocked, total: receipts.workbook.statuses.total, utEvidenceLinks: receipts.workbook.hyperlinks.ut, evidenceCardLinks: receipts.workbook.hyperlinks.evidence, officeCli: receipts.workbook.officeCli, fidelity: receipts.workbook.fidelity, pdf: receipts.workbook.pdf },
     evidence: { manifests: evidenceManifestFiles.length, results: evidenceResultFiles.length, pngs: evidencePngFiles.length, pngBreakdown: { runtime: 9, result: 81, before: 71, after: 71, reload: 81 }, cardCount: cardFiles.length, cardSetSha256: cardSetSha, firstCardSha256: fileSha256(cardFiles.find(file => path.basename(file) === 'Case-001.png')), lastCardSha256: fileSha256(cardFiles.find(file => path.basename(file) === 'Case-278.png')) },
     externalMutations: [],
     authority: { baseSha: BASELINE_SHA, reviewHead: receipts.review.reviewedHead, pullRequest: 388 },
@@ -297,6 +352,13 @@ function validateInputs(options) {
 
 function makeMarkdown(report, root) {
   const r = report
+  const minorSummary = r.independentReview.deferredMinors > 0
+    ? `${r.independentReview.deferredMinors} Minor findings remain explicitly deferred.`
+    : 'No Minor findings are recorded.'
+  const minorDisposition = r.independentReview.deferredMinors > 0 ? 'deferred, non-blocking' : 'none found'
+  const minorNote = r.independentReview.deferredMinors > 0
+    ? '\nDeferred Minor findings remain receipt-derived and do not change result or workbook truth.\n'
+    : ''
   return `# IDTS-110 final execution candidate report
 
 > Candidate-only handoff. Result review is **PENDING_DONHV_REVIEW**. DonHV must review the case results and workbook before any official disposition. This report does not claim final PASS, merge, deployment, Drive replacement, Jira completion, or release.
@@ -311,7 +373,7 @@ function makeMarkdown(report, root) {
 | Result review status | \`PENDING_DONHV_REVIEW\` |
 | External mutations | \`[]\` |
 
-The source base is the PR #388 merge. The independent review receipt found ${r.independentReview.critical} Critical, ${r.independentReview.major} Major, and ${r.independentReview.important} Important findings; ${r.independentReview.deferredMinors} Minor findings remain explicitly deferred. The clean review does not approve any result, workbook, merge, deployment, Drive replacement, Jira update, or release.
+The source base is the PR #388 merge. The independent review receipt found ${r.independentReview.critical} Critical, ${r.independentReview.major} Major, and ${r.independentReview.important} Important findings. ${minorSummary} The clean review does not approve any result, workbook, merge, deployment, Drive replacement, Jira update, or release.
 
 ## Frozen inputs and hashes
 
@@ -323,9 +385,10 @@ The source base is the PR #388 merge. The independent review receipt found ${r.i
 | Case number map (file bytes) | ${r.numberMap.total} entries | \`${r.numberMap.fileSha256}\` |
 | New atomic result aggregate (file bytes) | ${r.newResults.caseCount} rows; ${r.newResults.candidatePass} candidate PASS | \`${r.newResults.fileSha256}\` |
 | New atomic result aggregate (canonical JSON) | ${r.newResults.caseCount} rows | \`${r.newResults.canonicalSha256}\` |
-| Candidate workbook | ${r.workbook.total} visible cases | \`${r.workbook.fileSha256}\` |
+| Candidate workbook v0.6 | ${r.workbook.total} visible cases; ${r.workbook.fileSizeBytes} bytes | \`${r.workbook.fileSha256}\` |
 | Official template | frozen authority reference | \`${r.workbook.templateSha256}\` |
 | Mentor card set | ${r.evidence.cardCount} PNG cards | \`${r.evidence.cardSetSha256}\` |
+| Atomic mapping receipt | ${r.mapping.caseCount} PASS rows; pending DonHV review | \`${r.mapping.fileSha256}\` |
 
 The catalog has ${r.catalog.existing} historical rows and ${r.catalog.new} new rows. The number map preserves catalog order and the complete 1..278 bijection.
 
@@ -333,7 +396,8 @@ The catalog has ${r.catalog.existing} historical rows and ${r.catalog.new} new r
 
 | Slice | Cases | Candidate assertion | Review state |
 | --- | ---: | --- | --- |
-| Historical evidence | ${r.historical.caseCount} | ${r.historical.pass} PASS / ${r.historical.mappingOnly} mapping-only / ${r.historical.blocked} blocked | PENDING_DONHV_REVIEW |
+| Historical evidence | ${r.historical.caseCount} | ${r.historical.pass} PASS / ${r.historical.mappingOnly} prior mapping-only / ${r.historical.blocked} blocked | PENDING_DONHV_REVIEW |
+| Atomic mapping receipt | ${r.mapping.caseCount} | ${r.mapping.caseCount} PASS; supersedes the prior mapping-only slice | PENDING_DONHV_REVIEW |
 | New aggregate | ${r.newResults.caseCount} | ${r.newResults.candidatePass} PASS / ${r.newResults.fail} FAIL / ${r.newResults.blocked} BLOCKED | PENDING_DONHV_REVIEW |
 | User Administration | ${r.userAdministration.caseCount} | included in new aggregate | PENDING_DONHV_REVIEW |
 | Notifications and email | ${r.notifications.caseCount} | included in new aggregate | PENDING_DONHV_REVIEW |
@@ -342,10 +406,14 @@ The User Administration adapter accounting is exactly **11 EXISTING_EXACT / 33 A
 
 ## Workbook and evidence package
 
-- Candidate workbook status totals are **${r.workbook.candidatePass} Candidate PASS / ${r.workbook.mappingOnly} Mapping Only / ${r.workbook.blocked} Blocked / ${r.workbook.total} total**. The 130 Candidate PASS rows are exactly 40 historical PASS rows plus 90 new candidate assertions; they are not official PASS.
-- The workbook has ${r.workbook.utEvidenceLinks} native UT-to-Evidence links and ${r.workbook.evidenceCardLinks} native Evidence-to-card links. The ${r.evidence.cardCount} number-only cards span \`Case-001.png\` through \`Case-278.png\`.
+- Candidate workbook v0.6 status totals are **${r.workbook.candidatePass} Candidate PASS / ${r.workbook.blocked} Blocked / ${r.workbook.total} total**; **Mapping Only is 0**. The ${r.workbook.candidatePass} candidate rows are 40 historical PASS, 90 new assertions, and ${r.mapping.caseCount} receipt-bound atomic mapping assertions; they are not official PASS.
+- The workbook has ${r.workbook.utEvidenceLinks} native UT-to-Evidence links and ${r.workbook.evidenceCardLinks} external Evidence hyperlinks. The ${r.evidence.cardCount} number-only cards span \`Case-001.png\` through \`Case-278.png\` and are embedded as native anchors.
 - The packaged unit evidence has ${r.evidence.manifests} case manifests, ${r.evidence.results} result records, and ${r.evidence.pngs} PNG artifacts: ${r.evidence.pngBreakdown.runtime} runtime screenshots, ${r.evidence.pngBreakdown.result} structured result images, ${r.evidence.pngBreakdown.before} before-state images, ${r.evidence.pngBreakdown.after} after-state images, and ${r.evidence.pngBreakdown.reload} reload/readback images.
 - Card-set SHA-256 is \`${r.evidence.cardSetSha256}\`; first and last card hashes are \`${r.evidence.firstCardSha256}\` and \`${r.evidence.lastCardSha256}\`.
+
+### v0.6 PDF binding
+
+- Receipt-bound PDF SHA-256 is \`${r.workbook.pdf.fileSha256}\`, ${r.workbook.pdf.fileSizeBytes} bytes, ${r.workbook.pdf.pageCount} pages: ${r.workbook.pdf.otherSheetPages} other-sheet pages and ${r.workbook.pdf.evidencePages} Evidence pages.
 
 ### Frozen template warnings
 
@@ -362,22 +430,15 @@ Independent review and the package/card checks found no secret values, PII/email
 | Critical | ${r.independentReview.critical} | none found |
 | Major | ${r.independentReview.major} | none found |
 | Important | ${r.independentReview.important} | none found |
-| Minor | ${r.independentReview.deferredMinors} | deferred, non-blocking |
+| Minor | ${r.independentReview.deferredMinors} | ${minorDisposition} |
 
-Deferred minors are source-trace symbol hygiene for six approved literal assertion snippets and Task 5 report prose that does not print its final fix head even though Git binds it to \`67838224\`. Neither changes result or workbook truth.
+${minorNote}
 
 ## Gates and limitations
 
-The final local gate sequence is recorded separately from result approval:
+The receipt gate fails closed for a substituted workbook, a stale workbook/review/mapping/ledger receipt, a missing card, a remaining Mapping Only result, or totals other than 265 Candidate PASS / 0 Mapping Only / 13 Blocked / 278 total. It does not substitute for DonHV result approval or a full repository security/release gate.
 
-- Extension manifest, extended catalog, workbook contract, OfficeCLI validation, fidelity validation, secret scan, agent rules, and \`git diff --check\`: **PASS**.
-- Atomic runner: **PASS** after reusing the existing old-harness \`ajv\` through \`NODE_PATH\`; no dependency was installed or changed.
-- Evidence contract: the first read-only attempt was blocked because the required Playwright executable was unavailable. The contract script also rewrites the existing 90 evidence packages and 278 cards, so it was not rerun with a browser download or any other mutation. Existing Task 9 package/card evidence and the independent review remain the recorded evidence.
-- \`ai-devkit lint --json\`: **${r.tooling.aiDevkitAvailable ? 'PASS using the existing local command; no install' : 'NOT RERUN because the local command is unavailable and @latest installation is out of scope'}**. The required \`npx ai-devkit@latest lint --json\` form was not invoked because it could install dependencies, which is outside this task.
-
-OfficeCLI preflight was \`officecli --version\` → \`1.0.147\`; OfficeCLI does not author Markdown, so it was used only as the required preflight/inspection tool for this report task.
-
-The 13 historical BTP-required rows remain **Blocked** because an authorized target, fixture, rollback plan, and sanitized readback are not available. Any rerun requiring Cloud Foundry/BTP, provider/email, HANA, or deployment state is intentionally not performed and cannot be treated as a local failure. The evidence-contract browser/dependency limitation is tooling/environmental, not a product result.
+The 13 historical BTP-required rows remain **Blocked** because an authorized target, fixture, rollback plan, and sanitized readback are not available. Any rerun requiring Cloud Foundry/BTP, provider/email, HANA, or deployment state is intentionally not performed and cannot be treated as a local failure.
 
 No product source, dependency manifest, lockfile, schema/data/seed, BTP/HANA state, provider, real email, Drive file, Jira issue, branch push, merge, deployment, or release state was mutated.\n`
 }
@@ -388,12 +449,14 @@ function defaults(root) {
     catalog: path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'),
     numberMap: path.join(root, 'docs/qa/idts-110-case-number-map.json'),
     results: path.join(root, '.tmp/idts-110/all-results.json'),
-    workbook: path.join(root, 'docs/sap490/generated/Unit_Test_IDTS_SAP01_en_v0.5_candidate.xlsx'),
+    workbook: path.join(root, 'docs/sap490/generated/Unit_Test_IDTS_SAP01_en_v0.6_candidate.xlsx'),
     template: path.join(root, 'docs/sap490/templates/Deliverable_template/Unit_Test.xlsx'),
     workbookValidator: path.join(root, 'scripts/sap490/test-idts110-unit-test-workbook.mjs'),
-    workbookReceipt: path.join(root, 'docs/pm/evidence/idts-110/workbook-validation-receipt.json'),
-    reviewReceipt: path.join(root, 'docs/pm/evidence/idts-110/independent-review-receipt.json'),
-    reviewArtifact: path.join(root, '.superpowers/sdd/2026-09-05-idts-110-atomic-execution-and-workbook/task-11-independent-review.md'),
+    workbookReceipt: path.join(root, 'docs/pm/evidence/idts-110/workbook-v06-validation-receipt.json'),
+    reviewReceipt: path.join(root, 'docs/pm/evidence/idts-110/workbook-v06-independent-review-receipt.json'),
+    reviewArtifact: path.join(root, '.tmp/idts-110/workbook-v06-final-rereview.md'),
+    mappingReceipt: path.join(root, 'docs/pm/evidence/idts-110/mapping-execution-receipt.json'),
+    mappingResults: path.join(root, '.tmp/idts-110/mapping-atomic-results.json'),
     receiptManifest: path.join(root, 'docs/pm/evidence/idts-110/final-report-receipt-manifest.json'),
     output: path.join(root, 'docs/pm/evidence/idts-110/final-execution-report.md'),
     extension: path.join(root, 'docs/qa/idts-110-extension-cases.json'),

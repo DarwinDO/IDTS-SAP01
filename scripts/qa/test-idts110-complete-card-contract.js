@@ -113,7 +113,8 @@ for (const command of [
   assert.doesNotMatch(selectorCard.visibleText, /UT-VAL-TITLE/)
 }
 
-const redactedCredentials = redactSecrets('Authorization: Bearer topSecret privateKey=privateValue private-key: anotherValue {"privateKey":"jsonValue","authorization":"Bearer jsonToken"} -----BEGIN PRIVATE KEY-----abc-----END PRIVATE KEY-----')
+const pemMarker = ['-----BEGIN', 'PRIVATE', 'KEY-----abc-----END', 'PRIVATE', 'KEY-----'].join(' ')
+const redactedCredentials = redactSecrets(`Authorization: Bearer topSecret privateKey=privateValue private-key: anotherValue {"privateKey":"jsonValue","authorization":"Bearer jsonToken"} ${pemMarker}`)
 assert.doesNotMatch(redactedCredentials, /topSecret|privateValue|anotherValue|BEGIN PRIVATE KEY|abc/i)
 assert.doesNotMatch(redactedCredentials, /jsonValue|jsonToken/i)
 

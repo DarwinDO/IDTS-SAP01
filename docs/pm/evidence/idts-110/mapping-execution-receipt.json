@@ -1,0 +1,37 @@
+{
+  "kind": "idts-110-mapping-execution-receipt",
+  "schemaVersion": 1,
+  "jiraKey": "IDTS-110",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "catalogCanonicalSha256": "16603BEC649C4E6A09E907B2C7A1FC2B21C393BEFE7BD5C99B76AEA75BB60E30",
+  "catalogFileSha256": "BCE7A6FBF7D1E71CDDBEA342A13B1C195015B1EF8790D1F3EE554E0A686717D5",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "resultsPreApproved": false,
+  "resultReviewStatus": "PENDING_DONHV_REVIEW",
+  "aggregate": {
+    "path": ".tmp/idts-110/mapping-atomic-results.json",
+    "sha256": "CE1E1CE736473C0480FFB75B5D092D063EABD99D5713C763A308FF1DB13A7E79",
+    "runId": "idts110-mapping-1788755516806",
+    "startedAt": "2026-09-07T04:28:44.106Z",
+    "completedAt": "2026-09-07T04:31:56.785Z",
+    "caseCount": 135,
+    "statuses": {
+      "PASS": 135,
+      "FAIL": 0,
+      "BLOCKED": 0,
+      "HELD": 0,
+      "NOT_RUN": 0
+    }
+  },
+  "cards": {
+    "root": "docs/pm/evidence/idts-110/cards",
+    "count": 278,
+    "setSha256": "EB2BBB33168B6D513552370809A8CFEF3EF0F3FE7EFDC7A533EACE40CFB7564A",
+    "firstSha256": "B7F0390D1FF0B7075D3ACD2AE72C6A39667CB224809E0D3625926EE33C304A00",
+    "lastSha256": "AA2D5312BAB864CB8860B62B8BC703DCBED2793E71E306198654E5B1EA58CB06"
+  },
+  "externalMutations": []
+}
