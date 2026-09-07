@@ -4,6 +4,7 @@
 
 const PNG_SIGNATURE = Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])
 const NOT_AVAILABLE = 'N/A'
+const MENTOR_EXECUTOR_LABEL = 'NhanT (DonHV support)'
 
 function isObject (value) {
   return value !== null && typeof value === 'object' && !Array.isArray(value)
@@ -330,12 +331,14 @@ function buildViewModel ({ mentorNumber, definition = {}, result = {}, testLocat
   const locationSourceFunctions = isObject(testLocation) ? firstValue(testLocation.sourceFunctions, testLocation.functions, testLocation.sourceAssertions) : undefined
   const evidenceKind = firstValue(result.evidenceKind, result.kind, structuredEvidence.evidenceKind, /BTP_REQUIRED|BTP/i.test(String(firstValue(result.environment, definition.environment, structuredEvidence.environment) || '')) ? 'ENVIRONMENT_BLOCKED' : undefined)
   const runtimeImage = validPngDataUri(firstValue(runtimeImageDataUrl, result.runtimeImageDataUrl, structuredEvidence.runtimeImageDataUrl, result.runtimeEvidence?.imageDataUrl, result.runtimeEvidence?.screenshotDataUrl))
+  const rawExecutor = asText(firstValue(result.executor, structuredEvidence.executor))
   const model = {
     mentorNumber,
     title: asText(firstValue(definition.title, result.title)),
     result: asText(firstValue(result.status, result.result, result.candidateExecutionStatus)),
     review: asText(firstValue(result.reviewStatus, result.review, structuredEvidence.reviewStatus)),
-    executor: asText(firstValue(result.executor, structuredEvidence.executor)),
+    executor: MENTOR_EXECUTOR_LABEL,
+    rawExecutor,
     evidenceKind: asText(evidenceKind),
     precondition: asText(firstValue(definition.precondition, definition.preconditions, result.precondition, result.preconditions)),
     action: asText(firstValue(definition.action, definition.input, result.action, result.input)),
@@ -442,7 +445,7 @@ function buildHtml (model) {
 
 function buildCompleteCard (input) {
   const model = buildViewModel(input)
-  return { html: buildHtml(model), visibleText: buildVisibleText(model), reviewStatus: model.review }
+  return { html: buildHtml(model), visibleText: buildVisibleText(model), reviewStatus: model.review, rawExecutor: model.rawExecutor }
 }
 
-module.exports = { buildCompleteCard, escapeHtml, redactSecrets, validPngDataUri }
+module.exports = { buildCompleteCard, escapeHtml, redactSecrets, validPngDataUri, MENTOR_EXECUTOR_LABEL }

@@ -72,7 +72,9 @@ assert.match(complete.visibleText, /Result: PASS/)
 assert.equal(complete.reviewStatus, 'PENDING_DONHV_REVIEW', 'review status remains available as repository metadata')
 assert.doesNotMatch(complete.visibleText, /Review:\s*PENDING_DONHV_REVIEW/, 'review status is not mentor-visible text')
 assert.doesNotMatch(complete.html, /PENDING_DONHV_REVIEW/, 'review status is not rendered in card HTML')
-assert.match(complete.visibleText, /Executor: NhanT, agent-assisted/)
+assert.match(complete.visibleText, /Executor: NhanT \(DonHV support\)/)
+assert.equal(complete.rawExecutor, 'NhanT, agent-assisted', 'raw executor remains repository metadata only')
+assert.doesNotMatch(complete.visibleText, /NhanT, agent-assisted/)
 assert.match(complete.visibleText, /Evidence kind: LOCAL_ATOMIC/)
 
 for (const section of ['Test definition', 'Observed assertions', 'Persistence readback', 'Provenance', 'Source assertions', 'Structured evidence', 'Limitation']) {

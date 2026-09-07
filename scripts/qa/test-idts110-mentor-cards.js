@@ -13,6 +13,8 @@ const statuses = models.reduce((acc, model) => { const result = model.visibleTex
 assert.deepEqual(statuses, { PASS: 265, BLOCKED: 13 })
 for (const model of models) {
   assert.match(model.visibleText, new RegExp(`^Case ${model.mentorNumber}\\n`))
+  assert.match(model.visibleText, /^Executor: NhanT \(DonHV support\)$/m)
+  assert.doesNotMatch(model.visibleText, /Executor: (?!NhanT \(DonHV support\))/)
   assert.doesNotMatch(model.visibleText, /IDTS110-|\bUT-[A-Z0-9]+(?:-[A-Z0-9]+)*/)
   assert.doesNotMatch(model.visibleText, /Mapping Only|undefined|Bearer\s+\w+|\b[A-Za-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}\b/)
   assert.doesNotMatch(model.html, /<script[\s>]/i)
