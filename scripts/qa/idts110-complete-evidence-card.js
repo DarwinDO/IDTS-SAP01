@@ -365,7 +365,6 @@ function buildVisibleText (model) {
     model.title,
     '',
     `Result: ${model.result}`,
-    `Review: ${model.review}`,
     `Executor: ${model.executor}`,
     `Evidence kind: ${model.evidenceKind}`,
     '',
@@ -400,7 +399,7 @@ function buildHtml (model) {
     #idts-complete-evidence .card { background: #f3f3f3; border-radius: 14px; padding: 14px 20px 18px; box-sizing: border-box; }
     #idts-complete-evidence .evidence-topline, #idts-complete-evidence .evidence-meta, #idts-complete-evidence .evidence-definition { display: grid; gap: 12px 24px; }
     #idts-complete-evidence .evidence-topline { grid-template-columns: 1fr auto; align-items: center; border-top: 3px solid ${accent}; padding-top: 1px; }
-    #idts-complete-evidence .evidence-meta { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    #idts-complete-evidence .evidence-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #idts-complete-evidence .evidence-definition { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     #idts-complete-evidence h2, #idts-complete-evidence h3, #idts-complete-evidence p, #idts-complete-evidence dl, #idts-complete-evidence ul, #idts-complete-evidence table { margin-top: 0; }
     #idts-complete-evidence h2 { margin-bottom: 6px; font-size: 20px; }
@@ -413,7 +412,6 @@ function buildHtml (model) {
     #idts-complete-evidence li + li { margin-top: 6px; }
     #idts-complete-evidence code { overflow-wrap: anywhere; background: #e1e3e6; border-radius: 5px; padding: 2px 4px; }
     #idts-complete-evidence .evidence-note, #idts-complete-evidence .evidence-unavailable, #idts-complete-evidence .runtime-image-note { color: #6c7788; max-width: 75ch; margin-bottom: 0; }
-    #idts-complete-evidence .viz-badge { color: ${accent}; font-size: 12px; font-weight: 600; }
     #idts-complete-evidence .text-small { color: #6c7788; font-size: 12px; }
     #idts-complete-evidence hr { border: 0; border-top: 1px solid #d9d9d9; margin: 18px 0 0; }
     #idts-complete-evidence .table-responsive { overflow-x: auto; }
@@ -424,10 +422,10 @@ function buildHtml (model) {
     @media (max-width: 640px) { #idts-complete-evidence .evidence-meta, #idts-complete-evidence .evidence-definition, #idts-complete-evidence .evidence-topline { grid-template-columns: 1fr; } }
   </style>
   <section class="card" aria-labelledby="idts-evidence-title">
-    <div class="evidence-topline"><span class="viz-badge">${asHtml(model.review)}</span><span class="text-small">Complete atomic evidence</span></div>
+    <div class="evidence-topline"><span class="text-small">Complete atomic evidence</span></div>
     <h2 id="idts-evidence-title">Case ${model.mentorNumber}</h2>
     <p class="evidence-title">${asHtml(model.title)}</p>
-    <div class="evidence-meta">${metadataHtml('Result', model.result, true)}${metadataHtml('Executor', model.executor)}${metadataHtml('Review', model.review)}</div>
+    <div class="evidence-meta">${metadataHtml('Result', model.result, true)}${metadataHtml('Executor', model.executor)}</div>
     <hr>
     <h3>Test definition</h3>
     <div class="evidence-definition"><div>${metadataHtml('Precondition', model.precondition)}</div><div>${metadataHtml('Action', model.action)}</div><div>${metadataHtml('Expected result', model.expected)}</div></div>
@@ -444,7 +442,7 @@ function buildHtml (model) {
 
 function buildCompleteCard (input) {
   const model = buildViewModel(input)
-  return { html: buildHtml(model), visibleText: buildVisibleText(model) }
+  return { html: buildHtml(model), visibleText: buildVisibleText(model), reviewStatus: model.review }
 }
 
 module.exports = { buildCompleteCard, escapeHtml, redactSecrets, validPngDataUri }
