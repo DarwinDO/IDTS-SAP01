@@ -212,9 +212,12 @@ function readerCommand (testLocation, result, structuredEvidence) {
   const selector = /(^|\s)--(?:idts110-case|selector|case(?:-key)?|internal-case(?:-key)?)(?:=|\s+)(?:"[^"]+"|'[^']+'|[^\s]+)/gi
   const hasSelector = selector.test(text)
   selector.lastIndex = 0
-  const stripped = text.replace(selector, ' ').replace(/\s+/g, ' ').trim()
+  const executor = /(^|\s)--executor(?:=|\s+)(?:"[^"]+"|'[^']+'|[^\s]+)/gi
+  const hasExecutor = executor.test(text)
+  executor.lastIndex = 0
+  const stripped = text.replace(selector, ' ').replace(executor, ' ').replace(/\s+/g, ' ').trim()
   const withoutInternalIds = omitInternalCaseIds(stripped)
-  if (hasSelector || withoutInternalIds !== stripped) {
+  if (hasSelector || hasExecutor || withoutInternalIds !== stripped) {
     return `Batch command (case selector omitted for mentor view): ${withoutInternalIds || NOT_AVAILABLE}`
   }
   return withoutInternalIds || NOT_AVAILABLE

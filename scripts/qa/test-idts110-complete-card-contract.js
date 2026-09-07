@@ -101,6 +101,8 @@ assert.doesNotMatch(complete.visibleText, /IDTS110-|UT-[A-Z]+-/)
 
 assert.doesNotMatch(complete.visibleText, /--idts110-case=IDTS110-UT-AUTH-001/)
 assert.match(complete.visibleText, /Batch command \(case selector omitted for mentor view\):/)
+const executorSanitized = buildCompleteCard(fixture({ result: { ...fixture().result, testCommand: 'node scripts/qa/test.js --executor=Terra-High --baseline=7c02c56daa7f46661b4d2f778a7a0b2a77d88b8a' } }))
+assert.doesNotMatch(executorSanitized.visibleText, /Terra-High/)
 
 for (const command of [
   'node scripts/qa/test-idts110-local-exact.js --selector=UT-VAL-TITLE --baseline=7c02c56daa7f46661b4d2f778a7a0b2a77d88b8a',
