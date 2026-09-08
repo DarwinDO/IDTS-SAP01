@@ -178,3 +178,7 @@ Thu tu debug: `auth-guard.js` -> `AuthService.me` (chi BTP) ->
 **Live correction.** UI5 inserts a generated wrapper directly under `<body>` and places `#container` inside it. The flex child must therefore be that direct wrapper, while `#container` and `#container-uiarea` fill the bounded wrapper at 100%. Applying flex only to the nested `#container` collapses the generated wrapper to zero height.
 
 **Sửa sau kiểm tra live.** UI5 chèn một wrapper sinh động trực tiếp dưới `<body>` rồi mới đặt `#container` bên trong. Vì vậy flex child phải là wrapper trực tiếp đó; `#container` và `#container-uiarea` cao 100% trong wrapper đã được giới hạn. Nếu chỉ áp flex lên `#container` lồng bên trong thì wrapper sinh động bị co về 0.
+
+**Injected-sibling safety / An toàn với sibling được chèn.** The generated wrapper is selected by its stable declarative attributes: `data-name="idts.bugmanagementui"` and `data-id="container"`. Do not use a broad `body > div:not(...)` selector: UI5 static areas and browser extensions may inject additional direct body `div` elements, and making those siblings flex-grow creates a large blank region above the Fiori page.
+
+Wrapper sinh của app được chọn bằng hai attribute khai báo ổn định: `data-name="idts.bugmanagementui"` và `data-id="container"`. Không dùng selector rộng `body > div:not(...)`: UI5 static area và extension trình duyệt có thể chèn thêm `div` trực tiếp dưới body; nếu các sibling đó cũng flex-grow thì màn Fiori bị đẩy xuống bởi một vùng trắng lớn.
