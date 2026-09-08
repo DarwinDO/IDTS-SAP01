@@ -1,28 +1,32 @@
 {
   "caseId": "UT-NTF-013",
   "title": "Job Scheduler invokes outbox with technical authorization",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.879Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-08T03:04:20.000Z",
+  "baselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA",
+  "testCommand": "SAP Job Scheduling Service: authorized one-time schedule on existing job 3252425",
+  "sourceAssertions": [
+    "srv/email/outbox.js#processEmailDeliveries",
+    "srv/email/worker.js#processEmailOutboxBatch",
+    "srv/bug-service/history.js#writeHistoryEvent",
+    "srv/bug-service/history.js#recordBugChangeSideEffects"
+  ],
+  "actualResult": "Job ID 3252425 invoked POST processEmailOutbox through the bound scheduler. Execution finished COMPLETED/SUCCESS: total 1, successful 1, failed 0. Before-state had Pending/Failed/Processing 0 and Sent 79. Post-run HANA remained Sent 79 with no new delivery or business-row mutation.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "Job ID 3252425 invoked POST processEmailOutbox through the bound scheduler.",
+    "Execution finished COMPLETED/SUCCESS: total 1, successful 1, failed 0.",
+    "Before-state had Pending/Failed/Processing 0 and Sent 79.",
+    "Post-run HANA remained Sent 79 with no new delivery or business-row mutation."
   ],
   "evidenceIds": [
-    "IDTS110-UT-NTF-013-BLOCKER"
+    "IDTS110-UT-NTF-013-BTP-LIVE-20260908"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "limitations": "This is an empty-batch technical-authorization acceptance. No provider call or real email was attempted."
 }
