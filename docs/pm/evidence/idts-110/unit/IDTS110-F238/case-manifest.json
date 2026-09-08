@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F238",
+  "mentorNumber": 242,
+  "title": "notification shell renders the empty state",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T11:50:27.977Z",
+  "completedAt": "2026-09-05T11:50:29.189Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F238-A1",
+  "testFile": "scripts/qa/test-my-notifications-shell.js",
+  "testCommand": "node scripts/qa/test-my-notifications-shell.js --idts110-case=IDTS110-F238 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-ui-1788609025467-971346abf2c775b094e8645f --idts110-nonce=bb5b7bf4cef185d3d447193a35260414",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An empty inbox response shows the localized empty text without stale rows or horizontal overflow.",
+  "expectedResult": "An empty inbox response shows the localized empty text without stale rows or horizontal overflow.",
+  "actualResult": "An empty inbox response shows the localized empty text without stale rows or horizontal overflow.",
+  "sourceTrace": [
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "setStateVisibility"
+    },
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "notificationEmpty"
+    }
+  ],
+  "beforeState": {
+    "shell": "rendered",
+    "rows": 0
+  },
+  "afterState": {
+    "emptyVisible": true,
+    "rowCount": 0,
+    "horizontalOverflow": false
+  },
+  "reloadState": {
+    "route": "/idtsbugmanagementui/index.html",
+    "fixture": "empty"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "empty",
+    "route": "/idtsbugmanagementui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F238/runtime.png",
+    "screenshotSha256": "46eb5253b741de2db233a7980913b00330e0ff4b2a1cd8805917205b7abc48c5",
+    "manifestPath": "unit/IDTS110-F238/case-manifest.json",
+    "caseKey": "IDTS110-F238",
+    "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+    "nonce": "bb5b7bf4cef185d3d447193a35260414",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T11:50:29.183Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F238",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "nonce": "bb5b7bf4cef185d3d447193a35260414",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T11:50:29.183Z"
+    },
+    "domChecks": {
+      "emptyVisible": true,
+      "rowCount": 0,
+      "horizontalOverflow": false
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-my-notifications-shell.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F238-RESULT",
+    "IDTS110-F238-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "46eb5253b741de2db233a7980913b00330e0ff4b2a1cd8805917205b7abc48c5"
+  },
+  "resultSha256": "757146df2e27f18ebf87c72f9950be383d648755b8c393b697623c92ca08b140",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "46eb5253b741de2db233a7980913b00330e0ff4b2a1cd8805917205b7abc48c5",
+  "manifestPath": "case-manifest.json"
+}

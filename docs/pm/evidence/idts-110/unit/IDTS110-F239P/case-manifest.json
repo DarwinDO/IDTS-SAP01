@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F239P",
+  "mentorNumber": 246,
+  "title": "notification shell polls while visible",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T11:50:32.997Z",
+  "completedAt": "2026-09-05T11:50:34.188Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F239P-A1",
+  "testFile": "scripts/qa/test-my-notifications-shell.js",
+  "testCommand": "node scripts/qa/test-my-notifications-shell.js --idts110-case=IDTS110-F239P --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-ui-1788609025467-971346abf2c775b094e8645f --idts110-nonce=bb5b7bf4cef185d3d447193a35260414",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The visible shell starts one 30-second polling timer that refreshes the unread count.",
+  "expectedResult": "The visible shell starts one 30-second polling timer that refreshes the unread count.",
+  "actualResult": "The visible shell starts one 30-second polling timer that refreshes the unread count.",
+  "sourceTrace": [
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "startPolling"
+    }
+  ],
+  "beforeState": {
+    "unreadCalls": 1,
+    "searchCalls": 0,
+    "timerDelay": 30000,
+    "timerCallbacks": 1,
+    "clearCalls": 0,
+    "listenersAdded": 3,
+    "listenersRemoved": 0
+  },
+  "afterState": {
+    "unreadCalls": 2,
+    "searchCalls": 0,
+    "timerDelay": 30000,
+    "timerCallbacks": 1,
+    "clearCalls": 0,
+    "listenersAdded": 3,
+    "listenersRemoved": 0
+  },
+  "reloadState": {
+    "route": "/idtsbugmanagementui/index.html",
+    "fixture": "visible-poll"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "visible-poll",
+    "route": "/idtsbugmanagementui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F239P/runtime.png",
+    "screenshotSha256": "66d86d5091f946a6f496d41e3f1a94873bd1d16cf8ebe6c1f54087a500476c48",
+    "manifestPath": "unit/IDTS110-F239P/case-manifest.json",
+    "caseKey": "IDTS110-F239P",
+    "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+    "nonce": "bb5b7bf4cef185d3d447193a35260414",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T11:50:34.182Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F239P",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "nonce": "bb5b7bf4cef185d3d447193a35260414",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T11:50:34.182Z"
+    },
+    "domChecks": {
+      "visible": true,
+      "pollingIntervalMs": 30000
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-my-notifications-shell.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F239P-RESULT",
+    "IDTS110-F239P-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "66d86d5091f946a6f496d41e3f1a94873bd1d16cf8ebe6c1f54087a500476c48"
+  },
+  "resultSha256": "bb56739d29e5977e8119c29cdb1e773efad4bf3957e6319d19805bc10326e83d",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "66d86d5091f946a6f496d41e3f1a94873bd1d16cf8ebe6c1f54087a500476c48",
+  "manifestPath": "case-manifest.json"
+}

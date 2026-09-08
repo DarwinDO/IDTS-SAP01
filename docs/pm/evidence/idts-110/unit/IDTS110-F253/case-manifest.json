@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F253",
+  "mentorNumber": 278,
+  "title": "digest delivery row records a sanitized provider failure",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:28.620Z",
+  "completedAt": "2026-09-05T15:59:29.472Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F253-A1",
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F253 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A NotificationDigestDeliveries row whose stored digest snapshot fails provider send becomes FAILED with sanitized error state, bounded nextAttemptAt when attempts remain, cleared lock fields, and unchanged snapshot body.",
+  "expectedResult": "A NotificationDigestDeliveries row whose stored digest snapshot fails provider send becomes FAILED with sanitized error state, bounded nextAttemptAt when attempts remain, cleared lock fields, and unchanged snapshot body.",
+  "actualResult": "A NotificationDigestDeliveries row whose stored digest snapshot fails provider send becomes FAILED with sanitized error state, bounded nextAttemptAt when attempts remain, cleared lock fields, and unchanged snapshot body.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "DIGESTS"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "processNotificationDigestDeliveries"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "sanitizeTransportError"
+    }
+  ],
+  "beforeState": {
+    "status": "PENDING",
+    "attemptCount": 0,
+    "bodyLength": 28
+  },
+  "afterState": {
+    "status": "FAILED",
+    "lastErrorCode": "ESOCKET",
+    "retryScheduled": true,
+    "lockCleared": true,
+    "snapshotUnchanged": true,
+    "senderCalls": 1
+  },
+  "reloadState": {
+    "status": "FAILED",
+    "lastErrorCode": "ESOCKET",
+    "retryScheduled": true,
+    "lockCleared": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F253-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "7d66c37efe159312714ae275df2c2ff502404241d6232ed5aeede2ccad6e1729",
+    "before-database.png": "da338dbd9663588d4dba136154a20efa1bcc3caffa202a882e521a6ca4c2dfd6",
+    "after-database.png": "1c3f8cd6128748f6fb775a15f599c064c468ccd6b2eac27ad2ba399c670f1791",
+    "reload-readback.png": "095eb0609892d2b4768cfabf8ef062a9f35eb761d7e5c3349cee3b4415639c77"
+  },
+  "resultSha256": "0b56eeccf222de791f828d4334f86ea2e6c35bbddd3e7295a0562b389c900b2f",
+  "limitation": "Injected sender failure is local-only; no real provider or email delivery was attempted.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

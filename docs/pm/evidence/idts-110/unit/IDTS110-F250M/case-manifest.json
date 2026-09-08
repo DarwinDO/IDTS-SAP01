@@ -1,0 +1,74 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F250M",
+  "mentorNumber": 270,
+  "title": "digest snapshot enforces the render limit",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:19.352Z",
+  "completedAt": "2026-09-05T15:59:20.220Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F250M-A1",
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F250M --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A digest snapshot renders no more than the normalized limit and preserves the full itemCount for remaining items.",
+  "expectedResult": "A digest snapshot renders no more than the normalized limit and preserves the full itemCount for remaining items.",
+  "actualResult": "A digest snapshot renders no more than the normalized limit and preserves the full itemCount for remaining items.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "buildDigestSnapshot"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "normalizeLimit"
+    }
+  ],
+  "beforeState": {
+    "sourceBugCount": 11
+  },
+  "afterState": {
+    "sourceBugCountAfterInsert": 32,
+    "sourceBugCountAfterSnapshot": 32,
+    "itemCount": 25,
+    "renderedCount": 20,
+    "remainder": 5,
+    "cappedRenderedCount": 20
+  },
+  "reloadState": {
+    "sourceBugCount": 32,
+    "itemCount": 25,
+    "renderedCount": 20,
+    "remainder": 5
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F250M-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "8c5476cb117fec426d59e91d72c1eeba8f350cd081b1fe4562a25cc458b8017e",
+    "before-database.png": "46fed02a8753122cde1bf9ae39d3ce8a0b63e3ee044a958eb28adeaffc930171",
+    "after-database.png": "32029dbd3d4bd3aea55e93e6c05e3c2f44fa341aab7fa9b6d14aede8fd1b4c1c",
+    "reload-readback.png": "bc4f5a19525b018dd9dac7f5d07667ddabe21ba7ef1e417e824f9ec053512715"
+  },
+  "resultSha256": "57524722d003c1eb8cf2439d0176100f52e6f3d36b0536ecd0f2abbfc473f195",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

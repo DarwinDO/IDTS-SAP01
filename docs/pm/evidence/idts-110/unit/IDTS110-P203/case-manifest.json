@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P203",
+  "mentorNumber": 198,
+  "title": "PM-only status metrics enforce the authorization boundary",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:04.408Z",
+  "completedAt": "2026-09-05T10:05:05.232Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P203-A1",
+  "testFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+  "testCommand": "node scripts/qa/test-pm-monitoring-programmatic.js --idts110-case=IDTS110-P203 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert PM receives the full current status metric set with zero-count rows preserved.",
+  "expectedResult": "Assert PM receives the full current status metric set with zero-count rows preserved. Assert Developer and Tester receive HTTP 403 and no status metric payload.",
+  "actualResult": "Assert PM receives the full current status metric set with zero-count rows preserved. Assert Developer and Tester receive HTTP 403 and no status metric payload.",
+  "sourceTrace": [
+    {
+      "file": "srv/service.cds",
+      "symbol": "readBugStatusMetrics"
+    },
+    {
+      "file": "srv/bug-service/status-metrics.js",
+      "symbol": "readBugStatusMetrics"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "metricRows": 10,
+    "zeroCountRows": 9,
+    "unauthorizedRoles": 2
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P203-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "9027b0a957772ff549f5f05daa97b79c7cb04318afdca0e91e31f95e9283827d",
+    "before-database.png": "c82903e66c99436d58eb286b2acacd30d244556a19cd5712fae8dc74cf47bf3a",
+    "after-database.png": "89a433128c039b2448099913b863c3f11bd4001fa320bac44419e0c63351ca58",
+    "reload-readback.png": "507f7ce6edac432372795b8370a294b04f8837e1a42e945e796b18b35d3a3b83"
+  },
+  "resultSha256": "780b206b420d9fcc773140e7e5912e115e69e32f63372ad2371500299a0ce724",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F238E",
+  "mentorNumber": 243,
+  "title": "notification shell renders error and retry state",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T11:50:29.235Z",
+  "completedAt": "2026-09-05T11:50:30.458Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F238E-A1",
+  "testFile": "scripts/qa/test-my-notifications-shell.js",
+  "testCommand": "node scripts/qa/test-my-notifications-shell.js --idts110-case=IDTS110-F238E --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-ui-1788609025467-971346abf2c775b094e8645f --idts110-nonce=bb5b7bf4cef185d3d447193a35260414",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A failed inbox search shows the localized error and retry control while preserving no stale result rows.",
+  "expectedResult": "A failed inbox search shows the localized error and retry control while preserving no stale result rows.",
+  "actualResult": "A failed inbox search shows the localized error and retry control while preserving no stale result rows.",
+  "sourceTrace": [
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "setStateVisibility"
+    },
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "notificationLoadFailed"
+    }
+  ],
+  "beforeState": {
+    "shell": "rendered",
+    "rows": 0
+  },
+  "afterState": {
+    "errorVisible": true,
+    "retryVisible": true,
+    "rowCount": 0,
+    "horizontalOverflow": false
+  },
+  "reloadState": {
+    "route": "/idtsbugmanagementui/index.html",
+    "fixture": "error-retry"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "error-retry",
+    "route": "/idtsbugmanagementui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F238E/runtime.png",
+    "screenshotSha256": "01472fb2b591059f27694cd1502e8f625ff731fbfacedd85cca542b5f38fb3df",
+    "manifestPath": "unit/IDTS110-F238E/case-manifest.json",
+    "caseKey": "IDTS110-F238E",
+    "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+    "nonce": "bb5b7bf4cef185d3d447193a35260414",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T11:50:30.453Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F238E",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "nonce": "bb5b7bf4cef185d3d447193a35260414",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T11:50:30.453Z"
+    },
+    "domChecks": {
+      "errorVisible": true,
+      "retryVisible": true,
+      "rowCount": 0,
+      "horizontalOverflow": false
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-my-notifications-shell.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F238E-RESULT",
+    "IDTS110-F238E-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "01472fb2b591059f27694cd1502e8f625ff731fbfacedd85cca542b5f38fb3df"
+  },
+  "resultSha256": "c1dc385df6e154cb7fed76d64c02cf638f0498eb76d7d595cb1fad63182d976d",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "01472fb2b591059f27694cd1502e8f625ff731fbfacedd85cca542b5f38fb3df",
+  "manifestPath": "case-manifest.json"
+}

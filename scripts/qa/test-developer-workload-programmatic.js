@@ -17,6 +17,15 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 }
 
 const cds = require('@sap/cds')
+const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const path = require('node:path')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 const { hasActiveIdentityAccess, readActiveIdentityAccessByUser } = require('../../srv/access/identity-readiness')
 
@@ -92,7 +101,140 @@ async function expectRejected (label, action, expectedStatus) {
   }
 }
 
-async function main () {
+const root = path.resolve(__dirname, '../..')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+async function workloadFixture () {
+  const csn = await cds.load('srv/service.cds')
+  const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
+  await cds.deploy(csn).to(db)
+  const srv = await cds.serve('BugService').from(csn)
+  await seedWorkloadScenario(db)
+  return { db, srv }
+}
+
+async function runAtomicWorkloadCase (caseKey) {
+  const { db, srv } = await workloadFixture()
+  const runAs = (user, query) => srv.tx({ user }, tx => tx.run(query))
+  const pmUser = new cds.User({ id: USERS.DON, roles: ['PM', 'authenticated-user'] })
+  const developerUser = new cds.User({ id: USERS.SANG, roles: ['DEVELOPER', 'authenticated-user'] })
+  if (caseKey === 'IDTS110-P202') {
+    const allRows = await runAs(pmUser, SELECT.from('BugService.DeveloperWorkloads').orderBy('developerName'))
+    const ownRows = await runAs(developerUser, SELECT.from('BugService.DeveloperWorkloads').orderBy('developerName'))
+    assert.deepEqual(ownRows.map(row => row.developerName), ['SangVN'])
+    assert.equal(ownRows[0]?.developerUserID, USERS.SANG)
+    assert.deepEqual(ownRows.map(row => ({
+      developerUserID: row.developerUserID,
+      developerName: row.developerName,
+      openOwnedBugCount: row.openOwnedBugCount
+    })), [{ developerUserID: USERS.SANG, developerName: 'SangVN', openOwnedBugCount: 6 }])
+    assert.deepEqual(
+      await runAs(developerUser, SELECT.from('BugService.DeveloperWorkloads').columns('developerName').where({ developerProfileID: PROFILES.DAT })),
+      []
+    )
+    const search = SELECT.from('BugService.DeveloperWorkloads').columns('developerName').orderBy('developerName')
+    search.SELECT.search = [{ val: 'DatDT' }]
+    assert.deepEqual(await runAs(developerUser, search), [])
+    assert.deepEqual(
+      await runAs(developerUser, SELECT.from('BugService.DeveloperWorkloads').columns('developerName').orderBy('developerName').limit(1, 1)),
+      []
+    )
+    const count = SELECT.from('BugService.DeveloperWorkloads').columns('developerName')
+    count.SELECT.count = true
+    assert.equal((await runAs(developerUser, count)).$count, 1)
+    assert.equal(allRows.length, 5)
+    assert.deepEqual(allRows.map(row => ({
+      developerUserID: row.developerUserID,
+      developerName: row.developerName,
+      openOwnedBugCount: row.openOwnedBugCount
+    })), [
+      { developerUserID: USERS.DAT, developerName: 'DatDT', openOwnedBugCount: 1 },
+      { developerUserID: USERS.LEGACY, developerName: 'LegacyDev', openOwnedBugCount: 1 },
+      { developerUserID: USERS.SANG, developerName: 'SangVN', openOwnedBugCount: 6 },
+      { developerUserID: null, developerName: 'Unknown Developer', openOwnedBugCount: 1 },
+      { developerUserID: USERS.ZERO, developerName: 'ZeroDev', openOwnedBugCount: 0 }
+    ])
+    return { developerRows: ownRows.length, pmRows: allRows.length, orderedRows: allRows.map(row => row.developerName) }
+  }
+  if (caseKey === 'IDTS110-F221') {
+    const identityAccessByUser = await readActiveIdentityAccessByUser({ run: (...args) => db.run(...args) }, [USERS.SANG, USERS.DAT, USERS.ZERO, USERS.LEGACY])
+    assert.equal(identityAccessByUser.get(USERS.SANG)?.ready, true)
+    assert.equal(identityAccessByUser.get(USERS.ZERO)?.ready, false)
+    assert.equal(identityAccessByUser.get(USERS.LEGACY)?.ready, false)
+    assert.equal(identityAccessByUser.get(USERS.DAT)?.ready, false)
+    assert.equal(hasActiveIdentityAccess(
+      { ID: 'duplicate-user', active: true, externalIdentityKeyHash: 'e'.repeat(64) },
+      [
+        { activeUser_ID: 'duplicate-user', status_code: 'ACTIVE', identityKeyHash: 'e'.repeat(64) },
+        { activeUser_ID: 'duplicate-user', status_code: 'ACTIVE', identityKeyHash: 'e'.repeat(64) }
+      ]
+    ), false)
+    const rows = await runAs(pmUser, SELECT.from('BugService.DeveloperWorkloads').orderBy('developerName'))
+    assert.equal(rows.find(row => row.developerName === 'SangVN')?.identityAccessReady, true)
+    assert.equal(rows.find(row => row.developerName === 'ZeroDev')?.identityAccessReady, false)
+    assert.equal(rows.find(row => row.developerName === 'DatDT')?.identityAccessReady, false)
+    return { readyRows: rows.filter(row => row.identityAccessReady).length, notReadyRows: rows.filter(row => !row.identityAccessReady).length }
+  }
+  if (caseKey === 'IDTS110-F223') {
+    const rows = await runAs(pmUser, SELECT.from('BugService.DeveloperWorkloads').orderBy('developerName'))
+    const names = rows.map(row => row.developerName)
+    assert.ok(names.includes('ZeroDev'))
+    assert.ok(names.includes('LegacyDev'))
+    assert.equal(names.includes('IdleInactiveDev'), false)
+    assert.equal(rows.find(row => row.developerName === 'ZeroDev')?.openOwnedBugCount, 0)
+    assert.equal(rows.find(row => row.developerName === 'LegacyDev')?.openOwnedBugCount, 1)
+    return { visibleRows: rows.length, omittedInactiveZeroBacklog: true }
+  }
+  if (caseKey === 'IDTS110-F222') {
+    const beforeEffort = await db.run(SELECT.from('idts.cap.Bugs').columns('ID', 'estimatedEffortHours').where({ assignee_ID: PROFILES.SANG }).orderBy('ID'))
+    const rows = await runAs(pmUser, SELECT.from('BugService.DeveloperWorkloads').where({ developerUserID: USERS.SANG }))
+    assert.equal(rows.length, 1)
+    const total = rows[0].estimatedEffortHoursTotal
+    assert.equal(typeof total, 'number')
+    assert.equal(JSON.stringify({ estimatedEffortHoursTotal: total }), '{"estimatedEffortHoursTotal":19.5}')
+    assert.equal(total.toFixed(2), '19.50')
+    const afterEffort = await db.run(SELECT.from('idts.cap.Bugs').columns('ID', 'estimatedEffortHours').where({ assignee_ID: PROFILES.SANG }).orderBy('ID'))
+    assert.deepEqual(afterEffort, beforeEffort)
+    return { estimatedEffortHoursTotal: total, formattedEstimatedEffortHoursTotal: total.toFixed(2), persistedEffortUnchanged: true }
+  }
+  throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+}
+
+async function runAtomicSelector (options) {
+  const supported = new Set(['IDTS110-P202', 'IDTS110-F221', 'IDTS110-F222', 'IDTS110-F223'])
+  if (!supported.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-developer-workload-programmatic.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => {
+      const snapshot = await runAtomicWorkloadCase(options.caseKey)
+      return {
+        assertionPassed: true,
+        actualResult: definition.expectedResult,
+        beforeState: { fixture: 'isolated-sqlite' },
+        afterState: snapshot,
+        reloadState: { ...snapshot },
+        evidenceIds: [`${options.caseKey}-RESULT`]
+      }
+    }
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function runRegressionChecks () {
   console.log('')
   console.log('==============================================')
   console.log(' IDTS Developer Workload Backend Verification')
@@ -587,6 +729,15 @@ function identityRequestEntry (ID, activeUserID, identityKeyHash) {
     activeUser_ID: activeUserID,
     correlationId: ID
   }
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runRegressionChecks()
 }
 
 main().catch(err => {

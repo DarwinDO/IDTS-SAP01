@@ -1,28 +1,30 @@
 {
   "caseId": "UT-ATT-004",
   "title": "download bytes match the uploaded SHA-256",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.845Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-08T11:27:00.000Z",
+  "baselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA Cloud / S3",
+  "testCommand": "Browser Control authenticated attachment download and Web Crypto SHA-256 comparison",
+  "sourceAssertions": [
+    "db/schema.cds#BugAttachments",
+    "package.json#@cap-js/attachments"
+  ],
+  "actualResult": "The authenticated attachment content endpoint returned HTTP 200 and 131 bytes. The downloaded SHA-256 was 4AB336F3C87CB7AAC1A0741C0196BD71C8BC099D0D5D19E143454F07C97707DD, exactly matching the sanitized local fixture.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "Authenticated content download returned HTTP 200.",
+    "Downloaded byte length was exactly 131.",
+    "Downloaded SHA-256 exactly matched the precomputed local fixture SHA-256.",
+    "Content type and safe filename were preserved."
   ],
   "evidenceIds": [
-    "IDTS110-UT-ATT-004-BLOCKER"
+    "IDTS110-UT-ATT-004-BTP-LIVE-20260908"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "limitations": "The hash assertion covers the deployed S3-backed content path. DonHV separately confirmed the attachment row and standard Fiori interaction render normally."
 }

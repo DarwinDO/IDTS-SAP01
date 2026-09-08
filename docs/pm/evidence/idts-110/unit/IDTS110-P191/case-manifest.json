@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P191",
+  "mentorNumber": 191,
+  "title": "request role matrix allows valid business roles and the PM UserAdmin overlay",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:04:58.525Z",
+  "completedAt": "2026-09-05T10:04:58.550Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P191-A1",
+  "testFile": "scripts/qa/test-user-admin-role-contract.js",
+  "testCommand": "node scripts/qa/test-user-admin-role-contract.js --idts110-case=IDTS110-P191 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert all three business roles normalize and pass the request-access validator.",
+  "expectedResult": "Assert all three business roles normalize and pass the request-access validator. Assert an unknown role and a non-PM UserAdmin overlay are rejected with stable safe codes.",
+  "actualResult": "Assert all three business roles normalize and pass the request-access validator. Assert an unknown role and a non-PM UserAdmin overlay are rejected with stable safe codes.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "assertRequestedAccess"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requestOnboarding"
+    }
+  ],
+  "beforeState": {
+    "persistenceWrites": 0
+  },
+  "afterState": {
+    "roleBoundaries": 3,
+    "persistenceWrites": 0
+  },
+  "reloadState": {
+    "persistenceWrites": 0
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P191-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "830bf509a95a707f39135aa75398e619553ac3bfe8a3fb4f126e6ea0b09710d1",
+    "reload-readback.png": "3370c559482053338de1ffafdbfb07780e47747923637d44746b3f31772bd366"
+  },
+  "resultSha256": "0795dee9ac270704fa8e2c92e5fc031e39c1324cf00dee5722b0af065c769b59",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

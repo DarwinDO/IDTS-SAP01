@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F231R",
+  "mentorNumber": 233,
+  "assertionId": "IDTS110-F231R-A1",
+  "title": "catalog reactivation is audited",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:31.156Z",
+  "completedAt": "2026-09-05T10:05:31.998Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F231R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid inactive-to-active update persists REACTIVATE and exactly one safe audit event after reload.",
+  "expectedResult": "A valid inactive-to-active update persists REACTIVATE and exactly one safe audit event after reload.",
+  "actualResult": "A valid inactive-to-active update persists REACTIVATE and exactly one safe audit event after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "REACTIVATE"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "recordCatalogAudit"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "reactivated": true,
+    "safeAuditsAfterReload": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F231R-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

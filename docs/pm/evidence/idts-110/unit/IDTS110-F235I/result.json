@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F235I",
+  "mentorNumber": 238,
+  "assertionId": "IDTS110-F235I-A1",
+  "title": "repeated notification read is idempotent",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:53.641Z",
+  "completedAt": "2026-09-05T10:55:54.512Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F235I --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Repeating the same notification read with the already-applied version returns the same safe result without changing the row again.",
+  "expectedResult": "Repeating the same notification read with the already-applied version returns the same safe result without changing the row again.",
+  "actualResult": "Repeating the same notification read with the already-applied version returns the same safe result without changing the row again.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "markMyNotificationRead"
+    }
+  ],
+  "beforeState": {
+    "ID": "d4000032-0000-4000-8000-000000000001",
+    "readAt": null,
+    "modifiedAt": "2026-09-05T10:55:54.356Z"
+  },
+  "afterState": {
+    "ID": "d4000032-0000-4000-8000-000000000001",
+    "readAt": "2026-09-05T10:55:54.505Z",
+    "modifiedAt": "2026-09-05T10:55:54.505Z"
+  },
+  "reloadState": {
+    "ID": "d4000032-0000-4000-8000-000000000001",
+    "readAt": "2026-09-05T10:55:54.505Z",
+    "modifiedAt": "2026-09-05T10:55:54.505Z"
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F235I-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

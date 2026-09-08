@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F220R",
+  "mentorNumber": 219,
+  "title": "Developer access requires one responsibility",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:20.114Z",
+  "completedAt": "2026-09-05T10:05:20.115Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F220R-A1",
+  "testFile": "scripts/qa/test-user-admin-developer-profile.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile.js --idts110-case=IDTS110-F220R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "assertDeveloperProfileForRole rejects a DEVELOPER role with no responsibility using DEVELOPER_PROFILE_REQUIRED.",
+  "expectedResult": "assertDeveloperProfileForRole rejects a DEVELOPER role with no responsibility using DEVELOPER_PROFILE_REQUIRED.",
+  "actualResult": "assertDeveloperProfileForRole rejects a DEVELOPER role with no responsibility using DEVELOPER_PROFILE_REQUIRED.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "assertDeveloperProfileForRole"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-function",
+    "checks": 0
+  },
+  "afterState": {
+    "checks": 1
+  },
+  "reloadState": {
+    "fixture": "pure-function",
+    "checks": 1
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F220R-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "eec7371ac25cff74fc03714269b8cbf3c525884d5dcd843be220f11d480a2f59",
+    "reload-readback.png": "f8877338e9212f49d2d115e8909a40b5540f6a4a744e1afc915b1e39c2365a01"
+  },
+  "resultSha256": "6575dea9bbc7b8ecadd6ad420dfdc24a55886645f05734fd0e445b5708ba2872",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

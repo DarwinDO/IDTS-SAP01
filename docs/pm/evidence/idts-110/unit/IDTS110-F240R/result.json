@@ -1,0 +1,110 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F240R",
+  "mentorNumber": 250,
+  "assertionId": "IDTS110-F240R-A1",
+  "title": "applied REVOKE creates one access delivery",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:16.511Z",
+  "completedAt": "2026-09-05T13:42:17.072Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-access-notifications.js",
+  "testCommand": "node scripts/qa/test-user-access-notifications.js --idts110-case=IDTS110-F240R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An APPLIED REVOKE audit with eventType ACCESS_REVOKED creates one access delivery for the target user and does not create an inbox index.",
+  "expectedResult": "An APPLIED REVOKE audit with eventType ACCESS_REVOKED creates one access delivery for the target user and does not create an inbox index.",
+  "actualResult": "An APPLIED REVOKE audit with eventType ACCESS_REVOKED creates one access delivery for the target user and does not create an inbox index.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "writeUserAccessDelivery"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "ACCESS_EVENT_BY_ACTION"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "ACCESS_REVOKED"
+    }
+  ],
+  "beforeState": {
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliverySourceAuditEventIDs": [],
+    "deliveryTargetUserIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "deliveryErrorCodes": [],
+    "deliveryProviderMessages": [],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": []
+  },
+  "afterState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "df64eeaa-e4db-489c-9072-c0999dfae5c3"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000023"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SENT"
+    ],
+    "deliveryAttempts": [
+      1
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      "atomic-access-revoke-message"
+    ],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": [],
+    "emailOnly": true,
+    "duplicateCreated": false,
+    "senderCalls": 1
+  },
+  "reloadState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "df64eeaa-e4db-489c-9072-c0999dfae5c3"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000023"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SENT"
+    ],
+    "deliveryAttempts": [
+      1
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      "atomic-access-revoke-message"
+    ],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": []
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F240R-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

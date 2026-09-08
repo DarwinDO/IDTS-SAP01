@@ -1,0 +1,54 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P189",
+  "mentorNumber": 189,
+  "assertionId": "IDTS110-P189-A1",
+  "title": "active Developer profile read returns availability and readiness",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:04:56.382Z",
+  "completedAt": "2026-09-05T10:04:57.361Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile-actions.js --idts110-case=IDTS110-P189 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Read an active Developer and assert availabilityStatusCode, workloadLimit, readiness, and active responsibility count.",
+  "expectedResult": "Read an active Developer and assert availabilityStatusCode, workloadLimit, readiness, and active responsibility count. Assert the returned profile has no identity secret or unrelated user administration fields.",
+  "actualResult": "Read an active Developer and assert availabilityStatusCode, workloadLimit, readiness, and active responsibility count. Assert the returned profile has no identity secret or unrelated user administration fields.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "readDeveloperProfile"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "readDeveloperTarget"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "developerProfileResult"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "responsibilities": 1
+  },
+  "afterState": {
+    "readiness": true,
+    "activeResponsibilities": 1
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P189-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

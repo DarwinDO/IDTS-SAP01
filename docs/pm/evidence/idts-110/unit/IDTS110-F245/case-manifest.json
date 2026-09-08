@@ -1,0 +1,180 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F245",
+  "mentorNumber": 255,
+  "title": "cancelled invitation cannot be delivered",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:20.883Z",
+  "completedAt": "2026-09-05T13:42:21.643Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F245-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F245 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "After cancellation marks the delivery SKIPPED and request FAILED, a worker run makes no provider call and preserves the cancellation reason.",
+  "expectedResult": "After cancellation marks the delivery SKIPPED and request FAILED, a worker run makes no provider call and preserves the cancellation reason.",
+  "actualResult": "After cancellation marks the delivery SKIPPED and request FAILED, a worker run makes no provider call and preserves the cancellation reason.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "cancelExistingUserIdentityLink"
+    },
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "Invitation is no longer eligible for delivery"
+    }
+  ],
+  "beforeState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "abe0716d-7a84-4db7-9edf-a5dc23b71289"
+    ],
+    "requestStatuses": [
+      "INVITED"
+    ],
+    "requestVersions": [
+      0
+    ],
+    "requestErrorCodes": [
+      null
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:21.616Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "c6d68b11-18b8-4476-8604-c841bf9b7d1f"
+    ],
+    "deliveryRequestIDs": [
+      "abe0716d-7a84-4db7-9edf-a5dc23b71289"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      null
+    ]
+  },
+  "afterState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "abe0716d-7a84-4db7-9edf-a5dc23b71289"
+    ],
+    "requestStatuses": [
+      "FAILED"
+    ],
+    "requestVersions": [
+      1
+    ],
+    "requestErrorCodes": [
+      "INVITATION_CANCELLED"
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:21.616Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "c6d68b11-18b8-4476-8604-c841bf9b7d1f"
+    ],
+    "deliveryRequestIDs": [
+      "abe0716d-7a84-4db7-9edf-a5dc23b71289"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      "INVITATION_CANCELLED"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ],
+    "cancellationPreserved": true,
+    "deliverySkipped": true,
+    "senderCalls": 0
+  },
+  "reloadState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "abe0716d-7a84-4db7-9edf-a5dc23b71289"
+    ],
+    "requestStatuses": [
+      "FAILED"
+    ],
+    "requestVersions": [
+      1
+    ],
+    "requestErrorCodes": [
+      "INVITATION_CANCELLED"
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:21.616Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "c6d68b11-18b8-4476-8604-c841bf9b7d1f"
+    ],
+    "deliveryRequestIDs": [
+      "abe0716d-7a84-4db7-9edf-a5dc23b71289"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      "INVITATION_CANCELLED"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F245-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "a8efbbe60ec9713744b9d0659d3056cc4271f87c220e49231a3d60c03cb4479d",
+    "before-database.png": "6cedf71fc4bf9d245cba7e218e9e050dc3b5dbc0de43d9e96eb96c13e7189366",
+    "after-database.png": "ad1e5b0c9266e5aa8c8ae51f07f5f8bf0952575a62ab5e1ebcd0e14c9604d320",
+    "reload-readback.png": "e2001d3ee1e6d7b441e02a94fcf4b09cdf7a79a3487c1b511edb89472b9f8324"
+  },
+  "resultSha256": "d87b6493f5ae9ef5667c145f2d14a2923e2896acc914ac79a8c6fd59a39e7934",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

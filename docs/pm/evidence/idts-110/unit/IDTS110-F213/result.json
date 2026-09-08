@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F213",
+  "mentorNumber": 209,
+  "assertionId": "IDTS110-F213-A1",
+  "title": "reactivation stays inactive until queued operation completes",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:12.632Z",
+  "completedAt": "2026-09-05T10:05:13.378Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-access-lifecycle.js",
+  "testCommand": "node scripts/qa/test-user-admin-access-lifecycle.js --idts110-case=IDTS110-F213 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Reactivation increments the request version and queues REACTIVATE while the local user remains inactive until provider proof.",
+  "expectedResult": "Reactivation increments the request version and queues REACTIVATE while the local user remains inactive until provider proof.",
+  "actualResult": "Reactivation increments the request version and queues REACTIVATE while the local user remains inactive until provider proof.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "requestReactivate"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "insertAccessOperation"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "state": "SUSPENDED"
+  },
+  "afterState": {
+    "status": "SUSPENDED",
+    "version": 9,
+    "operation": "REACTIVATE",
+    "operationState": "PENDING"
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F213-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

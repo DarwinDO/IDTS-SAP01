@@ -1,0 +1,45 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F228",
+  "mentorNumber": 228,
+  "assertionId": "IDTS110-F228-A1",
+  "title": "catalog update rejects route and payload ID conflict",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:26.363Z",
+  "completedAt": "2026-09-05T10:05:27.186Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F228 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An update whose route ID differs from its payload ID returns the documented safe identity conflict and leaves the catalog row unchanged.",
+  "expectedResult": "An update whose route ID differs from its payload ID returns the documented safe identity conflict and leaves the catalog row unchanged.",
+  "actualResult": "An update whose route ID differs from its payload ID returns the documented safe identity conflict and leaves the catalog row unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "assertCatalogTargetIdentity"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "unchanged": true,
+    "routePayloadConflict": "CATALOG_ID_IMMUTABLE"
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F228-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F250R",
+  "mentorNumber": 272,
+  "assertionId": "IDTS110-F250R-A1",
+  "title": "digest snapshot omits raw fields",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:21.611Z",
+  "completedAt": "2026-09-05T15:59:22.556Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F250R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A digest snapshot omits raw fields from textBody and htmlBody and retains only the safe item projection.",
+  "expectedResult": "A digest snapshot omits raw fields from textBody and htmlBody and retains only the safe item projection.",
+  "actualResult": "A digest snapshot omits raw fields from textBody and htmlBody and retains only the safe item projection.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "buildDigestSnapshot"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "safeText"
+    }
+  ],
+  "beforeState": {
+    "rawSourceFields": [
+      "actualResult",
+      "description",
+      "environmentDetail",
+      "expectedResult",
+      "stepsToReproduce"
+    ]
+  },
+  "afterState": {
+    "persistedRawSourceFields": [
+      "actualResult",
+      "description",
+      "environmentDetail",
+      "expectedResult",
+      "stepsToReproduce"
+    ],
+    "snapshotItemKeys": [
+      "ID",
+      "bugNumber",
+      "createdAt",
+      "dueDate",
+      "priority",
+      "reason",
+      "severity",
+      "title"
+    ],
+    "snapshotItemCount": 4
+  },
+  "reloadState": {
+    "persistedBugID": "b3000000-0000-4000-8000-000000000007",
+    "snapshotItemKeys": [
+      "ID",
+      "bugNumber",
+      "createdAt",
+      "dueDate",
+      "priority",
+      "reason",
+      "severity",
+      "title"
+    ],
+    "rawValuesInItems": 0
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F250R-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F211",
+  "mentorNumber": 207,
+  "assertionId": "IDTS110-F211-A1",
+  "title": "role change fails closed before provider reconciliation",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:10.966Z",
+  "completedAt": "2026-09-05T10:05:11.633Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F211 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An authorized role change marks local access inactive, revokes active sessions, queues CHANGE_ROLE, and leaves provider completion unclaimed.",
+  "expectedResult": "An authorized role change marks local access inactive, revokes active sessions, queues CHANGE_ROLE, and leaves provider completion unclaimed.",
+  "actualResult": "An authorized role change marks local access inactive, revokes active sessions, queues CHANGE_ROLE, and leaves provider completion unclaimed.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requestRoleChange"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "queueFailClosedAccessChange"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "localAccessInactive": true,
+    "sessionsRevoked": true,
+    "queuedOperation": "CHANGE_ROLE",
+    "providerCompletionClaimed": false
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F211-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

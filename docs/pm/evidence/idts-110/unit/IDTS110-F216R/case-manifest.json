@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F216R",
+  "mentorNumber": 213,
+  "title": "reconcile accepts only an ambiguous provider outcome",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:16.319Z",
+  "completedAt": "2026-09-05T10:05:17.007Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F216R-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F216R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Reconcile accepts only AMBIGUOUS_PROVIDER_OUTCOME with the expected version, creates a fresh correlation, and appends one audit without accepting an unrelated outcome.",
+  "expectedResult": "Reconcile accepts only AMBIGUOUS_PROVIDER_OUTCOME with the expected version, creates a fresh correlation, and appends one audit without accepting an unrelated outcome.",
+  "actualResult": "Reconcile accepts only AMBIGUOUS_PROVIDER_OUTCOME with the expected version, creates a fresh correlation, and appends one audit without accepting an unrelated outcome.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "reconcileAccessOperation"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "assertExpectedVersion"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "invalidStateRejected": true,
+    "invalidVersionRejected": true,
+    "recoveryAction": "RECONCILE_ACCESS_OPERATION",
+    "state": "PENDING",
+    "auditFromState": "BLOCKED_MANUAL_REVIEW",
+    "auditToState": "PROVISION_QUEUED",
+    "newCorrelation": true,
+    "auditRows": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F216R-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "42053435e2c4978569afbf6ca3eb396139155967139a52f7ba82b276eeaf04b3",
+    "before-database.png": "b935211fdbf994472147df42f94c040725a7c51edc6c243802b3159aa65fef39",
+    "after-database.png": "893ca1bef9dc7d5b1f61c4d78f25ebd4cc8b9083e24090a00363ffe1633d367c",
+    "reload-readback.png": "5981cf495c6b4cfecb79bcba98a51cae8739bad45f73afef7d9b195fa2911840"
+  },
+  "resultSha256": "e452b0543bcab38e07bd94fe66f0da7db9d1cd72dfb2a7aeb25aed10cda1fae6",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

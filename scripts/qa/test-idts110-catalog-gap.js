@@ -197,7 +197,10 @@ assert.deepEqual(Object.keys(gapMatrix).sort(), [
 assert.equal(gapMatrix.schemaVersion, '1.0')
 assert.equal(gapMatrix.mentorNumbering, 'SEQUENTIAL_ONLY')
 assert.equal(gapMatrix.approvedCatalogCount, 188)
-assert.equal(catalog.cases.length, 188)
+const existingCatalogCount = Array.isArray(catalog.existingCaseOrder)
+  ? catalog.existingCaseOrder.length
+  : catalog.cases.length
+assert.equal(existingCatalogCount, 188)
 assert.equal(gapMatrix.baseSha, '9d5aad699662bde65a747de4c0d631678de639e4')
 for (const catalogCase of catalog.cases) {
   assert.equal(catalogCase.execution?.status, 'NOT_RUN')
@@ -456,7 +459,7 @@ const retainedTask2Proposals = gapMatrix.proposals.filter(row => row.decision ==
 assert.equal(featureCoverage.summary.retainedProposalCount, retainedTask2Proposals.length)
 assert.equal(
   featureCoverage.summary.proposedFinalCatalogCount,
-  catalog.cases.length + retainedTask2Proposals.length + allProposedCases.length
+  existingCatalogCount + retainedTask2Proposals.length + allProposedCases.length
 )
 assert.deepEqual([...referencedProposalKeys].sort(), [...proposedKeys].sort())
 for (const key of proposedKeys) assert.equal(proposalReferenceCounts.get(key), 1)

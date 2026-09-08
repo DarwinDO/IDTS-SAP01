@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F225",
+  "mentorNumber": 225,
+  "title": "PM creates normalized SAP Module catalog row",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:23.428Z",
+  "completedAt": "2026-09-05T10:05:24.270Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F225-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F225 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "PM/UserAdmin CREATE of CatalogSAPModules normalizes code/name, assigns a server UUID, persists active state, and records one safe CREATE audit after reload.",
+  "expectedResult": "PM/UserAdmin CREATE of CatalogSAPModules normalizes code/name, assigns a server UUID, persists active state, and records one safe CREATE audit after reload.",
+  "actualResult": "PM/UserAdmin CREATE of CatalogSAPModules normalizes code/name, assigns a server UUID, persists active state, and records one safe CREATE audit after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "prepareCatalogCreate"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "recordCatalogAudit"
+    },
+    {
+      "file": "srv/user-admin.cds",
+      "symbol": "CatalogSAPModules"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "createdID": "server-assigned",
+    "audit": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F225-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "cd8fbc2455d3217421f2373d22b57b4bf8cec2a4e8d96f6d0fe100276e283ee9",
+    "before-database.png": "46a25c09ceea59fb928cd4695eb4e643b5643797e9d0a93f47a072feb643acde",
+    "after-database.png": "21ebc6adde383eef8c57752c6e74ab4351930e78bd25cc72d3b2774f44076148",
+    "reload-readback.png": "dfed321ae347d68abae4c0962ad53933b8dbcd96ce3c68a8cc689bc9f4a7fa34"
+  },
+  "resultSha256": "ae2afe35e9796b2d3538b56520ff2bc2ed961f28009818e3f19797e653ea0347",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

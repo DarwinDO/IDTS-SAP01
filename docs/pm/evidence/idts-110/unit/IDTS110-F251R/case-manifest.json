@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F251R",
+  "mentorNumber": 274,
+  "title": "digest scheduling resumes after a page failure",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:23.870Z",
+  "completedAt": "2026-09-05T15:59:25.166Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F251R-A1",
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F251R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A late-page failure leaves earlier committed pages intact and resumes the remaining recipient pages without duplicating their rows.",
+  "expectedResult": "A late-page failure leaves earlier committed pages intact and resumes the remaining recipient pages without duplicating their rows.",
+  "actualResult": "A late-page failure leaves earlier committed pages intact and resumes the remaining recipient pages without duplicating their rows.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "scheduleNotificationDigests"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "createDigestTransactionRunner"
+    }
+  ],
+  "beforeState": {
+    "persistedRowCount": 0,
+    "sourceRecipientPageCount": 0
+  },
+  "afterState": {
+    "persistedRowCount": 99,
+    "firstPagePersistedCount": 99,
+    "failedPagePersistedCount": 0,
+    "failedPageSourceCount": 100
+  },
+  "reloadState": {
+    "persistedRowCount": 201,
+    "uniqueRecipientCount": 201,
+    "retriedPageSourceCount": 100,
+    "retriedPageMatchesFailedPage": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F251R-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "8ccbe2483486a0e7da4c639bfa6bee9c08efc0986ce020c5d447a6397dbf5684",
+    "before-database.png": "3dc2a33dea352caa377e97e943da6b3b76dd5427a89d049a8965ec098aa51413",
+    "after-database.png": "a888e24a11d56dd1a10812e27f0642afccc82b1cb4693dcad543e9326502739f",
+    "reload-readback.png": "41c435d3ed7c480835e1373a9e623ae763a2f9e3a5c90d9f2d031d37e417b1a3"
+  },
+  "resultSha256": "5d1d779f0e9126e718c3dcfd9c622d82a2f31d978ddb70990e88119acb3b16d1",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

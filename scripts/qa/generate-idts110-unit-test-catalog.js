@@ -12,7 +12,9 @@ const path = require('path')
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const OUTPUT = path.join(ROOT, 'docs', 'qa', 'idts-110-unit-test-catalog.json')
+const EXTENSION = path.join(ROOT, 'docs', 'qa', 'idts-110-extension-cases.json')
 const BASELINE_SHA = 'bc0c47e522ae208384d4b23dda21535dcc683683'
+const SOURCE_BASELINE_PATTERN = /^[0-9a-f]{40}$/i
 
 const cases = []
 
@@ -75,7 +77,7 @@ function add ({
     requirementIds,
     roles,
     coverage,
-    preconditions: `Use an isolated ${domain.toLowerCase()} fixture at baseline ${BASELINE_SHA.slice(0, 12)}; capture the relevant before-state.`,
+    preconditions: `Use an isolated ${domain.toLowerCase()} fixture and capture the relevant before-state. Historical catalog provenance is retained in metadata.`,
     input,
     steps: [
       'Prepare the stated precondition and capture the before-state.',
@@ -130,7 +132,7 @@ for (const [id, title, input] of [
 
 // Draft, create, update, and required-field validation.
 add({ caseId: 'UT-BUG-001', domain: 'Bug write', title: 'Tester creates a NEW draft with server-owned reporter', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['TESTER'], input: 'Create a NEW Bugs draft as Tester.', expectedResult: 'A draft is created and reporter_ID is derived from the authenticated Tester.', sourceTrace: source.draft, coverage: ['POSITIVE', 'ROLE', 'PERSISTENCE'] })
-add({ caseId: 'UT-BUG-002', domain: 'Bug write', title: 'PM creates a NEW draft with server-owned reporter', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['PM'], input: 'Create a NEW Bugs draft as PM.', expectedResult: 'A draft is created and reporter_ID is derived from the authenticated PM.', sourceTrace: source.draft, coverage: ['POSITIVE', 'ROLE', 'PERSISTENCE'] })
+add({ caseId: 'UT-BUG-002', domain: 'Bug write', title: 'PM cannot create a NEW draft', classification: 'ROLE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['PM'], input: 'Create a NEW Bugs draft as PM.', expectedResult: 'HTTP 403 is returned and no draft or active Bug is created.', sourceTrace: [{ file: 'srv/service.js', symbol: 'BugService' }, { file: 'srv/bug-service/permissions.js', symbol: 'assertBugCreatePermission' }].concat(source.draft.filter(trace => trace.symbol === 'prepareDraftNew')), coverage: ['ROLE', 'PERSISTENCE'] })
 add({ caseId: 'UT-BUG-003', domain: 'Bug write', title: 'Developer cannot create a NEW draft', classification: 'ROLE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), roles: ['DEVELOPER'], input: 'Create a NEW Bugs draft as Developer.', expectedResult: 'HTTP 403 is returned and no draft or active Bug is created.', sourceTrace: source.draft.concat(source.permissions), coverage: ['ROLE', 'PERSISTENCE'] })
 add({ caseId: 'UT-BUG-004', domain: 'Bug write', title: 'PATCH preserves fields not included in a partial draft update', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001'), input: 'PATCH only title on an existing draft.', expectedResult: 'The new title is merged with the old draft and unrelated fields remain unchanged.', sourceTrace: [{ file: 'srv/bug-service/drafts.js', symbol: 'prepareDraftPatch' }], coverage: ['POSITIVE', 'PERSISTENCE'] })
 add({ caseId: 'UT-BUG-005', domain: 'Bug write', title: 'saving an unassigned draft creates Pending Assignment', classification: 'POSITIVE', environment: 'HYBRID_BTP', requirementIds: req('SRS-FR-BUG-001', 'SRS-FR-ASSIGN-003'), input: 'SAVE a complete draft with assignee_ID null.', expectedResult: 'The active Bug is PENDING_ASSIGNMENT, assignee remains null, and PM is the next processor.', sourceTrace: source.draft.concat(source.write), coverage: ['POSITIVE', 'PERSISTENCE'] })
@@ -341,7 +343,115 @@ function summary () {
   }
 }
 
+function argumentValue (name) {
+  const prefix = `--${name}=`
+  const argument = process.argv.find(value => value.startsWith(prefix))
+  return argument ? argument.slice(prefix.length) : null
+}
+
+function existingOutputSourceBaseline () {
+  if (!fs.existsSync(OUTPUT)) return null
+  try {
+    const current = JSON.parse(fs.readFileSync(OUTPUT, 'utf8'))
+    return typeof current.sourceBaselineSha === 'string' ? current.sourceBaselineSha : null
+  } catch {
+    return null
+  }
+}
+
+function toCatalogDefinition (row) {
+  if (row.candidateStatus !== 'NOT_RUN' || row.execution?.status !== 'NOT_RUN') {
+    throw new Error(`${row.internalCaseKey} imports execution truth`)
+  }
+  return {
+    caseId: row.internalCaseKey,
+    domain: row.domain,
+    title: row.title,
+    objective: row.objective,
+    classification: row.classification,
+    priority: row.priority,
+    testLevel: row.testLevel,
+    environment: row.environment,
+    requirementIds: row.requirementIds,
+    roles: row.roles,
+    coverage: row.coverage,
+    preconditions: row.preconditions,
+    input: row.input,
+    steps: row.steps,
+    expectedResult: row.expectedResult,
+    sourceTrace: row.sourceTrace,
+    evidenceRequirements: row.evidenceRequirements,
+    execution: {
+      status: 'NOT_RUN',
+      executor: null,
+      executedAt: null,
+      baselineSha: null,
+      deploySha: null,
+      actualResult: null,
+      evidenceIds: []
+    },
+    limitations: null,
+    mentorNumber: row.mentorNumber,
+    candidateOrigin: row.candidateOrigin,
+    sourceProposalSequence: row.sourceProposalSequence,
+    plannedTestFile: row.plannedTestFile,
+    plannedAssertions: row.plannedAssertions,
+    assertionId: row.assertionId,
+    plannedAssertion: row.plannedAssertion,
+    acceptanceMode: row.acceptanceMode,
+    roleBoundary: row.roleBoundary,
+    executionBoundary: row.executionBoundary,
+    candidateStatus: 'NOT_RUN',
+    reviewStatus: row.reviewStatus
+  }
+}
+
+function loadExtension (sourceBaselineSha) {
+  if (!fs.existsSync(EXTENSION)) throw new Error(`Missing extension manifest: ${path.relative(ROOT, EXTENSION)}`)
+  const extension = JSON.parse(fs.readFileSync(EXTENSION, 'utf8'))
+  if (extension.sourceBaselineSha !== sourceBaselineSha) {
+    throw new Error(`Extension source baseline mismatch: expected ${sourceBaselineSha}, got ${extension.sourceBaselineSha}`)
+  }
+  if (extension.historicalCatalogBaselineSha !== BASELINE_SHA) {
+    throw new Error(`Extension historical catalog baseline mismatch: expected ${BASELINE_SHA}, got ${extension.historicalCatalogBaselineSha}`)
+  }
+  if (!Array.isArray(extension.retainedTask2) || extension.retainedTask2.length !== 10) {
+    throw new Error('Extension retained Task 2 rows must contain exactly 10 definitions')
+  }
+  if (!Array.isArray(extension.featureCandidates) || extension.featureCandidates.length !== 80) {
+    throw new Error('Extension feature rows must contain exactly 80 definitions')
+  }
+  return extension
+}
+
+const checkRequested = process.argv.includes('--check')
+const explicitExtended = process.argv.includes('--extended')
+const requestedSourceBaseline = argumentValue('source-baseline')
+if (requestedSourceBaseline && !SOURCE_BASELINE_PATTERN.test(requestedSourceBaseline)) {
+  throw new Error('--source-baseline must be an exact 40-character SHA')
+}
+if (requestedSourceBaseline && !explicitExtended && !checkRequested) {
+  throw new Error('--source-baseline requires --extended')
+}
+const currentOutputSourceBaseline = existingOutputSourceBaseline()
+const inferredExtended = checkRequested && !explicitExtended && Boolean(currentOutputSourceBaseline || requestedSourceBaseline)
+const extended = explicitExtended || inferredExtended
+const sourceBaselineSha = requestedSourceBaseline || (checkRequested && extended ? currentOutputSourceBaseline : null)
+if (extended && !sourceBaselineSha) throw new Error('--extended requires --source-baseline=<40-character SHA>')
+
+let extension = null
+if (extended) {
+  extension = loadExtension(sourceBaselineSha)
+  const extensionRows = [...extension.retainedTask2, ...extension.featureCandidates]
+  const existingIds = new Set(cases.map(item => item.caseId))
+  for (const row of extensionRows) {
+    if (existingIds.has(row.internalCaseKey)) throw new Error(`Extension case duplicates existing case ${row.internalCaseKey}`)
+    existingIds.add(row.internalCaseKey)
+    cases.push(toCatalogDefinition(row))
+  }
+}
 validate()
+
 const catalog = {
   schemaVersion: '1.0',
   project: 'IDTS-SAP01',
@@ -377,9 +487,18 @@ const catalog = {
   cases
 }
 
+if (extended) {
+  catalog.sourceBaselineSha = sourceBaselineSha
+  catalog.historicalCatalogBaselineSha = BASELINE_SHA
+  catalog.approvalReference = extension.approvalReference
+  catalog.mentorNumbering = 'SEQUENTIAL_ONLY'
+  catalog.extensionSummary = { existing: 188, retainedTask2: 10, featureCandidates: 80, total: 278 }
+  catalog.existingCaseOrder = cases.slice(0, 188).map(item => item.caseId)
+}
+
 const serialized = `${JSON.stringify(catalog, null, 2)}\n`
 const normalizeLineEndings = value => value.replace(/\r\n/g, '\n')
-if (process.argv.includes('--check')) {
+if (checkRequested) {
   if (!fs.existsSync(OUTPUT) || normalizeLineEndings(fs.readFileSync(OUTPUT, 'utf8')) !== serialized) {
     console.error(`Catalog is stale: ${path.relative(ROOT, OUTPUT)}`)
     process.exit(1)

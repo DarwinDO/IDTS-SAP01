@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "catalogSha": "16603bec649c4e6a09e907b2c7a1fc2b21c393befe7bd5c99b76aea75bb60e30",
+  "sourceCatalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "entries": [
+    {
+      "label": "Task 4 User Administration programmatic",
+      "path": ".tmp/idts-110/review-round3-fresh.json",
+      "runId": "idts110-1788602696225-662da0865fbc466327dc2088771beb25",
+      "sha256": "284e75f12f6508bd9a6ced9e7b70b5422bda2ef9fef95c8c81d785237a5ccee1",
+      "rawResultCount": 45,
+      "selectedCaseKeys": [
+        "IDTS110-P189", "IDTS110-P190", "IDTS110-P191", "IDTS110-P194", "IDTS110-P195", "IDTS110-P196", "IDTS110-P197", "IDTS110-P200", "IDTS110-P202", "IDTS110-P203",
+        "IDTS110-F204", "IDTS110-F205", "IDTS110-F206", "IDTS110-F207", "IDTS110-F208", "IDTS110-F209", "IDTS110-F210", "IDTS110-F210S", "IDTS110-F211", "IDTS110-F212", "IDTS110-F213", "IDTS110-F214", "IDTS110-F215", "IDTS110-F216", "IDTS110-F216R", "IDTS110-F217", "IDTS110-F218", "IDTS110-F219", "IDTS110-F220", "IDTS110-F220D", "IDTS110-F220R", "IDTS110-F220N", "IDTS110-F221", "IDTS110-F222", "IDTS110-F223", "IDTS110-F225", "IDTS110-F226", "IDTS110-F227", "IDTS110-F228", "IDTS110-F228E", "IDTS110-F229", "IDTS110-F230", "IDTS110-F231", "IDTS110-F231R"
+      ],
+      "excludedCaseKeys": ["IDTS110-F224"]
+    },
+    {
+      "label": "Task 5 My Notifications service",
+      "path": ".tmp/idts-110/task5-fix-round1-review.json",
+      "runId": "idts110-1788605749451-2365f5b068e7f3cc11aa9ab1457f38e2",
+      "sha256": "23e0b6743cb41b8f55ee0523697cb3caaed48e07d437a02b339414e944732209",
+      "rawResultCount": 7,
+      "selectedCaseKeys": ["IDTS110-F232", "IDTS110-F233", "IDTS110-F234", "IDTS110-F235", "IDTS110-F235I", "IDTS110-F235C", "IDTS110-F236"],
+      "excludedCaseKeys": []
+    },
+    {
+      "label": "Task 6 My Notifications UI",
+      "path": ".tmp/idts-110/ui-results.json",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "sha256": "07691febc86f85f95950bd4dcf3020824899a4a6f8e913c1289b7715e49eb62a",
+      "rawResultCount": 9,
+      "selectedCaseKeys": ["IDTS110-F237", "IDTS110-F238", "IDTS110-F238E", "IDTS110-F238L", "IDTS110-F239", "IDTS110-F239P", "IDTS110-F239H", "IDTS110-F239D"],
+      "excludedCaseKeys": ["IDTS110-F224"]
+    },
+    {
+      "label": "Task 6 User Administration workload UI replacement",
+      "path": ".tmp/idts-110/f224-fix-round1.json",
+      "runId": "idts110-f224-fix-r1-20260905e",
+      "sha256": "59f8af488c9e127c8cbdcca2d9590d7095e99cebad1bf9d26e5bfb0bf6ed5c5f",
+      "rawResultCount": 1,
+      "selectedCaseKeys": ["IDTS110-F224"],
+      "excludedCaseKeys": []
+    },
+    {
+      "label": "Task 7 access email",
+      "path": ".tmp/idts-110/review-task7-fix3-results.json",
+      "runId": "idts110-1788615735629-d086b0bacdf397d2fbc5218ab91b1a3c",
+      "sha256": "bd49b34bf3d98248911e393c0cde259604f03c06d160ec2834932a1214817474",
+      "rawResultCount": 10,
+      "selectedCaseKeys": ["IDTS110-F240", "IDTS110-F240R", "IDTS110-F241", "IDTS110-F243", "IDTS110-F243M", "IDTS110-F244", "IDTS110-F245", "IDTS110-F246", "IDTS110-F246R", "IDTS110-F246B"],
+      "excludedCaseKeys": []
+    },
+    {
+      "label": "Task 8 Bug email",
+      "path": ".tmp/idts-110/review-task8-fix2-results.json",
+      "runId": "idts110-1788623942723-a9f74045042c5a6fe9764e4d1cda6a42",
+      "sha256": "8c2db79570eabb7405a7d1171ee0600ccc53803e5c340d39bc5ded648457b84d",
+      "rawResultCount": 20,
+      "selectedCaseKeys": ["IDTS110-F247", "IDTS110-F247S", "IDTS110-F247SS", "IDTS110-F248", "IDTS110-F248C", "IDTS110-F248N", "IDTS110-F249", "IDTS110-F249K", "IDTS110-F249T", "IDTS110-F250", "IDTS110-F250L", "IDTS110-F250M", "IDTS110-F250Q", "IDTS110-F250R", "IDTS110-F251", "IDTS110-F251R", "IDTS110-F252", "IDTS110-F252R", "IDTS110-F252P", "IDTS110-F253"],
+      "excludedCaseKeys": []
+    }
+  ],
+  "selectedCaseCount": 90,
+  "superseded": [
+    {
+      "caseKey": "IDTS110-F224",
+      "path": ".tmp/idts-110/ui-results.json",
+      "reason": "Task 6 fix-round replacement is the current reviewed UI result"
+    }
+  ],
+  "externalMutations": []
+}

@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F206",
+  "mentorNumber": 201,
+  "assertionId": "IDTS110-F206-A1",
+  "title": "matching SAP identity verifies one onboarding invitation",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:07.185Z",
+  "completedAt": "2026-09-05T10:05:07.876Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F206 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid invitation with a matching SAP identity is consumed once, queues standard access, records one operation/audit, and omits identity fields from the result.",
+  "expectedResult": "A valid invitation with a matching SAP identity is consumed once, queues standard access, records one operation/audit, and omits identity fields from the result.",
+  "actualResult": "A valid invitation with a matching SAP identity is consumed once, queues standard access, records one operation/audit, and omits identity fields from the result.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "verifySapIdentity"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "verifyInvitationToken"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "identitySnapshotFrom"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "consumed": true,
+    "operationState": "PENDING",
+    "operationRows": 1,
+    "deliveryRows": 1,
+    "replayRejected": true,
+    "auditRows": 1,
+    "identityFieldsOmitted": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F206-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

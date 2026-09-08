@@ -1,0 +1,46 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F220R",
+  "mentorNumber": 219,
+  "assertionId": "IDTS110-F220R-A1",
+  "title": "Developer access requires one responsibility",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:20.114Z",
+  "completedAt": "2026-09-05T10:05:20.115Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-developer-profile.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile.js --idts110-case=IDTS110-F220R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "assertDeveloperProfileForRole rejects a DEVELOPER role with no responsibility using DEVELOPER_PROFILE_REQUIRED.",
+  "expectedResult": "assertDeveloperProfileForRole rejects a DEVELOPER role with no responsibility using DEVELOPER_PROFILE_REQUIRED.",
+  "actualResult": "assertDeveloperProfileForRole rejects a DEVELOPER role with no responsibility using DEVELOPER_PROFILE_REQUIRED.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "assertDeveloperProfileForRole"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-function",
+    "checks": 0
+  },
+  "afterState": {
+    "checks": 1
+  },
+  "reloadState": {
+    "fixture": "pure-function",
+    "checks": 1
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F220R-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

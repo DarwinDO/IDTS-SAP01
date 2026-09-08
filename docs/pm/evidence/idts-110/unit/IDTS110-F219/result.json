@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F219",
+  "mentorNumber": 216,
+  "assertionId": "IDTS110-F219-A1",
+  "title": "Developer Profile update persists responsibility lifecycle",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:18.892Z",
+  "completedAt": "2026-09-05T10:05:19.859Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile-actions.js --idts110-case=IDTS110-F219 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid Developer Profile update persists availability/workload, deactivates removed responsibilities without deletion, and writes bounded administration audits after reload.",
+  "expectedResult": "A valid Developer Profile update persists availability/workload, deactivates removed responsibilities without deletion, and writes bounded administration audits after reload.",
+  "actualResult": "A valid Developer Profile update persists availability/workload, deactivates removed responsibilities without deletion, and writes bounded administration audits after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "updateDeveloperProfile"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "persistDesiredDeveloperProfile"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "DEVELOPER_RESPONSIBILITY_DEACTIVATED"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "responsibilities": 1
+  },
+  "afterState": {
+    "beforeResponsibilities": 1,
+    "afterResponsibilities": 2,
+    "activeResponsibilities": 1,
+    "persistedWorkloadLimit": 2,
+    "auditActions": 3
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F219-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

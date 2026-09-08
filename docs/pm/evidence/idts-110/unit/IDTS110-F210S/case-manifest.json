@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F210S",
+  "mentorNumber": 206,
+  "title": "stale provisioning approval is rejected without mutation",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:10.092Z",
+  "completedAt": "2026-09-05T10:05:10.761Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F210S-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F210S --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Approval with a stale request version returns the safe version conflict and leaves request, operation, and audit state unchanged.",
+  "expectedResult": "Approval with a stale request version returns the safe version conflict and leaves request, operation, and audit state unchanged.",
+  "actualResult": "Approval with a stale request version returns the safe version conflict and leaves request, operation, and audit state unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "approveProvisioning"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "assertExpectedVersion"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "conflictCode": "ONBOARDING_VERSION_CONFLICT",
+    "requestUnchanged": true,
+    "operationsUnchanged": true,
+    "auditsUnchanged": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F210S-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "d767e58e670dad0c6c56d460c4b044b282a5b4fd25b03259815ff74670dd5775",
+    "before-database.png": "5b641514e4a1c76e392cbea344fcf1d3800c94c702ab6cee6fdfa5dd21e281a6",
+    "after-database.png": "37dd970a26cae303f50e5b70a055c53af7062748cc77907604e42cfa7959842e",
+    "reload-readback.png": "7c7a7fcab857b3679610012fbf4d9d14aeedbf5b2d72392bab71d4be802c2fda"
+  },
+  "resultSha256": "0eb39642420845beac6fe3028653188c6006072d26215997280d1e8baa58648d",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

@@ -1,0 +1,120 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F248C",
+  "mentorNumber": 263,
+  "title": "overdue discovery is idempotent for one source key",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:07.013Z",
+  "completedAt": "2026-09-05T15:59:07.909Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F248C-A1",
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F248C --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Rerunning an overdue discovery cycle with the same due-date history source key creates no duplicate event.",
+  "expectedResult": "Rerunning an overdue discovery cycle with the same due-date history source key creates no duplicate event.",
+  "actualResult": "Rerunning an overdue discovery cycle with the same due-date history source key creates no duplicate event.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "readScheduleAnchors"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "isOverdue"
+    }
+  ],
+  "beforeState": {
+    "notificationCount": 0,
+    "notificationIDs": [],
+    "bugIDs": [],
+    "eventTypes": [],
+    "sourceKeys": [],
+    "recipientIDs": [],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "afterState": {
+    "notificationCount": 2,
+    "notificationIDs": [
+      "ff674578-9bf5-4f00-a4e0-92cacc93428e",
+      "f3d7d69e-9a67-44c5-ba2c-f5b2623e9f7b"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000003",
+      "a3000000-0000-4000-8000-000000000003"
+    ],
+    "eventTypes": [
+      "OVERDUE",
+      "OVERDUE"
+    ],
+    "sourceKeys": [
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:a5000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000003",
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:a5000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000004"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000003",
+      "a1000000-0000-4000-8000-000000000004"
+    ],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "reloadState": {
+    "notificationCount": 2,
+    "notificationIDs": [
+      "ff674578-9bf5-4f00-a4e0-92cacc93428e",
+      "f3d7d69e-9a67-44c5-ba2c-f5b2623e9f7b"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000003",
+      "a3000000-0000-4000-8000-000000000003"
+    ],
+    "eventTypes": [
+      "OVERDUE",
+      "OVERDUE"
+    ],
+    "sourceKeys": [
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:a5000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000003",
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:a5000000-0000-4000-8000-000000000001:a1000000-0000-4000-8000-000000000004"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000003",
+      "a1000000-0000-4000-8000-000000000004"
+    ],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F248C-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "a9b3d8184d8ab9645339959fc6db55646b1ac3fa839b74fe7deb62dfbba7c44a",
+    "before-database.png": "0579c2540d5d7c457cc647387e840b7a61ccaa2a13108148f6a2b39284b8822c",
+    "after-database.png": "8abeb215f1d867bcb91075d7950c70b2833d402669a53c4d9da2016b8954a8d7",
+    "reload-readback.png": "c5977fda1895f501b1162eb486100c3dd7ac1e2061deb271971084e1608011b9"
+  },
+  "resultSha256": "c795bd0e39dae17daff814e0267dab0a43415ac5ce9e9d859d3140e222d5bbc5",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

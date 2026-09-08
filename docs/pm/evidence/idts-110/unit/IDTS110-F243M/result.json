@@ -1,0 +1,171 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F243M",
+  "mentorNumber": 253,
+  "assertionId": "IDTS110-F243M-A1",
+  "title": "token-mismatch onboarding delivery fails with bounded retry",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:18.970Z",
+  "completedAt": "2026-09-05T13:42:19.711Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F243M --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "When persisted token material does not match, the worker marks the delivery FAILED with INVITATION_TOKEN_MISMATCH, sanitizes error state, and schedules a bounded retry when attempts remain.",
+  "expectedResult": "When persisted token material does not match, the worker marks the delivery FAILED with INVITATION_TOKEN_MISMATCH, sanitizes error state, and schedules a bounded retry when attempts remain.",
+  "actualResult": "When persisted token material does not match, the worker marks the delivery FAILED with INVITATION_TOKEN_MISMATCH, sanitizes error state, and schedules a bounded retry when attempts remain.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "processUserOnboardingDeliveries"
+    },
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "INVITATION_TOKEN_MISMATCH"
+    },
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "retryDelayMs"
+    },
+    {
+      "file": "srv/user-admin/delivery.js",
+      "symbol": "sanitizeTransportError"
+    }
+  ],
+  "beforeState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "e3e1ad36-2b04-4e97-8840-016c815c819d"
+    ],
+    "requestStatuses": [
+      "INVITED"
+    ],
+    "requestVersions": [
+      0
+    ],
+    "requestErrorCodes": [
+      null
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:19.677Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "2dff1d9e-b4d1-48aa-9a12-9b607bac565b"
+    ],
+    "deliveryRequestIDs": [
+      "e3e1ad36-2b04-4e97-8840-016c815c819d"
+    ],
+    "deliveryStatuses": [
+      "PENDING"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      null
+    ]
+  },
+  "afterState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "e3e1ad36-2b04-4e97-8840-016c815c819d"
+    ],
+    "requestStatuses": [
+      "INVITED"
+    ],
+    "requestVersions": [
+      0
+    ],
+    "requestErrorCodes": [
+      "INVITATION_TOKEN_MISMATCH"
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:19.677Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "2dff1d9e-b4d1-48aa-9a12-9b607bac565b"
+    ],
+    "deliveryRequestIDs": [
+      "e3e1ad36-2b04-4e97-8840-016c815c819d"
+    ],
+    "deliveryStatuses": [
+      "FAILED"
+    ],
+    "deliveryAttempts": [
+      2
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      "INVITATION_TOKEN_MISMATCH"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ],
+    "firstAttemptFailed": true,
+    "retryScheduled": true,
+    "retryBoundedAtTwoAttempts": true,
+    "senderCalls": 0
+  },
+  "reloadState": {
+    "requestRows": 1,
+    "requestIDs": [
+      "e3e1ad36-2b04-4e97-8840-016c815c819d"
+    ],
+    "requestStatuses": [
+      "INVITED"
+    ],
+    "requestVersions": [
+      0
+    ],
+    "requestErrorCodes": [
+      "INVITATION_TOKEN_MISMATCH"
+    ],
+    "requestExpiresAt": [
+      "2026-09-05T14:42:19.677Z"
+    ],
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "2dff1d9e-b4d1-48aa-9a12-9b607bac565b"
+    ],
+    "deliveryRequestIDs": [
+      "e3e1ad36-2b04-4e97-8840-016c815c819d"
+    ],
+    "deliveryStatuses": [
+      "FAILED"
+    ],
+    "deliveryAttempts": [
+      2
+    ],
+    "deliveryNextAttemptAt": [
+      null
+    ],
+    "deliveryErrorCodes": [
+      "INVITATION_TOKEN_MISMATCH"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F243M-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

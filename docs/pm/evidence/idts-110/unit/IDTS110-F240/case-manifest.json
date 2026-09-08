@@ -1,0 +1,151 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F240",
+  "mentorNumber": 249,
+  "title": "applied role-change completion creates one inbox index",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:15.795Z",
+  "completedAt": "2026-09-05T13:42:16.372Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F240-A1",
+  "testFile": "scripts/qa/test-user-access-notifications.js",
+  "testCommand": "node scripts/qa/test-user-access-notifications.js --idts110-case=IDTS110-F240 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An APPLIED CHANGE_ROLE or REACTIVATE audit creates one source-bound access delivery and one caller inbox index, while queued, failed, mismatched, or duplicate calls create no second index.",
+  "expectedResult": "An APPLIED CHANGE_ROLE or REACTIVATE audit creates one source-bound access delivery and one caller inbox index, while queued, failed, mismatched, or duplicate calls create no second index.",
+  "actualResult": "An APPLIED CHANGE_ROLE or REACTIVATE audit creates one source-bound access delivery and one caller inbox index, while queued, failed, mismatched, or duplicate calls create no second index.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "writeUserAccessDelivery"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "writeUserAccessInboxIndex"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "ACCESS_EVENT_BY_ACTION"
+    }
+  ],
+  "beforeState": {
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliverySourceAuditEventIDs": [],
+    "deliveryTargetUserIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "deliveryErrorCodes": [],
+    "deliveryProviderMessages": [],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": []
+  },
+  "afterState": {
+    "deliveryRows": 2,
+    "deliveryIDs": [
+      "2fefecb0-595b-4199-9327-d6b66c3f743a",
+      "64e29fe6-ac86-4a97-a5ef-55c2adf5f427"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000020",
+      "62000000-0000-4000-8000-000000000021"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020",
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SENT",
+      "SENT"
+    ],
+    "deliveryAttempts": [
+      1,
+      1
+    ],
+    "deliveryErrorCodes": [
+      null,
+      null
+    ],
+    "deliveryProviderMessages": [
+      "atomic-access-message-1",
+      "atomic-access-message-2"
+    ],
+    "inboxRows": 2,
+    "inboxAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000020",
+      "62000000-0000-4000-8000-000000000021"
+    ],
+    "failedAuditExcluded": true,
+    "duplicateIndexRows": 1,
+    "queuedCreated": false,
+    "mismatchedCreated": false,
+    "duplicateCreated": false,
+    "senderCalls": 2
+  },
+  "reloadState": {
+    "deliveryRows": 2,
+    "deliveryIDs": [
+      "2fefecb0-595b-4199-9327-d6b66c3f743a",
+      "64e29fe6-ac86-4a97-a5ef-55c2adf5f427"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000020",
+      "62000000-0000-4000-8000-000000000021"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020",
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SENT",
+      "SENT"
+    ],
+    "deliveryAttempts": [
+      1,
+      1
+    ],
+    "deliveryErrorCodes": [
+      null,
+      null
+    ],
+    "deliveryProviderMessages": [
+      "atomic-access-message-1",
+      "atomic-access-message-2"
+    ],
+    "inboxRows": 2,
+    "inboxAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000020",
+      "62000000-0000-4000-8000-000000000021"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F240-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "dba28f6241ba65802e062a4d402f5dde5906e43f44a9600afdf1f33f95dc2769",
+    "before-database.png": "7a285f0be1538df7c8e4b423bd38ea5279d2e16aaaded4031bb135f40b2540bf",
+    "after-database.png": "aa90405dbcf77ee76f187383b88ff58b3f3fafff6dd9f53604c391cd86f0e39d",
+    "reload-readback.png": "f215b261ae750d6b8f878de973e4d63b6432db656dc57972275d86794f15552b"
+  },
+  "resultSha256": "926e3a83c67613bd4ac2c5547759f05335efe1c0f05be5189c8edf8ef1eeaa83",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

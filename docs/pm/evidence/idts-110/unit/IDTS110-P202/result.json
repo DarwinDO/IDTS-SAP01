@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P202",
+  "mentorNumber": 197,
+  "assertionId": "IDTS110-P202-A1",
+  "title": "Developer workload filters remain caller-scoped",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:03.419Z",
+  "completedAt": "2026-09-05T10:05:04.273Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-P202 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert a Developer receives only the own row even with another-profile filter, search, offset, or count request.",
+  "expectedResult": "Assert a Developer receives only the own row even with another-profile filter, search, offset, or count request. Assert PM still receives the full ordered workload set.",
+  "actualResult": "Assert a Developer receives only the own row even with another-profile filter, search, offset, or count request. Assert PM still receives the full ordered workload set.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "authorizeDeveloperWorkloadRead"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "readDeveloperWorkloads"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "developerRows": 1,
+    "pmRows": 5,
+    "orderedRows": [
+      "DatDT",
+      "LegacyDev",
+      "SangVN",
+      "Unknown Developer",
+      "ZeroDev"
+    ]
+  },
+  "reloadState": {
+    "developerRows": 1,
+    "pmRows": 5,
+    "orderedRows": [
+      "DatDT",
+      "LegacyDev",
+      "SangVN",
+      "Unknown Developer",
+      "ZeroDev"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P202-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

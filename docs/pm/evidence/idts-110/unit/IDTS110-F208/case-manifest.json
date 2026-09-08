@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F208",
+  "mentorNumber": 203,
+  "title": "mismatched SAP identity is denied without consuming invitation",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:08.129Z",
+  "completedAt": "2026-09-05T10:05:08.131Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F208-A1",
+  "testFile": "scripts/qa/test-user-onboarding-contract.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-contract.js --idts110-case=IDTS110-F208 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid token used by a different normalized SAP email returns INVITATION_IDENTITY_MISMATCH and leaves the invitation INVITED with consumedAt null.",
+  "expectedResult": "A valid token used by a different normalized SAP email returns INVITATION_IDENTITY_MISMATCH and leaves the invitation INVITED with consumedAt null.",
+  "actualResult": "A valid token used by a different normalized SAP email returns INVITATION_IDENTITY_MISMATCH and leaves the invitation INVITED with consumedAt null.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "identitySnapshotFrom"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "INVITATION_IDENTITY_MISMATCH"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-invitation"
+  },
+  "afterState": {
+    "code": "INVITATION_IDENTITY_MISMATCH",
+    "invitationStatus": "INVITED"
+  },
+  "reloadState": {
+    "invitationUnchanged": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F208-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "516eeda6dd145964b2515f687bb0fd7f11d46a1b7e23a244e6f38ecba1506209",
+    "before-database.png": "dd6938a85411ca9635b5f38e11850e106d2c5a62508f5283cfee224a69355831",
+    "after-database.png": "0b00fdbc4ea19ac039328ec093f287cc1b2f76070b587d61894ec1ec52072089",
+    "reload-readback.png": "0fe14b7c9f2194027a7fd56a39b6ca024975193d351646d815b5458f5c70b7e2"
+  },
+  "resultSha256": "78bc0bc5e987c97c0cb260405e2f2c4f416cf51905885f6067e27e4ebba6eb8f",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

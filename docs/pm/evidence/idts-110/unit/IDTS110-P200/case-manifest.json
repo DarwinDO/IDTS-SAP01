@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P200",
+  "mentorNumber": 196,
+  "title": "overdue monitoring uses the due-date boundary and excludes Closed Bugs",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:02.479Z",
+  "completedAt": "2026-09-05T10:05:03.291Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P200-A1",
+  "testFile": "scripts/qa/test-pm-monitoring-programmatic.js",
+  "testCommand": "node scripts/qa/test-pm-monitoring-programmatic.js --idts110-case=IDTS110-P200 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert an open Bug before today is overdue while a Bug due today is not overdue.",
+  "expectedResult": "Assert an open Bug before today is overdue while a Bug due today is not overdue. Assert a CLOSED Bug remains not overdue and no SLA threshold calculation is claimed.",
+  "actualResult": "Assert an open Bug before today is overdue while a Bug due today is not overdue. Assert a CLOSED Bug remains not overdue and no SLA threshold calculation is claimed.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "isOverdueBug"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "buildDeveloperWorkloadRows"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "overdueBeforeToday": true,
+    "dueTodayNotOverdue": true,
+    "closedExcluded": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P200-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "3da09038deae35b4385d2a49887f19419b9b08a57e77a9ec03168c0fc39238c4",
+    "reload-readback.png": "596d1951d7173966a0c213397ae8d9dcf42c6a88ab9291b69bc57a4d9ceca36c"
+  },
+  "resultSha256": "e5a61501a8da95fbc1f8eb74a26477571c2fce304d5719121ac588212066180b",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

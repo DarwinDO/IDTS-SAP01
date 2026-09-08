@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F204",
+  "mentorNumber": 199,
+  "title": "User Administration administrative reads require the full gate",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:05.358Z",
+  "completedAt": "2026-09-05T10:05:06.094Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F204-A1",
+  "testFile": "scripts/qa/test-user-onboarding-contract.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-contract.js --idts110-case=IDTS110-F204 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An anonymous, non-PM, PM-without-UserAdmin, or inactive requester is rejected with USER_ADMIN_REQUIRED before an administrative read or action.",
+  "expectedResult": "An anonymous, non-PM, PM-without-UserAdmin, or inactive requester is rejected with USER_ADMIN_REQUIRED before an administrative read or action.",
+  "actualResult": "An anonymous, non-PM, PM-without-UserAdmin, or inactive requester is rejected with USER_ADMIN_REQUIRED before an administrative read or action.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "assertUserAdministrator"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requireActiveUserAdministrator"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "rejectedAnonymousNonPmAndMissingOverlay": 3,
+    "inactiveRequesterRejected": true,
+    "authorizedReadRows": 0
+  },
+  "reloadState": {
+    "invitationUnchanged": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F204-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "75d42e5d6a048f766b71736ff30a8da3b2c4a2ec5f3151213500d329e9bfa889",
+    "before-database.png": "0b3cded595e4a6f14786f6de9d7c8c3a015b048a87bdaea604c26a8d332ece06",
+    "after-database.png": "0353366b32ccf23eef8b9b61f8ab6008712f035085d13d9a556f30dc200afd1c",
+    "reload-readback.png": "2ea3cc3960a01b9fdd7bdf59f3e5e0d11224d8fba6c5099b46391eeeef08e849"
+  },
+  "resultSha256": "9ab55f1565e44c49f6308cf066c88d493f9ad97d9699ad4a4e34834ab16c31a5",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

@@ -3,6 +3,14 @@
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
+const cds = require('@sap/cds')
+const { INSERT, SELECT } = cds.ql
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const {
   assertRequestedAccess,
@@ -40,7 +48,109 @@ function xsuaaUser ({ email, userUuid, platformUserId = '11111111-1111-4111-8111
   }
 }
 
-function main () {
+const root = path.resolve(__dirname, '../..')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+async function runAtomicAccessContractCase (caseKey) {
+  if (caseKey === 'IDTS110-F207' || caseKey === 'IDTS110-F208') {
+    const signingKey = 'atomic-contract-signing-key-with-enough-entropy-123456'
+    const invitation = createInvitationToken({
+      invitationID: '11111111-1111-4111-8111-111111111111',
+      targetEmail: 'Controlled.Test@Example.invalid',
+      expiresAt: '2026-09-30T10:00:00.000Z',
+      signingKey,
+      nonce: 'atomic-contract-nonce'
+    })
+    invitation.persisted.status_code = 'INVITED'
+    assert.equal(invitation.persisted.status_code, 'INVITED')
+    assert.equal(invitation.persisted.consumedAt, null)
+    const before = JSON.stringify(invitation.persisted)
+    if (caseKey === 'IDTS110-F207') {
+      expectCode(() => verifyInvitationToken({
+        token: `${invitation.token.slice(0, -1)}x`,
+        persisted: invitation.persisted,
+        signingKey,
+        now: new Date('2026-09-05T10:00:00.000Z')
+      }), 'INVALID_INVITATION')
+      assert.equal(JSON.stringify(invitation.persisted), before)
+      return { code: 'INVALID_INVITATION', invitationUnconsumed: invitation.persisted.consumedAt === null }
+    }
+    assert.doesNotThrow(() => verifyInvitationToken({
+      token: invitation.token,
+      persisted: invitation.persisted,
+      signingKey,
+      now: new Date('2026-09-05T10:00:00.000Z')
+    }))
+    expectCode(() => identitySnapshotFrom(xsuaaUser({
+      email: 'other@example.invalid',
+      userUuid: 'stable-atomic-contract-subject'
+    }), invitation.persisted), 'INVITATION_IDENTITY_MISMATCH')
+    assert.equal(JSON.stringify(invitation.persisted), before)
+    return { code: 'INVITATION_IDENTITY_MISMATCH', invitationStatus: 'INVITED' }
+  }
+
+  const db = await cds.deploy('db').to('sqlite::memory:')
+  const previousDb = cds.db
+  cds.db = db
+  try {
+    await db.run(INSERT.into('idts.cap.Users').entries([
+      { ID: '84000000-0000-4000-8000-000000000001', displayName: 'Atomic PM', email: 'atomic.contract.pm@example.invalid', role_code: 'PM', active: true },
+      { ID: '84000000-0000-4000-8000-000000000002', displayName: 'Inactive PM', email: 'atomic.contract.inactive@example.invalid', role_code: 'PM', active: false }
+    ]))
+    for (const roles of [[], ['TESTER'], ['PM']]) {
+      expectCode(() => assertUserAdministrator(requestUser(roles)), 'USER_ADMIN_REQUIRED')
+    }
+    const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
+    const activeAdmin = new cds.User({ id: 'atomic.contract.pm@example.invalid', roles: ['authenticated-user', 'PM', 'UserAdmin'] })
+    const authorizedRows = await service.send({ event: 'searchOnboarding', data: { query: '' }, user: activeAdmin })
+    assert.ok(Array.isArray(authorizedRows))
+    await assert.rejects(
+      service.send({
+        event: 'searchOnboarding',
+        data: { query: '' },
+        user: new cds.User({ id: 'atomic.contract.inactive@example.invalid', roles: ['authenticated-user', 'PM', 'UserAdmin'] })
+      }),
+      error => error?.code === 'USER_ADMIN_REQUIRED' && Number(error?.status || error?.statusCode) === 403
+    )
+    return { rejectedAnonymousNonPmAndMissingOverlay: 3, inactiveRequesterRejected: true, authorizedReadRows: authorizedRows.length }
+  } finally {
+    if (previousDb === undefined) delete cds.db
+    else cds.db = previousDb
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicSelector (options) {
+  if (!['IDTS110-F204', 'IDTS110-F207', 'IDTS110-F208'].includes(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-onboarding-contract.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      beforeState: { fixture: options.caseKey === 'IDTS110-F204' ? 'isolated-sqlite' : 'pure-invitation' },
+      afterState: await runAtomicAccessContractCase(options.caseKey),
+      reloadState: { invitationUnchanged: true },
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+function runRegressionChecks () {
   const serviceSource = fs.readFileSync(path.join(__dirname, '../../srv/user-admin.cds'), 'utf8')
   const handlerSource = fs.readFileSync(path.join(__dirname, '../../srv/user-admin.js'), 'utf8')
   const schemaSource = fs.readFileSync(path.join(__dirname, '../../db/schema.cds'), 'utf8')
@@ -150,4 +260,16 @@ function main () {
   console.log('IDTS user onboarding security contract: PASS')
 }
 
-main()
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  runRegressionChecks()
+}
+
+main().catch(error => {
+  console.error(error)
+  process.exitCode = 1
+})

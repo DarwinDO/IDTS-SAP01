@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F218",
+  "mentorNumber": 215,
+  "assertionId": "IDTS110-F218-A1",
+  "title": "stale display name version is rejected without mutation",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:18.017Z",
+  "completedAt": "2026-09-05T10:05:18.760Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-active-users.js",
+  "testCommand": "node scripts/qa/test-user-admin-active-users.js --idts110-case=IDTS110-F218 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A display-name update with an old modifiedAt returns USER_PROFILE_VERSION_CONFLICT and leaves the stored user and audit count unchanged.",
+  "expectedResult": "A display-name update with an old modifiedAt returns USER_PROFILE_VERSION_CONFLICT and leaves the stored user and audit count unchanged.",
+  "actualResult": "A display-name update with an old modifiedAt returns USER_PROFILE_VERSION_CONFLICT and leaves the stored user and audit count unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/active-users.js",
+      "symbol": "USER_PROFILE_VERSION_CONFLICT"
+    },
+    {
+      "file": "srv/user-admin/active-users.js",
+      "symbol": "expectedModifiedAt"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "unchanged": true,
+    "conflictCode": "USER_PROFILE_VERSION_CONFLICT",
+    "auditsUnchanged": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F218-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

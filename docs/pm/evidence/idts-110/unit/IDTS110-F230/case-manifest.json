@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F230",
+  "mentorNumber": 231,
+  "title": "catalog impact returns bounded counts",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:29.235Z",
+  "completedAt": "2026-09-05T10:05:30.076Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F230-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F230 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "readCatalogImpact returns catalogType/catalogID plus Bug, active responsibility, and active child-reference counts for a supported target and rejects invalid targets safely.",
+  "expectedResult": "readCatalogImpact returns catalogType/catalogID plus Bug, active responsibility, and active child-reference counts for a supported target and rejects invalid targets safely.",
+  "actualResult": "readCatalogImpact returns catalogType/catalogID plus Bug, active responsibility, and active child-reference counts for a supported target and rejects invalid targets safely.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "readCatalogImpact"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "readCatalogImpactCounts"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "catalogType": "SAP_MODULE",
+    "catalogID": "85200000-0000-4000-8000-000000000001",
+    "bugReferenceCount": 1,
+    "activeResponsibilityCount": 1,
+    "activeChildReferenceCount": 1,
+    "invalidTargetRejected": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F230-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "88d15c2382a3e6a5e767ff4ecbde4245b525013b2d89724858c54bbda65a573e",
+    "before-database.png": "96139ae393bc97b0421eac2e77049f18e7a0099f5bfb0e8c7b8be3a4095eca9b",
+    "after-database.png": "fe73fb9ef6abd8a28f85643cdacfc2a9dcd4ed30113425312cc7a73663e37997",
+    "reload-readback.png": "ee1e15badbeb6d705db6b32cc1e05fa063ef7bf19b98ddb469fdb73177070f73"
+  },
+  "resultSha256": "b1ecc68d5b670bb02b58640b464283cfac3c84c1d66aea8ac85a4805e5bdd60c",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

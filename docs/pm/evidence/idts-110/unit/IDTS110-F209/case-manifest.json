@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F209",
+  "mentorNumber": 204,
+  "title": "onboarding search returns safe status and cancellation eligibility",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:08.341Z",
+  "completedAt": "2026-09-05T10:05:09.014Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F209-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F209 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An authorized onboarding search returns bounded summaries and cancelEligible only for an unconsumed INVITED request, without identity or token fields.",
+  "expectedResult": "An authorized onboarding search returns bounded summaries and cancelEligible only for an unconsumed INVITED request, without identity or token fields.",
+  "actualResult": "An authorized onboarding search returns bounded summaries and cancelEligible only for an unconsumed INVITED request, without identity or token fields.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "searchOnboarding"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "onboardingSummary"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "boundedRows": 7,
+    "cancelEligible": true,
+    "cancelEligibleNegativeStates": 6,
+    "sensitiveFieldsOmitted": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F209-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "b76d41036a135176049761759cf0bac1fafeb4826cb9f2e28f7d566a07b6be23",
+    "before-database.png": "5b8de49886144bbfb45c9845ce3e98f0b880b826a1b7ae5628ddc79b671a439d",
+    "after-database.png": "225de2254fa2fc9518f5515633fb3853a375c0cc1b1b9ef2ae72b48005bd4698",
+    "reload-readback.png": "b47191c287d08257ee2bb8b31f303b2fde9353708bec3b4a9f913e7dbeca61e2"
+  },
+  "resultSha256": "79e4d7c1736326c8fb7a744df2917d84e9cc16ce57b0b002be3295ea5cfea81f",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

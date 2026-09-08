@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F251",
+  "mentorNumber": 273,
+  "assertionId": "IDTS110-F251-A1",
+  "title": "digest scheduling enforces recipient-date uniqueness",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:22.770Z",
+  "completedAt": "2026-09-05T15:59:23.651Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F251 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The weekday Bangkok scheduler persists at most one recipient/date/type digest and reuses the exact existing unique row.",
+  "expectedResult": "The weekday Bangkok scheduler persists at most one recipient/date/type digest and reuses the exact existing unique row.",
+  "actualResult": "The weekday Bangkok scheduler persists at most one recipient/date/type digest and reuses the exact existing unique row.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "scheduleNotificationDigests"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "insertDigestDelivery"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "isDigestUniqueViolation"
+    }
+  ],
+  "beforeState": {
+    "winner": {
+      "ID": "e8000000-0000-4000-8000-000000000001",
+      "recipient_ID": "e7000000-0000-4000-8000-000000000001",
+      "businessDate": "2026-09-04",
+      "digestType": "DAILY_PM",
+      "itemCount": 1,
+      "subject": "Existing winner",
+      "status_code": "PENDING",
+      "attemptCount": 0
+    },
+    "conflictRows": 1,
+    "laterRows": 0
+  },
+  "afterState": {
+    "schedulerResult": {
+      "created": 1,
+      "reused": 1,
+      "skipped": 1
+    },
+    "winner": {
+      "ID": "e8000000-0000-4000-8000-000000000001",
+      "recipient_ID": "e7000000-0000-4000-8000-000000000001",
+      "businessDate": "2026-09-04",
+      "digestType": "DAILY_PM",
+      "itemCount": 1,
+      "subject": "Existing winner",
+      "status_code": "PENDING",
+      "attemptCount": 0
+    },
+    "laterRows": 1,
+    "queriesAfterAbort": 0
+  },
+  "reloadState": {
+    "winner": {
+      "ID": "e8000000-0000-4000-8000-000000000001",
+      "recipient_ID": "e7000000-0000-4000-8000-000000000001",
+      "businessDate": "2026-09-04",
+      "digestType": "DAILY_PM",
+      "itemCount": 1,
+      "subject": "Existing winner",
+      "status_code": "PENDING",
+      "attemptCount": 0
+    },
+    "laterRows": 1,
+    "winnerUnchanged": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F251-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

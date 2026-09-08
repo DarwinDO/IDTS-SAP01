@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F248",
+  "mentorNumber": 262,
+  "assertionId": "IDTS110-F248-A1",
+  "title": "overdue discovery excludes Closed Bugs and unsafe recipients",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:05.993Z",
+  "completedAt": "2026-09-05T15:59:06.871Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F248 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An overdue non-Closed Bug creates one event only for an eligible current owner or assignee, while a Closed Bug creates none.",
+  "expectedResult": "An overdue non-Closed Bug creates one event only for an eligible current owner or assignee, while a Closed Bug creates none.",
+  "actualResult": "An overdue non-Closed Bug creates one event only for an eligible current owner or assignee, while a Closed Bug creates none.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "isOverdue"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "readOverdueRecipients"
+    }
+  ],
+  "beforeState": {
+    "notificationCount": 0,
+    "notificationIDs": [],
+    "bugIDs": [],
+    "eventTypes": [],
+    "sourceKeys": [],
+    "recipientIDs": [],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "afterState": {
+    "notificationCount": 2,
+    "notificationIDs": [
+      "3c845aa8-0c45-4812-9fbb-ebfc439664d1",
+      "09512429-e6e9-41dd-9b4d-e8758ccfbfe2"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000003",
+      "a3000000-0000-4000-8000-000000000003"
+    ],
+    "eventTypes": [
+      "OVERDUE",
+      "OVERDUE"
+    ],
+    "sourceKeys": [
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:CREATED:a3000000-0000-4000-8000-000000000003:2026-08-26T00:00:00.000Z:a1000000-0000-4000-8000-000000000003",
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:CREATED:a3000000-0000-4000-8000-000000000003:2026-08-26T00:00:00.000Z:a1000000-0000-4000-8000-000000000004"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000003",
+      "a1000000-0000-4000-8000-000000000004"
+    ],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "reloadState": {
+    "notificationCount": 2,
+    "notificationIDs": [
+      "3c845aa8-0c45-4812-9fbb-ebfc439664d1",
+      "09512429-e6e9-41dd-9b4d-e8758ccfbfe2"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000003",
+      "a3000000-0000-4000-8000-000000000003"
+    ],
+    "eventTypes": [
+      "OVERDUE",
+      "OVERDUE"
+    ],
+    "sourceKeys": [
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:CREATED:a3000000-0000-4000-8000-000000000003:2026-08-26T00:00:00.000Z:a1000000-0000-4000-8000-000000000003",
+      "OVERDUE:a3000000-0000-4000-8000-000000000003:2026-08-26:CREATED:a3000000-0000-4000-8000-000000000003:2026-08-26T00:00:00.000Z:a1000000-0000-4000-8000-000000000004"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000003",
+      "a1000000-0000-4000-8000-000000000004"
+    ],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F248-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

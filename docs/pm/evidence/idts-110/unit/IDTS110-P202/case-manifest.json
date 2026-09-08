@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P202",
+  "mentorNumber": 197,
+  "title": "Developer workload filters remain caller-scoped",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:03.419Z",
+  "completedAt": "2026-09-05T10:05:04.273Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P202-A1",
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-P202 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated pm monitoring fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert a Developer receives only the own row even with another-profile filter, search, offset, or count request.",
+  "expectedResult": "Assert a Developer receives only the own row even with another-profile filter, search, offset, or count request. Assert PM still receives the full ordered workload set.",
+  "actualResult": "Assert a Developer receives only the own row even with another-profile filter, search, offset, or count request. Assert PM still receives the full ordered workload set.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "authorizeDeveloperWorkloadRead"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "readDeveloperWorkloads"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "developerRows": 1,
+    "pmRows": 5,
+    "orderedRows": [
+      "DatDT",
+      "LegacyDev",
+      "SangVN",
+      "Unknown Developer",
+      "ZeroDev"
+    ]
+  },
+  "reloadState": {
+    "developerRows": 1,
+    "pmRows": 5,
+    "orderedRows": [
+      "DatDT",
+      "LegacyDev",
+      "SangVN",
+      "Unknown Developer",
+      "ZeroDev"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P202-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "4364e6763a03e89e236e686d2b70e03c919f61f012a6cbe95013cfe6dcd94a03",
+    "before-database.png": "63f97aef20b6a1554902edc0bf5bf65467f8342f52cd8967e8e1b3c1149cd4f1",
+    "after-database.png": "84ebb0d2568f87f667d0c8d43cd75ed261a108d979c448663b35cac7cf776066",
+    "reload-readback.png": "9a0980e609d0425d8d9e24d85ec8277ae41f5f1d58a106b18c0b2348346f8cca"
+  },
+  "resultSha256": "86d2f9db1774fe77cb5b167d15b103ae5e72340c59fa8c620701340a5096bc05",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

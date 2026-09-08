@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F220",
+  "mentorNumber": 217,
+  "assertionId": "IDTS110-F220-A1",
+  "title": "profile workload limit rejects nonpositive input",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:19.948Z",
+  "completedAt": "2026-09-05T10:05:19.949Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-developer-profile.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile.js --idts110-case=IDTS110-F220 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "normalizeDeveloperProfileInput rejects a zero or negative workloadLimit with INVALID_DEVELOPER_WORKLOAD_LIMIT.",
+  "expectedResult": "normalizeDeveloperProfileInput rejects a zero or negative workloadLimit with INVALID_DEVELOPER_WORKLOAD_LIMIT.",
+  "actualResult": "normalizeDeveloperProfileInput rejects a zero or negative workloadLimit with INVALID_DEVELOPER_WORKLOAD_LIMIT.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "normalizeDeveloperProfileInput"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-function",
+    "checks": 0
+  },
+  "afterState": {
+    "rejectedWorkloadLimits": [
+      0,
+      -1
+    ]
+  },
+  "reloadState": {
+    "fixture": "pure-function",
+    "checks": 1
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F220-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

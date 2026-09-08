@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P189",
+  "mentorNumber": 189,
+  "title": "active Developer profile read returns availability and readiness",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:04:56.382Z",
+  "completedAt": "2026-09-05T10:04:57.361Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P189-A1",
+  "testFile": "scripts/qa/test-user-admin-developer-profile-actions.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile-actions.js --idts110-case=IDTS110-P189 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Read an active Developer and assert availabilityStatusCode, workloadLimit, readiness, and active responsibility count.",
+  "expectedResult": "Read an active Developer and assert availabilityStatusCode, workloadLimit, readiness, and active responsibility count. Assert the returned profile has no identity secret or unrelated user administration fields.",
+  "actualResult": "Read an active Developer and assert availabilityStatusCode, workloadLimit, readiness, and active responsibility count. Assert the returned profile has no identity secret or unrelated user administration fields.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "readDeveloperProfile"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "readDeveloperTarget"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "developerProfileResult"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "responsibilities": 1
+  },
+  "afterState": {
+    "readiness": true,
+    "activeResponsibilities": 1
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P189-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "285ad7481c30714b9fc8601f5da3a03115f066846b8e67afe7efdd44252784bf",
+    "reload-readback.png": "586da46142bb2f407938d03a8c5a84c9cf6d44f29d58add9b2d8885cda3d4bcf"
+  },
+  "resultSha256": "7db94ab68e10fe0438315fbdb9869a7edb7fcdae47764e9d34ff866dd15d6938",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

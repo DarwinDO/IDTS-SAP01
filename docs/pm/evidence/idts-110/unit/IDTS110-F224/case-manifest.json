@@ -1,0 +1,150 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F224",
+  "mentorNumber": 224,
+  "title": "workload drill-down excludes Closed Bugs and uses safe deep links",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T12:23:05.189Z",
+  "completedAt": "2026-09-05T12:23:06.720Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F224-A1",
+  "testFile": "scripts/qa/test-user-admin-workload.js",
+  "testCommand": "node scripts/qa/test-user-admin-workload.js --idts110-case=IDTS110-F224 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-f224-fix-r1-20260905e --idts110-nonce=fixr1-20260905e",
+  "preconditions": "Use an isolated developer workload fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The drill-down requests only the selected profile’s non-Closed Bugs, keeps technical assignee and current action owner distinct, and creates a deep link only for a valid active entity UUID.",
+  "expectedResult": "The drill-down requests only the selected profile’s non-Closed Bugs, keeps technical assignee and current action owner distinct, and creates a deep link only for a valid active entity UUID.",
+  "actualResult": "The drill-down requests only the selected profile’s non-Closed Bugs, keeps technical assignee and current action owner distinct, and creates a deep link only for a valid active entity UUID.",
+  "sourceTrace": [
+    {
+      "file": "app/user-administration-ui/webapp/controller/Main.controller.js",
+      "symbol": "_loadDeveloperWorkloadBugs"
+    },
+    {
+      "file": "app/user-administration-ui/webapp/controller/Main.controller.js",
+      "symbol": "_bugObjectPageUrl"
+    },
+    {
+      "file": "app/user-administration-ui/webapp/fragment/DeveloperWorkloadDetails.fragment.xml",
+      "symbol": "currentActionOwnerDisplayName"
+    }
+  ],
+  "beforeState": {
+    "dialog": "opening",
+    "selectedProfile": "20000000-0000-0000-0000-000000000001"
+  },
+  "afterState": {
+    "workloadRendered": true,
+    "actionOwnerRendered": true,
+    "nonClosedRendered": true,
+    "openBugActionRendered": true,
+    "productionModule": "idts/useradministrationui/controller/Main.controller",
+    "productionControllerLoaded": true,
+    "productionMethods": "_loadDeveloperWorkloadBugs,_bugObjectPageUrl,openBugInManagement",
+    "productionLoaderCalled": true,
+    "productionUrlHelperCalled": true,
+    "productionNavigationPending": true,
+    "odataEntitySet": "/Bugs",
+    "requestFilter": "assignee_ID eq 20000000-0000-0000-0000-000000000001 and status_code ne 'CLOSED'",
+    "requestOrderBy": "dueDate asc,bugNumber asc",
+    "requestSelect": "ID,bugNumber,title,status_code,priority_code,severity_code,dueDate,estimatedEffortHours,assigneeDisplayName,currentActionOwnerDisplayName",
+    "requestGroupId": "$direct",
+    "requestSkip": 0,
+    "requestLength": 100,
+    "selectedProfile": "20000000-0000-0000-0000-000000000001",
+    "deepLinksValid": true,
+    "normalizedDeepLink": "/idtsbugmanagementui/index.html#/Bugs(ID=30000000-0000-0000-0000-000000000001,IsActiveEntity=true)",
+    "expectedNavigationPath": "/idtsbugmanagementui/index.html#/Bugs(ID=30000000-0000-0000-0000-000000000001,IsActiveEntity=true)",
+    "actualNavigationPath": "/idtsbugmanagementui/index.html#/Bugs(ID=30000000-0000-0000-0000-000000000001,IsActiveEntity=true)",
+    "sourceClosedRows": 1,
+    "renderedBugRows": 1,
+    "documentOverflow": false
+  },
+  "reloadState": {
+    "route": "/idtsuseradministrationui/index.html",
+    "fixture": "workload-drilldown"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "workload-drilldown",
+    "route": "/idtsuseradministrationui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F224/runtime.png",
+    "screenshotSha256": "095f8afd0c64cb2da45e1e009a54dba50696d7959293d201be57b4934829a041",
+    "manifestPath": "unit/IDTS110-F224/case-manifest.json",
+    "caseKey": "IDTS110-F224",
+    "runId": "idts110-f224-fix-r1-20260905e",
+    "nonce": "fixr1-20260905e",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T12:23:06.714Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F224",
+      "runId": "idts110-f224-fix-r1-20260905e",
+      "nonce": "fixr1-20260905e",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T12:23:06.714Z"
+    },
+    "domChecks": {
+      "workloadRendered": true,
+      "actionOwnerRendered": true,
+      "nonClosedRendered": true,
+      "openBugActionRendered": true,
+      "productionModule": "idts/useradministrationui/controller/Main.controller",
+      "productionControllerLoaded": true,
+      "productionMethods": "_loadDeveloperWorkloadBugs,_bugObjectPageUrl,openBugInManagement",
+      "productionLoaderCalled": true,
+      "productionUrlHelperCalled": true,
+      "productionNavigationPending": true,
+      "odataEntitySet": "/Bugs",
+      "requestFilter": "assignee_ID eq 20000000-0000-0000-0000-000000000001 and status_code ne 'CLOSED'",
+      "requestOrderBy": "dueDate asc,bugNumber asc",
+      "requestSelect": "ID,bugNumber,title,status_code,priority_code,severity_code,dueDate,estimatedEffortHours,assigneeDisplayName,currentActionOwnerDisplayName",
+      "requestGroupId": "$direct",
+      "requestSkip": 0,
+      "requestLength": 100,
+      "selectedProfile": "20000000-0000-0000-0000-000000000001",
+      "deepLinksValid": true,
+      "normalizedDeepLink": "/idtsbugmanagementui/index.html#/Bugs(ID=30000000-0000-0000-0000-000000000001,IsActiveEntity=true)",
+      "expectedNavigationPath": "/idtsbugmanagementui/index.html#/Bugs(ID=30000000-0000-0000-0000-000000000001,IsActiveEntity=true)",
+      "actualNavigationPath": "/idtsbugmanagementui/index.html#/Bugs(ID=30000000-0000-0000-0000-000000000001,IsActiveEntity=true)",
+      "sourceClosedRows": 1,
+      "renderedBugRows": 1,
+      "documentOverflow": false
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-user-admin-workload.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F224-RESULT",
+    "IDTS110-F224-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "095f8afd0c64cb2da45e1e009a54dba50696d7959293d201be57b4934829a041"
+  },
+  "resultSha256": "0b1c21ec3500e820b781023cd1f3afef2274e5f6b7dbc1cd0e7b93a7b0cd9866",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "095f8afd0c64cb2da45e1e009a54dba50696d7959293d201be57b4934829a041",
+  "manifestPath": "case-manifest.json"
+}

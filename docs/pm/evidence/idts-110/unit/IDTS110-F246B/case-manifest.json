@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F246B",
+  "mentorNumber": 258,
+  "title": "CAP rollback starts no provider work",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:23.883Z",
+  "completedAt": "2026-09-05T13:42:24.683Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F246B-A1",
+  "testFile": "scripts/qa/test-email-immediate-kick.js",
+  "testCommand": "node scripts/qa/test-email-immediate-kick.js --idts110-case=IDTS110-F246B --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A failed CAP request rolls back its post-commit registration and starts no provider work.",
+  "expectedResult": "A failed CAP request rolls back its post-commit registration and starts no provider work.",
+  "actualResult": "A failed CAP request rolls back its post-commit registration and starts no provider work.",
+  "sourceTrace": [
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "scheduleImmediateEmailOutbox"
+    },
+    {
+      "file": "srv/email/worker.js",
+      "symbol": "writeNotificationAndSchedule"
+    }
+  ],
+  "beforeState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "spawnCount": 0,
+    "batchCount": 0,
+    "providerCalls": 0
+  },
+  "afterState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "writePath": "writeNotificationAndSchedule",
+    "rolledBack": true,
+    "providerCalls": 0,
+    "kickCount": 0,
+    "scheduleResults": [
+      "REGISTERED"
+    ]
+  },
+  "reloadState": {
+    "notificationRows": 0,
+    "notificationIDs": [],
+    "sourceKeys": [],
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F246B-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "eb9723e1ab3142b33c568980b2624588595e047c972e24c2c21a7b767b9cd204",
+    "before-database.png": "ba8165cb9efeda5e3b22929ad6ffd3728a32aa0c44d12e7e20118ec3f111b194",
+    "after-database.png": "d3a50d99c9be28455bf491848af02ea84a8d9994913087e059c87f7d5ac6e020",
+    "reload-readback.png": "4a195f16791f0613febe7a6ab47a4d793b38f47c30b958925346eeb120d3cb81"
+  },
+  "resultSha256": "54e96594f96a9264c77abffd290652f44c3d508b636147a4c09308d2e6bfae40",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

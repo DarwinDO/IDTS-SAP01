@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F249T",
+  "mentorNumber": 267,
+  "assertionId": "IDTS110-F249T-A1",
+  "title": "scheduled page failure does not advance its cursor",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:13.355Z",
+  "completedAt": "2026-09-05T15:59:16.878Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F249T --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A failed page transaction rolls back its writes and leaves the committed cursor unchanged so the same page can be retried.",
+  "expectedResult": "A failed page transaction rolls back its writes and leaves the committed cursor unchanged so the same page can be retried.",
+  "actualResult": "A failed page transaction rolls back its writes and leaves the committed cursor unchanged so the same page can be retried.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "createPageTransactionRunner"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "mergeScheduleResult"
+    }
+  ],
+  "beforeState": {
+    "persistedNotificationCount": 0,
+    "cursor": null
+  },
+  "afterState": {
+    "persistedNotificationCount": 500,
+    "committedPages": [
+      1
+    ],
+    "failedPagePersistedCount": 0,
+    "attemptedPageTwoCursor": "f4000000-0000-4000-8000-000000000500"
+  },
+  "reloadState": {
+    "persistedNotificationCount": 501,
+    "uniqueSourceKeyCount": 501,
+    "retriedPageTwoRowCount": 1,
+    "retriedPageTwoCursor": "f4000000-0000-4000-8000-000000000500"
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F249T-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

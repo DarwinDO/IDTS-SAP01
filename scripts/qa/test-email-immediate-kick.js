@@ -9,12 +9,26 @@ const { EventEmitter } = require('node:events')
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
+const { SELECT } = cds.ql
 
 const {
   processEmailOutboxBatch,
   scheduleImmediateEmailOutbox,
   writeNotificationAndSchedule
 } = require('../../srv/email/worker')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '../../docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
 
 function fakeRequest () {
   const handlers = new Map()
@@ -37,7 +51,196 @@ function waitForDetachedWork () {
   return new Promise(resolve => setImmediate(resolve))
 }
 
+async function createAtomicKickFixture () {
+  const csn = await cds.load(['db/schema.cds', 'srv/service.cds'])
+  const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
+  await cds.deploy(csn).to(db)
+  const bug = await db.run(SELECT.one.from('idts.cap.Bugs').columns('ID'))
+  const recipient = await db.run(SELECT.one.from('idts.cap.Users').columns('ID').where({ active: true }))
+  assert.ok(bug?.ID, 'atomic kick fixture has an active Bug')
+  assert.ok(recipient?.ID, 'atomic kick fixture has an active recipient')
+  return {
+    db,
+    bugID: bug.ID,
+    recipientID: recipient.ID,
+    config: {
+      enabled: true,
+      ready: true,
+      baseUrl: 'https://idts.example.invalid',
+      fromAddress: 'no-reply@example.invalid',
+      fromName: 'IDTS Atomic',
+      batchSize: 10,
+      maxRetryCount: 1,
+      pollIntervalMs: 15000
+    },
+    restore: async () => {
+      if (typeof db.disconnect === 'function') await db.disconnect()
+    }
+  }
+}
+
+async function readAtomicKickState (db, sourceKey) {
+  const notifications = await db.run(SELECT.from('idts.cap.Notifications').columns('ID', 'sourceKey').where({ sourceKey }))
+  const deliveries = notifications.length
+    ? await db.run(SELECT.from('idts.cap.NotificationDeliveries').columns('ID', 'notification_ID', 'status_code', 'attemptCount').where({ notification_ID: { in: notifications.map(row => row.ID) } }))
+    : []
+  return {
+    notificationRows: notifications.length,
+    notificationIDs: notifications.map(row => row.ID),
+    sourceKeys: notifications.map(row => row.sourceKey),
+    deliveryRows: deliveries.length,
+    deliveryIDs: deliveries.map(row => row.ID),
+    deliveryStatuses: deliveries.map(row => row.status_code),
+    deliveryAttempts: deliveries.map(row => Number(row.attemptCount || 0))
+  }
+}
+
+async function runAtomicImmediateKickCase (caseKey) {
+  const fixture = await createAtomicKickFixture()
+  try {
+    const sourceKey = `ATOMIC_KICK:${caseKey}`
+    const request = fakeRequest()
+    const counters = { spawn: 0, batch: 0, provider: 0, detachedTransactions: 0 }
+    const scheduleResults = []
+    const dependencies = {
+      spawn (options, task) {
+        counters.spawn += 1
+        assert.equal(options.user, cds.User.privileged)
+        const job = new EventEmitter()
+        Promise.resolve()
+          .then(() => fixture.db.tx(async tx => {
+            counters.detachedTransactions += 1
+            return task(tx)
+          }))
+          .then(result => job.emit('succeeded', result))
+          .catch(error => job.emit('failed', error))
+        return job
+      },
+      async processBatch (input) {
+        counters.batch += 1
+        assert.ok(input.tx, 'post-commit kick receives an isolated CAP transaction')
+        return { sent: 0, failed: 0, skipped: 0 }
+      }
+    }
+    const schedule = receivedRequest => {
+      const registered = scheduleImmediateEmailOutbox(receivedRequest, dependencies)
+      scheduleResults.push(registered ? 'REGISTERED' : 'DUPLICATE_IGNORED')
+      return registered
+    }
+    const entry = {
+      bugID: fixture.bugID,
+      recipientID: fixture.recipientID,
+      eventType: 'ASSIGNED',
+      message: 'Atomic post-commit kick fixture.',
+      sourceKey
+    }
+    const beforeDbState = await readAtomicKickState(fixture.db, sourceKey)
+    const beforeState = { ...beforeDbState, spawnCount: counters.spawn, batchCount: counters.batch, providerCalls: counters.provider }
+
+    if (caseKey === 'IDTS110-F246') {
+      const pending = await fixture.db.tx(tx => writeNotificationAndSchedule(request, entry, { tx, config: fixture.config, schedule }))
+      assert.equal(pending.deliveryStatus, 'PENDING')
+      const pendingState = await readAtomicKickState(fixture.db, sourceKey)
+      assert.equal(pendingState.notificationRows, 1)
+      assert.equal(pendingState.deliveryRows, 1)
+      assert.deepEqual(pendingState.deliveryStatuses, ['PENDING'])
+      assert.deepEqual(scheduleResults, ['REGISTERED'])
+      assert.equal(counters.spawn, 0, 'the kick waits for request commit')
+      await request.emit('succeeded')
+      await waitForDetachedWork()
+      await waitForDetachedWork()
+      assert.equal(counters.spawn, 1)
+      assert.equal(counters.batch, 1)
+      assert.equal(counters.detachedTransactions, 1)
+      assert.equal(counters.provider, 0)
+      const afterDbState = await readAtomicKickState(fixture.db, sourceKey)
+      const afterState = { ...afterDbState, writePath: 'writeNotificationAndSchedule', pendingDeliveryRows: afterDbState.deliveryStatuses.filter(status => status === 'PENDING').length, kickCount: counters.batch, spawnCount: counters.spawn, providerCalls: counters.provider }
+      assert.equal(afterState.pendingDeliveryRows, 1)
+      const reloadState = await readAtomicKickState(fixture.db, sourceKey)
+      assert.deepEqual(reloadState, afterDbState)
+      return { beforeState, afterState, reloadState }
+    }
+
+    if (caseKey === 'IDTS110-F246R') {
+      const first = await fixture.db.tx(tx => writeNotificationAndSchedule(request, entry, { tx, config: fixture.config, schedule }))
+      const second = await fixture.db.tx(tx => writeNotificationAndSchedule(request, entry, { tx, config: fixture.config, schedule }))
+      assert.equal(first.deliveryStatus, 'PENDING')
+      assert.equal(second.deliveryStatus, 'PENDING')
+      assert.equal(second.deliveryID, first.deliveryID)
+      const pendingState = await readAtomicKickState(fixture.db, sourceKey)
+      assert.equal(pendingState.notificationRows, 1)
+      assert.equal(pendingState.deliveryRows, 1)
+      assert.deepEqual(pendingState.deliveryStatuses, ['PENDING'])
+      assert.deepEqual(scheduleResults, ['REGISTERED', 'DUPLICATE_IGNORED'])
+      assert.equal(request.handlerCount('succeeded'), 1)
+      await request.emit('succeeded')
+      await waitForDetachedWork()
+      await waitForDetachedWork()
+      assert.equal(counters.spawn, 1)
+      assert.equal(counters.batch, 1)
+      assert.equal(counters.provider, 0)
+      const afterDbState = await readAtomicKickState(fixture.db, sourceKey)
+      const afterState = { ...afterDbState, writePath: 'writeNotificationAndSchedule', scheduleResults, deliveryRows: afterDbState.deliveryRows, kickCount: counters.batch, providerCalls: counters.provider }
+      const reloadState = await readAtomicKickState(fixture.db, sourceKey)
+      assert.deepEqual(reloadState, afterDbState)
+      return { beforeState, afterState, reloadState }
+    }
+
+    if (caseKey === 'IDTS110-F246B') {
+      await assert.rejects(fixture.db.tx(async tx => {
+        const pending = await writeNotificationAndSchedule(request, entry, { tx, config: fixture.config, schedule })
+        assert.equal(pending.deliveryStatus, 'PENDING')
+        throw new Error('ATOMIC_KICK_ROLLBACK')
+      }), /ATOMIC_KICK_ROLLBACK/)
+      const rolledBackState = await readAtomicKickState(fixture.db, sourceKey)
+      assert.equal(rolledBackState.notificationRows, 0)
+      assert.equal(rolledBackState.deliveryRows, 0)
+      await request.emit('failed')
+      await waitForDetachedWork()
+      assert.equal(counters.spawn, 0)
+      assert.equal(counters.batch, 0)
+      assert.equal(counters.provider, 0)
+      const afterState = { ...rolledBackState, writePath: 'writeNotificationAndSchedule', rolledBack: true, providerCalls: counters.provider, kickCount: counters.batch, scheduleResults }
+      const reloadState = await readAtomicKickState(fixture.db, sourceKey)
+      assert.deepEqual(reloadState, rolledBackState)
+      return { beforeState, afterState, reloadState }
+    }
+
+    throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  } finally {
+    await fixture.restore()
+  }
+}
+
+async function runAtomicSelector (options) {
+  const supported = new Set(['IDTS110-F246', 'IDTS110-F246R', 'IDTS110-F246B'])
+  if (!supported.has(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-email-immediate-kick.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      ...(await runAtomicImmediateKickCase(options.caseKey)),
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
 async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
   assert.equal(typeof scheduleImmediateEmailOutbox, 'function', 'immediate kick API is exported')
 
   let spawnCount = 0

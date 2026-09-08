@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F221",
+  "mentorNumber": 221,
+  "title": "Developer workload identity readiness fails closed",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:20.321Z",
+  "completedAt": "2026-09-05T10:05:21.195Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F221-A1",
+  "testFile": "scripts/qa/test-developer-workload-programmatic.js",
+  "testCommand": "node scripts/qa/test-developer-workload-programmatic.js --idts110-case=IDTS110-F221 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated developer workload fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A workload row is ready only for one exact linked active identity; unmapped, inactive, hash-mismatched, and duplicate-active-request identities are not ready.",
+  "expectedResult": "A workload row is ready only for one exact linked active identity; unmapped, inactive, hash-mismatched, and duplicate-active-request identities are not ready.",
+  "actualResult": "A workload row is ready only for one exact linked active identity; unmapped, inactive, hash-mismatched, and duplicate-active-request identities are not ready.",
+  "sourceTrace": [
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "identityAccessReady"
+    },
+    {
+      "file": "srv/bug-service/monitoring.js",
+      "symbol": "readActiveIdentityAccessByUser"
+    },
+    {
+      "file": "scripts/qa/test-developer-workload-programmatic.js",
+      "symbol": "Duplicate matching ACTIVE requests are not ready"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "readyRows": 1,
+    "notReadyRows": 4
+  },
+  "reloadState": {
+    "readyRows": 1,
+    "notReadyRows": 4
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F221-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "42fd3d48fc2be75bc04ffd8993df3fb062ac1bc92d162de68c8a09b7124e5ff4",
+    "before-database.png": "f02a68c89bbb1e3bb84b6e6293994996451f2ec45c9cd8644d322aca0141d9ce",
+    "after-database.png": "932a6a56c3ab5de1eea78485ba1abe9eaeab81bfef51fcedad2a537cea5a38fe",
+    "reload-readback.png": "71bf2b660b9aeb6b99158348d996894996a2843b01f0391c01d075b18999f56a"
+  },
+  "resultSha256": "40bf5f4fdaccdc80df4c5c44723f545631cdf148c78b0fa6caaaf69273b4e37f",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

@@ -3,8 +3,24 @@
 const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const root = path.resolve(__dirname, '../..')
+const catalogPath = path.join(root, 'docs/qa/idts-110-unit-test-catalog.json')
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(catalogPath, 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+async function runRegressionChecks () {
 const app = path.join(root, 'app/user-administration-ui')
 const webapp = path.join(app, 'webapp')
 const manifest = JSON.parse(fs.readFileSync(path.join(webapp, 'manifest.json'), 'utf8'))
@@ -332,9 +348,49 @@ async function verifyPagingAndReadContracts () {
   assert.equal(bugBindingCalls[0].parameters.$top, undefined)
 }
 
-verifyPagingAndReadContracts().then(() => {
+  await verifyPagingAndReadContracts()
+}
+
+async function runAtomicSelector (options) {
+  if (options.caseKey !== 'IDTS110-F224') {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-workload.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => {
+      await runRegressionChecks()
+      return {
+        status: 'BLOCKED',
+        assertionPassed: false,
+        actualResult: 'Programmatic workload precheck passed; authoritative rendered UI execution is owned by the UI-runtime lane.',
+        beforeState: { precheck: 'not-run' },
+        afterState: { precheck: 'passed' },
+        reloadState: { precheck: 'not-applicable' },
+        evidenceIds: [`${options.caseKey}-RESULT`, `${options.caseKey}-VISUAL`],
+        limitation: 'This Task 4 record is only a programmatic/native-control precheck; Task 6 must capture the rendered workload screenshot.'
+      }
+    }
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runRegressionChecks()
   console.log('IDTS User Administration Developer Workload contract: PASS')
-}).catch(error => {
+}
+
+main().catch(error => {
   console.error(error.stack || error)
   process.exitCode = 1
 })

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F229",
+  "mentorNumber": 230,
+  "assertionId": "IDTS110-F229-A1",
+  "title": "catalog deactivation blocks active responsibility or child references",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:28.267Z",
+  "completedAt": "2026-09-05T10:05:29.108Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F229 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A deactivation with an approved reason returns CATALOG_HAS_ACTIVE_DEPENDENCIES when active responsibility or child-reference counts are nonzero, while bugReferenceCount remains informational and the row is unchanged.",
+  "expectedResult": "A deactivation with an approved reason returns CATALOG_HAS_ACTIVE_DEPENDENCIES when active responsibility or child-reference counts are nonzero, while bugReferenceCount remains informational and the row is unchanged.",
+  "actualResult": "A deactivation with an approved reason returns CATALOG_HAS_ACTIVE_DEPENDENCIES when active responsibility or child-reference counts are nonzero, while bugReferenceCount remains informational and the row is unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "CATALOG_HAS_ACTIVE_DEPENDENCIES"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "readCatalogImpactCounts"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "active": true,
+    "bugReferenceCount": 1,
+    "dependencyGuard": "CATALOG_HAS_ACTIVE_DEPENDENCIES"
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F229-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

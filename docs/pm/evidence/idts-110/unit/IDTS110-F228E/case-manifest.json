@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F228E",
+  "mentorNumber": 229,
+  "title": "catalog update rejects a stale ETag",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:27.320Z",
+  "completedAt": "2026-09-05T10:05:28.145Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F228E-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F228E --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An update with a stale If-Match returns the documented optimistic conflict and leaves the catalog row and audit unchanged.",
+  "expectedResult": "An update with a stale If-Match returns the documented optimistic conflict and leaves the catalog row and audit unchanged.",
+  "actualResult": "An update with a stale If-Match returns the documented optimistic conflict and leaves the catalog row and audit unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "assertCurrentEtag"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "unchanged": true,
+    "successfulAuditsUnchanged": true,
+    "etag": "stale-rejected"
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F228E-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "89dec6cde1bc2398d3db4db0e3ef52e42013c35b47fb28f82635357ec89acdbf",
+    "before-database.png": "6cce603b7a4fad7bb58badbb9456756f3bcc3b686e427605bf777cb60f6de451",
+    "after-database.png": "2f886c902a8d6e52a4e9e18f14a7da629be38fc913e9a038cda294b214fd83f1",
+    "reload-readback.png": "92891ed1fabc586d38eafe2d6f516cc1bcabb6116f43c9e3f94fc32a77c7393c"
+  },
+  "resultSha256": "7a2de3c6e06d40da03fef1a39fe16411aba310b4b1b3af733662e98a0cc66b75",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

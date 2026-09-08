@@ -15,13 +15,19 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
-const { INSERT, SELECT, UPDATE } = cds.ql
+const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 
 const { normalizeEmailConfig } = require('../../srv/email/config')
 const {
   discoverScheduledNotifications,
   processNotificationSchedules
 } = require('../../srv/notification/scheduled')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const IDS = Object.freeze({
   pm: 'a1000000-0000-4000-8000-000000000001',
@@ -39,7 +45,19 @@ const IDS = Object.freeze({
   staleDueDate: 'a3000000-0000-4000-8000-000000000008',
   staleRecipient: 'a3000000-0000-4000-8000-000000000009',
   staleProfile: 'a3000000-0000-4000-8000-000000000010',
-  cutoffOverdue: 'a3000000-0000-4000-8000-000000000011'
+  cutoffOverdue: 'a3000000-0000-4000-8000-000000000011',
+  urgentBlocker: 'a3000000-0000-4000-8000-000000000012',
+  urgentControl: 'a3000000-0000-4000-8000-000000000013',
+  inactiveOverdueOwner: 'a1100000-0000-4000-8000-000000000001',
+  staleOverdueOwner: 'a1100000-0000-4000-8000-000000000002',
+  unmappedOverdueOwner: 'a1100000-0000-4000-8000-000000000003',
+  invalidProfileUser: 'a1100000-0000-4000-8000-000000000004',
+  invalidProfileOwner: 'a1100000-0000-4000-8000-000000000005',
+  invalidOverdueProfile: 'a2100000-0000-4000-8000-000000000002',
+  inactiveOverdueBug: 'a3100000-0000-4000-8000-000000000001',
+  staleOverdueBug: 'a3100000-0000-4000-8000-000000000002',
+  unmappedOverdueBug: 'a3100000-0000-4000-8000-000000000003',
+  invalidProfileOverdueBug: 'a3100000-0000-4000-8000-000000000004'
 })
 
 const BASE_NOW = new Date('2026-08-27T04:00:00.000Z')
@@ -66,7 +84,31 @@ async function notificationBySource (db, sourceKey) {
   return db.run(SELECT.one.from('idts.cap.Notifications').where({ sourceKey }))
 }
 
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '../../docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+const scheduledAtomicCases = new Map([
+  ['IDTS110-F247', runAtomicPendingAssignmentCase],
+  ['IDTS110-F247S', runAtomicUrgentSlaCase],
+  ['IDTS110-F247SS', runAtomicStandardSlaCase],
+  ['IDTS110-F248', runAtomicOverdueRecipientCase],
+  ['IDTS110-F248C', runAtomicOverdueIdempotencyCase],
+  ['IDTS110-F248N', runAtomicNewDueDateCycleCase],
+  ['IDTS110-F249', runAtomicActivationCutoffCase],
+  ['IDTS110-F249K', runAtomicKeysetPagingCase],
+  ['IDTS110-F249T', runAtomicCursorRollbackCase]
+])
+
 async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
   const notificationCds = fs.readFileSync(path.join(__dirname, '../../srv/notification.cds'), 'utf8')
   assert.match(notificationCds, /@\(requires:\s*'OutboxProcessor'\)\s*action processNotificationSchedules\(now:Timestamp,\s*discoveryFrom:Timestamp\)/,
     'scheduled action is protected and accepts one server-side activation cutoff')
@@ -488,6 +530,482 @@ async function main () {
   console.log('IDTS My Notifications scheduled discovery contract: PASS')
 }
 
+async function runAtomicSelector (options) {
+  assert.equal(scheduledAtomicCases.size, 9)
+  assert.deepEqual([...scheduledAtomicCases.keys()], [
+    'IDTS110-F247', 'IDTS110-F247S', 'IDTS110-F247SS', 'IDTS110-F248',
+    'IDTS110-F248C', 'IDTS110-F248N', 'IDTS110-F249', 'IDTS110-F249K', 'IDTS110-F249T'
+  ])
+  const executeCase = scheduledAtomicCases.get(options.caseKey)
+  if (!executeCase) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-my-notifications-scheduled.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      ...(await executeCase()),
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function createScheduledAtomicFixture ({ bugs = [], dueDateHistories = [], statusHistories = [] } = {}) {
+  const db = await isolatedSchedulerDatabase()
+  await clearSchedulerDomainData(db)
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.pm, 'Scheduled PM', 'scheduled-pm@example.test', 'PM', true),
+    user(IDS.inactivePm, 'Inactive Scheduled PM', 'inactive-pm@example.test', 'PM', false),
+    user(IDS.owner, 'Current Action Owner', 'scheduled-owner@example.test', 'TESTER', true),
+    user(IDS.assigneeUser, 'Technical Assignee', 'scheduled-assignee@example.test', 'DEVELOPER', true)
+  ]))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: IDS.assigneeProfile,
+    user_ID: IDS.assigneeUser,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 5,
+    active: true
+  }))
+  if (bugs.length) await db.run(INSERT.into('idts.cap.Bugs').entries(bugs))
+  for (const history of statusHistories) await addStatusHistory(db, history.bugID, history.eventID)
+  for (const history of dueDateHistories) {
+    await addDueDateHistory(db, history.bugID, history.oldValue, history.newValue, history.eventID, history.timestamp)
+  }
+  return db
+}
+
+async function clearSchedulerDomainData (db) {
+  for (const entity of [
+    'idts.cap.NotificationDeliveries',
+    'idts.cap.Notifications',
+    'idts.cap.HistoryLogs',
+    'idts.cap.HistoryEvents',
+    'idts.cap.Bugs',
+    'idts.cap.DeveloperProfiles',
+    'idts.cap.Users'
+  ]) await db.run(DELETE.from(entity))
+}
+
+async function scheduledState (db) {
+  const notifications = await db.run(SELECT.from('idts.cap.Notifications')
+    .columns('ID', 'bug_ID', 'eventType_code', 'sourceKey', 'recipient_ID')
+    .orderBy('sourceKey asc'))
+  const deliveries = await db.run(SELECT.from('idts.cap.NotificationDeliveries')
+    .columns('notification_ID', 'status_code', 'attemptCount')
+    .orderBy('notification_ID asc'))
+  return {
+    notificationCount: notifications.length,
+    notificationIDs: notifications.map(row => row.ID),
+    bugIDs: notifications.map(row => row.bug_ID),
+    eventTypes: notifications.map(row => row.eventType_code),
+    sourceKeys: notifications.map(row => row.sourceKey),
+    recipientIDs: notifications.map(row => row.recipient_ID),
+    deliveryCount: deliveries.length,
+    deliveryStatuses: deliveries.map(row => row.status_code),
+    deliveryAttempts: deliveries.map(row => Number(row.attemptCount || 0))
+  }
+}
+
+async function runAtomicPendingAssignmentCase () {
+  const db = await createScheduledAtomicFixture({
+    bugs: [bug(IDS.edited, 'BUG-ATOMIC-PENDING', 'HIGH', 'MAJOR', BASE_NOW.toISOString(), null, null, null)]
+  })
+  try {
+    const beforeState = await scheduledState(db)
+    const deniedRequest = new cds.Request({
+      user: new cds.User({ id: 'ordinary-user', roles: ['authenticated-user'] }),
+      data: { now: BASE_NOW.toISOString() }
+    })
+    await assert.rejects(() => processNotificationSchedules(deniedRequest), error => {
+      assert.equal(error.status, 403)
+      assert.equal(error.code, 'OUTBOX_PROCESSOR_REQUIRED')
+      return true
+    }, 'only OutboxProcessor can invoke scheduled discovery')
+    await discoverScheduledNotifications({
+      tx: db,
+      now: BASE_NOW,
+      discoveryFrom: BASE_NOW,
+      emailConfig: emailConfig()
+    })
+    const rows = await db.run(SELECT.from('idts.cap.Notifications').columns('sourceKey', 'recipient_ID').orderBy('sourceKey asc'))
+    assert.deepEqual(rows, [{
+      sourceKey: `PENDING_ASSIGNMENT:${IDS.edited}:${IDS.pm}`,
+      recipient_ID: IDS.pm
+    }], 'one eligible PM receives one Pending Assignment event')
+    assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: IDS.edited, recipient_ID: IDS.owner }), 0,
+      'a non-PM target never receives the PM-only Pending Assignment event')
+    const afterState = await scheduledState(db)
+    const reloadState = await scheduledState(db)
+    assert.deepEqual(reloadState, afterState, 'Pending Assignment source/readback survives a reload')
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicUrgentSlaCase () {
+  const createdAt = new Date('2026-08-27T00:00:00.000Z')
+  const db = await createScheduledAtomicFixture({
+    bugs: [
+      bug(IDS.urgent, 'BUG-ATOMIC-URGENT-SLA-PRIORITY', 'CRITICAL', 'MAJOR', createdAt.toISOString(), null, null, null),
+      bug(IDS.urgentBlocker, 'BUG-ATOMIC-URGENT-SLA-SEVERITY', 'HIGH', 'BLOCKER', createdAt.toISOString(), null, null, null),
+      bug(IDS.urgentControl, 'BUG-ATOMIC-URGENT-SLA-CONTROL', 'HIGH', 'MAJOR', createdAt.toISOString(), null, null, null)
+    ]
+  })
+  try {
+    const beforeState = await scheduledState(db)
+    const urgentCases = [IDS.urgent, IDS.urgentBlocker]
+    const urgentSlaKeys = urgentCases.map(ID => `SLA:${ID}:4h:${IDS.pm}`)
+    const controlSlaKey = `SLA:${IDS.urgentControl}:4h:${IDS.pm}`
+    await discoverScheduledNotifications({ tx: db, now: new Date('2026-08-27T03:59:59.999Z'), discoveryFrom: createdAt, emailConfig: emailConfig() })
+    for (const sourceKey of [...urgentSlaKeys, controlSlaKey]) {
+      assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey }), 0,
+        `SLA is absent immediately before four hours for ${sourceKey}`)
+    }
+    await discoverScheduledNotifications({ tx: db, now: BASE_NOW, discoveryFrom: createdAt, emailConfig: emailConfig() })
+    const slaRows = await db.run(SELECT.from('idts.cap.Notifications')
+      .columns('ID', 'sourceKey', 'bug_ID')
+      .where({ eventType_code: 'PENDING_ASSIGNMENT' })
+      .orderBy('sourceKey asc'))
+    const actualUrgentSlaRows = slaRows.filter(row => urgentSlaKeys.includes(row.sourceKey))
+    assert.deepEqual(actualUrgentSlaRows.map(row => row.sourceKey).sort(), urgentSlaKeys.slice().sort(),
+      'both CRITICAL-priority and BLOCKER-severity branches emit the same four-hour SLA invariant')
+    for (const sla of actualUrgentSlaRows) {
+      assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: sla.ID }), 1,
+        'each urgent SLA creates one durable prompt outbox row without sending email')
+    }
+    assert.equal(slaRows.some(row => row.sourceKey === controlSlaKey), false,
+      'the nonurgent control does not enter the four-hour urgent SLA branch')
+    const afterState = await scheduledState(db)
+    assert.deepEqual(afterState.sourceKeys.filter(key => urgentSlaKeys.includes(key)).sort(), urgentSlaKeys.slice().sort())
+    const reloadState = await scheduledState(db)
+    assert.deepEqual(reloadState, afterState)
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicStandardSlaCase () {
+  const createdAt = new Date('2026-08-27T00:00:00.000Z')
+  const db = await createScheduledAtomicFixture({
+    bugs: [bug(IDS.standard, 'BUG-ATOMIC-STANDARD-SLA', 'HIGH', 'MAJOR', createdAt.toISOString(), null, null, null)]
+  })
+  try {
+    const beforeState = await scheduledState(db)
+    await discoverScheduledNotifications({ tx: db, now: new Date('2026-08-27T23:59:59.999Z'), discoveryFrom: createdAt, emailConfig: emailConfig() })
+    assert.equal(await count(db, 'idts.cap.Notifications', { sourceKey: `SLA:${IDS.standard}:24h:${IDS.pm}` }), 0,
+      'standard SLA is absent immediately before 24 hours')
+    await discoverScheduledNotifications({ tx: db, now: new Date('2026-08-28T00:00:00.000Z'), discoveryFrom: createdAt, emailConfig: emailConfig() })
+    const sla = await notificationBySource(db, `SLA:${IDS.standard}:24h:${IDS.pm}`)
+    assert.ok(sla?.ID, 'standard Pending Assignment emits its SLA event at 24 hours')
+    assert.equal(await count(db, 'idts.cap.NotificationDeliveries', { notification_ID: sla.ID }), 0,
+      'standard SLA remains inbox/digest policy without a prompt delivery')
+    const afterState = await scheduledState(db)
+    const reloadState = await scheduledState(db)
+    assert.deepEqual(reloadState, afterState)
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicOverdueRecipientCase () {
+  const db = await createScheduledAtomicFixture({
+    bugs: [
+      bug(IDS.overdue, 'BUG-ATOMIC-OVERDUE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
+      bug(IDS.closed, 'BUG-ATOMIC-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-20T00:00:00.000Z', '2026-08-20', IDS.owner, IDS.assigneeProfile, 'CLOSED'),
+      bug(IDS.inactiveOverdueBug, 'BUG-ATOMIC-OVERDUE-INACTIVE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.inactiveOverdueOwner, null, 'ASSIGNED'),
+      bug(IDS.staleOverdueBug, 'BUG-ATOMIC-OVERDUE-STALE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.staleOverdueOwner, null, 'ASSIGNED'),
+      bug(IDS.unmappedOverdueBug, 'BUG-ATOMIC-OVERDUE-UNMAPPED', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.unmappedOverdueOwner, null, 'ASSIGNED'),
+      bug(IDS.invalidProfileOverdueBug, 'BUG-ATOMIC-OVERDUE-INVALID-PROFILE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.invalidProfileOwner, IDS.invalidOverdueProfile, 'ASSIGNED')
+    ]
+  })
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.inactiveOverdueOwner, 'Inactive overdue owner', 'inactive-overdue-owner@example.test', 'TESTER', false),
+    user(IDS.staleOverdueOwner, 'Stale overdue owner', 'stale-overdue-owner@example.test', 'TESTER', true),
+    user(IDS.invalidProfileUser, 'Invalid profile user', 'invalid-profile-user@example.test', 'DEVELOPER', true)
+  ]))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: IDS.invalidOverdueProfile,
+    user_ID: IDS.invalidProfileUser,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 5,
+    active: false
+  }))
+  try {
+    const beforeState = await scheduledState(db)
+    let staleRecipientInjected = false
+    const tx = {
+      run: async query => {
+        const from = query.SELECT?.from?.ref?.[0]
+        const isEligibilityRead = from === 'idts.cap.Users' && !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate') &&
+          JSON.stringify(query.SELECT.where).includes(IDS.staleOverdueOwner)
+        if (isEligibilityRead && !staleRecipientInjected) {
+          const rows = await db.run(query)
+          await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: IDS.staleOverdueOwner }))
+          staleRecipientInjected = true
+          return rows
+        }
+        return db.run(query)
+      }
+    }
+    await discoverScheduledNotifications({ tx, now: BASE_NOW, discoveryFrom: new Date('2026-08-26T00:00:00.000Z'), emailConfig: emailConfig() })
+    const overdueRows = await db.run(SELECT.from('idts.cap.Notifications')
+      .columns('recipient_ID', 'eventType_code')
+      .where({ bug_ID: IDS.overdue })
+      .orderBy('recipient_ID asc'))
+    assert.deepEqual(overdueRows, [
+      { recipient_ID: IDS.owner, eventType_code: 'OVERDUE' },
+      { recipient_ID: IDS.assigneeUser, eventType_code: 'OVERDUE' }
+    ], 'overdue discovery notifies the current owner and aligned technical assignee only')
+    assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: IDS.closed }), 0,
+      'Closed Bugs are excluded from overdue discovery')
+    assert.equal(staleRecipientInjected, true, 'stale owner is deactivated after the source eligibility read')
+    for (const [bugID, recipientID, label] of [
+      [IDS.inactiveOverdueBug, IDS.inactiveOverdueOwner, 'inactive owner'],
+      [IDS.staleOverdueBug, IDS.staleOverdueOwner, 'stale owner'],
+      [IDS.unmappedOverdueBug, IDS.unmappedOverdueOwner, 'unmapped owner'],
+      [IDS.invalidProfileOverdueBug, IDS.invalidProfileUser, 'invalid Developer Profile user']
+    ]) {
+      assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID }), 0,
+        `${label} Bug produces no overdue notification rows`)
+      assert.equal(await count(db, 'idts.cap.Notifications', { bug_ID: bugID, recipient_ID: recipientID }), 0,
+        `${label} recipient is never persisted`)
+    }
+    assert.equal(await count(db, 'idts.cap.NotificationDeliveries'), 0,
+      'overdue discovery does not send through a provider')
+    const afterState = await scheduledState(db)
+    const reloadState = await scheduledState(db)
+    assert.deepEqual(reloadState, afterState)
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicOverdueIdempotencyCase () {
+  const eventID = 'a5000000-0000-4000-8000-000000000001'
+  const db = await createScheduledAtomicFixture({
+    bugs: [bug(IDS.overdue, 'BUG-ATOMIC-OVERDUE-IDEMPOTENT', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile)],
+    dueDateHistories: [{ bugID: IDS.overdue, oldValue: null, newValue: '2026-08-26', eventID, timestamp: '2026-08-26T01:00:00.000Z' }]
+  })
+  try {
+    const beforeState = await scheduledState(db)
+    await discoverScheduledNotifications({ tx: db, now: BASE_NOW, discoveryFrom: new Date('2026-08-26T00:00:00.000Z'), emailConfig: emailConfig() })
+    const firstState = await scheduledState(db)
+    assert.equal(firstState.notificationCount, 2, 'the first overdue cycle creates one event per eligible recipient')
+    await discoverScheduledNotifications({ tx: db, now: BASE_NOW, discoveryFrom: new Date('2026-08-26T00:00:00.000Z'), emailConfig: emailConfig() })
+    const afterState = await scheduledState(db)
+    assert.deepEqual(afterState, firstState, 'the same due-date history source key is idempotent')
+    assert.equal(new Set(afterState.sourceKeys).size, 2, 'both recipients retain distinct source keys without duplicates')
+    const reloadState = await scheduledState(db)
+    assert.deepEqual(reloadState, afterState)
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicNewDueDateCycleCase () {
+  const firstEventID = 'a5000000-0000-4000-8000-000000000001'
+  const secondEventID = 'a5000000-0000-4000-8000-000000000002'
+  const db = await createScheduledAtomicFixture({
+    bugs: [bug(IDS.overdue, 'BUG-ATOMIC-OVERDUE-CYCLES', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile)],
+    dueDateHistories: [{ bugID: IDS.overdue, oldValue: null, newValue: '2026-08-26', eventID: firstEventID, timestamp: '2026-08-26T01:00:00.000Z' }]
+  })
+  try {
+    const beforeState = await scheduledState(db)
+    await discoverScheduledNotifications({ tx: db, now: BASE_NOW, discoveryFrom: new Date('2026-08-26T00:00:00.000Z'), emailConfig: emailConfig() })
+    const firstState = await scheduledState(db)
+    await db.run(UPDATE('idts.cap.Bugs').set({ dueDate: '2026-08-25' }).where({ ID: IDS.overdue }))
+    await addDueDateHistory(db, IDS.overdue, '2026-08-26', '2026-08-25', secondEventID, '2026-08-27T02:00:00.000Z')
+    await discoverScheduledNotifications({ tx: db, now: BASE_NOW, discoveryFrom: new Date('2026-08-26T00:00:00.000Z'), emailConfig: emailConfig() })
+    const afterState = await scheduledState(db)
+    assert.equal(afterState.notificationCount, firstState.notificationCount + 2,
+      'the new due-date cycle creates one event per eligible recipient')
+    assert.equal(new Set(afterState.sourceKeys).size, afterState.notificationCount,
+      'new and old cycles have unique source keys')
+    assert.ok(afterState.sourceKeys.some(key => key.includes(`OVERDUE:${IDS.overdue}:2026-08-25:${secondEventID}`)),
+      'the new cycle source key contains its new due-date history identity')
+    const reloadState = await scheduledState(db)
+    assert.deepEqual(reloadState, afterState)
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicActivationCutoffCase () {
+  const cutoff = new Date('2026-08-27T04:00:00.000Z')
+  const db = await createScheduledAtomicFixture({
+    bugs: [
+      bug(IDS.urgent, 'BUG-ATOMIC-CUTOFF-OLD-PENDING', 'CRITICAL', 'MAJOR', '2026-08-27T00:00:00.000Z', null, null, null),
+      bug(IDS.overdue, 'BUG-ATOMIC-CUTOFF-OLD-OVERDUE', 'HIGH', 'MAJOR', '2026-08-26T00:00:00.000Z', '2026-08-26', IDS.owner, IDS.assigneeProfile),
+      bug(IDS.edited, 'BUG-ATOMIC-CUTOFF-AT-PENDING', 'HIGH', 'MAJOR', cutoff.toISOString(), null, null, null),
+      bug(IDS.cutoffOverdue, 'BUG-ATOMIC-CUTOFF-AT-OVERDUE', 'HIGH', 'MAJOR', cutoff.toISOString(), '2026-08-26', IDS.owner, null, 'ASSIGNED')
+    ],
+    dueDateHistories: [
+      { bugID: IDS.overdue, oldValue: null, newValue: '2026-08-26', eventID: 'a5000000-0000-4000-8000-000000000001', timestamp: '2026-08-26T01:00:00.000Z' },
+      { bugID: IDS.cutoffOverdue, oldValue: null, newValue: '2026-08-26', eventID: 'a5000000-0000-4000-8000-000000000003', timestamp: cutoff.toISOString() }
+    ],
+    statusHistories: [{ bugID: IDS.edited, eventID: 'a7000000-0000-4000-8000-000000000001' }]
+  })
+  const previousCutoff = process.env.IDTS_NOTIFICATION_DISCOVERY_FROM
+  const previousDb = cds.db
+  process.env.IDTS_NOTIFICATION_DISCOVERY_FROM = cutoff.toISOString()
+  cds.db = db
+  try {
+    const beforeState = await scheduledState(db)
+    const request = new cds.Request({
+      user: new cds.User({ id: 'atomic-scheduler', roles: ['OutboxProcessor'] }),
+      data: { now: BASE_NOW.toISOString(), discoveryFrom: '2020-01-01T00:00:00.000Z' }
+    })
+    await processNotificationSchedules(request)
+    const afterState = await scheduledState(db)
+    assert.equal(afterState.sourceKeys.some(key => key.includes(IDS.urgent)), false,
+      'Pending Assignment backlog before activation is excluded')
+    assert.equal(afterState.sourceKeys.some(key => key.includes(IDS.overdue)), false,
+      'Overdue backlog before activation is excluded')
+    assert.ok(afterState.sourceKeys.includes(`PENDING_ASSIGNMENT:${IDS.edited}:${IDS.pm}`),
+      'Pending Assignment anchored at activation is included')
+    assert.ok(afterState.sourceKeys.some(key => key.includes(`OVERDUE:${IDS.cutoffOverdue}:2026-08-26:a5000000-0000-4000-8000-000000000003:${IDS.owner}`)),
+      'Overdue history anchored at activation is included')
+    const reloadState = await scheduledState(db)
+    assert.deepEqual(reloadState, afterState)
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (previousCutoff === undefined) delete process.env.IDTS_NOTIFICATION_DISCOVERY_FROM
+    else process.env.IDTS_NOTIFICATION_DISCOVERY_FROM = previousCutoff
+    cds.db = previousDb
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+function scheduledUuidFromIndex (index) {
+  return `c3000000-0000-4000-8000-${String(index).padStart(12, '0')}`
+}
+
+function scheduledPmUuidFromIndex (index) {
+  return `c4000000-0000-4000-8000-${String(index).padStart(12, '0')}`
+}
+
+function scheduledMissingUserUuidFromIndex (index) {
+  return `c5000000-0000-4000-8000-${String(index).padStart(12, '0')}`
+}
+
+async function runAtomicKeysetPagingCase () {
+  // Keep the candidate and recipient streams independently page-bounded without
+  // creating a 501x501 notification cross-product: one pending candidate drives
+  // both PM pages while the other 500 overdue candidates exercise candidate paging.
+  const bugs = [
+    bug(scheduledUuidFromIndex(1), 'BUG-ATOMIC-KEYSET-PENDING', 'LOW', 'MINOR', '2026-08-27T00:00:00.000Z', null, null, null),
+    ...Array.from({ length: 500 }, (_, index) =>
+      bug(
+        scheduledUuidFromIndex(index + 2),
+        `BUG-ATOMIC-KEYSET-OVERDUE-${index + 1}`,
+        'LOW',
+        'MINOR',
+        '2026-08-27T00:00:00.000Z',
+        '2026-08-26',
+        scheduledMissingUserUuidFromIndex(index + 1),
+        null,
+        'ASSIGNED'
+      ))
+  ]
+  const db = await createScheduledAtomicFixture({ bugs })
+  const extraPMs = Array.from({ length: 500 }, (_, index) =>
+    user(scheduledPmUuidFromIndex(index + 1), `Atomic PM ${index + 1}`, `atomic-pm-${index + 1}@example.test`, 'PM', true))
+  await db.run(INSERT.into('idts.cap.Users').entries(extraPMs))
+  try {
+    const beforeState = await scheduledPageState(db)
+    const expectedCandidateRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    const expectedPMRows = await db.run(SELECT.from('idts.cap.Users')
+      .columns('ID')
+      .where({ active: true, role_code: 'PM' })
+      .orderBy('ID asc'))
+    const candidateQueries = []
+    const pmQueries = []
+    const tx = {
+      run: async query => {
+        const from = query.SELECT?.from?.ref?.[0]
+        if (from === 'idts.cap.Bugs' && query.SELECT.limit?.rows?.val === 500) {
+          const rows = await db.run(query)
+          candidateQueries.push({ query, ids: rows.map(row => row.ID) })
+          return rows
+        }
+        const isPMPageRead = from === 'idts.cap.Users' && query.SELECT.limit?.rows?.val === 500 &&
+          query.SELECT.columns?.length === 1 && !Object.prototype.hasOwnProperty.call(query.SELECT, 'forUpdate')
+        if (isPMPageRead) {
+          const rows = await db.run(query)
+          pmQueries.push({ query, ids: rows.map(row => row.ID) })
+          return rows
+        }
+        return db.run(query)
+      }
+    }
+    await discoverScheduledNotifications({ tx, now: BASE_NOW, discoveryFrom: new Date('2026-08-27T00:00:00.000Z'), emailConfig: emailConfig() })
+    assert.deepEqual(candidateQueries.map(page => page.ids.length), [500, 1], '501 candidates are read through two bounded pages')
+    assert.deepEqual(pmQueries.map(page => page.ids.length), [500, 1], '501 active PMs are read through two bounded PM pages')
+    const candidatePageOne = candidateQueries[0]
+    const candidatePageTwo = candidateQueries[1]
+    const pmPageOne = pmQueries[0]
+    const pmPageTwo = pmQueries[1]
+    for (const page of [...candidateQueries, ...pmQueries]) {
+      assert.equal(page.query.SELECT.limit.offset, undefined, 'keyset pages never use OFFSET')
+      assert.deepEqual(page.query.SELECT.orderBy, [{ ref: ['ID'], sort: 'asc' }], 'keyset pages order by ID ascending')
+      assert.equal(new Set(page.ids).size, page.ids.length, 'each returned page has no duplicate IDs')
+    }
+    assert.doesNotMatch(JSON.stringify(candidatePageOne.query.SELECT.where), /ID.*>.*c3/, 'the first candidate page has no prior cursor')
+    assert.match(JSON.stringify(candidatePageTwo.query.SELECT.where), new RegExp(`ID.*>.*${candidatePageOne.ids.at(-1)}`),
+      'the second candidate page starts strictly after page one')
+    assert.doesNotMatch(JSON.stringify(pmPageOne.query.SELECT.where), /ID.*>.*c4/, 'the first PM page has no prior cursor')
+    assert.match(JSON.stringify(pmPageTwo.query.SELECT.where), new RegExp(`ID.*>.*${pmPageOne.ids.at(-1)}`),
+      'the second PM page starts strictly after page one')
+    const expectedCandidateIDs = expectedCandidateRows.map(row => row.ID)
+    const observedCandidateIDs = candidateQueries.flatMap(page => page.ids)
+    assert.deepEqual(observedCandidateIDs, expectedCandidateIDs, 'candidate rows are returned exactly once across both pages')
+    assert.deepEqual(pmQueries.flatMap(page => page.ids), expectedPMRows.map(row => row.ID),
+      'active PM rows are returned exactly once across both PM pages')
+    const afterState = await scheduledPageState(db)
+    assert.equal(afterState.notificationCount, expectedPMRows.length, 'the one pending candidate produces one event per active PM')
+    const reloadState = await scheduledPageState(db)
+    assert.deepEqual(reloadState, afterState)
+    return {
+      beforeState: { ...beforeState, candidateSourceRows: expectedCandidateRows.length, activePMSourceRows: expectedPMRows.length },
+      afterState: { ...afterState, candidatePages: candidateQueries.length, pmPages: pmQueries.length },
+      reloadState: { ...reloadState, candidateRowsObservedOnce: observedCandidateIDs.length, pmRowsObservedOnce: pmQueries.flatMap(page => page.ids).length }
+    }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function scheduledPageState (db) {
+  const rows = await db.run(SELECT.from('idts.cap.Notifications')
+    .columns('sourceKey')
+    .orderBy('sourceKey asc'))
+  const deliveries = await db.run(SELECT.from('idts.cap.NotificationDeliveries').columns('ID'))
+  return {
+    notificationCount: rows.length,
+    firstSourceKey: rows[0]?.sourceKey || null,
+    lastSourceKey: rows.at(-1)?.sourceKey || null,
+    deliveryCount: deliveries.length
+  }
+}
+
+async function runAtomicCursorRollbackCase () {
+  return assertContextPageRollback(null, emailConfig(), true)
+}
+
 function user (ID, displayName, email, role_code, active) {
   return { ID, displayName, email, role_code, active }
 }
@@ -866,8 +1384,9 @@ async function assertContextBearingRequestPath (db, config) {
   assert.equal(config.enabled, true, 'context-path fixture keeps the existing email policy')
 }
 
-async function assertContextPageRollback (db, config) {
+async function assertContextPageRollback (db, config, clean = false) {
   const realDb = await isolatedSchedulerDatabase()
+  if (clean) await clearSchedulerDomainData(realDb)
   await realDb.run(INSERT.into('idts.cap.Users').entries(user(
     IDS.pm,
     'Rollback Scheduler PM',
@@ -878,12 +1397,11 @@ async function assertContextPageRollback (db, config) {
   const pageBugs = Array.from({ length: 501 }, (_, index) =>
     bug(`f4000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`, `CONTEXT-ROLLBACK-${index + 1}`, 'LOW', 'MINOR', BASE_NOW.toISOString(), null, null, null))
   await realDb.run(INSERT.into('idts.cap.Bugs').entries(pageBugs))
-  const candidatePage = pageNumber => pageNumber === 1 ? pageBugs.slice(0, 500) : pageBugs.slice(500)
-
   const pageContexts = []
   const candidatePageStarts = []
   const candidateCommittedPages = []
   const candidateCallbackPages = []
+  const candidateQueries = []
   const requestUser = new cds.User({ id: 'context-rollback-scheduler', roles: ['OutboxProcessor'] })
   const request = new cds.Request({
     tenant: 'tenant-context-rollback',
@@ -894,6 +1412,8 @@ async function assertContextPageRollback (db, config) {
   const originalServiceTx = servicePrototype.tx
   const previousDb = cds.db
   let candidatePageNumber = 0
+  let attempt = 0
+  let failureInjected = false
   servicePrototype.tx = function (...args) {
     const callback = typeof args[0] === 'function' ? args[0] : args[1]
     const context = typeof args[0] === 'function' ? null : args[0]
@@ -909,13 +1429,25 @@ async function assertContextPageRollback (db, config) {
               candidatePageStarts.push({ pageNumber: rootStats.candidatePageNumber, committedBefore: candidateCommittedPages.length })
               candidateCallbackPages.push(rootStats.candidatePageNumber)
             }
-            return candidatePage(rootStats.candidatePageNumber)
+            const rows = await pageTx.run(query)
+            const where = query.SELECT.where || []
+            const cursorIndex = where.findIndex(part => part === '>')
+            candidateQueries.push({
+              attempt,
+              pageNumber: rootStats.candidatePageNumber,
+              cursor: cursorIndex >= 0 ? where[cursorIndex + 1]?.val || null : null,
+              ids: rows.map(row => row.ID)
+            })
+            return rows
           }
           return pageTx.run(query)
         }
       }
       const result = await callback(wrappedPageTx)
-      if (rootStats.candidatePageNumber === 2) throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
+      if (rootStats.candidatePageNumber === 2 && !failureInjected) {
+        failureInjected = true
+        throw Object.assign(new Error('scheduled page failure fixture'), { code: 'PAGE_FAILURE_FIXTURE' })
+      }
       return result
     }).then(result => {
       if (rootStats.candidatePageNumber !== null) candidateCommittedPages.push(rootStats.candidatePageNumber)
@@ -923,30 +1455,108 @@ async function assertContextPageRollback (db, config) {
     })
   }
   cds.db = realDb
+  let summary
+  let firstAttemptPageOne
+  let firstAttemptPageTwo
+  let secondAttemptPageTwo
+  let beforePersistedRows
+  let afterFailureRows
+  let afterRetryRows
   try {
+    const readPersistedRows = () => realDb.run(SELECT.from('idts.cap.Notifications')
+      .columns('ID', 'bug_ID', 'recipient_ID', 'sourceKey')
+      .where({ eventType_code: 'PENDING_ASSIGNMENT' })
+      .orderBy('sourceKey asc'))
+    beforePersistedRows = await readPersistedRows()
+    attempt = 1
     await assert.rejects(() => processNotificationSchedules(request), /scheduled page failure fixture/)
+    afterFailureRows = await readPersistedRows()
+    const firstAttemptQueries = candidateQueries.filter(query => query.attempt === 1)
+    firstAttemptPageOne = firstAttemptQueries.find(query => query.pageNumber === 1)
+    firstAttemptPageTwo = firstAttemptQueries.find(query => query.pageNumber === 2)
+    assert.deepEqual(firstAttemptQueries.map(query => query.pageNumber), [1, 2],
+      'the first run reads page one and then fails on page two')
+    if (clean) {
+      assert.equal(afterFailureRows.length, firstAttemptPageOne.ids.length,
+        'page one notification writes persist before page two fails')
+      assert.equal(afterFailureRows.filter(row => firstAttemptPageTwo.ids.includes(row.bug_ID)).length, 0,
+        'page two notification writes are rolled back')
+      assert.equal(firstAttemptPageTwo.cursor, firstAttemptPageOne.ids.at(-1),
+        'the failed page cursor is the last committed page-one ID')
+    }
+
+    afterRetryRows = afterFailureRows
+    if (clean) {
+      candidatePageNumber = 0
+      attempt = 2
+      await processNotificationSchedules(request)
+      afterRetryRows = await readPersistedRows()
+      const secondAttemptQueries = candidateQueries.filter(query => query.attempt === 2)
+      secondAttemptPageTwo = secondAttemptQueries.find(query => query.pageNumber === 2)
+      assert.deepEqual(secondAttemptQueries.map(query => query.pageNumber), [1, 2],
+        'the retry resumes through the same two source pages')
+      assert.deepEqual(secondAttemptPageTwo.ids, firstAttemptPageTwo.ids,
+        'the retry reads the same failed page rows')
+      assert.equal(secondAttemptPageTwo.cursor, firstAttemptPageTwo.cursor,
+        'the retry uses the same unadvanced keyset cursor')
+      assert.equal(afterRetryRows.length, pageBugs.length,
+        'the resumed page persists the remaining source rows')
+      assert.equal(new Set(afterRetryRows.map(row => row.sourceKey)).size, afterRetryRows.length,
+        'page resume leaves no duplicate source keys')
+      const persistedBugIDs = new Set(afterRetryRows.map(row => row.bug_ID))
+      assert.deepEqual(persistedBugIDs, new Set(pageBugs.map(row => row.ID)),
+        'the final persisted source set contains every Bug exactly once')
+    }
+    const beforeState = {
+      persistedNotificationCount: beforePersistedRows.length,
+      cursor: null
+    }
+    const afterState = {
+      persistedNotificationCount: afterFailureRows.length,
+      committedPages: candidateCommittedPages.slice(0, 1),
+      failedPagePersistedCount: afterFailureRows.filter(row => firstAttemptPageTwo.ids.includes(row.bug_ID)).length,
+      attemptedPageTwoCursor: firstAttemptPageTwo.cursor
+    }
+    const reloadState = {
+      persistedNotificationCount: afterRetryRows.length,
+      uniqueSourceKeyCount: new Set(afterRetryRows.map(row => row.sourceKey)).size,
+      retriedPageTwoRowCount: secondAttemptPageTwo?.ids.length || 0,
+      retriedPageTwoCursor: secondAttemptPageTwo?.cursor || null
+    }
+    summary = { beforeState, afterState, reloadState }
   } finally {
     servicePrototype.tx = originalServiceTx
     cds.db = previousDb
   }
 
-  const firstSource = `PENDING_ASSIGNMENT:${pageBugs[0].ID}:${IDS.pm}`
-  const secondSource = `PENDING_ASSIGNMENT:${pageBugs[500].ID}:${IDS.pm}`
-  assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: firstSource }), 1,
-    'page one source/inbox write survives a later page failure')
-  assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
-    'failed page source/inbox write rolls back as one CAP unit')
-  assert.deepEqual(candidateCallbackPages, [1, 2],
-    'the failing page callback still runs before its root transaction rolls back')
-  assert.deepEqual(candidateCommittedPages, [1],
-    'only the successful first page commits')
+  assert.deepEqual(candidateCallbackPages, clean ? [1, 2, 1, 2] : [1, 2],
+    'the failing page callback runs before its root transaction rolls back and the retry replays both pages')
+  assert.deepEqual(candidateCommittedPages, clean ? [1, 1, 2] : [1],
+    'only page one commits before failure and the retry commits both pages')
   assert.ok(new Set(pageContexts).size >= 2,
-    'rollback path also receives a fresh context per detached root page')
+    'rollback path receives a fresh context per detached root page')
   assert.ok(pageContexts.every(context => context.tenant === request.tenant && context.user === request.user),
     'rollback path preserves tenant and user context')
-  assert.deepEqual(candidatePageStarts.map(page => page.committedBefore), [0, 1],
+  assert.deepEqual(candidatePageStarts.map(page => page.committedBefore), clean ? [0, 1, 1, 2] : [0, 1],
     'rollback path starts page two only after page one commits')
+  if (!clean) {
+    const firstSource = `PENDING_ASSIGNMENT:${pageBugs[0].ID}:${IDS.pm}`
+    const secondSource = `PENDING_ASSIGNMENT:${pageBugs[500].ID}:${IDS.pm}`
+    assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: firstSource }), 1,
+      'page one source/inbox write survives a later page failure')
+    assert.equal(await count(realDb, 'idts.cap.Notifications', { sourceKey: secondSource }), 0,
+      'failed page source/inbox write rolls back as one CAP unit')
+  }
   assert.equal(config.enabled, true, 'rollback fixture keeps the existing email policy')
+  return clean
+    ? summary
+    : {
+        callbackPages: candidateCallbackPages,
+        committedPages: candidateCommittedPages,
+        failedPageWrites: 0,
+        cursorAdvanced: false,
+        retryablePage: 2
+      }
 }
 
 async function isolatedSchedulerDatabase () {

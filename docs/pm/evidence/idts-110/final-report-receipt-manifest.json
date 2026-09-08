@@ -1,0 +1,17 @@
+{
+  "kind": "idts-110-final-report-receipt-manifest",
+  "schemaVersion": 1,
+  "reviewedHead": "a82de8e3f8521d5e9d1de4f2f2fc2071669126f0",
+  "reviewArtifact": ".tmp/idts-110/workbook-v06-final-rereview.md",
+  "workbookReceipt": "docs/pm/evidence/idts-110/workbook-v06-validation-receipt.json",
+  "reviewReceipt": "docs/pm/evidence/idts-110/workbook-v06-independent-review-receipt.json",
+  "mappingReceipt": "docs/pm/evidence/idts-110/mapping-execution-receipt.json",
+  "sourceLedger": "docs/pm/evidence/idts-110/source-result-ledger.json",
+  "reviewArtifactSha256": "D33FE211C466F8BFE854F09221A2E4DD4792CC3C84D01A862B97F273DEF6D9BE",
+  "receiptSha256": {
+    "workbook": "97F0152F39AC9FDD1A4997CC26E2162EE1513868F4051F6E89CBCF52E19E956C",
+    "review": "80299314387FBA24DA573032A7956DB7F2162E3356A774123ABBE198F90CA3B0",
+    "mapping": "F9BA80BB9743EB88DC5D7BA320636C167D1CA33A381A92537CAC6DB6D7FED8E6",
+    "sourceLedger": "37F8177813A560BD96D950ACF186659E62BF3E63C55C958851AC0F7184D3429D"
+  }
+}

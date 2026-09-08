@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F234",
+  "mentorNumber": 236,
+  "title": "unread count is isolated to the active caller",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:51.659Z",
+  "completedAt": "2026-09-05T10:55:52.525Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F234-A1",
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F234 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "getMyUnreadNotificationCount counts only unread rows for the resolved active caller and denies inactive, unmapped, or unauthorized identities.",
+  "expectedResult": "getMyUnreadNotificationCount counts only unread rows for the resolved active caller and denies inactive, unmapped, or unauthorized identities.",
+  "actualResult": "getMyUnreadNotificationCount counts only unread rows for the resolved active caller and denies inactive, unmapped, or unauthorized identities.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "getMyUnreadNotificationCount"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "recipient_ID: actor.ID"
+    }
+  ],
+  "beforeState": {
+    "inboxRows": 5,
+    "callerAUnread": 2,
+    "callerBUnread": 2,
+    "inactiveRows": 0,
+    "pmRows": 0,
+    "userAdminRows": 0
+  },
+  "afterState": {
+    "callerAUnread": 2,
+    "callerBUnread": 2,
+    "pmUnread": 0,
+    "userAdminUnread": 0
+  },
+  "reloadState": {
+    "rowsUnchanged": true,
+    "deniedStatuses": [
+      401,
+      403,
+      403,
+      403
+    ],
+    "safeNoPayload": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F234-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "ac5525ea26b7b724fb405baf194e9d534739fc82252dac7b2c384543fc3b1e6d",
+    "before-database.png": "9363f083d1808317b46fabf73aeec4755f93e633c0d1ffde8a6ad3c629004a84",
+    "after-database.png": "46ac0b16a164caa9d3ff4e937c98c5b40fd74f7e35af28cca50d3e0326f6a02e",
+    "reload-readback.png": "8d8837f734873c44ac9af15a58ff35ec64a49c559728e7ca99f4ada65e8d62f1"
+  },
+  "resultSha256": "61404770a4e6838e478e45b921f875a3500fa7e9fed8e6bbaae00dbfdde7b126",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

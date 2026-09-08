@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F237",
+  "mentorNumber": 241,
+  "title": "notification shell renders a compact Bug title row",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T11:50:26.805Z",
+  "completedAt": "2026-09-05T11:50:27.950Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F237-A1",
+  "testFile": "scripts/qa/test-my-notifications-shell.js",
+  "testCommand": "node scripts/qa/test-my-notifications-shell.js --idts110-case=IDTS110-F237 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-ui-1788609025467-971346abf2c775b094e8645f --idts110-nonce=bb5b7bf4cef185d3d447193a35260414",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A Bug notification row displays bugNumber — bugTitle as the primary line with unread state and timestamp, without a category icon or Bug description region, and with horizontalScrolling false.",
+  "expectedResult": "A Bug notification row displays bugNumber — bugTitle as the primary line with unread state and timestamp, without a category icon or Bug description region, and with horizontalScrolling false.",
+  "actualResult": "A Bug notification row displays bugNumber — bugTitle as the primary line with unread state and timestamp, without a category icon or Bug description region, and with horizontalScrolling false.",
+  "sourceTrace": [
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "createRowItem"
+    },
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "horizontalScrolling"
+    },
+    {
+      "file": "scripts/qa/test-my-notifications-shell.js",
+      "symbol": "Bug number and title form the readable primary line"
+    }
+  ],
+  "beforeState": {
+    "shell": "rendered",
+    "popover": "closed"
+  },
+  "afterState": {
+    "titleVisible": true,
+    "unreadVisible": true,
+    "timestampVisible": true,
+    "iconCount": 0,
+    "descriptionVisible": false,
+    "horizontalOverflow": false,
+    "rowCount": 1
+  },
+  "reloadState": {
+    "route": "/idtsbugmanagementui/index.html",
+    "fixture": "notification"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "populated-bug",
+    "route": "/idtsbugmanagementui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F237/runtime.png",
+    "screenshotSha256": "7e1ce8abbf159263db737205290e1a073c0598b9f254b2d600be450164b68090",
+    "manifestPath": "unit/IDTS110-F237/case-manifest.json",
+    "caseKey": "IDTS110-F237",
+    "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+    "nonce": "bb5b7bf4cef185d3d447193a35260414",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T11:50:27.947Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F237",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "nonce": "bb5b7bf4cef185d3d447193a35260414",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T11:50:27.947Z"
+    },
+    "domChecks": {
+      "titleVisible": true,
+      "unreadVisible": true,
+      "timestampVisible": true,
+      "iconCount": 0,
+      "descriptionVisible": false,
+      "horizontalOverflow": false,
+      "rowCount": 1
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-my-notifications-shell.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F237-RESULT",
+    "IDTS110-F237-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "7e1ce8abbf159263db737205290e1a073c0598b9f254b2d600be450164b68090"
+  },
+  "resultSha256": "17df0368a09defa8e5407ab36c1f2c6173e1f8996dcd9397a34134a5c71491cd",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "7e1ce8abbf159263db737205290e1a073c0598b9f254b2d600be450164b68090",
+  "manifestPath": "case-manifest.json"
+}

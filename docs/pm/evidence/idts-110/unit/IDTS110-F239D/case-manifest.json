@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F239D",
+  "mentorNumber": 248,
+  "title": "notification shell destroys timer and listeners",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T11:50:35.549Z",
+  "completedAt": "2026-09-05T11:50:36.689Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F239D-A1",
+  "testFile": "scripts/qa/test-my-notifications-shell.js",
+  "testCommand": "node scripts/qa/test-my-notifications-shell.js --idts110-case=IDTS110-F239D --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-ui-1788609025467-971346abf2c775b094e8645f --idts110-nonce=bb5b7bf4cef185d3d447193a35260414",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Destroy clears the polling timer and registered listeners exactly once.",
+  "expectedResult": "Destroy clears the polling timer and registered listeners exactly once.",
+  "actualResult": "Destroy clears the polling timer and registered listeners exactly once.",
+  "sourceTrace": [
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "destroy"
+    }
+  ],
+  "beforeState": {
+    "unreadCalls": 1,
+    "searchCalls": 0,
+    "timerDelay": 30000,
+    "timerCallbacks": 1,
+    "clearCalls": 0,
+    "listenersAdded": 3,
+    "listenersRemoved": 0
+  },
+  "afterState": {
+    "unreadCalls": 1,
+    "searchCalls": 0,
+    "timerDelay": 30000,
+    "timerCallbacks": 1,
+    "clearCalls": 1,
+    "listenersAdded": 3,
+    "listenersRemoved": 3
+  },
+  "reloadState": {
+    "route": "/idtsbugmanagementui/index.html",
+    "fixture": "destroy"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "destroy",
+    "route": "/idtsbugmanagementui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F239D/runtime.png",
+    "screenshotSha256": "442e17be4f12cfc99ca51a6ef9982b846a5ce763b2aebaea478d84d50e1960c6",
+    "manifestPath": "unit/IDTS110-F239D/case-manifest.json",
+    "caseKey": "IDTS110-F239D",
+    "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+    "nonce": "bb5b7bf4cef185d3d447193a35260414",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T11:50:36.683Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F239D",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "nonce": "bb5b7bf4cef185d3d447193a35260414",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T11:50:36.683Z"
+    },
+    "domChecks": {
+      "hostHasToolbar": false,
+      "destroyed": true
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-my-notifications-shell.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F239D-RESULT",
+    "IDTS110-F239D-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "442e17be4f12cfc99ca51a6ef9982b846a5ce763b2aebaea478d84d50e1960c6"
+  },
+  "resultSha256": "19e0b9711185d60c4312156b7c040c72a8ebe521378494280ea48f910a502147",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "442e17be4f12cfc99ca51a6ef9982b846a5ce763b2aebaea478d84d50e1960c6",
+  "manifestPath": "case-manifest.json"
+}

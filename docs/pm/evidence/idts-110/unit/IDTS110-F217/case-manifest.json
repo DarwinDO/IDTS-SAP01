@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F217",
+  "mentorNumber": 214,
+  "title": "active-user display name update preserves identity fields",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:17.133Z",
+  "completedAt": "2026-09-05T10:05:17.884Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F217-A1",
+  "testFile": "scripts/qa/test-user-admin-active-users.js",
+  "testCommand": "node scripts/qa/test-user-admin-active-users.js --idts110-case=IDTS110-F217 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A valid PM/UserAdmin display-name update persists the normalized name and one audit reason while email, role, active state, and identity fields remain unchanged after reload.",
+  "expectedResult": "A valid PM/UserAdmin display-name update persists the normalized name and one audit reason while email, role, active state, and identity fields remain unchanged after reload.",
+  "actualResult": "A valid PM/UserAdmin display-name update persists the normalized name and one audit reason while email, role, active state, and identity fields remain unchanged after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/active-users.js",
+      "symbol": "updateActiveUserDisplayName"
+    },
+    {
+      "file": "srv/user-admin/active-users.js",
+      "symbol": "USER_PROFILE_UPDATED"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "normalizedName": "Atomic Alice Updated",
+    "identityPreserved": true,
+    "appliedAudits": 1,
+    "auditReason": "Correct the controlled display name."
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F217-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "b085eec2b0d6ecefeec7cbd598f559063b4778b10f5107874efe39fb8c7e85cc",
+    "before-database.png": "d59f617507cac3bfa6fb9c1ff3c077c9d269747711e380d4818fbab820b2c5e9",
+    "after-database.png": "fcd4a0079ca4c98b49f4af0f1aca0377db1c1e847b73b1b1c39f614e8aed333a",
+    "reload-readback.png": "1833aa6bfba76876ba15ba59664746a3ea113153b5b10038d7117b993b083edd"
+  },
+  "resultSha256": "6cd7fa0567d7052b31f6bc4052acf517905eb7ae45450b87e5fd1c5d2603a512",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

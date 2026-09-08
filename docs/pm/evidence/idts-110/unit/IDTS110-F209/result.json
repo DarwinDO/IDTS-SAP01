@@ -1,0 +1,51 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F209",
+  "mentorNumber": 204,
+  "assertionId": "IDTS110-F209-A1",
+  "title": "onboarding search returns safe status and cancellation eligibility",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:08.341Z",
+  "completedAt": "2026-09-05T10:05:09.014Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F209 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An authorized onboarding search returns bounded summaries and cancelEligible only for an unconsumed INVITED request, without identity or token fields.",
+  "expectedResult": "An authorized onboarding search returns bounded summaries and cancelEligible only for an unconsumed INVITED request, without identity or token fields.",
+  "actualResult": "An authorized onboarding search returns bounded summaries and cancelEligible only for an unconsumed INVITED request, without identity or token fields.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "searchOnboarding"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "onboardingSummary"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "boundedRows": 7,
+    "cancelEligible": true,
+    "cancelEligibleNegativeStates": 6,
+    "sensitiveFieldsOmitted": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F209-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

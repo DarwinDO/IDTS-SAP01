@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F214",
+  "mentorNumber": 210,
+  "title": "legacy identity link snapshots one eligible target",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:13.480Z",
+  "completedAt": "2026-09-05T10:05:14.326Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F214-A1",
+  "testFile": "scripts/qa/test-existing-user-identity-link.js",
+  "testCommand": "node scripts/qa/test-existing-user-identity-link.js --idts110-case=IDTS110-F214 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An eligible legacy TESTER or DEVELOPER links exactly one selected Users.ID and snapshots its role and source email into one pending link request.",
+  "expectedResult": "An eligible legacy TESTER or DEVELOPER links exactly one selected Users.ID and snapshots its role and source email into one pending link request.",
+  "actualResult": "An eligible legacy TESTER or DEVELOPER links exactly one selected Users.ID and snapshots its role and source email into one pending link request.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "requestExistingUserIdentityLink"
+    },
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "assertEligibleLegacyTarget"
+    },
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "createExistingLinkRequest"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "linkedRoles": [
+      "DEVELOPER",
+      "TESTER"
+    ],
+    "sourceEmailsSnapshotted": [
+      "[REDACTED]",
+      "[REDACTED]"
+    ],
+    "pendingDeliveries": 2,
+    "pmTargetRejected": true
+  },
+  "reloadState": {
+    "linkedRoles": [
+      "DEVELOPER",
+      "TESTER"
+    ],
+    "pendingDeliveries": 2,
+    "pmTargetRejected": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F214-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "6159bba33fe1202d91181e16886164d61743ebc064f3a0e8d74e3864d1a0e010",
+    "before-database.png": "6611f8da89e77a41758381c16563711dd6bf56f34154e7570244e770e9f6da4d",
+    "after-database.png": "0e2dab10f5a32f5b3514ea8dfd6aa77b714b42c2c6024aa487a140f5e2df2f9c",
+    "reload-readback.png": "136f9afbc893d6553e4db73cd6b9dbb547d43d879522df023e095716028c8030"
+  },
+  "resultSha256": "cd9be663bc2b82fd5ea69a5bef01e5987ce400b595b7cdec21aae41049d787b4",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

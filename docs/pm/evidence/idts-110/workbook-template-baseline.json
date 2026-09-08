@@ -1,0 +1,409 @@
+{
+  "template": {
+    "path": "docs/sap490/templates/Deliverable_template/Unit_Test.xlsx",
+    "sha256": "5764937d3cf12ef7fba107bb1104a018cb509d2db7e4d2f6793a7ff245a0a334",
+    "officecliVersion": "1.0.147"
+  },
+  "sheetOrder": [
+    "Cover",
+    "Histories",
+    "UT",
+    "Evidence"
+  ],
+  "sheets": {
+    "Cover": {
+      "state": "visible",
+      "dimension": "A1:AQ1000",
+      "rows": 1000,
+      "columns": 43,
+      "showGridLines": false,
+      "defaultColumnWidth": 12.62890625,
+      "defaultRowHeight": 15,
+      "rowHeights": [{ "rows": "1:1000", "height": 19.5 }],
+      "columnWidths": [{ "columns": "A:AQ", "width": 4.13 }],
+      "merges": [
+        "B8:AO8",
+        "I11:M11",
+        "N11:T11",
+        "U11:Y11",
+        "Z11:AI11",
+        "I12:M12",
+        "N12:AI12",
+        "I13:M13",
+        "N13:AI13",
+        "I14:M14",
+        "N14:T14",
+        "U14:Y14",
+        "Z14:AI14",
+        "U18:Y18",
+        "Z18:AD18",
+        "AE18:AI18",
+        "U19:Y20",
+        "Z19:AD20",
+        "AE19:AI20"
+      ],
+      "printArea": null,
+      "printTitles": null,
+      "pageSetup": {
+        "paperSize": "9",
+        "scale": "100",
+        "fitToWidth": "1",
+        "fitToHeight": "1",
+        "pageOrder": "downThenOver",
+        "orientation": "landscape",
+        "blackAndWhite": "false",
+        "draft": "false",
+        "horizontalDpi": "300",
+        "verticalDpi": "300"
+      },
+      "margins": {
+        "left": "0.39375",
+        "right": "0.39375",
+        "top": "0.7875",
+        "bottom": "0.7875",
+        "header": "0.511811023622047",
+        "footer": "0"
+      },
+      "header": "",
+      "footer": "&L&F&R&P / ",
+      "dataValidations": [],
+      "autoFilter": null
+    },
+    "Histories": {
+      "state": "visible",
+      "dimension": "A1:Z1000",
+      "rows": 1000,
+      "columns": 26,
+      "showGridLines": false,
+      "defaultColumnWidth": 12.62890625,
+      "defaultRowHeight": 15,
+      "rowHeights": [{ "rows": "1:1000", "height": 19.5 }],
+      "columnWidths": [
+        { "columns": "A:A", "width": 4.38 },
+        { "columns": "B:B", "width": 5.13 },
+        { "columns": "C:C", "width": 9.26 },
+        { "columns": "D:D", "width": 74.25 },
+        { "columns": "E:E", "width": 31.5 },
+        { "columns": "F:G", "width": 15.76 },
+        { "columns": "H:Z", "width": 10.26 }
+      ],
+      "merges": [],
+      "printArea": null,
+      "printTitles": null,
+      "pageSetup": {
+        "paperSize": "9",
+        "scale": "100",
+        "fitToWidth": "1",
+        "fitToHeight": "1",
+        "pageOrder": "downThenOver",
+        "orientation": "landscape",
+        "blackAndWhite": "false",
+        "draft": "false",
+        "horizontalDpi": "300",
+        "verticalDpi": "300"
+      },
+      "margins": {
+        "left": "0.39375",
+        "right": "0.39375",
+        "top": "0.7875",
+        "bottom": "0.7875",
+        "header": "0.511811023622047",
+        "footer": "0"
+      },
+      "header": "",
+      "footer": "&L&F&R&P / ",
+      "dataValidations": [],
+      "autoFilter": null
+    },
+    "UT": {
+      "state": "visible",
+      "dimension": "A1:BV1048576",
+      "rows": 1048576,
+      "columns": 74,
+      "showGridLines": false,
+      "defaultColumnWidth": 12.62890625,
+      "defaultRowHeight": 15,
+      "rowHeights": [
+        { "rows": "1:7,9:14,16:958", "height": 14.25 },
+        { "rows": "8:8", "height": 13.5 },
+        { "rows": "15:15", "height": 60 },
+        { "rows": "1048451:1048576", "height": 12.8 }
+      ],
+      "columnWidths": [
+        { "columns": "A:A", "width": 2.63 },
+        { "columns": "B:B", "width": 3.88 },
+        { "columns": "C:C", "width": 4 },
+        { "columns": "D:D", "width": 3.63 },
+        { "columns": "E:W", "width": 2.63 },
+        { "columns": "X:X", "width": 0.38 },
+        { "columns": "Y:AV", "width": 2.63 },
+        { "columns": "AW:AW", "width": 3.5 },
+        { "columns": "AX:BB", "width": 2.63 },
+        { "columns": "BC:BC", "width": 5.63 },
+        { "columns": "BD:BJ", "width": 2.63 },
+        { "columns": "BK:BK", "width": 4.26 },
+        { "columns": "BL:BR", "width": 2.63 }
+      ],
+      "merges": [
+        "B2:K2",
+        "L2:AN2",
+        "AO2:AW2",
+        "AX2:BD2",
+        "BE2:BK2",
+        "BL2:BR2",
+        "B3:K4",
+        "L3:AN4",
+        "AO3:AW4",
+        "AX3:BD4",
+        "BE3:BK4",
+        "BL3:BR4",
+        "B6:D7",
+        "E6:AW6",
+        "AX6:BK6",
+        "BL6:BR7",
+        "E7:X7",
+        "Y7:AW7",
+        "AX7:BC7",
+        "BD7:BI7",
+        "BJ7:BK7",
+        "B8:D8",
+        "Y8:AW8",
+        "AX8:BC8",
+        "BD8:BI8",
+        "BJ8:BK8",
+        "BL8:BR8",
+        "B9:D9",
+        "Y9:AW9",
+        "AX9:BC9",
+        "BD9:BI9",
+        "BJ9:BK9",
+        "BL9:BR9",
+        "B10:D10",
+        "Y10:AW10",
+        "AX10:BC10",
+        "BD10:BI10",
+        "BJ10:BK10",
+        "BL10:BR10",
+        "B11:D11",
+        "Y11:AW11",
+        "AX11:BC11",
+        "BD11:BI11",
+        "BJ11:BK11",
+        "BL11:BR11",
+        "B12:D12",
+        "Y12:AW12",
+        "BD12:BI12",
+        "BJ12:BK12",
+        "BL12:BR12",
+        "B13:D13",
+        "Y13:AW13",
+        "AX13:BC13",
+        "BD13:BI13",
+        "BJ13:BK13",
+        "BL13:BR13",
+        "B14:D14",
+        "Y14:AW14",
+        "AX14:BC14",
+        "BD14:BI14",
+        "BJ14:BK14",
+        "BL14:BR14",
+        "B15:D15",
+        "Y15:AW15",
+        "AX15:BC15",
+        "BD15:BI15",
+        "BJ15:BK15",
+        "BL15:BR15",
+        "B16:D16",
+        "Y16:AW16",
+        "AX16:BC16",
+        "BD16:BI16",
+        "BJ16:BK16",
+        "BL16:BR16"
+      ],
+      "dataValidations": [
+        {
+          "sqref": "BJ8:BJ16",
+          "type": "list",
+          "formula1": "\"O,X,-\"",
+          "allowBlank": "true",
+          "showDropDown": "false",
+          "showErrorMessage": "true"
+        }
+      ],
+      "autoFilter": null,
+      "printArea": null,
+      "printTitles": null,
+      "pageSetup": {
+        "paperSize": "9",
+        "scale": "100",
+        "fitToWidth": "1",
+        "fitToHeight": "0",
+        "pageOrder": "downThenOver",
+        "orientation": "landscape",
+        "blackAndWhite": "false",
+        "draft": "false",
+        "horizontalDpi": "300",
+        "verticalDpi": "300"
+      },
+      "margins": {
+        "left": "0.590277777777778",
+        "right": "0.39375",
+        "top": "0.590277777777778",
+        "bottom": "0.590277777777778",
+        "header": "0",
+        "footer": "0"
+      },
+      "header": "&L文書ID：F400&R単体テスト仕様書 - &A",
+      "footer": "&C&P / "
+    },
+    "Evidence": {
+      "state": "visible",
+      "dimension": "A1",
+      "rows": 1,
+      "columns": 1,
+      "showGridLines": true,
+      "defaultColumnWidth": 12.62890625,
+      "defaultRowHeight": 12.8,
+      "rowHeights": [],
+      "columnWidths": [],
+      "merges": [],
+      "printArea": null,
+      "printTitles": null,
+      "pageSetup": {
+        "paperSize": "1",
+        "scale": "100",
+        "fitToWidth": "1",
+        "fitToHeight": "1",
+        "pageOrder": "downThenOver",
+        "orientation": "portrait",
+        "blackAndWhite": "false",
+        "draft": "false",
+        "horizontalDpi": "300",
+        "verticalDpi": "300"
+      },
+      "margins": {
+        "left": "0.747916666666667",
+        "right": "0.747916666666667",
+        "top": "0.984027777777778",
+        "bottom": "0.984027777777778",
+        "header": "0.511811023622047",
+        "footer": "0.511811023622047"
+      },
+      "header": "",
+      "footer": "",
+      "dataValidations": [],
+      "autoFilter": null
+    }
+  },
+  "contract": {
+    "generatedGeometry": {
+      "Histories": {
+        "rows": "3:6",
+        "heightRule": {
+          "base": 19.5,
+          "charsPerLine": 60,
+          "lineHeight": 14.5
+        }
+      },
+      "UT": {
+        "rows": "8:285",
+        "heightRule": {
+          "min": 14.25,
+          "max": 370,
+          "testCharsPerLine": 39,
+          "resultCharsPerLine": 58,
+          "lineHeight": 14.25,
+          "padding": 10
+        },
+        "mergePattern": ["B:D", "E:X", "Y:AW", "AX:BC", "BD:BI", "BJ:BK", "BL:BR"]
+      },
+      "Evidence": {
+        "dimension": "A1:K279",
+        "rows": [
+          { "rows": "1:1", "height": 30 },
+          { "rows": "2:279", "height": 72 }
+        ],
+        "columnWidths": [
+          { "columns": "A:A", "width": 14 },
+          { "columns": "B:B", "width": 10 },
+          { "columns": "C:C", "width": 32 },
+          { "columns": "D:D", "width": 52 },
+          { "columns": "E:E", "width": 45 },
+          { "columns": "F:F", "width": 18 },
+          { "columns": "G:G", "width": 48 },
+          { "columns": "H:H", "width": 18 },
+          { "columns": "I:I", "width": 58 },
+          { "columns": "J:J", "width": 58 },
+          { "columns": "K:K", "width": 16 }
+        ]
+      }
+    },
+    "mergeContracts": {
+      "Cover": "template",
+      "Histories": "template",
+      "UT": "header-template-plus-generated-row-pattern",
+      "Evidence": "template"
+    },
+    "styleInvariants": {
+      "UT": {
+        "anchors": ["B8", "E8", "Y8", "AX8", "BD8", "BJ8", "BL8"],
+        "fields": [
+          "font.bold",
+          "font.color",
+          "font.size",
+          "font.name",
+          "border.left",
+          "border.right",
+          "border.top",
+          "border.bottom",
+          "numberformat",
+          "numFmtId",
+          "protection.locked",
+          "protection.hidden"
+        ]
+      }
+    },
+    "validationContracts": {
+      "UT": [
+        {
+          "sqref": "BJ8:BJ16",
+          "type": "list",
+          "formula1": "\"O,X,-\""
+        }
+      ],
+      "Evidence": []
+    }
+  },
+  "definedNames": [
+    { "name": "A", "body": "#REF!" },
+    { "name": "BASE", "body": "#REF!" },
+    { "name": "BASE2", "body": "#REF!" },
+    { "name": "DS_KEYS", "body": "#REF!" },
+    { "name": "DS_NM", "body": "#REF!" },
+    { "name": "KEYS", "body": "#REF!" },
+    { "name": "NAMES", "body": "#REF!" },
+    { "name": "NEC_KEYS", "body": "#REF!" },
+    { "name": "SYMBOL", "body": "#REF!" },
+    { "name": "TBL_KEYS", "body": "#REF!" },
+    { "name": "TBL_KEYS2", "body": "#REF!" },
+    { "name": "店舗DF_KEYS", "body": "#REF!" },
+    { "name": "物流DF_KEYS", "body": "#REF!" }
+  ],
+  "authorityIssues": [
+    { "id": "D1", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[A]", "message": "Defined name 'A' has error body #REF!", "context": "#REF!" },
+    { "id": "D2", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[BASE]", "message": "Defined name 'BASE' has error body #REF!", "context": "#REF!" },
+    { "id": "D3", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[BASE2]", "message": "Defined name 'BASE2' has error body #REF!", "context": "#REF!" },
+    { "id": "D4", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[DS_KEYS]", "message": "Defined name 'DS_KEYS' has error body #REF!", "context": "#REF!" },
+    { "id": "D5", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[DS_NM]", "message": "Defined name 'DS_NM' has error body #REF!", "context": "#REF!" },
+    { "id": "D6", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[KEYS]", "message": "Defined name 'KEYS' has error body #REF!", "context": "#REF!" },
+    { "id": "D7", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[NAMES]", "message": "Defined name 'NAMES' has error body #REF!", "context": "#REF!" },
+    { "id": "D8", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[NEC_KEYS]", "message": "Defined name 'NEC_KEYS' has error body #REF!", "context": "#REF!" },
+    { "id": "D9", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[SYMBOL]", "message": "Defined name 'SYMBOL' has error body #REF!", "context": "#REF!" },
+    { "id": "D10", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[TBL_KEYS]", "message": "Defined name 'TBL_KEYS' has error body #REF!", "context": "#REF!" },
+    { "id": "D11", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[TBL_KEYS2]", "message": "Defined name 'TBL_KEYS2' has error body #REF!", "context": "#REF!" },
+    { "id": "D12", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[店舗DF_KEYS]", "message": "Defined name '店舗DF_KEYS' has error body #REF!", "context": "#REF!" },
+    { "id": "D13", "type": 1, "subtype": "definedname_broken", "severity": 0, "path": "/namedrange[物流DF_KEYS]", "message": "Defined name '物流DF_KEYS' has error body #REF!", "context": "#REF!" },
+    { "id": "O14", "type": 0, "severity": 1, "path": "/Histories/C2", "message": "text overflow: 2 lines at 12.0pt need 29pt, usable 16pt. suggest: clear customHeight to let Excel auto-fit" },
+    { "id": "O15", "type": 0, "severity": 1, "path": "/Histories/F2", "message": "text overflow: 2 lines at 12.0pt need 29pt, usable 16pt. suggest: clear customHeight to let Excel auto-fit" }
+  ]
+}

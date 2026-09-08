@@ -1,28 +1,32 @@
 {
   "caseId": "UT-ATT-006",
   "title": "delete removes metadata and storage object",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.848Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-08T12:11:49.000Z",
+  "baselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA Cloud / S3",
+  "testCommand": "DonHV PM Fiori Edit/Delete/Save confirmation plus exact S3/HANA readback and post-fix active DELETE 405 acceptance",
+  "sourceAssertions": [
+    "srv/bug-service/content.js#prepareAttachmentWrite",
+    "srv/bug-service/content.js#assertAttachmentDeletePermission",
+    "db/schema.cds#BugAttachments",
+    "package.json#@cap-js/attachments"
+  ],
+  "actualResult": "DonHV confirmed the PM Fiori Edit → Delete → Save flow on BUG-0019 and History recorded Deleted attachment PlatformAPI.json. Exact backend readback removed the S3 object and HANA metadata while unrelated Bug state stayed unchanged. After release 19c2f8b0, direct active DELETE is rejected with HTTP 405.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "Committed Fiori delete produced one readable deletion History event.",
+    "S3 object and HANA metadata were removed.",
+    "Unrelated Bug status, comments and notifications remained unchanged.",
+    "Direct active attachment DELETE now returns HTTP 405 and cannot bypass Save."
   ],
   "evidenceIds": [
-    "IDTS110-UT-ATT-006-BLOCKER"
+    "IDTS110-UT-ATT-006-BTP-LIVE-20260908"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "limitations": "The original exact S3/HANA removal used a direct active DELETE and exposed the audit bypass; it is retained only as pre-fix technical evidence. Final user flow is Fiori draft Save, and release 19c2f8b0 blocks the old direct path with 405. HANA Cloud auto-stopped during the earlier readback, was restarted, and final readiness passed."
 }

@@ -1,0 +1,62 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F233",
+  "mentorNumber": 235,
+  "assertionId": "IDTS110-F233-A1",
+  "title": "My Notifications hydration isolates source summaries",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:50.665Z",
+  "completedAt": "2026-09-05T10:55:51.528Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F233 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A mixed page hydrates Bug and applied-access sources into the safe DTO, with UNAVAILABLE and null targetPath for wrong-recipient, dual-source, unsupported, or missing sources.",
+  "expectedResult": "A mixed page hydrates Bug and applied-access sources into the safe DTO, with UNAVAILABLE and null targetPath for wrong-recipient, dual-source, unsupported, or missing sources.",
+  "actualResult": "A mixed page hydrates Bug and applied-access sources into the safe DTO, with UNAVAILABLE and null targetPath for wrong-recipient, dual-source, unsupported, or missing sources.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "hydrateNotificationPage"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "bugSummary"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "accessSummary"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "unavailableSummary"
+    }
+  ],
+  "beforeState": {
+    "sourceRows": 6,
+    "bugSourceRows": 3,
+    "accessSourceRows": 3
+  },
+  "afterState": {
+    "dtoRows": 6,
+    "unavailableRows": 4
+  },
+  "reloadState": {
+    "rawRows": 6,
+    "safeProjectionRows": 6,
+    "dtoFieldsExact": true,
+    "privateFieldsExposed": false
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F233-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

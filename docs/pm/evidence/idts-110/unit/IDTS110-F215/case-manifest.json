@@ -1,0 +1,70 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F215",
+  "mentorNumber": 211,
+  "title": "cancelling an unverified invitation preserves history",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:14.538Z",
+  "completedAt": "2026-09-05T10:05:15.213Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F215-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F215 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Cancelling an unconsumed INVITED request marks its delivery SKIPPED, releases its open-request key, appends one audit event, and preserves history rows.",
+  "expectedResult": "Cancelling an unconsumed INVITED request marks its delivery SKIPPED, releases its open-request key, appends one audit event, and preserves history rows.",
+  "actualResult": "Cancelling an unconsumed INVITED request marks its delivery SKIPPED, releases its open-request key, appends one audit event, and preserves history rows.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "cancelExistingUserIdentityLink"
+    },
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "INVITATION_CANCELLED"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "status": "FAILED",
+    "deliveryStatus": "SKIPPED",
+    "requestHistoryPreserved": true,
+    "deliveryHistoryPreserved": true,
+    "auditRows": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F215-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "d18cdff800ee7b64085f2cdee03d0a1c7675d7fe2a173dacfd543321acc45a60",
+    "before-database.png": "dcc59dba3163b8713298232837edf9ad5fe494c9b7d41f1180c51332e8d70ed9",
+    "after-database.png": "2024b579ea2241d16233ba50aef9a3fa2fbddbdda9cfb53401a4e975cab9c144",
+    "reload-readback.png": "6681f248d68c1757af4b274641ae3dc3d984620633ca2a12268a656cc4651fdd"
+  },
+  "resultSha256": "56b46e93aab87a295dd50a230bfb8005c5d7dad8ec5f0f5eef68d26049f20ad1",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

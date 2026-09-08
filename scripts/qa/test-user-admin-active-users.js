@@ -8,6 +8,12 @@ const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
 const { INSERT, SELECT, UPDATE } = cds.ql
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const root = path.resolve(__dirname, '../..')
 const cdsSource = fs.readFileSync(path.join(root, 'srv/user-admin.cds'), 'utf8')
@@ -60,6 +66,13 @@ const PAGED_USER_COUNT = 205
 const ACTIVE_HASH = 'a'.repeat(64)
 const REVOKED_HASH = 'b'.repeat(64)
 const SUSPENDED_HASH = 'c'.repeat(64)
+
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(root, 'docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
 
 function requestEntry (ID, values) {
   return {
@@ -119,7 +132,118 @@ async function expectRejected (operation, status, code) {
     (code === undefined || error?.code === code))
 }
 
-async function main () {
+async function runAtomicActiveUserCase (caseKey) {
+  const db = await cds.deploy('db').to('sqlite::memory:')
+  const previousDb = cds.db
+  cds.db = db
+  try {
+    const pmEmail = 'active.atomic.pm@example.invalid'
+    await db.run(INSERT.into('idts.cap.Users').entries([
+      {
+        ID: PM_ID,
+        displayName: 'Atomic PM',
+        email: pmEmail,
+        role_code: 'PM',
+        active: true
+      },
+      {
+        ID: ACTIVE_USER_ID,
+        displayName: 'Atomic Alice',
+        email: 'atomic.alice@example.invalid',
+        role_code: 'DEVELOPER',
+        externalIdentityOrigin: 'fixture-origin',
+        externalIdentityIssuer: 'https://issuer.example.invalid',
+        externalIdentitySubject: 'fixture-subject',
+        externalIdentityKeyHash: ACTIVE_HASH,
+        active: true
+      }
+    ]))
+    const service = await cds.serve('UserAdministrationService').from('srv/user-admin.cds')
+    const administrator = new cds.User({ id: pmEmail, roles: ['authenticated-user', 'PM', 'UserAdmin'] })
+    const details = await service.send({ event: 'readActiveUserDetails', data: { userID: ACTIVE_USER_ID }, user: administrator })
+    const beforeUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: ACTIVE_USER_ID }))
+    const beforeAudits = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ targetUser_ID: ACTIVE_USER_ID }))
+    if (caseKey === 'IDTS110-F217') {
+      const updated = await service.send({
+        event: 'updateActiveUserDisplayName',
+        data: {
+          userID: ACTIVE_USER_ID,
+          displayName: '  Atomic Alice Updated  ',
+          reason: 'Correct the controlled display name.',
+          expectedModifiedAt: details.profileModifiedAt
+        },
+        user: administrator
+      })
+      assert.equal(updated.displayName, 'Atomic Alice Updated')
+      const afterUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: ACTIVE_USER_ID }))
+      assert.equal(afterUser.displayName, 'Atomic Alice Updated')
+      assert.equal(afterUser.email, beforeUser.email)
+      assert.equal(afterUser.role_code, beforeUser.role_code)
+      assert.equal(afterUser.active, beforeUser.active)
+      assert.equal(afterUser.externalIdentityOrigin, beforeUser.externalIdentityOrigin)
+      assert.equal(afterUser.externalIdentityIssuer, beforeUser.externalIdentityIssuer)
+      assert.equal(afterUser.externalIdentitySubject, beforeUser.externalIdentitySubject)
+      assert.equal(afterUser.externalIdentityKeyHash, beforeUser.externalIdentityKeyHash)
+      assert.notEqual(afterUser.modifiedAt, beforeUser.modifiedAt)
+      const auditsAfter = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ targetUser_ID: ACTIVE_USER_ID, action: 'USER_PROFILE_UPDATED', result: 'APPLIED' }))
+      assert.equal(auditsAfter.length, 1)
+      assert.equal(auditsAfter[0].beforeDisplayName, 'Atomic Alice')
+      assert.equal(auditsAfter[0].afterDisplayName, 'Atomic Alice Updated')
+      assert.equal(auditsAfter[0].profileChangeReason, 'Correct the controlled display name.')
+      return {
+        normalizedName: afterUser.displayName,
+        identityPreserved: afterUser.externalIdentityKeyHash === beforeUser.externalIdentityKeyHash,
+        appliedAudits: auditsAfter.length,
+        auditReason: auditsAfter[0].profileChangeReason
+      }
+    }
+    await expectRejected(service.send({
+      event: 'updateActiveUserDisplayName',
+      data: {
+        userID: ACTIVE_USER_ID,
+        displayName: 'Stale Atomic Name',
+        reason: 'Stale controlled request.',
+        expectedModifiedAt: '2020-01-01T00:00:00.000Z'
+      },
+      user: administrator
+    }), 409, 'USER_PROFILE_VERSION_CONFLICT')
+    const afterUser = await db.run(SELECT.one.from('idts.cap.Users').where({ ID: ACTIVE_USER_ID }))
+    const auditsAfter = await db.run(SELECT.from('idts.cap.UserIdentityAuditEvents').where({ targetUser_ID: ACTIVE_USER_ID }))
+    assert.deepEqual(afterUser, beforeUser)
+    assert.deepEqual(auditsAfter, beforeAudits)
+    return { unchanged: true, conflictCode: 'USER_PROFILE_VERSION_CONFLICT', auditsUnchanged: true }
+  } finally {
+    if (previousDb === undefined) delete cds.db
+    else cds.db = previousDb
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicSelector (options) {
+  if (!['IDTS110-F217', 'IDTS110-F218'].includes(options.caseKey)) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-user-admin-active-users.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      beforeState: { fixture: 'isolated-sqlite' },
+      afterState: await runAtomicActiveUserCase(options.caseKey),
+      reloadState: { readback: true },
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function runRegressionChecks () {
   const { deriveAccessState } = require('../../srv/user-admin/active-users')
 
   assert.equal(deriveAccessState({ userActive: true, identityLinked: true, requestStatus: 'ACTIVE' }), 'ACTIVE')
@@ -583,6 +707,15 @@ async function main () {
   }), 403, 'USER_ADMIN_REQUIRED')
 
   console.log('IDTS Active Users contract and aggregation: PASS')
+}
+
+async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
+  await runRegressionChecks()
 }
 
 main().catch(error => {

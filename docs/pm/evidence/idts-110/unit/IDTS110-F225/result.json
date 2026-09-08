@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F225",
+  "mentorNumber": 225,
+  "assertionId": "IDTS110-F225-A1",
+  "title": "PM creates normalized SAP Module catalog row",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:23.428Z",
+  "completedAt": "2026-09-05T10:05:24.270Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F225 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "PM/UserAdmin CREATE of CatalogSAPModules normalizes code/name, assigns a server UUID, persists active state, and records one safe CREATE audit after reload.",
+  "expectedResult": "PM/UserAdmin CREATE of CatalogSAPModules normalizes code/name, assigns a server UUID, persists active state, and records one safe CREATE audit after reload.",
+  "actualResult": "PM/UserAdmin CREATE of CatalogSAPModules normalizes code/name, assigns a server UUID, persists active state, and records one safe CREATE audit after reload.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "prepareCatalogCreate"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "recordCatalogAudit"
+    },
+    {
+      "file": "srv/user-admin.cds",
+      "symbol": "CatalogSAPModules"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "createdID": "server-assigned",
+    "audit": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F225-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F240R",
+  "mentorNumber": 250,
+  "title": "applied REVOKE creates one access delivery",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:16.511Z",
+  "completedAt": "2026-09-05T13:42:17.072Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F240R-A1",
+  "testFile": "scripts/qa/test-user-access-notifications.js",
+  "testCommand": "node scripts/qa/test-user-access-notifications.js --idts110-case=IDTS110-F240R --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An APPLIED REVOKE audit with eventType ACCESS_REVOKED creates one access delivery for the target user and does not create an inbox index.",
+  "expectedResult": "An APPLIED REVOKE audit with eventType ACCESS_REVOKED creates one access delivery for the target user and does not create an inbox index.",
+  "actualResult": "An APPLIED REVOKE audit with eventType ACCESS_REVOKED creates one access delivery for the target user and does not create an inbox index.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "writeUserAccessDelivery"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "ACCESS_EVENT_BY_ACTION"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "ACCESS_REVOKED"
+    }
+  ],
+  "beforeState": {
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliverySourceAuditEventIDs": [],
+    "deliveryTargetUserIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "deliveryErrorCodes": [],
+    "deliveryProviderMessages": [],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": []
+  },
+  "afterState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "df64eeaa-e4db-489c-9072-c0999dfae5c3"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000023"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SENT"
+    ],
+    "deliveryAttempts": [
+      1
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      "atomic-access-revoke-message"
+    ],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": [],
+    "emailOnly": true,
+    "duplicateCreated": false,
+    "senderCalls": 1
+  },
+  "reloadState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "df64eeaa-e4db-489c-9072-c0999dfae5c3"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000023"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SENT"
+    ],
+    "deliveryAttempts": [
+      1
+    ],
+    "deliveryErrorCodes": [
+      null
+    ],
+    "deliveryProviderMessages": [
+      "atomic-access-revoke-message"
+    ],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": []
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F240R-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "c20420cbbd431ef1c5aa8d375ca7bf5e84a2a5845fc7aeb05e5bd14c12c3f283",
+    "before-database.png": "7624735683e56843aaba95dd761e294d951fd01132d2c93cd3666817b26c75ea",
+    "after-database.png": "964f017d7662d5d9bea52678688fdf1121006d94789306459e32010b4ccb3589",
+    "reload-readback.png": "b865469effa307ed074b4ce4bcc096bef333df38f9c5a70076b8d6cb5ebac9e7"
+  },
+  "resultSha256": "d99f3afef6695a4e9a855c5891b6b86eaee56714d747717314ed5376b27cc1cc",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

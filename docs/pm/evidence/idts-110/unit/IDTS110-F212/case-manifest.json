@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F212",
+  "mentorNumber": 208,
+  "title": "local suspension revokes sessions and creates its access delivery",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:11.755Z",
+  "completedAt": "2026-09-05T10:05:12.505Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F212-A1",
+  "testFile": "scripts/qa/test-user-admin-access-lifecycle.js",
+  "testCommand": "node scripts/qa/test-user-admin-access-lifecycle.js --idts110-case=IDTS110-F212 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Suspending an ACTIVE user changes local state to SUSPENDED, revokes every unrevoked session, records QUEUED then APPLIED audit rows, and creates the APPLIED SUSPEND access delivery.",
+  "expectedResult": "Suspending an ACTIVE user changes local state to SUSPENDED, revokes every unrevoked session, records QUEUED then APPLIED audit rows, and creates the APPLIED SUSPEND access delivery.",
+  "actualResult": "Suspending an ACTIVE user changes local state to SUSPENDED, revokes every unrevoked session, records QUEUED then APPLIED audit rows, and creates the APPLIED SUSPEND access delivery.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "requestSuspend"
+    },
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "revokeActiveSessions"
+    },
+    {
+      "file": "srv/user-admin/access-lifecycle.js",
+      "symbol": "writeUserAccessDelivery"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite",
+    "state": "ACTIVE"
+  },
+  "afterState": {
+    "openSessionsBefore": 2,
+    "revokedSessionsAfter": 2,
+    "delivery": "ACCESS_SUSPENDED"
+  },
+  "reloadState": {
+    "persisted": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F212-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "ba856783e87fe9cc1f6c38b4d5b14f4c1b0e9984828967b686def01f54abcba2",
+    "before-database.png": "22e90e89de500b31c889f035f0d6f3a103dab02021ab95e12983997f33eac488",
+    "after-database.png": "ed5666018927b76f44e9ed6f601bb38faea2cc883db01233027f73a6a7a4194d",
+    "reload-readback.png": "29ec61c7ea4f5295696b04675ede8676c9094580649338b6ce01d2d78fbe9a47"
+  },
+  "resultSha256": "88b0c1bf08abcf9127aa1a18653d4a5a707674a9e3990064b73c0d30dc304fe9",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

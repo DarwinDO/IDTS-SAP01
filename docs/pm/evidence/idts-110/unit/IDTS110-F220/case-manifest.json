@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F220",
+  "mentorNumber": 217,
+  "title": "profile workload limit rejects nonpositive input",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:19.948Z",
+  "completedAt": "2026-09-05T10:05:19.949Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F220-A1",
+  "testFile": "scripts/qa/test-user-admin-developer-profile.js",
+  "testCommand": "node scripts/qa/test-user-admin-developer-profile.js --idts110-case=IDTS110-F220 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "normalizeDeveloperProfileInput rejects a zero or negative workloadLimit with INVALID_DEVELOPER_WORKLOAD_LIMIT.",
+  "expectedResult": "normalizeDeveloperProfileInput rejects a zero or negative workloadLimit with INVALID_DEVELOPER_WORKLOAD_LIMIT.",
+  "actualResult": "normalizeDeveloperProfileInput rejects a zero or negative workloadLimit with INVALID_DEVELOPER_WORKLOAD_LIMIT.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "normalizeDeveloperProfileInput"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-function",
+    "checks": 0
+  },
+  "afterState": {
+    "rejectedWorkloadLimits": [
+      0,
+      -1
+    ]
+  },
+  "reloadState": {
+    "fixture": "pure-function",
+    "checks": 1
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F220-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "d94d319296fada98a5b7a8a5ea9c2920b6be5d7c1d0818c0fc88416a6770f409",
+    "reload-readback.png": "3fd68cf2c93c08b9c0fe318af2de0cfc381d1e995116baf8cbc016e437261d5c"
+  },
+  "resultSha256": "ebe3f12cb8a83049133f60f600ef6bdd6e1e8361b492d27a68b66101075d7059",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

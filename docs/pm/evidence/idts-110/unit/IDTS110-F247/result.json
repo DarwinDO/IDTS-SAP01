@@ -1,0 +1,92 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F247",
+  "mentorNumber": 259,
+  "assertionId": "IDTS110-F247-A1",
+  "title": "scheduled discovery emits one Pending Assignment event",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:02.900Z",
+  "completedAt": "2026-09-05T15:59:03.778Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-my-notifications-scheduled.js",
+  "testCommand": "node scripts/qa/test-my-notifications-scheduled.js --idts110-case=IDTS110-F247 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "The protected scheduler creates one Pending Assignment event for each eligible PM recipient and no event for a non-PM target.",
+  "expectedResult": "The protected scheduler creates one Pending Assignment event for each eligible PM recipient and no event for a non-PM target.",
+  "actualResult": "The protected scheduler creates one Pending Assignment event for each eligible PM recipient and no event for a non-PM target.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "discoverScheduledNotifications"
+    },
+    {
+      "file": "srv/notification/scheduled.js",
+      "symbol": "isPendingAssignmentCandidate"
+    }
+  ],
+  "beforeState": {
+    "notificationCount": 0,
+    "notificationIDs": [],
+    "bugIDs": [],
+    "eventTypes": [],
+    "sourceKeys": [],
+    "recipientIDs": [],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "afterState": {
+    "notificationCount": 1,
+    "notificationIDs": [
+      "670a4b4f-6866-45e0-a8dc-8f7cfa631a92"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000006"
+    ],
+    "eventTypes": [
+      "PENDING_ASSIGNMENT"
+    ],
+    "sourceKeys": [
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000006:a1000000-0000-4000-8000-000000000001"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000001"
+    ],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "reloadState": {
+    "notificationCount": 1,
+    "notificationIDs": [
+      "670a4b4f-6866-45e0-a8dc-8f7cfa631a92"
+    ],
+    "bugIDs": [
+      "a3000000-0000-4000-8000-000000000006"
+    ],
+    "eventTypes": [
+      "PENDING_ASSIGNMENT"
+    ],
+    "sourceKeys": [
+      "PENDING_ASSIGNMENT:a3000000-0000-4000-8000-000000000006:a1000000-0000-4000-8000-000000000001"
+    ],
+    "recipientIDs": [
+      "a1000000-0000-4000-8000-000000000001"
+    ],
+    "deliveryCount": 0,
+    "deliveryStatuses": [],
+    "deliveryAttempts": []
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F247-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F229",
+  "mentorNumber": 230,
+  "title": "catalog deactivation blocks active responsibility or child references",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:28.267Z",
+  "completedAt": "2026-09-05T10:05:29.108Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F229-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-F229 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated business catalogs fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A deactivation with an approved reason returns CATALOG_HAS_ACTIVE_DEPENDENCIES when active responsibility or child-reference counts are nonzero, while bugReferenceCount remains informational and the row is unchanged.",
+  "expectedResult": "A deactivation with an approved reason returns CATALOG_HAS_ACTIVE_DEPENDENCIES when active responsibility or child-reference counts are nonzero, while bugReferenceCount remains informational and the row is unchanged.",
+  "actualResult": "A deactivation with an approved reason returns CATALOG_HAS_ACTIVE_DEPENDENCIES when active responsibility or child-reference counts are nonzero, while bugReferenceCount remains informational and the row is unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "CATALOG_HAS_ACTIVE_DEPENDENCIES"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "readCatalogImpactCounts"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "active": true,
+    "bugReferenceCount": 1,
+    "dependencyGuard": "CATALOG_HAS_ACTIVE_DEPENDENCIES"
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F229-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "8612b97fda167a3c7dd81811f29afb7a93111a53a2f7a95d8a23bf07c5a3c681",
+    "before-database.png": "c5aa1dd62a5eeb52f2601afa0c44c6addb290a8d996f12780c7c9e9c5b408e1d",
+    "after-database.png": "fd576d9ee24747458ed09d3f71ac183a75d8dd9972752ce6143c246ce1d9c4e0",
+    "reload-readback.png": "930dee1df7e0bff5f6935c94612dcb2d3bf9a8a78d19a5281b3a33b0a891e3c0"
+  },
+  "resultSha256": "57c06be16c6108f3bd1684a8120c5bd763b4e2be45da7e0bdded13cde7bc5378",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

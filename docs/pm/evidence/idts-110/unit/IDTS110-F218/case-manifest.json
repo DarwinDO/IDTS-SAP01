@@ -1,0 +1,68 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F218",
+  "mentorNumber": 215,
+  "title": "stale display name version is rejected without mutation",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:18.017Z",
+  "completedAt": "2026-09-05T10:05:18.760Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F218-A1",
+  "testFile": "scripts/qa/test-user-admin-active-users.js",
+  "testCommand": "node scripts/qa/test-user-admin-active-users.js --idts110-case=IDTS110-F218 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration profile fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A display-name update with an old modifiedAt returns USER_PROFILE_VERSION_CONFLICT and leaves the stored user and audit count unchanged.",
+  "expectedResult": "A display-name update with an old modifiedAt returns USER_PROFILE_VERSION_CONFLICT and leaves the stored user and audit count unchanged.",
+  "actualResult": "A display-name update with an old modifiedAt returns USER_PROFILE_VERSION_CONFLICT and leaves the stored user and audit count unchanged.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/active-users.js",
+      "symbol": "USER_PROFILE_VERSION_CONFLICT"
+    },
+    {
+      "file": "srv/user-admin/active-users.js",
+      "symbol": "expectedModifiedAt"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "unchanged": true,
+    "conflictCode": "USER_PROFILE_VERSION_CONFLICT",
+    "auditsUnchanged": true
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F218-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "d7c48beadeb1492b6d7004de1cba1765dfd866fd2d7c05afb4fba05ba6af741f",
+    "before-database.png": "f06badb1fd67c34c3cc0990457261b0e9a1aa1e96aab287c10f13c1f7b1c3e34",
+    "after-database.png": "57aa7a2f6c347633461a5a4dd6a62d949253b8ae51507917dc8a2743e7b595fa",
+    "reload-readback.png": "09fb509129081f57c6ee1c155af38a1c8147a58ae89205210b00aea60f103b2f"
+  },
+  "resultSha256": "a664f2bf057057f0178f3cd7e74c1c224f3963601d613fe7262aa1c56082826a",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

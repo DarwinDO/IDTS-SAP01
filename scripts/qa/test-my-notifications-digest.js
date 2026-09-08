@@ -15,7 +15,7 @@ const assert = require('node:assert/strict')
 const fs = require('node:fs')
 const path = require('node:path')
 const cds = require('@sap/cds')
-const { INSERT, SELECT, UPDATE } = cds.ql
+const { DELETE, INSERT, SELECT, UPDATE } = cds.ql
 
 const { normalizeEmailConfig } = require('../../srv/email/config')
 const {
@@ -26,6 +26,12 @@ const {
 } = require('../../srv/notification/digest')
 const { processEmailOutboxBatch } = require('../../srv/email/worker')
 const { processNotificationSchedules } = require('../../srv/notification/scheduled')
+const {
+  formatAtomicMarker,
+  readAtomicOptions,
+  runAtomicCase,
+  runAtomicUnavailableCase
+} = require('./idts110-atomic-runner')
 
 const IDS = Object.freeze({
   pm: 'b1000000-0000-4000-8000-000000000001',
@@ -86,7 +92,33 @@ async function count (db, entity, where = {}) {
   return Number(row?.count || 0)
 }
 
+function readDefinition (caseKey) {
+  const catalog = JSON.parse(fs.readFileSync(path.join(__dirname, '../../docs/qa/idts-110-unit-test-catalog.json'), 'utf8'))
+  const definition = catalog.cases.find(row => row.caseId === caseKey)
+  if (!definition) throw new Error(`Unknown IDTS-110 case ${caseKey}`)
+  return definition
+}
+
+const digestAtomicCases = new Map([
+  ['IDTS110-F250', runAtomicDigestPersonaCase],
+  ['IDTS110-F250L', runAtomicDigestOrderingCase],
+  ['IDTS110-F250M', runAtomicDigestLimitCase],
+  ['IDTS110-F250Q', runAtomicDigestLinkCase],
+  ['IDTS110-F250R', runAtomicDigestRawOmissionCase],
+  ['IDTS110-F251', runAtomicDigestUniqueCase],
+  ['IDTS110-F251R', runAtomicDigestPageResumeCase],
+  ['IDTS110-F252', () => runAtomicDigestPersonaSendCase('inactive')],
+  ['IDTS110-F252R', () => runAtomicDigestPersonaSendCase('role')],
+  ['IDTS110-F252P', () => runAtomicDigestPersonaSendCase('profile')],
+  ['IDTS110-F253', runAtomicDigestFailureCase]
+])
+
 async function main () {
+  const options = readAtomicOptions()
+  if (options.caseKey) {
+    await runAtomicSelector(options)
+    return
+  }
   const source = fs.readFileSync(path.join(__dirname, '../../srv/notification/digest.js'), 'utf8')
   assert.match(source, /Intl\.DateTimeFormat\(['"]en-CA['"],\s*\{\s*timeZone:\s*['"]Asia\/Bangkok['"]/,
     'digest date derivation is explicitly Bangkok-local')
@@ -705,6 +737,496 @@ async function main () {
   console.log('IDTS My Notifications digest contract: PASS')
 }
 
+async function runAtomicSelector (options) {
+  assert.equal(digestAtomicCases.size, 11)
+  assert.deepEqual([...digestAtomicCases.keys()], [
+    'IDTS110-F250', 'IDTS110-F250L', 'IDTS110-F250M', 'IDTS110-F250Q', 'IDTS110-F250R',
+    'IDTS110-F251', 'IDTS110-F251R', 'IDTS110-F252', 'IDTS110-F252R', 'IDTS110-F252P', 'IDTS110-F253'
+  ])
+  const executeCase = digestAtomicCases.get(options.caseKey)
+  if (!executeCase) {
+    await runAtomicUnavailableCase({ ...options, plannedTestFile: 'scripts/qa/test-my-notifications-digest.js' })
+    return
+  }
+  const definition = readDefinition(options.caseKey)
+  const result = await runAtomicCase({
+    definition,
+    assertionId: `${options.caseKey}-A1`,
+    baselineSha: options.baselineSha,
+    executor: options.executor,
+    execute: async () => ({
+      ...(await executeCase()),
+      assertionPassed: true,
+      actualResult: definition.expectedResult,
+      evidenceIds: [`${options.caseKey}-RESULT`]
+    })
+  })
+  console.log(formatAtomicMarker(result))
+  process.exitCode = result.status === 'PASS' ? 0 : 1
+}
+
+async function createDigestAtomicFixture () {
+  const db = await isolatedDigestDatabase()
+  await clearDigestDomainData(db)
+  await db.run(INSERT.into('idts.cap.Users').entries([
+    user(IDS.pm, 'Digest PM', 'digest-pm@example.test', 'PM'),
+    user(IDS.developer, 'Digest Developer', 'digest-developer@example.test', 'DEVELOPER'),
+    user(IDS.tester, 'Digest Tester', 'digest-tester@example.test', 'TESTER'),
+    user(IDS.idle, 'Digest Idle', 'digest-idle@example.test', 'TESTER')
+  ]))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries([
+    {
+      ID: IDS.developerProfile,
+      user_ID: IDS.developer,
+      availabilityStatus_code: 'AVAILABLE',
+      workloadLimit: 5,
+      active: true
+    },
+    {
+      ID: IDS.strayTesterProfile,
+      user_ID: IDS.tester,
+      availabilityStatus_code: 'AVAILABLE',
+      workloadLimit: 5,
+      active: true
+    }
+  ]))
+  await db.run(INSERT.into('idts.cap.Bugs').entries([
+    bug(IDS.pending, 'BUG-DIGEST-PENDING', 'LOW', 'MINOR', '2026-08-27T00:00:00.000Z', null, IDS.pm, null, 'PENDING_ASSIGNMENT'),
+    bug(IDS.urgent, 'BUG-DIGEST-CRITICAL', 'CRITICAL', 'BLOCKER', '2026-08-27T00:00:00.000Z', null, IDS.developer, IDS.developerProfile, 'ASSIGNED'),
+    bug(IDS.developerOverdue, 'BUG-DIGEST-DEVELOPER-OVERDUE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, IDS.developerProfile, 'ASSIGNED'),
+    bug(IDS.testerAwaiting, 'BUG-DIGEST-TESTER-AWAITING', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-09-04', IDS.tester, null, 'RETEST_REQUIRED', 'BUG-DIGEST-TESTER-AWAITING digest fixture', 'TESTER', IDS.tester),
+    bug(IDS.closed, 'BUG-DIGEST-CLOSED', 'CRITICAL', 'BLOCKER', '2026-08-26T00:00:00.000Z', '2026-08-27', IDS.pm, null, 'CLOSED'),
+    bug(IDS.future, 'BUG-DIGEST-FUTURE', 'CRITICAL', 'BLOCKER', '2026-08-28T02:00:00.000Z', null, IDS.pm, null, 'ASSIGNED'),
+    bug(IDS.unsafe, '<script>alert(1)</script>', 'MEDIUM', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, IDS.developerProfile, 'ASSIGNED', '<img src=x onerror=alert(2)>'),
+    bug(IDS.pendingTransition, 'BUG-DIGEST-PENDING-RECENT', 'LOW', 'MINOR', '2026-08-20T00:00:00.000Z', null, IDS.pm, null, 'PENDING_ASSIGNMENT', 'Pending Assignment was entered recently', 'PM'),
+    bug(IDS.roleMismatch, 'BUG-DIGEST-ROLE-MISMATCH', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.tester, null, 'ASSIGNED', 'Mismatched next processor role', 'DEVELOPER'),
+    bug(IDS.strayRetest, 'BUG-DIGEST-STRAY-RETEST', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, null, 'ASSIGNED', 'Retest owner on wrong status', 'DEVELOPER', IDS.tester),
+    bug(IDS.strayProfile, 'BUG-DIGEST-STRAY-PROFILE', 'HIGH', 'MAJOR', '2026-08-27T00:00:00.000Z', '2026-08-27', null, IDS.strayTesterProfile, 'ASSIGNED', 'Tester has a developer profile', null)
+  ]))
+  await addPendingAssignmentHistory(db, IDS.pendingTransition)
+  return db
+}
+
+async function clearDigestDomainData (db) {
+  for (const entity of [
+    'idts.cap.NotificationDigestDeliveries',
+    'idts.cap.NotificationDeliveries',
+    'idts.cap.Notifications',
+    'idts.cap.HistoryLogs',
+    'idts.cap.HistoryEvents',
+    'idts.cap.Bugs',
+    'idts.cap.DeveloperProfiles',
+    'idts.cap.Users'
+  ]) await db.run(DELETE.from(entity))
+}
+
+function digestSnapshotState (snapshot) {
+  return {
+    recipient: snapshot.recipientID,
+    businessDate: snapshot.businessDate,
+    digestType: snapshot.digestType,
+    itemCount: snapshot.itemCount,
+    renderedCount: snapshot.items.length,
+    itemIDs: snapshot.items.map(item => item.ID),
+    hasQueueLink: /exclude_closed=true/.test(snapshot.textBody) || /exclude_closed=true/.test(snapshot.htmlBody)
+  }
+}
+
+async function runAtomicDigestPersonaCase () {
+  const db = await createDigestAtomicFixture()
+  try {
+    const beforeState = {
+      bugCount: await count(db, 'idts.cap.Bugs'),
+      digestDeliveryCount: await count(db, 'idts.cap.NotificationDigestDeliveries')
+    }
+    const snapshots = new Map()
+    for (const [ID, role] of [[IDS.pm, 'PM'], [IDS.developer, 'DEVELOPER'], [IDS.tester, 'TESTER']]) {
+      snapshots.set(role, await buildDigestSnapshot({ tx: db, recipient: { ID, role_code: role }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 }))
+    }
+    const idle = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.idle, role_code: 'TESTER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    const pm = snapshots.get('PM')
+    const developer = snapshots.get('DEVELOPER')
+    const tester = snapshots.get('TESTER')
+    assert.ok(pm?.items.some(item => item.ID === IDS.pending), 'PM sees Pending Assignment work')
+    assert.ok(pm?.items.some(item => item.ID === IDS.urgent), 'PM sees Critical/Blocker work')
+    assert.doesNotMatch(pm.textBody, /BUG-DIGEST-CLOSED|BUG-DIGEST-FUTURE/, 'PM excludes Closed and future Bugs')
+    assert.ok(developer?.items.some(item => item.ID === IDS.developerOverdue), 'Developer sees assigned actionable work')
+    assert.ok(developer?.items.some(item => item.ID === IDS.strayRetest), 'Developer sees aligned action-owner work')
+    assert.doesNotMatch(developer.textBody, /BUG-DIGEST-PENDING|BUG-DIGEST-TESTER-AWAITING/, 'Developer excludes other personas')
+    assert.ok(tester?.items.some(item => item.ID === IDS.testerAwaiting), 'Tester sees only its retest action')
+    assert.doesNotMatch(tester.textBody, /BUG-DIGEST-DEVELOPER-OVERDUE|BUG-DIGEST-PENDING|BUG-DIGEST-ROLE-MISMATCH/, 'Tester excludes other roles and mismatched action owners')
+    assert.equal(idle, null, 'an active recipient without actionable work has no empty digest')
+    const snapshotState = Object.fromEntries([...snapshots].map(([role, snapshot]) => [role, digestSnapshotState(snapshot)]))
+    const afterState = {
+      pmItemCount: snapshotState.PM.itemCount,
+      developerItemCount: snapshotState.DEVELOPER.itemCount,
+      testerItemCount: snapshotState.TESTER.itemCount,
+      pmItemIDs: snapshotState.PM.itemIDs,
+      developerItemIDs: snapshotState.DEVELOPER.itemIDs,
+      testerItemIDs: snapshotState.TESTER.itemIDs,
+      idleSnapshot: null
+    }
+    const reloadState = {
+      pmItemIDs: [],
+      developerItemIDs: [],
+      testerItemIDs: []
+    }
+    for (const [ID, role] of [[IDS.pm, 'PM'], [IDS.developer, 'DEVELOPER'], [IDS.tester, 'TESTER']]) {
+      const snapshot = await buildDigestSnapshot({ tx: db, recipient: { ID, role_code: role }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+      const roleKey = role.toLowerCase()
+      reloadState[`${roleKey}ItemIDs`] = snapshot.items.map(item => item.ID)
+      assert.deepEqual(reloadState[`${roleKey}ItemIDs`], afterState[`${roleKey}ItemIDs`], `${role} persona snapshot is stable on reload`)
+    }
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicDigestOrderingCase () {
+  const db = await createDigestAtomicFixture()
+  try {
+    const snapshot = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    assert.deepEqual(snapshot.items.slice(0, 4).map(item => item.ID), [IDS.urgent, IDS.developerOverdue, IDS.strayRetest, IDS.unsafe],
+      'digest applies priority, severity, due-date, creation-time, and ID ordering')
+    assert.equal(new Set(snapshot.items.map(item => item.ID)).size, snapshot.items.length, 'digest ordering does not duplicate items')
+    const beforeState = { itemCount: snapshot.itemCount, firstID: snapshot.items[0]?.ID || null }
+    const afterState = { itemIDs: snapshot.items.map(item => item.ID), priorities: snapshot.items.map(item => item.priority) }
+    const reload = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    const reloadState = { itemIDs: reload.items.map(item => item.ID), priorities: reload.items.map(item => item.priority) }
+    assert.deepEqual(reloadState, afterState, 'ordered digest is deterministic on reload')
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function addMoreDigestBugs (db, countToAdd = 21) {
+  await db.run(INSERT.into('idts.cap.Bugs').entries(Array.from({ length: countToAdd }, (_, index) =>
+    bug(uuidFromIndex(400 + index), `BUG-DIGEST-MORE-${String(index + 1).padStart(2, '0')}`, 'LOW', 'MINOR', '2026-08-27T00:00:00.000Z', '2026-08-27', IDS.developer, IDS.developerProfile, 'ASSIGNED'))))
+}
+
+async function runAtomicDigestLimitCase () {
+  const db = await createDigestAtomicFixture()
+  try {
+    const beforeSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    await addMoreDigestBugs(db)
+    const afterAddSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    const snapshot = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    assert.equal(snapshot.itemCount, 25, 'digest keeps the full actionable itemCount')
+    assert.equal(snapshot.items.length, 20, 'digest renders at most the normalized limit')
+    assert.match(snapshot.textBody, /and 5 more/i, 'digest reports the unrendered remainder')
+    assert.match(snapshot.htmlBody, /exclude_closed=true/, 'digest remainder exposes its filtered queue link')
+    const capped = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 50 })
+    assert.equal(capped.items.length, 20, 'caller limit cannot exceed the digest maximum')
+    const afterSnapshotSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    const reloaded = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    const reloadSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    assert.deepEqual(reloaded.items.map(item => item.ID), snapshot.items.map(item => item.ID),
+      'the limited digest source result is stable after a fresh read')
+    const beforeState = { sourceBugCount: beforeSourceRows.length }
+    const afterState = {
+      sourceBugCountAfterInsert: afterAddSourceRows.length,
+      sourceBugCountAfterSnapshot: afterSnapshotSourceRows.length,
+      itemCount: snapshot.itemCount,
+      renderedCount: snapshot.items.length,
+      remainder: snapshot.itemCount - snapshot.items.length,
+      cappedRenderedCount: capped.items.length
+    }
+    const reloadState = {
+      sourceBugCount: reloadSourceRows.length,
+      itemCount: reloaded.itemCount,
+      renderedCount: reloaded.items.length,
+      remainder: reloaded.itemCount - reloaded.items.length
+    }
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+function assertAllowlistedDigestQueueLink (link, recipientID) {
+  assert.equal(typeof link, 'string', 'digest queue link is a string')
+  const normalizedLink = link.replace(/&amp;/g, '&')
+  assert.doesNotMatch(normalizedLink, /^javascript:/i, 'digest queue link is not executable')
+  assert.doesNotMatch(normalizedLink, /^https?:\/\//i, 'digest queue link is not an external absolute URL')
+  assert.match(normalizedLink, /^\//, 'digest queue link is relative to the production application')
+  const parsed = new URL(normalizedLink, 'https://idts.example.test')
+  assert.equal(parsed.origin, 'https://idts.example.test', 'digest queue link resolves only against the expected local app origin')
+  assert.equal(parsed.pathname, '/idtsbugmanagementui/index.html', 'digest queue link uses the production Bug Management app path')
+  assert.equal(parsed.search, '', 'digest queue link has no outer URL query parameters')
+  assert.match(parsed.hash, /^#\/Bugs\?/, 'digest queue link uses the production Bugs queue hash route')
+  const queryText = parsed.hash.slice('#/Bugs?'.length)
+  const params = new URLSearchParams(queryText)
+  assert.deepEqual([...params.keys()], ['exclude_closed', 'nextProcessorUser_ID'],
+    'digest queue hash contains only the allowlisted filters')
+  assert.equal(params.get('exclude_closed'), 'true', 'digest queue excludes Closed Bugs')
+  assert.equal(params.get('nextProcessorUser_ID'), recipientID, 'digest queue is filtered to the expected developer')
+  assert.equal(params.toString(), `exclude_closed=true&nextProcessorUser_ID=${encodeURIComponent(recipientID)}`,
+    'digest queue filters have the exact production ordering and encoding')
+  return parsed
+}
+
+async function runAtomicDigestLinkCase () {
+  const db = await createDigestAtomicFixture()
+  try {
+    const beforeSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    await addMoreDigestBugs(db)
+    const afterAddSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    const snapshot = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    const allLinks = [...snapshot.htmlBody.matchAll(/href="([^"]+)"/g)].map(match => match[1])
+    const itemBlocks = [...snapshot.htmlBody.matchAll(/<li[^>]*>[\s\S]*?<\/li>/g)].map(match => match[0])
+    const itemLinks = itemBlocks.map(block => block.match(/href="([^"]+)"/)?.[1] || null)
+    const bugLinks = allLinks.filter(link => link.includes('#/Bugs('))
+    assert.equal(itemBlocks.length, snapshot.items.length, 'each rendered digest item has one rendered list item')
+    assert.deepEqual(itemLinks, bugLinks, 'the rendered Bug links belong only to digest items')
+    assert.ok(itemLinks.every(link => /^\/idtsbugmanagementui\/index\.html#\/Bugs\([^)]*,IsActiveEntity=true\)$/.test(link)),
+      'Bug links use only the allowlisted Object Page route')
+    const appBase = itemLinks[0].slice(0, itemLinks[0].indexOf('#/Bugs('))
+    snapshot.items.forEach((item, index) => {
+      assert.equal(itemLinks[index], `${appBase}#/Bugs(ID=${encodeURIComponent(item.ID)},IsActiveEntity=true)`,
+        `digest item ${item.ID} binds to its exact Bug Object Page link`)
+    })
+    const queueLinks = [...snapshot.htmlBody.matchAll(/href="([^"]*exclude_closed=true[^"]*)"/g)].map(match => match[1])
+    assert.equal(queueLinks.length, 1, 'the remainder has one allowlisted queue link')
+    assertAllowlistedDigestQueueLink(queueLinks[0], IDS.developer)
+    for (const [unsafeLink, reason] of [
+      ['/other-route#/Bugs?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer, 'unexpected path'],
+      ['/idtsbugmanagementui/index.html#/Other?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer, 'unexpected hash route'],
+      ['/idtsbugmanagementui/index.html#/Bugs?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer + '&unexpected=true', 'unexpected query parameter'],
+      ['javascript:alert(1)', 'javascript scheme'],
+      ['https://evil.example.test/idtsbugmanagementui/index.html#/Bugs?exclude_closed=true&nextProcessorUser_ID=' + IDS.developer, 'external origin']
+    ]) {
+      assert.throws(() => assertAllowlistedDigestQueueLink(unsafeLink, IDS.developer), /production|relative|allowlisted|unexpected|external|executable/i,
+        `queue link rejects ${reason}`)
+    }
+    assert.doesNotMatch(snapshot.htmlBody, /javascript:|https?:\/\//i, 'digest links contain no external or script URL')
+    const afterSnapshotSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    const reloaded = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    const reloadSourceRows = await db.run(SELECT.from('idts.cap.Bugs').columns('ID').orderBy('ID asc'))
+    const reloadItemBlocks = [...reloaded.htmlBody.matchAll(/<li[^>]*>[\s\S]*?<\/li>/g)].map(match => match[0])
+    const reloadItemLinks = reloadItemBlocks.map(block => block.match(/href="([^"]+)"/)?.[1] || null)
+    assert.deepEqual(reloaded.items.map(item => item.ID), snapshot.items.map(item => item.ID), 'Bug source ordering survives a fresh link read')
+    assert.deepEqual(reloadItemLinks, itemLinks, 'Bug links survive a fresh digest render unchanged')
+    const beforeState = { sourceBugCount: beforeSourceRows.length }
+    const afterState = {
+      sourceBugCountAfterInsert: afterAddSourceRows.length,
+      sourceBugCountAfterSnapshot: afterSnapshotSourceRows.length,
+      renderedItemCount: snapshot.items.length,
+      bugLinkCount: itemLinks.length,
+      queueLinkCount: queueLinks.length
+    }
+    const reloadState = {
+      sourceBugCount: reloadSourceRows.length,
+      renderedItemCount: reloaded.items.length,
+      bugLinkCount: reloadItemLinks.length
+    }
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicDigestRawOmissionCase () {
+  const db = await createDigestAtomicFixture()
+  try {
+    const rawFields = ['description', 'actualResult', 'expectedResult', 'stepsToReproduce', 'environmentDetail']
+    const beforeBug = await db.run(SELECT.one.from('idts.cap.Bugs').where({ ID: IDS.unsafe }))
+    await db.run(UPDATE('idts.cap.Bugs').set({
+      description: 'RAW-DIGEST-DESCRIPTION',
+      actualResult: 'RAW-DIGEST-ACTUAL',
+      expectedResult: 'RAW-DIGEST-EXPECTED',
+      stepsToReproduce: 'RAW-DIGEST-STEPS',
+      environmentDetail: 'RAW-DIGEST-ENVIRONMENT'
+    }).where({ ID: IDS.unsafe }))
+    const afterBug = await db.run(SELECT.one.from('idts.cap.Bugs').where({ ID: IDS.unsafe }))
+    const snapshot = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    const rawValues = rawFields.map(field => afterBug[field])
+    for (const rawValue of rawValues) {
+      assert.doesNotMatch(JSON.stringify(snapshot.items), new RegExp(rawValue))
+      assert.doesNotMatch(snapshot.textBody, new RegExp(rawValue))
+      assert.doesNotMatch(snapshot.htmlBody, new RegExp(rawValue))
+    }
+    const safeItemKeys = ['ID', 'bugNumber', 'title', 'priority', 'severity', 'reason', 'dueDate', 'createdAt']
+    assert.ok(snapshot.items.length > 0, 'raw-field fixture remains actionable')
+    for (const item of snapshot.items) {
+      assert.deepEqual(Object.keys(item).sort(), safeItemKeys.slice().sort(), 'snapshot item exposes exactly the safe allowlist')
+      assert.ok(rawFields.every(field => !Object.prototype.hasOwnProperty.call(item, field)), 'snapshot item omits every raw source field')
+    }
+    assert.ok(snapshot.textBody.includes('<script>alert(1)</script>'), 'safe text keeps the source title readable')
+    assert.match(snapshot.htmlBody, /&lt;script&gt;|&lt;img/i, 'HTML escapes hostile source text')
+    assert.doesNotMatch(snapshot.htmlBody, /<script>|<img\b/i, 'raw source fields cannot inject markup')
+    const afterSnapshot = await buildDigestSnapshot({ tx: db, recipient: { ID: IDS.developer, role_code: 'DEVELOPER' }, businessDate: BUSINESS_DATE, snapshotAt: SNAPSHOT_AT, limit: 20 })
+    const reloadedBug = await db.run(SELECT.one.from('idts.cap.Bugs').where({ ID: IDS.unsafe }))
+    assert.deepEqual(afterSnapshot.items.map(item => item.ID), snapshot.items.map(item => item.ID), 'safe digest source result survives a fresh read')
+    const beforeState = { rawSourceFields: rawFields.filter(field => beforeBug[field] !== undefined).sort() }
+    const afterState = {
+      persistedRawSourceFields: rawFields.filter(field => reloadedBug[field] === afterBug[field]).sort(),
+      snapshotItemKeys: [...new Set(snapshot.items.flatMap(item => Object.keys(item)))].sort(),
+      snapshotItemCount: snapshot.itemCount
+    }
+    const reloadState = {
+      persistedBugID: reloadedBug.ID,
+      snapshotItemKeys: [...new Set(afterSnapshot.items.flatMap(item => Object.keys(item)))].sort(),
+      rawValuesInItems: rawValues.filter(value => JSON.stringify(afterSnapshot.items).includes(value)).length
+    }
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicDigestUniqueCase () {
+  return assertUniqueConflictIsolation(true)
+}
+
+async function runAtomicDigestPageResumeCase () {
+  return assertBoundedDigestPagesAndRestart(true)
+}
+
+async function runAtomicDigestPersonaSendCase (change) {
+  const db = await isolatedDigestDatabase()
+  await clearDigestDomainData(db)
+  const deliveryID = `d6000000-0000-4000-8000-${change === 'inactive' ? '000000000001' : change === 'role' ? '000000000002' : '000000000003'}`
+  await db.run(INSERT.into('idts.cap.Users').entries(user(IDS.tester, 'Send race reporter', 'send-race-reporter@example.test', 'TESTER')))
+  await db.run(INSERT.into('idts.cap.Users').entries(user(IDS.developer, 'Send race recipient', 'send-race-recipient@example.test', 'DEVELOPER')))
+  await db.run(INSERT.into('idts.cap.DeveloperProfiles').entries({
+    ID: IDS.developerProfile,
+    user_ID: IDS.developer,
+    availabilityStatus_code: 'AVAILABLE',
+    workloadLimit: 5,
+    active: true
+  }))
+  await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries({
+    ID: deliveryID,
+    recipient_ID: IDS.developer,
+    businessDate: '2026-09-03',
+    digestType: digestTypeFor('DEVELOPER'),
+    windowStart: '2026-09-02T17:00:00.000Z',
+    windowEnd: '2026-09-03T01:00:00.000Z',
+    snapshotAt: '2026-09-03T01:00:00.000Z',
+    itemCount: 1,
+    subject: 'Stored persona snapshot',
+    textBody: 'Stored persona snapshot',
+    htmlBody: '<p>Stored persona snapshot</p>',
+    status_code: 'PENDING',
+    attemptCount: 0
+  }))
+  try {
+    const beforeState = { status: 'PENDING', recipientActive: true, role: 'DEVELOPER', profileActive: true, senderCalls: 0 }
+    let injected = false
+    const tx = {
+      run: async query => {
+        const updateData = JSON.stringify(query.UPDATE?.data || query.UPDATE?.with || {})
+        const isClaim = updateData.includes('lockToken') && updateData.includes('lockedUntil') && !updateData.includes('status_code')
+        const result = await db.run(query)
+        if (isClaim && !injected) {
+          injected = true
+          if (change === 'inactive') await db.run(UPDATE('idts.cap.Users').set({ active: false }).where({ ID: IDS.developer }))
+          if (change === 'role') await db.run(UPDATE('idts.cap.Users').set({ role_code: 'TESTER' }).where({ ID: IDS.developer }))
+          if (change === 'profile') await db.run(UPDATE('idts.cap.DeveloperProfiles').set({ active: false }).where({ ID: IDS.developerProfile }))
+        }
+        return result
+      }
+    }
+    let senderCalls = 0
+    const result = await processNotificationDigestDeliveries({
+      tx,
+      config: enabledConfig({ batchSize: 1 }),
+      sendMail: async () => { senderCalls += 1; return { messageId: 'must-not-send' } },
+      now: new Date('2026-09-03T01:01:00.000Z'),
+      workerID: `atomic-${change}-persona-worker`
+    })
+    const row = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({ ID: deliveryID }))
+    assert.equal(result.sent, 0)
+    assert.equal(result.skipped, 1, `${change} persona change skips the claimed digest`)
+    assert.equal(row?.status_code, 'SKIPPED')
+    assert.equal(senderCalls, 0, `${change} persona change makes no provider call`)
+    if (change === 'role' || change === 'profile') assert.equal(row?.lastErrorCode, 'RECIPIENT_PERSONA_INVALID')
+    const afterState = {
+      status: row?.status_code,
+      lastErrorCode: row?.lastErrorCode,
+      attemptCount: Number(row?.attemptCount || 0),
+      lockCleared: !row?.lockToken && !row?.lockedUntil,
+      senderCalls
+    }
+    const reloadRow = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({ ID: deliveryID }))
+    const reloadState = { status: reloadRow?.status_code, lastErrorCode: reloadRow?.lastErrorCode, senderCalls }
+    return { beforeState, afterState, reloadState }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
+async function runAtomicDigestFailureCase () {
+  const db = await isolatedDigestDatabase()
+  await clearDigestDomainData(db)
+  const deliveryID = 'd7000000-0000-4000-8000-000000000001'
+  const now = new Date('2026-09-03T01:01:00.000Z')
+  await db.run(INSERT.into('idts.cap.Users').entries(user(IDS.pm, 'Failure PM', 'failure-pm@example.test', 'PM')))
+  await db.run(INSERT.into('idts.cap.NotificationDigestDeliveries').entries({
+    ID: deliveryID,
+    recipient_ID: IDS.pm,
+    businessDate: '2026-09-03',
+    digestType: digestTypeFor('PM'),
+    windowStart: '2026-09-02T17:00:00.000Z',
+    windowEnd: now.toISOString(),
+    snapshotAt: now.toISOString(),
+    itemCount: 1,
+    subject: 'Stored failure snapshot',
+    textBody: 'Stored failure snapshot text',
+    htmlBody: '<p>Stored failure snapshot text</p>',
+    status_code: 'PENDING',
+    attemptCount: 0
+  }))
+  try {
+    const before = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({ ID: deliveryID }))
+    const beforeState = { status: before.status_code, attemptCount: Number(before.attemptCount || 0), bodyLength: before.textBody.length }
+    let senderCalls = 0
+    const result = await processNotificationDigestDeliveries({
+      tx: db,
+      config: enabledConfig({ batchSize: 1, maxRetryCount: 2 }),
+      sendMail: async () => {
+        senderCalls += 1
+        throw Object.assign(new Error('smtp.private.local digest-test-password'), { code: 'ESOCKET' })
+      },
+      now,
+      workerID: 'atomic-digest-failure-worker'
+    })
+    assert.equal(result.failed, 1)
+    const after = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({ ID: deliveryID }))
+    assert.equal(after.status_code, 'FAILED')
+    assert.equal(after.lastErrorCode, 'ESOCKET')
+    assert.equal(after.lastErrorSummary, 'SMTP connection failed.')
+    assert.equal(Number(after.attemptCount), 1)
+    assert.ok(after.nextAttemptAt && Date.parse(after.nextAttemptAt) > now.getTime())
+    assert.ok(Date.parse(after.nextAttemptAt) - now.getTime() <= 24 * 60 * 60 * 1000, 'retry time remains bounded')
+    assert.equal(after.lockToken, null)
+    assert.equal(after.lockedUntil, null)
+    assert.equal(after.textBody, before.textBody, 'failed retry keeps the stored text snapshot unchanged')
+    assert.equal(after.htmlBody, before.htmlBody, 'failed retry keeps the stored HTML snapshot unchanged')
+    assert.equal(senderCalls, 1)
+    const afterState = {
+      status: after.status_code,
+      lastErrorCode: after.lastErrorCode,
+      retryScheduled: true,
+      lockCleared: !after.lockToken && !after.lockedUntil,
+      snapshotUnchanged: after.textBody === before.textBody && after.htmlBody === before.htmlBody,
+      senderCalls
+    }
+    const reload = await db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').where({ ID: deliveryID }))
+    const reloadState = { status: reload.status_code, lastErrorCode: reload.lastErrorCode, retryScheduled: Boolean(reload.nextAttemptAt), lockCleared: !reload.lockToken && !reload.lockedUntil }
+    return {
+      beforeState,
+      afterState,
+      reloadState,
+      limitation: 'Injected sender failure is local-only; no real provider or email delivery was attempted.'
+    }
+  } finally {
+    if (typeof db.disconnect === 'function') await db.disconnect()
+  }
+}
+
 function user (ID, displayName, email, role_code) {
   return { ID, displayName, email, role_code, active: true }
 }
@@ -868,8 +1390,9 @@ async function assertSendTimeAuthorizationRace () {
   assert.ok(boundaryProfileLocks.length >= 2, 'active-profile eligibility is re-read and locked at send time')
 }
 
-async function assertUniqueConflictIsolation () {
+async function assertUniqueConflictIsolation (clean = false) {
   const db = await isolatedDigestDatabase()
+  if (clean) await clearDigestDomainData(db)
   const conflictUserID = 'e7000000-0000-4000-8000-000000000001'
   const laterUserID = 'e7000000-0000-4000-8000-000000000002'
   const winnerID = 'e8000000-0000-4000-8000-000000000001'
@@ -899,6 +1422,23 @@ async function assertUniqueConflictIsolation () {
     htmlBody: '<p>Existing winner</p>',
     status_code: 'PENDING',
     attemptCount: 0
+  }))
+  const deliveryColumns = [
+    'ID', 'recipient_ID', 'businessDate', 'digestType', 'windowStart', 'windowEnd', 'snapshotAt',
+    'itemCount', 'subject', 'textBody', 'htmlBody', 'status_code', 'attemptCount', 'lastErrorCode', 'lastErrorSummary'
+  ]
+  const deliveryState = row => row && Object.fromEntries([
+    'ID', 'recipient_ID', 'businessDate', 'digestType', 'itemCount', 'subject', 'status_code', 'attemptCount'
+  ].map(field => [field, row[field]]))
+  const deliveryComparable = row => row && Object.fromEntries(deliveryColumns.map(field => [field, row[field]]))
+  const readDelivery = where => db.run(SELECT.one.from('idts.cap.NotificationDigestDeliveries').columns(...deliveryColumns).where(where))
+  const key = { recipient_ID: conflictUserID, businessDate: date, digestType: digestTypeFor('PM') }
+  const winnerBefore = await readDelivery({ ID: winnerID })
+  const conflictRowsBefore = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns(...deliveryColumns).where(key))
+  const laterRowsBefore = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns(...deliveryColumns).where({
+    recipient_ID: laterUserID,
+    businessDate: date,
+    digestType: digestTypeFor('PM')
   }))
 
   const state = { conflictOccurred: false, winnerReads: 0, queriesAfterAbort: 0, rootCount: 0 }
@@ -963,12 +1503,46 @@ async function assertUniqueConflictIsolation () {
   assert.ok(result.created >= 1, 'a later recipient continues after the isolated unique conflict')
   assert.equal(state.queriesAfterAbort, 0, 'no query is issued after the simulated 23505 root abort')
   assert.ok(state.winnerReads >= 1, 'the exact winner is read through an independent healthy root')
-  assert.equal(await count(db, 'idts.cap.NotificationDigestDeliveries', { recipient_ID: laterUserID, businessDate: date }), 1,
-    'later recipient snapshot persists after an earlier exact-key conflict')
+  const conflictRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns(...deliveryColumns).where(key))
+  const laterRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns(...deliveryColumns).where({
+    recipient_ID: laterUserID,
+    businessDate: date,
+    digestType: digestTypeFor('PM')
+  }))
+  assert.equal(conflictRows.length, 1, 'the conflicting recipient/key has exactly one persisted row')
+  assert.equal(conflictRows[0]?.ID, winnerID, 'the exact pre-existing winner row ID is reused')
+  assert.deepEqual(deliveryComparable(conflictRows[0]), deliveryComparable(winnerBefore),
+    'the pre-existing winner row remains unchanged after conflict recovery')
+  assert.equal(laterRows.length, 1, 'later recipient continues with exactly one persisted row')
+  const reloadWinner = await readDelivery({ ID: winnerID })
+  const reloadLaterRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns(...deliveryColumns).where({
+    recipient_ID: laterUserID,
+    businessDate: date,
+    digestType: digestTypeFor('PM')
+  }))
+  return {
+    beforeState: {
+      winner: deliveryState(winnerBefore),
+      conflictRows: conflictRowsBefore.length,
+      laterRows: laterRowsBefore.length
+    },
+    afterState: {
+      schedulerResult: result,
+      winner: deliveryState(conflictRows[0]),
+      laterRows: laterRows.length,
+      queriesAfterAbort: state.queriesAfterAbort
+    },
+    reloadState: {
+      winner: deliveryState(reloadWinner),
+      laterRows: reloadLaterRows.length,
+      winnerUnchanged: JSON.stringify(deliveryComparable(reloadWinner)) === JSON.stringify(deliveryComparable(winnerBefore))
+    }
+  }
 }
 
-async function assertBoundedDigestPagesAndRestart () {
+async function assertBoundedDigestPagesAndRestart (clean = false) {
   const db = await isolatedDigestDatabase()
+  if (clean) await clearDigestDomainData(db)
   const users = Array.from({ length: 201 }, (_, index) => user(
     `ea000000-0000-4000-8000-${String(index + 1).padStart(12, '0')}`,
     `Bounded PM ${index + 1}`,
@@ -992,29 +1566,84 @@ async function assertBoundedDigestPagesAndRestart () {
     'Bounded page pending',
     'PM'
   )))
-  const state = { recipientPageQueries: 0, recipientPageSizes: [], bugPageSizes: [], rootRecipientSizes: [], failSecondPage: true }
+  const state = {
+    attempt: 1,
+    recipientPageQueries: 0,
+    recipientPageSizes: [],
+    recipientPageRuns: [],
+    bugPageSizes: [],
+    rootRecipientSizes: [],
+    failSecondPage: true
+  }
   const service = makeDigestPageService(db, state)
+  const readPersistedRows = () => db.run(SELECT.from('idts.cap.NotificationDigestDeliveries')
+    .columns('ID', 'recipient_ID', 'businessDate', 'digestType', 'itemCount', 'status_code')
+    .where({ businessDate: '2026-09-07', digestType: digestTypeFor('PM') })
+    .orderBy('recipient_ID asc'))
+  const beforePersistedRows = await readPersistedRows()
   await assert.rejects(
     () => scheduleNotificationDigests({ tx: service, now: new Date('2026-09-07T01:00:00.000Z') }),
     /late recipient page failure/,
     'late recipient page failure is observable'
   )
   const boundedRecipientIDs = new Set(users.map(row => row.ID))
-  const firstPageRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns('recipient_ID').where({ businessDate: '2026-09-07' }))
-  const firstPageCount = firstPageRows.filter(row => boundedRecipientIDs.has(row.recipient_ID)).length
+  const firstPersistedRows = await readPersistedRows()
+  const firstAttemptRuns = state.recipientPageRuns.filter(run => run.attempt === 1)
+  const firstPageRun = firstAttemptRuns.find(run => run.pageNumber === 1)
+  const failedPageRun = firstAttemptRuns.find(run => run.pageNumber === 2)
+  const firstPageIDs = new Set(firstPageRun.ids)
+  const firstPageEligibleIDs = new Set(firstPageRun.ids.filter(ID => boundedRecipientIDs.has(ID)))
+  const failedPageIDs = new Set(failedPageRun.ids)
+  const firstPageRows = firstPersistedRows.filter(row => firstPageIDs.has(row.recipient_ID))
+  const failedPageRows = firstPersistedRows.filter(row => failedPageIDs.has(row.recipient_ID))
+  const firstPageCount = firstPageRows.length
+  const missingFirstPageIDs = [...firstPageEligibleIDs].filter(ID => !firstPersistedRows.some(row => row.recipient_ID === ID))
   assert.ok(firstPageCount > 0 && firstPageCount < users.length,
     `the first recipient page remains committed after a late-page failure: ${firstPageCount}`)
+  if (clean) {
+    assert.equal(firstPageCount, firstPageEligibleIDs.size,
+      `persisted eligible first-page rows match the actual source page result; missing=${JSON.stringify(missingFirstPageIDs)}`)
+  }
+  assert.equal(failedPageRows.length, 0, 'the failed recipient page leaves no persisted rows')
+  assert.ok(failedPageRun.ids.length > 0, 'the failing recipient page was actually read')
   assert.ok(state.recipientPageSizes.every(size => size <= 100), 'recipient pages never exceed the bounded page size')
   assert.ok(state.bugPageSizes.length > 0 && state.bugPageSizes.every(size => size <= 500), 'Bug stream pages stay bounded')
 
   state.failSecondPage = false
   state.recipientPageQueries = 0
+  state.attempt = 2
   const rerun = await scheduleNotificationDigests({ tx: service, now: new Date('2026-09-07T01:30:00.000Z') })
+  const secondAttemptRuns = state.recipientPageRuns.filter(run => run.attempt === 2)
+  const retryPageRun = secondAttemptRuns.find(run => run.pageNumber === 2)
+  const completeRows = await readPersistedRows()
   assert.ok(rerun.reused >= firstPageCount && rerun.created >= users.length - firstPageCount, `restart reuses earlier page and creates all remaining snapshots: ${JSON.stringify(rerun)} firstPage=${firstPageCount} sizes=${JSON.stringify(state.recipientPageSizes)}`)
-  const completeRows = await db.run(SELECT.from('idts.cap.NotificationDigestDeliveries').columns('recipient_ID').where({ businessDate: '2026-09-07' }))
+  assert.deepEqual(retryPageRun.ids, failedPageRun.ids, 'the retry reads the same source recipient page after rollback')
   assert.equal(completeRows.filter(row => boundedRecipientIDs.has(row.recipient_ID)).length, users.length,
     'all recipients process without a silent aggregate cap')
+  if (clean) {
+    assert.equal(new Set(completeRows.map(row => row.recipient_ID)).size, users.length,
+      'the resumed digest pages leave one row per recipient')
+  }
   assert.ok(state.rootRecipientSizes.filter(Boolean).every(size => size <= 100), 'each committed root handles at most one recipient page')
+  return {
+    beforeState: {
+      persistedRowCount: beforePersistedRows.length,
+      sourceRecipientPageCount: 0
+    },
+    afterState: {
+      persistedRowCount: firstPersistedRows.length,
+      firstPagePersistedCount: firstPageRows.length,
+      failedPagePersistedCount: failedPageRows.length,
+      failedPageSourceCount: failedPageRun.ids.length
+    },
+    reloadState: {
+      persistedRowCount: completeRows.length,
+      uniqueRecipientCount: new Set(completeRows.map(row => row.recipient_ID)).size,
+      retriedPageSourceCount: retryPageRun.ids.length,
+      retriedPageMatchesFailedPage: JSON.stringify(retryPageRun.ids) === JSON.stringify(failedPageRun.ids)
+    }
+}
+
 }
 
 async function assertProfileStateBoundedAndComplete () {
@@ -1128,6 +1757,11 @@ async function runDigestPageQuery (db, state, query, actualTx, root) {
     state.recipientPageQueries += 1
     const rows = await run(query)
     state.recipientPageSizes.push(rows.length)
+    state.recipientPageRuns.push({
+      attempt: state.attempt || 1,
+      pageNumber: state.recipientPageQueries,
+      ids: rows.map(row => row.ID)
+    })
     if (state.failSecondPage && state.recipientPageQueries === 2) throw new Error('late recipient page failure')
     if (root) root.recipientPageSize = rows.length
     return rows

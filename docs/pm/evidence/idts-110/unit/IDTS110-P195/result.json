@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P195",
+  "mentorNumber": 193,
+  "assertionId": "IDTS110-P195-A1",
+  "title": "PM creates a Defect Category catalog row",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:04:59.612Z",
+  "completedAt": "2026-09-05T10:05:00.431Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-P195 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Create a Defect Category as PM/UserAdmin and assert normalized code, name, active state, and audit.",
+  "expectedResult": "Create a Defect Category as PM/UserAdmin and assert normalized code, name, active state, and audit. Attempt the same create as a non-PM and assert HTTP 403 with no catalog row.",
+  "actualResult": "Create a Defect Category as PM/UserAdmin and assert normalized code, name, active state, and audit. Attempt the same create as a non-PM and assert HTTP 403 with no catalog row.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "prepareCatalogCreate"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requireActiveUserAdministrator"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "createdRows": 1,
+    "unauthorizedRows": 0
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P195-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

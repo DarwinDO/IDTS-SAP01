@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F205",
+  "mentorNumber": 200,
+  "title": "authorized onboarding request persists normalized safe state",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:06.314Z",
+  "completedAt": "2026-09-05T10:05:06.982Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F205-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F205 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A PM/UserAdmin onboarding request persists normalized email/display name, a token hash, the desired profile, and one PENDING delivery without exposing token internals.",
+  "expectedResult": "A PM/UserAdmin onboarding request persists normalized email/display name, a token hash, the desired profile, and one PENDING delivery without exposing token internals.",
+  "actualResult": "A PM/UserAdmin onboarding request persists normalized email/display name, a token hash, the desired profile, and one PENDING delivery without exposing token internals.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requestOnboarding"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "normalizeEmail"
+    },
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "normalizeDeveloperProfileInput"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "normalizedEmail": "[REDACTED]",
+    "normalizedDisplayName": "Atomic Desired Developer",
+    "desiredProfilePersisted": true,
+    "pendingDeliveries": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F205-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "846f45981b743c78a39c423cbb64fcba9dc8306f5ad21f393d5253a94b504e2e",
+    "before-database.png": "685977341f36380ee98e40d3fb8e82a57fd37289a5ee7931d8336238abe9560d",
+    "after-database.png": "99b33541fb01ac4722449a9ec09f24420b9db8de7277251f8d6774215c548884",
+    "reload-readback.png": "41c8be43881629d8a551aa863cb2a5a5f1511948d7f386354fe365673d8db803"
+  },
+  "resultSha256": "96a59c5fc3c74dd70451b0523ba1d1967124e07d369066ac08b154fb7550160e",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

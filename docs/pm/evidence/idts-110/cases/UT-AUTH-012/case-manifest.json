@@ -1,28 +1,30 @@
 {
   "caseId": "UT-AUTH-012",
   "title": "mapped XSUAA identity resolves one active IDTS user",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.724Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-08T02:41:55.022Z",
+  "baselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA",
+  "testCommand": "Browser Control authenticated AppRouter request plus bounded HANA aggregate readback",
+  "sourceAssertions": [
+    "srv/auth/platform-role.js#enforcePlatformRoleAlignment",
+    "srv/auth.js#btpUserProfile"
+  ],
+  "actualResult": "AuthService.me returned HTTP 200 with PM and User Administration capability. Protected Bugs OData returned HTTP 200 and count 19. Active Users showed the same account as Active with Identity link Yes. HANA reported 6 linked active users and the same aggregate state before and after.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "AuthService.me returned HTTP 200 with PM and User Administration capability.",
+    "Protected Bugs OData returned HTTP 200 and count 19.",
+    "Active Users showed the same account as Active with Identity link Yes.",
+    "HANA reported 6 linked active users and the same aggregate state before and after."
   ],
   "evidenceIds": [
-    "IDTS110-UT-AUTH-012-BLOCKER"
+    "IDTS110-UT-AUTH-012-BTP-LIVE-20260908"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "limitations": "Proves the authorized mapped PM path. Tester and Developer role-specific acceptance remain outside this case run."
 }

@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P197",
+  "mentorNumber": 195,
+  "title": "inactive catalog parent blocks Component Category creation",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:01.514Z",
+  "completedAt": "2026-09-05T10:05:02.344Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P197-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-P197 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Assert CatalogComponentCategories CREATE rejects an inactive component or defect-category parent with INACTIVE_CATALOG_PARENT before persistence.",
+  "expectedResult": "Assert CatalogComponentCategories CREATE rejects an inactive component or defect-category parent with INACTIVE_CATALOG_PARENT before persistence.",
+  "actualResult": "Assert CatalogComponentCategories CREATE rejects an inactive component or defect-category parent with INACTIVE_CATALOG_PARENT before persistence.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "assertActivePairParents"
+    },
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "prepareCatalogCreate"
+    },
+    {
+      "file": "srv/bug-service/bug-write.js",
+      "symbol": "deriveOrValidateComponentCategory"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "rejectedParent": true,
+    "pairRows": 32
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P197-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "3520d85d7dfb33fd3beed1d23e7c49c3dc2eb4753ad4e236b7edcda57529760b",
+    "before-database.png": "18aaf58337d8e78ff26ecad20f08dde4a63596732fc5167fc498027e34d311a5",
+    "after-database.png": "125f99a31499f3f84ea87b0ab2cb5a0c5abb4c29b2c39415643088354dfb21b8",
+    "reload-readback.png": "833d3dc3f77e7bff3e28fe04a402bc9881991fdded252db62bd19e37e6fcc47b"
+  },
+  "resultSha256": "9034680ae5cc608f6146bdf706207d4443284dc2689a32493dbde4a27bacab2f",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

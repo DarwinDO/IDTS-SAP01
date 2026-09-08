@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F250L",
+  "mentorNumber": 269,
+  "title": "digest snapshot orders items deterministically",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:18.190Z",
+  "completedAt": "2026-09-05T15:59:19.139Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F250L-A1",
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F250L --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A digest snapshot orders its included items with the server comparator before rendering.",
+  "expectedResult": "A digest snapshot orders its included items with the server comparator before rendering.",
+  "actualResult": "A digest snapshot orders its included items with the server comparator before rendering.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "buildDigestSnapshot"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "compareDigestItems"
+    }
+  ],
+  "beforeState": {
+    "itemCount": 4,
+    "firstID": "b3000000-0000-4000-8000-000000000002"
+  },
+  "afterState": {
+    "itemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000007"
+    ],
+    "priorities": [
+      "CRITICAL",
+      "HIGH",
+      "HIGH",
+      "MEDIUM"
+    ]
+  },
+  "reloadState": {
+    "itemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000007"
+    ],
+    "priorities": [
+      "CRITICAL",
+      "HIGH",
+      "HIGH",
+      "MEDIUM"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F250L-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "aff67f14c8d86c122c975e346a49dee5d56684f167be66392b9a8d6c9d4a6785",
+    "before-database.png": "32ccb91e75c742383ae423e7222b06c0e5550ef8966fd5822835540bac8693fc",
+    "after-database.png": "3eb6f640a93c44a6cc9b84729f80b4acb58e5869c4d819c50fd523659016b968",
+    "reload-readback.png": "f7776f0f7ffd3d8d7ff5adc8eb8fe0149554304ee864d990023a3a4d8f3ab87f"
+  },
+  "resultSha256": "3facbf48fef8a26f8c6aaf553f18fd6174f02d1bf7982dd806da743341d2bb40",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F238L",
+  "mentorNumber": 244,
+  "title": "notification shell renders loading state",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "UI_RUNTIME",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T11:50:30.515Z",
+  "completedAt": "2026-09-05T11:50:31.735Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F238L-A1",
+  "testFile": "scripts/qa/test-my-notifications-shell.js",
+  "testCommand": "node scripts/qa/test-my-notifications-shell.js --idts110-case=IDTS110-F238L --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted --idts110-run-id=idts110-ui-1788609025467-971346abf2c775b094e8645f --idts110-nonce=bb5b7bf4cef185d3d447193a35260414",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "While an inbox request is pending, loading is visible and empty/error/retry controls are hidden.",
+  "expectedResult": "While an inbox request is pending, loading is visible and empty/error/retry controls are hidden.",
+  "actualResult": "While an inbox request is pending, loading is visible and empty/error/retry controls are hidden.",
+  "sourceTrace": [
+    {
+      "file": "app/bug-management-ui/webapp/ext/notification/NotificationShell.js",
+      "symbol": "setStateVisibility"
+    }
+  ],
+  "beforeState": {
+    "shell": "rendered",
+    "request": "pending"
+  },
+  "afterState": {
+    "loadingVisible": true,
+    "emptyVisible": false,
+    "errorVisible": false,
+    "retryVisible": false,
+    "text": "My Notifications Mark all as read Read state All Unread Read Category All All Message Strip Information Loading notifications… No data"
+  },
+  "reloadState": {
+    "route": "/idtsbugmanagementui/index.html",
+    "fixture": "loading"
+  },
+  "runtimeEvidence": {
+    "browser": "Playwright Chromium",
+    "scenario": "loading",
+    "route": "/idtsbugmanagementui/index.html",
+    "viewport": {
+      "width": 1280,
+      "height": 900
+    },
+    "screenshotPath": "unit/IDTS110-F238L/runtime.png",
+    "screenshotSha256": "f5b4413c8b4c78b2a768fb2342b4530a1c8f40cf36da958afdc8aceec4905294",
+    "manifestPath": "unit/IDTS110-F238L/case-manifest.json",
+    "caseKey": "IDTS110-F238L",
+    "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+    "nonce": "bb5b7bf4cef185d3d447193a35260414",
+    "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+    "createdAt": "2026-09-05T11:50:31.728Z",
+    "pathMetadata": {
+      "caseKey": "IDTS110-F238L",
+      "runId": "idts110-ui-1788609025467-971346abf2c775b094e8645f",
+      "nonce": "bb5b7bf4cef185d3d447193a35260414",
+      "baseline": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+      "createdAt": "2026-09-05T11:50:31.728Z"
+    },
+    "domChecks": {
+      "loadingVisible": true,
+      "emptyVisible": false,
+      "errorVisible": false,
+      "retryVisible": false,
+      "text": "My Notifications Mark all as read Read state All Unread Read Category All All Message Strip Information Loading notifications… No data"
+    },
+    "consoleErrors": [],
+    "networkErrors": [],
+    "precheck": {
+      "runner": "scripts/qa/test-my-notifications-shell.js",
+      "status": "PASS"
+    }
+  },
+  "evidenceIds": [
+    "IDTS110-F238L-RESULT",
+    "IDTS110-F238L-VISUAL"
+  ],
+  "evidenceFiles": [
+    "runtime.png"
+  ],
+  "artifactHashes": {
+    "runtime.png": "f5b4413c8b4c78b2a768fb2342b4530a1c8f40cf36da958afdc8aceec4905294"
+  },
+  "resultSha256": "3597ea4c2e0f1ddcf522746aac544ca6fc9871b7ae7d188e804994d39d1a2a04",
+  "limitation": "Rendered in a deterministic fixture with installed Playwright Chromium; no provider or live platform state was used.",
+  "acceptanceMode": "UI_RUNTIME_VISUAL",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd",
+  "screenshotPath": "runtime.png",
+  "screenshotSha256": "f5b4413c8b4c78b2a768fb2342b4530a1c8f40cf36da958afdc8aceec4905294",
+  "manifestPath": "case-manifest.json"
+}

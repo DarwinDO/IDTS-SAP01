@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F250",
+  "mentorNumber": 268,
+  "title": "digest snapshot selects one persona’s actionable Bugs",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:17.081Z",
+  "completedAt": "2026-09-05T15:59:17.975Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F250-A1",
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F250 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A PM, Developer, or Tester snapshot includes only that recipient persona’s actionable non-Closed Bugs.",
+  "expectedResult": "A PM, Developer, or Tester snapshot includes only that recipient persona’s actionable non-Closed Bugs.",
+  "actualResult": "A PM, Developer, or Tester snapshot includes only that recipient persona’s actionable non-Closed Bugs.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "buildDigestSnapshot"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "digestItemFor"
+    }
+  ],
+  "beforeState": {
+    "bugCount": 11,
+    "digestDeliveryCount": 0
+  },
+  "afterState": {
+    "pmItemCount": 8,
+    "developerItemCount": 4,
+    "testerItemCount": 1,
+    "pmItemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000010",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000012",
+      "b3000000-0000-4000-8000-000000000007",
+      "b3000000-0000-4000-8000-000000000009",
+      "b3000000-0000-4000-8000-000000000001"
+    ],
+    "developerItemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000007"
+    ],
+    "testerItemIDs": [
+      "b3000000-0000-4000-8000-000000000004"
+    ],
+    "idleSnapshot": null
+  },
+  "reloadState": {
+    "pmItemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000010",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000012",
+      "b3000000-0000-4000-8000-000000000007",
+      "b3000000-0000-4000-8000-000000000009",
+      "b3000000-0000-4000-8000-000000000001"
+    ],
+    "developerItemIDs": [
+      "b3000000-0000-4000-8000-000000000002",
+      "b3000000-0000-4000-8000-000000000003",
+      "b3000000-0000-4000-8000-000000000011",
+      "b3000000-0000-4000-8000-000000000007"
+    ],
+    "testerItemIDs": [
+      "b3000000-0000-4000-8000-000000000004"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F250-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "ff262ee437b28541647dff5e47308e766ae3298662935d3f23bff239fedd55ab",
+    "before-database.png": "6583806748c773d774810ad1075fdc63ce94c13be09f2fd324eb201d488f115f",
+    "after-database.png": "7c0dbe9cc037f98a7a98d60adf212484a7397545cb1d75ecd73f5589d11d0c69",
+    "reload-readback.png": "e5d8a0ee94700cc9e9f655aa0b428a5d093849b4c3d1a319d741a7a925ed9ae7"
+  },
+  "resultSha256": "004ad81df4e8a8bb22973d6fdef0504496a78ea11c120b5024afa7ac0275cee5",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

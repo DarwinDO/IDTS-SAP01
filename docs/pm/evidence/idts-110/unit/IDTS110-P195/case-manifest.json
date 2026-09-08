@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-P195",
+  "mentorNumber": 193,
+  "title": "PM creates a Defect Category catalog row",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:04:59.612Z",
+  "completedAt": "2026-09-05T10:05:00.431Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-P195-A1",
+  "testFile": "scripts/qa/test-user-admin-catalogs.js",
+  "testCommand": "node scripts/qa/test-user-admin-catalogs.js --idts110-case=IDTS110-P195 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Create a Defect Category as PM/UserAdmin and assert normalized code, name, active state, and audit.",
+  "expectedResult": "Create a Defect Category as PM/UserAdmin and assert normalized code, name, active state, and audit. Attempt the same create as a non-PM and assert HTTP 403 with no catalog row.",
+  "actualResult": "Create a Defect Category as PM/UserAdmin and assert normalized code, name, active state, and audit. Attempt the same create as a non-PM and assert HTTP 403 with no catalog row.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/catalogs.js",
+      "symbol": "prepareCatalogCreate"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requireActiveUserAdministrator"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "createdRows": 1,
+    "unauthorizedRows": 0
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-P195-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "ab3b5d36621b2635c12bb80498530466c1c3b99a57b5657843067d363dce416e",
+    "before-database.png": "be2d634955a025f0bda27db39544667a322acf0c66bca6cf9f3cff8217c7361b",
+    "after-database.png": "d73faa6698b6772480eb2d76c9e7a1883e9277e6463e78c10ddb5afb4c39f958",
+    "reload-readback.png": "31673c98d95f0395e090e3bb18a3f9dd1ed0dc7990499f4c8aae85d1d80036e0"
+  },
+  "resultSha256": "0cfe5769c1e5d247012d6afdc5e9bb432e89d7fc577a49624f8313dc9aa561b1",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

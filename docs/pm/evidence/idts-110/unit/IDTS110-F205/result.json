@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F205",
+  "mentorNumber": 200,
+  "assertionId": "IDTS110-F205-A1",
+  "title": "authorized onboarding request persists normalized safe state",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:06.314Z",
+  "completedAt": "2026-09-05T10:05:06.982Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F205 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A PM/UserAdmin onboarding request persists normalized email/display name, a token hash, the desired profile, and one PENDING delivery without exposing token internals.",
+  "expectedResult": "A PM/UserAdmin onboarding request persists normalized email/display name, a token hash, the desired profile, and one PENDING delivery without exposing token internals.",
+  "actualResult": "A PM/UserAdmin onboarding request persists normalized email/display name, a token hash, the desired profile, and one PENDING delivery without exposing token internals.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "requestOnboarding"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "normalizeEmail"
+    },
+    {
+      "file": "srv/user-admin/developer-profile.js",
+      "symbol": "normalizeDeveloperProfileInput"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "normalizedEmail": "[REDACTED]",
+    "normalizedDisplayName": "Atomic Desired Developer",
+    "desiredProfilePersisted": true,
+    "pendingDeliveries": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F205-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

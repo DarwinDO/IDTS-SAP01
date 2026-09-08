@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F207",
+  "mentorNumber": 202,
+  "assertionId": "IDTS110-F207-A1",
+  "title": "tampered invitation is rejected before consumption",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:08.004Z",
+  "completedAt": "2026-09-05T10:05:08.006Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-user-onboarding-contract.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-contract.js --idts110-case=IDTS110-F207 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A tampered invitation signature returns INVALID_INVITATION and leaves the invitation unconsumed with no access operation.",
+  "expectedResult": "A tampered invitation signature returns INVALID_INVITATION and leaves the invitation unconsumed with no access operation.",
+  "actualResult": "A tampered invitation signature returns INVALID_INVITATION and leaves the invitation unconsumed with no access operation.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "verifyInvitationToken"
+    },
+    {
+      "file": "srv/user-admin/invitations.js",
+      "symbol": "invitationTokenSegments"
+    }
+  ],
+  "beforeState": {
+    "fixture": "pure-invitation"
+  },
+  "afterState": {
+    "code": "INVALID_INVITATION",
+    "invitationUnconsumed": true
+  },
+  "reloadState": {
+    "invitationUnchanged": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F207-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}

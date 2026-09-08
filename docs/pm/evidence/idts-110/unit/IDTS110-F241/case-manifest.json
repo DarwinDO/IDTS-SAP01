@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F241",
+  "mentorNumber": 251,
+  "title": "applied access delivery skips an invalid application URL",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-review-task7-fix3",
+  "startedAt": "2026-09-05T13:42:17.213Z",
+  "completedAt": "2026-09-05T13:42:17.780Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F241-A1",
+  "testFile": "scripts/qa/test-user-access-notifications.js",
+  "testCommand": "node scripts/qa/test-user-access-notifications.js --idts110-case=IDTS110-F241 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-review-task7-fix3",
+  "preconditions": "Use an isolated access email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An APPLIED access audit with an invalid application URL creates a SKIPPED access delivery with EMAIL_BASE_URL_INVALID and makes no provider call.",
+  "expectedResult": "An APPLIED access audit with an invalid application URL creates a SKIPPED access delivery with EMAIL_BASE_URL_INVALID and makes no provider call.",
+  "actualResult": "An APPLIED access audit with an invalid application URL creates a SKIPPED access delivery with EMAIL_BASE_URL_INVALID and makes no provider call.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "writeUserAccessDelivery"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "skippedAccessDeliveryReason"
+    },
+    {
+      "file": "srv/user-admin/access-delivery.js",
+      "symbol": "buildAccessApplicationLink"
+    }
+  ],
+  "beforeState": {
+    "deliveryRows": 0,
+    "deliveryIDs": [],
+    "deliverySourceAuditEventIDs": [],
+    "deliveryTargetUserIDs": [],
+    "deliveryStatuses": [],
+    "deliveryAttempts": [],
+    "deliveryErrorCodes": [],
+    "deliveryProviderMessages": [],
+    "inboxRows": 0,
+    "inboxAuditEventIDs": []
+  },
+  "afterState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "5a61fcbf-4cca-4898-9fea-ec0df9609d4e"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryErrorCodes": [
+      "EMAIL_BASE_URL_INVALID"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ],
+    "inboxRows": 1,
+    "inboxAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ],
+    "senderCalls": 0,
+    "providerWorkStarted": false
+  },
+  "reloadState": {
+    "deliveryRows": 1,
+    "deliveryIDs": [
+      "5a61fcbf-4cca-4898-9fea-ec0df9609d4e"
+    ],
+    "deliverySourceAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ],
+    "deliveryTargetUserIDs": [
+      "61000000-0000-4000-8000-000000000020"
+    ],
+    "deliveryStatuses": [
+      "SKIPPED"
+    ],
+    "deliveryAttempts": [
+      0
+    ],
+    "deliveryErrorCodes": [
+      "EMAIL_BASE_URL_INVALID"
+    ],
+    "deliveryProviderMessages": [
+      null
+    ],
+    "inboxRows": 1,
+    "inboxAuditEventIDs": [
+      "62000000-0000-4000-8000-000000000024"
+    ]
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F241-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "4a113bd2cd63964b3c6b245a7605aacf2442f8858b38b8e3951dae48488c0e59",
+    "before-database.png": "28989a2fe5633b3177ecd12e95fd90eec729042ffb6c6471bea67749a850a3e4",
+    "after-database.png": "9e6781f8240ee63d34070299b6a51cd1c42d93fc6959942bbe81c61a023b17e4",
+    "reload-readback.png": "41898c389f6358f3da7cee9a43cd97ec7a127e86a390ccba5f6d8ec30ffb845c"
+  },
+  "resultSha256": "8cd36c593c5e5348791ee0e94d639b91c6bdd211cb564aa404fbb87c5cf04052",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

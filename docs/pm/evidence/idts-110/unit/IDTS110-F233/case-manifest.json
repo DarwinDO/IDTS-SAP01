@@ -1,0 +1,80 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F233",
+  "mentorNumber": 235,
+  "title": "My Notifications hydration isolates source summaries",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:55:50.665Z",
+  "completedAt": "2026-09-05T10:55:51.528Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F233-A1",
+  "testFile": "scripts/qa/test-my-notifications-service.js",
+  "testCommand": "node scripts/qa/test-my-notifications-service.js --idts110-case=IDTS110-F233 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated my notifications fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A mixed page hydrates Bug and applied-access sources into the safe DTO, with UNAVAILABLE and null targetPath for wrong-recipient, dual-source, unsupported, or missing sources.",
+  "expectedResult": "A mixed page hydrates Bug and applied-access sources into the safe DTO, with UNAVAILABLE and null targetPath for wrong-recipient, dual-source, unsupported, or missing sources.",
+  "actualResult": "A mixed page hydrates Bug and applied-access sources into the safe DTO, with UNAVAILABLE and null targetPath for wrong-recipient, dual-source, unsupported, or missing sources.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "hydrateNotificationPage"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "bugSummary"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "accessSummary"
+    },
+    {
+      "file": "srv/notification/inbox.js",
+      "symbol": "unavailableSummary"
+    }
+  ],
+  "beforeState": {
+    "sourceRows": 6,
+    "bugSourceRows": 3,
+    "accessSourceRows": 3
+  },
+  "afterState": {
+    "dtoRows": 6,
+    "unavailableRows": 4
+  },
+  "reloadState": {
+    "rawRows": 6,
+    "safeProjectionRows": 6,
+    "dtoFieldsExact": true,
+    "privateFieldsExposed": false
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F233-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "48bd053487181e84cd9fae9f325dc5cf2b762b1763eb3f4711b640743ad3231a",
+    "before-database.png": "2bc7f3673aa0f224263d6cd2eca1c617d59585722f1dad8078451d8cbc8463a4",
+    "after-database.png": "6e0a4c177e9408553cf47fb46862244d913e95e80a8660e921684bc58a12b588",
+    "reload-readback.png": "c081d9e6cf1442175462d828ea7e5d52585ed2a056b70d81e6490b8f99cf49c5"
+  },
+  "resultSha256": "9abf4c36009c28de38b509a76ed5b8119efee1a3ed500cfa39547013e43f1cb1",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

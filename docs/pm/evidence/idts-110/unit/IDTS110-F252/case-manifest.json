@@ -1,0 +1,76 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F252",
+  "mentorNumber": 275,
+  "title": "digest send skips an inactive recipient",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T15:59:25.387Z",
+  "completedAt": "2026-09-05T15:59:26.269Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F252-A1",
+  "testFile": "scripts/qa/test-my-notifications-digest.js",
+  "testCommand": "node scripts/qa/test-my-notifications-digest.js --idts110-case=IDTS110-F252 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated bug email delivery fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "A claimed digest row is SKIPPED without provider call when its recipient is inactive before send.",
+  "expectedResult": "A claimed digest row is SKIPPED without provider call when its recipient is inactive before send.",
+  "actualResult": "A claimed digest row is SKIPPED without provider call when its recipient is inactive before send.",
+  "sourceTrace": [
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "processNotificationDigestDeliveries"
+    },
+    {
+      "file": "srv/notification/digest.js",
+      "symbol": "readDigestSendRecipient"
+    }
+  ],
+  "beforeState": {
+    "status": "PENDING",
+    "recipientActive": true,
+    "role": "DEVELOPER",
+    "profileActive": true,
+    "senderCalls": 0
+  },
+  "afterState": {
+    "status": "SKIPPED",
+    "lastErrorCode": "RECIPIENT_EMAIL_INVALID",
+    "attemptCount": 1,
+    "lockCleared": true,
+    "senderCalls": 0
+  },
+  "reloadState": {
+    "status": "SKIPPED",
+    "lastErrorCode": "RECIPIENT_EMAIL_INVALID",
+    "senderCalls": 0
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F252-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "d2a95fe617b701ba367a5b417c185e87b26a05481b60b0c73f8a6e943ccd776e",
+    "before-database.png": "ee29c7b748cff24fa0856ca91a28a6a345c992c581ad880f371a68e4486d2eba",
+    "after-database.png": "146deb01f159f41e209a1b80c20ec2dcc09d2761a0b31dccea537437037a2838",
+    "reload-readback.png": "0e754083ae3023d1dc538179c025c894ecc7f524ba61ef27bba6496aace4c72b"
+  },
+  "resultSha256": "c880114cdbeeb3dc13e569e42f8ab6522096b02d906a75a5d46c2b8694d3862d",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

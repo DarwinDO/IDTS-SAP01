@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F210",
+  "mentorNumber": 205,
+  "title": "provisioning approval succeeds at the current version",
+  "candidateExecutionStatus": "PASS",
+  "reviewStatus": "PENDING_DONHV_REVIEW",
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:09.211Z",
+  "completedAt": "2026-09-05T10:05:09.888Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "catalogSha": "7f9d68d2185e95b166befb928069d6dfbcaffae563667692a1c319755c88e253",
+  "approvalReference": {
+    "pullRequest": 388,
+    "mergeSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b"
+  },
+  "assertionId": "IDTS110-F210-A1",
+  "testFile": "scripts/qa/test-user-onboarding-programmatic.js",
+  "testCommand": "node scripts/qa/test-user-onboarding-programmatic.js --idts110-case=IDTS110-F210 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "Approval of one current-version PENDING_APPROVAL request queues provisioning, inserts one PENDING operation, and appends one audit.",
+  "expectedResult": "Approval of one current-version PENDING_APPROVAL request queues provisioning, inserts one PENDING operation, and appends one audit.",
+  "actualResult": "Approval of one current-version PENDING_APPROVAL request queues provisioning, inserts one PENDING operation, and appends one audit.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "approveProvisioning"
+    },
+    {
+      "file": "srv/user-admin.js",
+      "symbol": "insertAccessOperation"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "status": "PROVISION_QUEUED",
+    "provisioningVersion": 2,
+    "operationRows": 1,
+    "operationType": "PROVISION",
+    "operationState": "PENDING",
+    "auditRows": 1
+  },
+  "reloadState": {
+    "readback": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F210-RESULT"
+  ],
+  "evidenceFiles": [
+    "result.png",
+    "before-database.png",
+    "after-database.png",
+    "reload-readback.png"
+  ],
+  "artifactHashes": {
+    "result.png": "e022f2cc3d3aa47ad4ad9dfa4fed7b814233322ec26da6a95c63160e1b15ae18",
+    "before-database.png": "57486fca0031c885e39f07e7d313012da114ff71fbf5bfc9298f20e2942bfb7d",
+    "after-database.png": "940d3eccd2c3d9218ec55170c4365d7c5a37322144a127737f55d0088c7db2a1",
+    "reload-readback.png": "236867c92d829d224b4114570ac06b6a097d02dc8f93e67722dd84685d1ff1d9"
+  },
+  "resultSha256": "f301de4aef950953a26fec934e9447cb4654a618468b36812ed0fab4c7d030b5",
+  "limitation": "No provider or live BTP state used.",
+  "acceptanceMode": "PROGRAMMATIC_ATOMIC",
+  "sourceBatchRunId": "idts110-aggregate-f2731669b029bdf5a1c3cadd"
+}

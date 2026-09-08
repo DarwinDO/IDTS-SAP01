@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "1.0",
+  "jiraKey": "IDTS-110",
+  "caseKey": "IDTS110-F214",
+  "mentorNumber": 210,
+  "assertionId": "IDTS110-F214-A1",
+  "title": "legacy identity link snapshots one eligible target",
+  "status": "PASS",
+  "assertionPassed": true,
+  "authorizedFixture": false,
+  "evidenceKind": "LOCAL_ATOMIC",
+  "executor": "Codex-agent-assisted",
+  "startedAt": "2026-09-05T10:05:13.480Z",
+  "completedAt": "2026-09-05T10:05:14.326Z",
+  "sourceBaselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deployedSha": null,
+  "testFile": "scripts/qa/test-existing-user-identity-link.js",
+  "testCommand": "node scripts/qa/test-existing-user-identity-link.js --idts110-case=IDTS110-F214 --baseline=6eb6f73840d7150598a993f8656d2b44e5b0cd4b --executor=Codex-agent-assisted",
+  "preconditions": "Use an isolated user administration access fixture at source baseline 6eb6f73840d7150598a993f8656d2b44e5b0cd4b; capture the relevant before-state.",
+  "input": "An eligible legacy TESTER or DEVELOPER links exactly one selected Users.ID and snapshots its role and source email into one pending link request.",
+  "expectedResult": "An eligible legacy TESTER or DEVELOPER links exactly one selected Users.ID and snapshots its role and source email into one pending link request.",
+  "actualResult": "An eligible legacy TESTER or DEVELOPER links exactly one selected Users.ID and snapshots its role and source email into one pending link request.",
+  "sourceTrace": [
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "requestExistingUserIdentityLink"
+    },
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "assertEligibleLegacyTarget"
+    },
+    {
+      "file": "srv/user-admin/existing-identity-link.js",
+      "symbol": "createExistingLinkRequest"
+    }
+  ],
+  "beforeState": {
+    "fixture": "isolated-sqlite"
+  },
+  "afterState": {
+    "linkedRoles": [
+      "DEVELOPER",
+      "TESTER"
+    ],
+    "sourceEmailsSnapshotted": [
+      "[REDACTED]",
+      "[REDACTED]"
+    ],
+    "pendingDeliveries": 2,
+    "pmTargetRejected": true
+  },
+  "reloadState": {
+    "linkedRoles": [
+      "DEVELOPER",
+      "TESTER"
+    ],
+    "pendingDeliveries": 2,
+    "pmTargetRejected": true
+  },
+  "runtimeEvidence": null,
+  "evidenceIds": [
+    "IDTS110-F214-RESULT"
+  ],
+  "limitation": "No provider or live BTP state used.",
+  "reviewStatus": "PENDING_DONHV_REVIEW"
+}
