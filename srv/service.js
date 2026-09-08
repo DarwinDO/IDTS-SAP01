@@ -42,7 +42,8 @@ const {
 const {
   prepareCommentCreate,
   prepareCommentMutation,
-  prepareAttachmentWrite
+  prepareAttachmentWrite,
+  rejectActiveAttachmentWrite
 } = require('./bug-service/content')
 const {
   prepareDraftNew,
@@ -76,7 +77,6 @@ module.exports = class BugService extends cds.ApplicationService {
     const Attachments = entities['Bugs.attachments']
 
     const commentTargets = [Comments, Comments?.drafts].filter(Boolean)
-    const attachmentTargets = [Attachments, Attachments?.drafts].filter(Boolean)
     const historyEventTargets = [HistoryEvents, HistoryEvents?.drafts].filter(Boolean)
 
     // Nhóm READ: guard chặn client ghi vào read model; before-handler bổ sung cột phụ thuộc
@@ -117,8 +117,13 @@ module.exports = class BugService extends cds.ApplicationService {
       this.before(['PUT', 'UPDATE', 'PATCH', 'DELETE'], target, req => prepareCommentMutation(req, entities))
     }
 
-    for (const target of attachmentTargets) {
-      this.before(['CREATE', 'PUT', 'UPDATE', 'PATCH', 'DELETE'], target, req => prepareAttachmentWrite(req, entities))
+    // Attachment metadata/binary must follow the Bug draft lifecycle. Active writes would bypass
+    // the SAVE boundary that owns committed add/remove history, so fail them closed.
+    if (Attachments) {
+      this.before(['CREATE', 'PUT', 'UPDATE', 'PATCH', 'DELETE'], Attachments, rejectActiveAttachmentWrite)
+    }
+    if (Attachments?.drafts) {
+      this.before(['CREATE', 'PUT', 'UPDATE', 'PATCH', 'DELETE'], Attachments.drafts, req => prepareAttachmentWrite(req, entities))
     }
 
     // Các after-handler chạy sau khi thay đổi chính đã thành công. Chúng tạo history/notification;

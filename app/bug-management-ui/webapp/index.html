@@ -7,8 +7,20 @@
     <title>Issue and Defect Tracking System</title>
     <link rel="stylesheet" href="css/idts-shell.css">
     <style>
-        html, body, body > div:not(#idtsNotificationShellHost):not(#idtsProfileShellHost), #container, #container-uiarea {
+        html, body, #container-uiarea {
             height: 100%;
+        }
+        body#content {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #idtsNotificationShellHost {
+            flex: 0 0 auto;
+        }
+        #container {
+            flex: 1 1 auto;
+            min-height: 0;
         }
     </style>
 

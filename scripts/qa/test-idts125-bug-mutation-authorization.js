@@ -216,25 +216,33 @@ async function main () {
   const logsBeforeDelete = await db.run(SELECT.from('idts.cap.HistoryLogs').where({ bug_ID: DAT_BUG_ID }))
 
   await expectReject(
-    'actual attachment DELETE route rejects a non-uploader',
+    'direct active attachment DELETE rejects a non-uploader before mutation',
     () => dispatchAttachmentDelete(service, DAT_BUG_ID, DELETE_ATTACHMENT_ID, sang()),
-    403
+    405
   )
   await expectReject(
-    'forged parent ID cannot bypass persisted attachment ownership',
+    'forged parent ID cannot bypass the active-write boundary',
     () => dispatchAttachmentDelete(service, DAT_BUG_ID, DELETE_ATTACHMENT_ID, sang(), { up__ID: SANG_BUG_ID }),
-    403
+    405
   )
   record(
     'denied actual attachment DELETE preserves metadata',
     Boolean(await db.run(SELECT.one.from('idts.cap.Bugs.attachments').where({ ID: DELETE_ATTACHMENT_ID })))
   )
 
-  await dispatchAttachmentDelete(service, DAT_BUG_ID, DELETE_ATTACHMENT_ID, tester())
-  record(
-    'actual uploader DELETE removes attachment metadata',
-    !await db.run(SELECT.one.from('idts.cap.Bugs.attachments').where({ ID: DELETE_ATTACHMENT_ID }))
+  await expectReject(
+    'direct active attachment DELETE must use Bug draft Save',
+    () => dispatchAttachmentDelete(service, DAT_BUG_ID, DELETE_ATTACHMENT_ID, tester()),
+    405
   )
+  record(
+    'rejected direct active DELETE preserves attachment metadata',
+    Boolean(await db.run(SELECT.one.from('idts.cap.Bugs.attachments').where({ ID: DELETE_ATTACHMENT_ID })))
+  )
+
+  // Simulate the metadata state after CAP has activated a valid Bug draft.
+  // The SAVE-side-effect assertion below owns audit creation for that committed removal.
+  await db.run(DELETE.from('idts.cap.Bugs.attachments').where({ ID: DELETE_ATTACHMENT_ID }))
 
   const saveAuditRequest = new cds.Request({
     method: 'POST',
@@ -269,7 +277,7 @@ async function main () {
   record('Fiori Bug fields use dynamic role field controls', /bugRequiredFieldControl/.test(labels) && /bugOptionalFieldControl/.test(labels))
   record('Fiori attachment mutations use dedicated capability', /attachments[\s\S]*canManageAttachments/.test(capabilities))
 
-  const expectedChecks = 22
+  const expectedChecks = 23
   if (RESULTS.length !== expectedChecks) record('completion guard reached every planned assertion', false, `expected=${expectedChecks} actual=${RESULTS.length}`)
   const failures = RESULTS.filter(result => !result.pass)
   console.log(`\nChecks: ${RESULTS.length} | Passed: ${RESULTS.length - failures.length} | Failed: ${failures.length}`)

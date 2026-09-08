@@ -90,3 +90,9 @@ Thay đổi quy tắc attachment/comment phải cập nhật ở đây + schema 
 **Tiếng Việt.** Comment vẫn dành cho Tester/Developer/PM active trên Bug mở. Create/update attachment giữ rule điều phối hiện hành: Tester/PM hoặc Developer assignee hiện tại. Quyền delete chặt hơn: PM được xóa mọi attachment của Bug đang mở; Tester hoặc Developer chỉ được xóa attachment do chính mình upload. Guard đọc dòng attachment đã persist để lấy `up__ID` và `createdBy`, không tin parent ID do client gửi lên khi phân quyền. `filename`, MIME type và size là metadata; binary do SAP attachment adapter xử lý và không được ghi log.
 
 Unmapped authenticated identities are rejected before comment authorship or attachment persistence. / Identity đã xác thực nhưng không map được IDTS user bị reject trước khi ghi author comment hoặc persist attachment.
+
+## IDTS-110 draft-only attachment mutations (2026-09-08)
+
+**English.** `rejectActiveAttachmentWrite` is the fail-closed guard for direct active attachment CREATE/PUT/UPDATE/PATCH/DELETE. Draft attachment mutations retain the existing actor, parent Bug, Closed-state, assignment, uploader and metadata validation in `prepareAttachmentWrite`. This prevents an API caller from bypassing draft activation and its add/remove History comparison.
+
+**Tiếng Việt.** `rejectActiveAttachmentWrite` chặn fail-closed mọi CREATE/PUT/UPDATE/PATCH/DELETE trực tiếp lên attachment active. Mutation trên draft vẫn giữ toàn bộ kiểm tra actor, Bug cha, trạng thái Closed, assignee, uploader và metadata trong `prepareAttachmentWrite`. Nhờ vậy API caller không thể né draft activation và bước so sánh History add/remove.
