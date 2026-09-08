@@ -1,28 +1,31 @@
 {
   "caseId": "UT-ATT-005",
   "title": "attachment survives service restart and reload",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.847Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-08T11:27:51.000Z",
+  "baselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA Cloud / S3",
+  "testCommand": "cf restart idts-sap01-srv; npm run btp:demo:check; authenticated attachment metadata and content readback",
+  "sourceAssertions": [
+    "db/schema.cds#BugAttachments",
+    "package.json#@cap-js/attachments",
+    "scripts/btp/prepare-demo.ps1#CheckOnly"
+  ],
+  "actualResult": "After the controlled CAP service restart, the service returned to 1/1 and the readiness gate reported DEMO READY. The active metadata row remained present and the downloaded object still had 131 bytes with the identical SHA-256.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "CAP returned to one running instance after restart.",
+    "The BTP readiness gate passed with liveness 200, database readiness 200 and protected anonymous API 401.",
+    "The active attachment metadata row remained present after reload.",
+    "The post-restart content was 131 bytes and retained the exact original SHA-256."
   ],
   "evidenceIds": [
-    "IDTS110-UT-ATT-005-BLOCKER"
+    "IDTS110-UT-ATT-005-BTP-LIVE-20260908"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "limitations": "This proves persistence across a service restart, not a new deployment. The Fiori table rendering defect remains separate from the successful metadata and content readback."
 }

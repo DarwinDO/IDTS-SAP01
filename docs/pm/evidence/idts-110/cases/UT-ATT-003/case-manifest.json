@@ -1,28 +1,31 @@
 {
   "caseId": "UT-ATT-003",
   "title": "S3 upload stores HANA metadata and one object",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.842Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-08T11:25:04.000Z",
+  "baselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA Cloud / S3",
+  "testCommand": "Browser Control authenticated same-origin OData draft upload plus bounded Cloud Foundry HANA readback",
+  "sourceAssertions": [
+    "srv/bug-service/content.js#prepareAttachmentWrite",
+    "db/schema.cds#BugAttachments",
+    "package.json#@cap-js/attachments"
+  ],
+  "actualResult": "An authenticated PM created one draft attachment (HTTP 201), uploaded 131 sanitized bytes through the attachment content endpoint (HTTP 204), and activated the draft. HANA stored exactly one metadata row and S3 returned the same 131-byte object without exposing a credential or storage URL.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "Draft attachment metadata create returned HTTP 201.",
+    "S3-backed content PUT returned HTTP 204 for 131 sanitized bytes.",
+    "HANA task 28 read back exactly one active metadata row with the expected filename, MIME type and file size.",
+    "Authenticated content GET returned HTTP 200 without exposing a provider credential or private storage URL."
   ],
   "evidenceIds": [
-    "IDTS110-UT-ATT-003-BLOCKER"
+    "IDTS110-UT-ATT-003-BTP-LIVE-20260908"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "limitations": "The generated Fiori attachment toolbar remained disabled in edit mode and the active table did not render the persisted row. The accepted backend integration path therefore used the same authenticated browser session and standard OData attachment endpoints; the UI defect requires separate remediation."
 }

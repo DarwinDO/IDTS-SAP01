@@ -1,28 +1,32 @@
 {
   "caseId": "UT-ATT-006",
   "title": "delete removes metadata and storage object",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.848Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-08T12:11:49.000Z",
+  "baselineSha": "6eb6f73840d7150598a993f8656d2b44e5b0cd4b",
+  "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA Cloud / S3",
+  "testCommand": "Browser Control authenticated exact attachment DELETE plus Cloud Foundry HANA task 31 readback",
+  "sourceAssertions": [
+    "srv/bug-service/content.js#prepareAttachmentWrite",
+    "srv/bug-service/content.js#assertAttachmentDeletePermission",
+    "db/schema.cds#BugAttachments",
+    "package.json#@cap-js/attachments"
+  ],
+  "actualResult": "The exact authenticated attachment DELETE returned HTTP 204. The S3 provider returned HTTP 204 for object deletion, and HANA task 31 read back zero rows for both the exact attachment and BUG-0016 attachments. BUG-0016 remained PENDING_ASSIGNMENT with 0 comments and 2 notifications.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "The exact authorized DELETE returned HTTP 204.",
+    "The S3 DeleteObject provider response was HTTP 204.",
+    "HANA readback reported exact attachment count 0 and BUG-0016 attachment count 0.",
+    "BUG-0016 status, comments and notifications remained unchanged."
   ],
   "evidenceIds": [
-    "IDTS110-UT-ATT-006-BLOCKER"
+    "IDTS110-UT-ATT-006-BTP-LIVE-20260908"
   ],
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "limitations": "A separate audit defect was exposed: direct active attachment DELETE created no delete HistoryEvent; history stayed at 5 with only the earlier Added attachment event. The Fiori table also failed to render the attachment. HANA Cloud auto-stopped during the first post-delete readback and was restarted; the final readiness gate and task 31 readback passed."
 }
