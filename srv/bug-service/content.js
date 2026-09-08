@@ -92,6 +92,10 @@ async function prepareAttachmentWrite (req, entities) {
   }
 }
 
+function rejectActiveAttachmentWrite (req) {
+  return req.reject(405, 'Attachment changes must be made in Edit mode and committed with Save.')
+}
+
 async function readAttachmentForMutation (req, entities) {
   const parameterIDs = (req.params || []).map(parameter => parameter?.ID).filter(Boolean)
   const attachmentID = req.data?.ID || parameterIDs[parameterIDs.length - 1]
@@ -204,6 +208,7 @@ module.exports = {
   prepareCommentCreate,
   prepareCommentMutation,
   prepareAttachmentWrite,
+  rejectActiveAttachmentWrite,
   assertAttachmentPermission,
   assertAttachmentDeletePermission,
   readAttachmentForMutation

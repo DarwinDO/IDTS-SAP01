@@ -168,3 +168,13 @@ Thu tu debug: `auth-guard.js` -> `AuthService.me` (chi BTP) ->
 **English.** `idtsNotificationShellHost` precedes the profile host and receives a native UI5 toolbar. The existing full-height selector excludes both shell hosts so the new toolbar does not occupy a viewport. There is no new custom notification CSS or auth bypass. Check `NotificationShell`, `Component.js` and responsive browser screenshots together.
 
 **Tiếng Việt.** `idtsNotificationShellHost` đứng trước profile host, nhận toolbar UI5 native. Selector full-height có sẵn loại hai shell host để toolbar mới không chiếm cả viewport. Không có CSS notification custom mới hoặc bypass auth. Kiểm cùng `NotificationShell`, `Component.js` và screenshot browser responsive.
+
+## IDTS-110 notification toolbar and Fiori viewport correction (2026-09-08)
+
+**English.** The notification toolbar intentionally occupies one row above the Fiori component. The body is therefore a column flex container: the toolbar keeps its natural height and `#container` receives only the remaining viewport height with `min-height: 0`. Do not give every body child `height: 100%`; that makes the Object Page footer extend below the visual viewport.
+
+**Tiếng Việt.** Toolbar notification chủ ý chiếm một hàng phía trên Fiori component. Vì vậy body dùng flex theo cột: toolbar giữ chiều cao tự nhiên, còn `#container` chỉ nhận phần viewport còn lại và có `min-height: 0`. Không đặt mọi div con của body cao 100%; cách đó đẩy footer Object Page xuống dưới visual viewport.
+
+**Live correction.** UI5 inserts a generated wrapper directly under `<body>` and places `#container` inside it. The flex child must therefore be that direct wrapper, while `#container` and `#container-uiarea` fill the bounded wrapper at 100%. Applying flex only to the nested `#container` collapses the generated wrapper to zero height.
+
+**Sửa sau kiểm tra live.** UI5 chèn một wrapper sinh động trực tiếp dưới `<body>` rồi mới đặt `#container` bên trong. Vì vậy flex child phải là wrapper trực tiếp đó; `#container` và `#container-uiarea` cao 100% trong wrapper đã được giới hạn. Nếu chỉ áp flex lên `#container` lồng bên trong thì wrapper sinh động bị co về 0.

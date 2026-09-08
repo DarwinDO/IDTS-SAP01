@@ -450,3 +450,9 @@ Neu bo registration nay, metadata co the van thay action, nhung runtime action s
 **English.** `BugService.init()` registers the attachment authorization guard before attachment writes. It deliberately does not register an `after DELETE` history writer. Deletion audit is produced by the existing draft SAVE flow after comparing the before/after attachment metadata, preventing duplicate or false history when a draft is discarded.
 
 **Tiếng Việt.** `BugService.init()` đăng ký attachment authorization guard trước attachment write. File này cố ý không đăng ký history writer tại `after DELETE`. Audit xóa được tạo bởi luồng draft SAVE hiện có sau khi so sánh metadata trước/sau, tránh history trùng hoặc history giả khi draft bị discard.
+
+## IDTS-110 active attachment write boundary (2026-09-08)
+
+**English.** Active `Bugs.attachments` mutations now fail with 405. Only `Bugs.attachments.drafts` is passed to `prepareAttachmentWrite`; Fiori Edit then commits the change through root Bug `SAVE`, which remains the single attachment audit boundary. Attachment reads and downloads are unchanged.
+
+**Tiếng Việt.** Mutation trực tiếp vào `Bugs.attachments` active nay trả 405. Chỉ `Bugs.attachments.drafts` đi qua `prepareAttachmentWrite`; Fiori Edit sau đó commit qua `SAVE` của Bug gốc, vẫn là ranh giới audit attachment duy nhất. Read và download attachment không đổi.

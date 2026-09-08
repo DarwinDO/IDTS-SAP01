@@ -78,3 +78,12 @@ No Unit Test VI is created. No command-only, script-only, generated-card-only, s
 - PR #387 is merged at `9d5aad699662bde65a747de4c0d631678de639e4`; all analysis is anchored to `origin/dev@9d5aad699662bde65a747de4c0d631678de639e4`.
 - No canonical catalog, workbook, Drive, Jira, BTP, product source, live data, dependency, lockfile, email, deployment, or atomic test execution was mutated. Proposed rows are not PASS.
 - DonHV approval is required for the 15-row disposition set, the seven-family/80-case expansion, the candidate count of 278, and the sequential-only presentation before a catalog-extension or execution plan is written.
+
+## 2026-09-08 — Cases 114–117 attachment acceptance correction
+
+- Live Fiori verification proved PM and Tester attachment upload/delete work through Edit → attachment mutation → Save, and committed add/delete History appears after Save.
+- A direct active-entity DELETE used by the earlier API evidence was not equivalent to the UI flow. It bypassed draft activation and removed metadata without the expected committed-draft audit.
+- Source remediation is isolated on `fix/idts-110-attachment-draft-footer-donhv`: direct active attachment writes fail with 405; draft writes retain existing authorization/validation and root Save remains the single audit boundary.
+- The same investigation isolated the clipped Save/Discard Draft footer: the 32px notification toolbar was followed by a Fiori component incorrectly sized to another full viewport. The protected shell now uses a column flex layout so Fiori receives only the remaining height.
+- Cases 114–117 evidence must be regenerated after exact source review and live rollout. The Unit Test workbook remains untouched in this gate.
+- Exact source review `47f62d1d-5e0c-4e4e-9589-e0497f0b9835` covered all 9 executable changed surfaces in `6eb6f738..a7511fed` with 0 candidates/findings. The next boundary is one Draft PR; merge/rollout and final evidence regeneration remain separate approvals.
