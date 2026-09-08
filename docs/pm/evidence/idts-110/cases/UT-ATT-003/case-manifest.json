@@ -27,5 +27,5 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "The generated Fiori attachment toolbar remained disabled in edit mode and the active table did not render the persisted row. The accepted backend integration path therefore used the same authenticated browser session and standard OData attachment endpoints; the UI defect requires separate remediation."
+  "limitations": "The atomic assertion is the authenticated BTP/HANA/S3 integration. DonHV separately confirmed the standard Fiori Edit → Upload → Save flow works; that UI confirmation is not substituted for the byte/hash readback."
 }

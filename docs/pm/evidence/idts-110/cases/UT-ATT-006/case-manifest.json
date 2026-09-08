@@ -8,19 +8,19 @@
   "deploySha": "391e500f9f180dd3039bc6a2a276d45472d76a63",
   "environment": "BTP_REQUIRED",
   "runtime": "SAP BTP Cloud Foundry / XSUAA / HANA Cloud / S3",
-  "testCommand": "Browser Control authenticated exact attachment DELETE plus Cloud Foundry HANA task 31 readback",
+  "testCommand": "DonHV PM Fiori Edit/Delete/Save confirmation plus exact S3/HANA readback and post-fix active DELETE 405 acceptance",
   "sourceAssertions": [
     "srv/bug-service/content.js#prepareAttachmentWrite",
     "srv/bug-service/content.js#assertAttachmentDeletePermission",
     "db/schema.cds#BugAttachments",
     "package.json#@cap-js/attachments"
   ],
-  "actualResult": "The exact authenticated attachment DELETE returned HTTP 204. The S3 provider returned HTTP 204 for object deletion, and HANA task 31 read back zero rows for both the exact attachment and BUG-0016 attachments. BUG-0016 remained PENDING_ASSIGNMENT with 0 comments and 2 notifications.",
+  "actualResult": "DonHV confirmed the PM Fiori Edit → Delete → Save flow on BUG-0019 and History recorded Deleted attachment PlatformAPI.json. Exact backend readback removed the S3 object and HANA metadata while unrelated Bug state stayed unchanged. After release 19c2f8b0, direct active DELETE is rejected with HTTP 405.",
   "assertions": [
-    "The exact authorized DELETE returned HTTP 204.",
-    "The S3 DeleteObject provider response was HTTP 204.",
-    "HANA readback reported exact attachment count 0 and BUG-0016 attachment count 0.",
-    "BUG-0016 status, comments and notifications remained unchanged."
+    "Committed Fiori delete produced one readable deletion History event.",
+    "S3 object and HANA metadata were removed.",
+    "Unrelated Bug status, comments and notifications remained unchanged.",
+    "Direct active attachment DELETE now returns HTTP 405 and cannot bypass Save."
   ],
   "evidenceIds": [
     "IDTS110-UT-ATT-006-BTP-LIVE-20260908"
@@ -28,5 +28,5 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "A separate audit defect was exposed: direct active attachment DELETE created no delete HistoryEvent; history stayed at 5 with only the earlier Added attachment event. The Fiori table also failed to render the attachment. HANA Cloud auto-stopped during the first post-delete readback and was restarted; the final readiness gate and task 31 readback passed."
+  "limitations": "The original exact S3/HANA removal used a direct active DELETE and exposed the audit bypass; it is retained only as pre-fix technical evidence. Final user flow is Fiori draft Save, and release 19c2f8b0 blocks the old direct path with 405. HANA Cloud auto-stopped during the earlier readback, was restarted, and final readiness passed."
 }

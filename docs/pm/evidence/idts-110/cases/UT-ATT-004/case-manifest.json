@@ -26,5 +26,5 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "The hash assertion covers the deployed S3-backed content path. The active Fiori attachment table did not render the persisted row, so download validation used the same authenticated browser session and standard content endpoint."
+  "limitations": "The hash assertion covers the deployed S3-backed content path. DonHV separately confirmed the attachment row and standard Fiori interaction render normally."
 }

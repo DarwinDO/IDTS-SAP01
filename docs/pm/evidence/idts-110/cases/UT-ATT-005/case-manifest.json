@@ -27,5 +27,5 @@
   "evidenceFiles": [
     "result.png"
   ],
-  "limitations": "This proves persistence across a service restart, not a new deployment. The Fiori table rendering defect remains separate from the successful metadata and content readback."
+  "limitations": "This proves persistence across a service restart, not a new deployment. Normal Fiori attachment rendering was confirmed separately by DonHV."
 }
