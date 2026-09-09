@@ -7638,8 +7638,8 @@
     {
       "caseId": "UT-ATT-012",
       "domain": "Attachments",
-      "title": "storage delete failure keeps a truthful attachment state",
-      "objective": "Verify storage delete failure keeps a truthful attachment state.",
+      "title": "storage delete failure remains visible in the transactional outbox",
+      "objective": "Verify storage delete failure remains visible in the transactional outbox.",
       "classification": "NEGATIVE",
       "priority": "HIGH",
       "testLevel": "BTP_INTEGRATION",
@@ -7664,7 +7664,7 @@
         "Assert the response, persisted state, side effects, and safe error boundary described below.",
         "Reload or read back state when persistence is part of the case."
       ],
-      "expectedResult": "The UI/API reports failure and does not falsely report deletion or mutate Bug workflow.",
+      "expectedResult": "Metadata deletion is acknowledged, Bug workflow remains unchanged, and failed object cleanup stays in the persistent outbox with retry/error state instead of being silently lost.",
       "sourceTrace": [
         {
           "file": "srv/bug-service/content.js",
