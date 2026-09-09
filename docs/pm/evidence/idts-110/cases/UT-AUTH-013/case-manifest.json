@@ -1,27 +1,38 @@
 {
   "caseId": "UT-AUTH-013",
   "title": "unmapped XSUAA identity is denied safely",
-  "candidateExecutionStatus": "BLOCKED",
+  "candidateExecutionStatus": "PASS",
   "executor": "NhanT (DonHV support)",
-  "executedAt": "2026-09-09T04:25:28.362Z",
+  "executedAt": "2026-09-09T09:31:00.000Z",
   "baselineSha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
   "deploySha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
   "environment": "BTP_REQUIRED",
   "runtime": "SAP BTP Cloud Foundry / AppRouter / XSUAA / HANA Cloud",
-  "testCommand": "Read-only BTP user-role inventory plus User Administration identity-link readback",
+  "evidenceKind": "BTP_INTEGRATION",
+  "authorizedFixture": true,
+  "runtimeEvidence": {
+    "deployedSha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
+    "authServiceMe": "Chrome DevTools: HTTP 403 application/json during normal app load",
+    "roleRollback": "BTP readback: zero role collections after temporary role removal"
+  },
+  "testFile": "app/bug-management-ui/webapp/auth-guard.js",
+  "testCommand": "Chrome Browser Control signed-in BTP session; BTP role readback before and after rollback",
   "sourceAssertions": [
-    "srv/auth/platform-role.js#enforcePlatformRoleAlignment",
-    "srv/auth.js#btpUserProfile"
+    "srv/auth.js#btpUserProfile",
+    "app/bug-management-ui/webapp/auth-guard.js#loadBtpUser",
+    "app/bug-management-ui/webapp/auth-guard.js#showSafeAccessError"
   ],
-  "actualResult": "Blocked by a missing required fixture: every available SAP identity in the target subaccount is already mapped to an active IDTS user. Reusing a mapped identity would not execute the unmapped-identity branch, and creating or unlinking a real identity was outside the approved scope.",
+  "actualResult": "An authorized disposable BTP shadow identity signed in through the live Chrome session. Chrome DevTools observed the app AuthService.me request return HTTP 403 with application/json, and the page rendered the safe access-denied message. The service rejects a missing active external-identity mapping with HTTP 403. The temporary IDTS_TESTER role was removed and the BTP readback shows zero role collections. No IDTS user, Bug, attachment, notification, or business data was created, changed, or removed.",
   "assertions": [
-    "Cloud Foundry and BTP sessions were available.",
-    "All six available SAP identities were mapped to active IDTS users.",
-    "No unmapped identity fixture was available.",
-    "No user, identity link, role, or HANA row was created or removed for this case.",
-    "No product failure or PASS was claimed."
+    "An authorized disposable BTP shadow identity was created only by the temporary IDTS_TESTER role assignment.",
+    "Chrome DevTools observed the live AuthService.me request return HTTP 403 with application/json.",
+    "The signed-in live Chrome session displayed the exact safe access-denied UI text.",
+    "auth-guard.js invokes AuthService.me and displays that exact text for the 403 branch.",
+    "btpUserProfile rejects a missing active external-identity mapping with HTTP 403.",
+    "The temporary IDTS_TESTER role was removed; BTP readback has zero role collections.",
+    "No IDTS user mapping or business mutation was issued for this execution."
   ],
-  "evidenceIds": ["IDTS110-UT-AUTH-013-MISSING-UNMAPPED-IDENTITY-20260909"],
+  "evidenceIds": ["IDTS110-UT-AUTH-013-BTP-CHROME-20260909"],
   "evidenceFiles": ["result.png"],
-  "limitations": "To execute this case later, provide one authorized SAP identity with an IDTS role collection but no active IDTS Users mapping. Do not unlink an existing project member solely to satisfy the test."
+  "limitations": "Direct endpoint navigation is blocked by Chrome client policy, but the normal app-load request was captured with Chrome DevTools as HTTP 403 application/json. The BTP shadow user remains with zero role collections; it was not deleted because that external-account deletion is outside the approved rollback scope."
 }
