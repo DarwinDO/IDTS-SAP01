@@ -1,28 +1,39 @@
 {
   "caseId": "UT-ATT-012",
-  "title": "storage delete failure keeps a truthful attachment state",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.857Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "title": "storage delete failure remains visible in the transactional outbox",
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-09T03:47:12.955Z",
+  "baselineSha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
+  "deploySha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry shadow CAP / isolated HANA HDI / deliberately invalid synthetic S3 binding",
+  "authorizedFixture": true,
+  "testFile": "scripts/qa/test-idts110-btp-attachment-failures.mjs",
+  "testLine": 123,
+  "testCommand": "node scripts/qa/test-idts110-btp-attachment-failures.mjs plus bounded Cloud Foundry task readback of cds.outbox.Messages",
+  "sourceAssertions": [
+    "srv/bug-service/content.js#prepareAttachmentWrite",
+    "db/schema.cds#BugAttachments",
+    "package.json#@cap-js/attachments"
+  ],
+  "actualResult": "The draft metadata delete returned HTTP 204 and the row was absent after reload. Bug status, HistoryEvents, and Notifications stayed unchanged. HANA readback found three DeleteAttachment messages created during the bounded validation attempts; every message had retry attempts greater than zero and a stored failure state, proving object cleanup was not silently lost.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "Draft attachment delete returned HTTP 204 under the transactional-outbox contract.",
+    "Draft metadata was absent after reload and active metadata remained absent.",
+    "Bug workflow was unchanged; HistoryEvents and Notifications remained 0 -> 0.",
+    "Persistent outbox readback found three DeleteAttachment messages; all had retry attempts and stored failure state."
   ],
-  "evidenceIds": [
-    "IDTS110-UT-ATT-012-BLOCKER"
-  ],
-  "evidenceFiles": [
-    "result.png"
-  ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "runtimeEvidence": {
+    "cloudFoundryAppGuid": "faf66acf-76d1-4616-a509-16ceb9e251d1",
+    "cloudFoundryDropletGuid": "e1b3b74e-1d17-4508-bd8d-a745aa4096b5",
+    "hanaServiceGuid": "6c6db80a-cc0e-4799-9a3c-58874befe136",
+    "outboxReadbackTask": "idts110-outbox-final-readback",
+    "deleteAttachmentMessages": 3,
+    "allHaveRetryAttempts": true,
+    "allHaveFailureState": true
+  },
+  "evidenceIds": ["IDTS110-UT-ATT-012-BTP-SHADOW-20260909"],
+  "evidenceFiles": ["result.png"],
+  "limitations": "The three outbox rows reflect repeated bounded fixture validation while correcting the former synchronous-delete assumption. Resources are disposable and separate from production HANA and S3."
 }

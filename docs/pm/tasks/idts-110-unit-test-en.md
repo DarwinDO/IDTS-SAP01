@@ -87,3 +87,19 @@ No Unit Test VI is created. No command-only, script-only, generated-card-only, s
 - The same investigation isolated the clipped Save/Discard Draft footer: the 32px notification toolbar was followed by a Fiori component incorrectly sized to another full viewport. The protected shell now uses a column flex layout so Fiori receives only the remaining height.
 - Cases 114–117 evidence must be regenerated after exact source review and live rollout. The Unit Test workbook remains untouched in this gate.
 - Exact source review `47f62d1d-5e0c-4e4e-9589-e0497f0b9835` covered all 9 executable changed surfaces in `6eb6f738..a7511fed` with 0 candidates/findings. The next boundary is one Draft PR; merge/rollout and final evidence regeneration remain separate approvals.
+
+## 2026-09-09 — Formerly blocked live-case evidence
+
+### English
+
+- Cases 14 and 15 now have exact BTP/XSUAA fail-closed evidence for multiple application roles and platform/profile role mismatch. Both return HTTP 403 without identity details or business mutation; the temporary test account role readback was restored to exactly `IDTS_TESTER`.
+- Cases 121–123 now have isolated BTP shadow evidence for upload, download, and transactional-outbox delete storage failures. Bug status, history, and notifications remain unchanged. All disposable shadow applications and services were deleted after readback.
+- Case 13 remains the only blocked case. The target subaccount has no available unmapped SAP identity: all six available identities are already mapped to active IDTS users. Creating a synthetic identity or unlinking a real member is outside the approved scope.
+- The current evidence-card model is `277 PASS / 1 BLOCKED / 278 total`. The Unit Test workbook and Drive copy are unchanged; their prior receipt is intentionally not reissued in this evidence-only gate.
+
+### Tiếng Việt
+
+- Case 14 và 15 nay có evidence BTP/XSUAA chính xác cho hành vi fail-closed khi có nhiều application role hoặc khi platform role không khớp role trong profile. Cả hai trả HTTP 403, không lộ identity detail, không có business mutation; role readback của tài khoản test tạm đã được khôi phục về đúng `IDTS_TESTER`.
+- Case 121–123 nay có evidence từ môi trường BTP shadow tách biệt cho lỗi storage khi upload, download và delete qua transactional outbox. Bug status, history và notifications không thay đổi. Mọi ứng dụng và service shadow dùng một lần đã được xóa sau readback.
+- Case 13 là case block duy nhất còn lại. Subaccount đích không có SAP identity chưa map: cả sáu identity sẵn có đều đã map với user IDTS active. Tạo identity giả hoặc gỡ link thành viên thật nằm ngoài scope đã duyệt.
+- Mô hình evidence card hiện tại là `277 PASS / 1 BLOCKED / 278 total`. Workbook Unit Test và bản Drive không thay đổi; receipt cũ của chúng được chủ động không phát hành lại trong gate chỉ cập nhật evidence này.

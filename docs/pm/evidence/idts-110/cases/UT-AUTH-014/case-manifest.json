@@ -1,28 +1,37 @@
 {
   "caseId": "UT-AUTH-014",
   "title": "XSUAA identity with multiple application roles is denied",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.727Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-09T04:17:00.000Z",
+  "baselineSha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
+  "deploySha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / AppRouter / XSUAA / HANA Cloud",
+  "authorizedFixture": true,
+  "testFile": "scripts/qa/test-idts110-btp-role-alignment-receipt.mjs",
+  "testLine": 1,
+  "testCommand": "Browser Control authenticated AppRouter fetch to AuthService.me(), followed by node scripts/qa/test-idts110-btp-role-alignment-receipt.mjs .tmp/idts110-btp-role-alignment-receipts.json",
+  "sourceAssertions": [
+    "srv/auth/platform-role.js#enforcePlatformRoleAlignment",
+    "srv/auth.js#btpUserProfile"
+  ],
+  "actualResult": "With both IDTS_TESTER and IDTS_DEVELOPER present in the newly minted XSUAA token, AuthService.me() returned HTTP 403 and the safe invalid-role-assignment message. The UI showed the generic account-cannot-access page. The temporary Developer role was removed and BTP readback returned exactly IDTS_TESTER.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "BTP role readback showed IDTS_TESTER plus IDTS_DEVELOPER before login.",
+    "A newly minted XSUAA session returned HTTP 403.",
+    "The response exposed no identity internals or HANA diagnostics.",
+    "No business mutation request was issued.",
+    "Rollback readback showed exactly IDTS_TESTER."
   ],
-  "evidenceIds": [
-    "IDTS110-UT-AUTH-014-BLOCKER"
-  ],
-  "evidenceFiles": [
-    "result.png"
-  ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "runtimeEvidence": {
+    "cloudFoundryAppGuid": "671b189e-8fa5-4d68-8ad5-983b815dc71e",
+    "appRouterAuth": "XSUAA",
+    "httpStatus": 403,
+    "roleStateBefore": ["IDTS_TESTER", "IDTS_DEVELOPER"],
+    "roleStateAfter": ["IDTS_TESTER"]
+  },
+  "evidenceIds": ["IDTS110-UT-AUTH-014-BTP-LIVE-20260909"],
+  "evidenceFiles": ["result.png"],
+  "limitations": "The temporary role combination existed only for this bounded acceptance and was rolled back immediately after HTTP readback."
 }

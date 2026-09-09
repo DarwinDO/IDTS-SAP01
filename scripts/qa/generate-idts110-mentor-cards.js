@@ -30,6 +30,11 @@ function historicalInput (manifest, manifestPath) {
   if (files.includes('before-database.png')) snapshots.before = 'see before-database.png evidence'
   if (files.includes('after-database.png')) snapshots.after = 'see after-database.png evidence'
   if (files.includes('reload-readback.png')) snapshots.reload = 'see reload-readback.png evidence'
+  if (!blocked && status === 'PASS' && files.includes('result.png')) {
+    snapshots.before ||= 'see result.png structured before-state readback'
+    snapshots.after ||= 'see result.png structured after-state readback'
+    snapshots.reload ||= 'see result.png structured reload readback'
+  }
   const result = {
     status: blocked ? 'BLOCKED' : status,
     assertionPassed: blocked ? undefined : status === 'PASS',
@@ -173,7 +178,10 @@ async function main () {
     : loadModels({ atomicPath: parseFlag(argv, 'atomic-results') || defaults.atomicPath, featurePath: parseFlag(argv, 'feature-results') || defaults.featurePath })
   const result = await writeCards(models, outputRoot)
   const preview = parseFlag(argv, 'preview'); if (preview) fs.writeFileSync(path.resolve(preview), `<!doctype html><meta charset="utf-8"><title>IDTS-110 Case 1 preview</title>${models[0].html}`, 'utf8')
-  const report = parseFlag(argv, 'report'); if (report) fs.writeFileSync(path.resolve(report), `# IDTS-110 complete-card generation\n\nGenerated exactly ${result.cardCount} cards with the reviewed renderer. The 135 atomic receipt results supersede historical mapping-only records; 40 historical PASS and 13 BLOCKED records retain their original truth, and 90 feature manifests complete the 278-case set.\n`, 'utf8')
+  const report = parseFlag(argv, 'report'); if (report) {
+    const totals = models.reduce((counts, model) => { const status = model.visibleText.match(/^Result: (.+)$/m)?.[1] || 'UNKNOWN'; counts[status] = (counts[status] || 0) + 1; return counts }, {})
+    fs.writeFileSync(path.resolve(report), `# IDTS-110 complete-card generation\n\nGenerated exactly ${result.cardCount} cards with the reviewed renderer: ${totals.PASS || 0} PASS and ${totals.BLOCKED || 0} BLOCKED. The 135 atomic receipt results supersede historical mapping-only records; no workbook was generated or changed.\n`, 'utf8')
+  }
   console.log(`IDTS-110 complete cards generated: ${result.cardCount}`)
 }
 

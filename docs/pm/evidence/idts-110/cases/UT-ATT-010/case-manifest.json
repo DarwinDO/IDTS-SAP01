@@ -1,28 +1,36 @@
 {
   "caseId": "UT-ATT-010",
   "title": "storage upload failure does not leave orphan metadata",
-  "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.854Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-09T03:47:12.955Z",
+  "baselineSha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
+  "deploySha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry shadow CAP / isolated HANA HDI / deliberately invalid synthetic S3 binding",
+  "authorizedFixture": true,
+  "testFile": "scripts/qa/test-idts110-btp-attachment-failures.mjs",
+  "testLine": 81,
+  "testCommand": "node scripts/qa/test-idts110-btp-attachment-failures.mjs (authorized shadow fixture URL supplied by environment)",
+  "sourceAssertions": [
+    "srv/bug-service/content.js#prepareAttachmentWrite",
+    "db/schema.cds#BugAttachments",
+    "package.json#@cap-js/attachments"
+  ],
+  "actualResult": "The controlled S3 upload returned HTTP 500. Prepared metadata remained only in the retryable draft, no active attachment metadata was created, and Bug status, HistoryEvents, and Notifications stayed unchanged after reload.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "Controlled storage upload returned HTTP 500 without exposing credentials.",
+    "Prepared draft metadata remained retryable while active metadata stayed absent.",
+    "Bug workflow was unchanged.",
+    "HistoryEvents remained 0 -> 0 and Notifications remained 0 -> 0."
   ],
-  "evidenceIds": [
-    "IDTS110-UT-ATT-010-BLOCKER"
-  ],
-  "evidenceFiles": [
-    "result.png"
-  ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "runtimeEvidence": {
+    "cloudFoundryAppGuid": "faf66acf-76d1-4616-a509-16ceb9e251d1",
+    "cloudFoundryDropletGuid": "e1b3b74e-1d17-4508-bd8d-a745aa4096b5",
+    "hanaServiceGuid": "6c6db80a-cc0e-4799-9a3c-58874befe136",
+    "storageFixture": "synthetic-invalid-s3"
+  },
+  "evidenceIds": ["IDTS110-UT-ATT-010-BTP-SHADOW-20260909"],
+  "evidenceFiles": ["result.png"],
+  "limitations": "This is an authorized failure-path acceptance on disposable shadow resources. It does not mutate or test the production HANA container or production S3 bucket."
 }

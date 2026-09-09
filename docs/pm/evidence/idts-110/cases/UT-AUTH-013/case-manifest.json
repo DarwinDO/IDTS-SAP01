@@ -2,27 +2,26 @@
   "caseId": "UT-AUTH-013",
   "title": "unmapped XSUAA identity is denied safely",
   "candidateExecutionStatus": "BLOCKED",
-  "reviewStatus": "PENDING_DONHV_REVIEW",
-  "executor": "NhanT (agent-assisted)",
-  "executedAt": "2026-08-04T09:15:58.726Z",
-  "baselineSha": "56b4a4f3d92ef2f9558869caab4b393b07d8b5e7",
-  "deploySha": null,
+  "executor": "NhanT (DonHV support)",
+  "executedAt": "2026-09-09T04:25:28.362Z",
+  "baselineSha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
+  "deploySha": "0249a7362bffb7a2d753eb12ccaae7cc7eac212f",
   "environment": "BTP_REQUIRED",
-  "runtime": "node v22.23.2, win32 x64",
-  "testCommand": "npm.cmd run btp:demo:check",
-  "sourceAssertions": [],
-  "actualResult": "Blocked before execution: `npm run btp:demo:check` cannot start because the Cloud Foundry CLI is unavailable on this host. No BTP request, deployment, database/seed change, or integration assertion ran.",
+  "runtime": "SAP BTP Cloud Foundry / AppRouter / XSUAA / HANA Cloud",
+  "testCommand": "Read-only BTP user-role inventory plus User Administration identity-link readback",
+  "sourceAssertions": [
+    "srv/auth/platform-role.js#enforcePlatformRoleAlignment",
+    "srv/auth.js#btpUserProfile"
+  ],
+  "actualResult": "Blocked by a missing required fixture: every available SAP identity in the target subaccount is already mapped to an active IDTS user. Reusing a mapped identity would not execute the unmapped-identity branch, and creating or unlinking a real identity was outside the approved scope.",
   "assertions": [
-    "Cloud Foundry CLI available: false",
-    "BTP readiness command exit code: 1",
-    "BTP integration assertion executed: false",
-    "Product failure claimed: false"
+    "Cloud Foundry and BTP sessions were available.",
+    "All six available SAP identities were mapped to active IDTS users.",
+    "No unmapped identity fixture was available.",
+    "No user, identity link, role, or HANA row was created or removed for this case.",
+    "No product failure or PASS was claimed."
   ],
-  "evidenceIds": [
-    "IDTS110-UT-AUTH-013-BLOCKER"
-  ],
-  "evidenceFiles": [
-    "result.png"
-  ],
-  "limitations": "Environment blocker only. These 13 cases require an authorized Cloud Foundry/BTP session; DonHV owns final BTP execution review and workbook integration."
+  "evidenceIds": ["IDTS110-UT-AUTH-013-MISSING-UNMAPPED-IDENTITY-20260909"],
+  "evidenceFiles": ["result.png"],
+  "limitations": "To execute this case later, provide one authorized SAP identity with an IDTS role collection but no active IDTS Users mapping. Do not unlink an existing project member solely to satisfy the test."
 }
