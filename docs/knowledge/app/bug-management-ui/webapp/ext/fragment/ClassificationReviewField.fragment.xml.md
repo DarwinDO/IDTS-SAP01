@@ -96,3 +96,8 @@ Form Fiori cung cấp label ngắn **Classification suggestions**. Action mở d
 **English.** The Classification annotation inserts this fragment into the existing Classification field group. `core:require` loads `ClassificationReview.js`; `press="ClassificationReview.openDialog"` transfers the button event and current control tree to that module. `SmartAssignmentSection` is a visual row wrapper only. If the button is absent, inspect annotation/fragment loading; if press does nothing, break in `openDialog()`.
 
 **Tiếng Việt.** Annotation Classification chèn fragment vào field group Classification đang có. `core:require` nạp `ClassificationReview.js`; `press="ClassificationReview.openDialog"` chuyển event và control tree hiện tại sang module đó. `SmartAssignmentSection` chỉ là wrapper bố cục. Nút không hiện thì kiểm annotation/fragment; nút hiện nhưng bấm không chạy thì breakpoint ở `openDialog()`.
+## UI5 raw status binding correction — 2026-09-09
+
+**English.** A `visible` expression that compares `status_code` must use `%{status_code}`. The `%{...}` syntax keeps `ASSIGNED`, `CLOSED`, and other codes as strings; `${...}` may coerce the value to the Boolean target type before comparison and produce a `FormatException`.
+
+**Tiếng Việt.** Expression `visible` so sánh `status_code` phải dùng `%{status_code}`. Cú pháp `%{...}` giữ `ASSIGNED`, `CLOSED` và các code khác ở dạng chuỗi; `${...}` có thể ép giá trị sang kiểu Boolean của thuộc tính đích trước khi so sánh và gây `FormatException`.

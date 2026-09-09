@@ -242,3 +242,8 @@ Anchor quan trọng:
 **English.** The History facet hosts this fragment. The first row embeds the read-only Handoff Summary action; the List binds HistoryEvents ordered by time with `growingThreshold=5` and explicit Show More behavior. Item fields come from persisted audit records and expanded logs. If all events render at once, inspect growing properties and binding; if actor/status/reason is wrong, inspect backend history writers instead.
 
 **Tiếng Việt.** Facet History host fragment này. Row đầu chứa action Handoff Summary read-only; List bind HistoryEvents theo thời gian với `growingThreshold=5` và Show More rõ ràng. Field item đến từ audit record/log đã persist. Nếu mọi event đổ ra một lần, kiểm growing property/binding; actor/status/reason sai thì debug history writer backend.
+## UI5 raw status binding correction — 2026-09-09
+
+**English.** The Handoff Summary wrapper keeps Boolean entity flags in normal `${...}` bindings but reads `status_code` through `%{status_code}`. This preserves the string comparison with `CLOSED` and prevents Boolean-target conversion errors.
+
+**Tiếng Việt.** Wrapper Handoff Summary vẫn bind các cờ entity Boolean bằng `${...}`, nhưng đọc `status_code` qua `%{status_code}`. Cách này giữ phép so sánh chuỗi với `CLOSED` và tránh lỗi ép kiểu theo thuộc tính Boolean.

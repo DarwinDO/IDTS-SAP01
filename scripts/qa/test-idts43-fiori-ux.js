@@ -39,6 +39,17 @@ async function main() {
   assert(!historyTimeline.includes('groupedChangeContext'), 'groupedChangeContext must not be rendered as a default timeline text row')
   pass('History timeline hides grouped field-change context by default')
 
+  for (const fragmentName of [
+    'ClassificationReviewField.fragment.xml',
+    'SimilarBugReviewField.fragment.xml',
+    'HistoryTimeline.fragment.xml'
+  ]) {
+    const fragment = read(path.join('webapp', 'ext', 'fragment', fragmentName))
+    assert.match(fragment, /visible="\{=[^\"]*%\{status_code\}[^\"]*\}"/, `${fragmentName} must compare the raw status string in its visible binding`)
+    assert.doesNotMatch(fragment, /visible="\{=[^\"]*\$\{status_code\}[^\"]*\}"/, `${fragmentName} must not coerce status_code through the Boolean visible target type`)
+  }
+  pass('Smart Assignment wrappers compare raw status strings without Boolean coercion')
+
   const actions = read(path.join('annotations', 'actions.cds'))
   assert(actions.includes("Label  : 'Reopen Bug for Further Work'"))
   assert(actions.includes("@Common.Label : 'Reason for Reopening'"))
@@ -47,7 +58,7 @@ async function main() {
   const manifest = JSON.parse(read(path.join('webapp', 'manifest.json')))
   const appPackage = JSON.parse(read('package.json'))
   const appPackageLock = JSON.parse(read('package-lock.json'))
-  assert.strictEqual(appPackage.version, '0.0.14', 'Shell selector hotfix must advance the Bug Management HTML5 cache identity')
+  assert.strictEqual(appPackage.version, '0.0.15', 'Smart Assignment binding fix must advance the Bug Management HTML5 cache identity')
   assert.strictEqual(manifest['sap.app'].applicationVersion.version, appPackage.version)
   assert.strictEqual(appPackageLock.version, appPackage.version)
   assert.strictEqual(appPackageLock.packages[''].version, appPackage.version)
