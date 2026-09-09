@@ -38,7 +38,10 @@ function historicalInput (manifest, manifestPath) {
   const result = {
     status: blocked ? 'BLOCKED' : status,
     assertionPassed: blocked ? undefined : status === 'PASS',
-    evidenceKind: blocked ? 'ENVIRONMENT_BLOCKED' : (manifest.environment && /BTP|RUNTIME/i.test(manifest.environment) ? 'HISTORICAL_RUNTIME' : 'HISTORICAL_STRUCTURED'),
+    evidenceKind: blocked ? 'ENVIRONMENT_BLOCKED' : (manifest.evidenceKind || (manifest.environment && /BTP|RUNTIME/i.test(manifest.environment) ? 'HISTORICAL_RUNTIME' : 'HISTORICAL_STRUCTURED')),
+    authorizedFixture: manifest.authorizedFixture,
+    deployedSha: manifest.deploySha,
+    runtimeEvidence: manifest.runtimeEvidence,
     executor: manifest.executor, reviewStatus: manifest.reviewStatus || 'PENDING_DONHV_REVIEW', actualResult: manifest.actualResult,
     observedAssertions: manifest.assertions, sourceTrace: manifest.sourceAssertions, sourceBaselineSha: manifest.baselineSha,
     testFile: manifest.testFile, testCommand: manifest.testCommand, startedAt: manifest.executedAt, completedAt: manifest.executedAt,
