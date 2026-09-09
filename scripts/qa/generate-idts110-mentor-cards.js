@@ -161,7 +161,7 @@ async function writeCards (modelsOrOptions, outputRoot = defaults.outputRoot) {
   const models = modelsOrOptions
   if (!Array.isArray(models) || models.length !== 278) throw new Error('expected exactly 278 card models')
   const items = models.map(model => ({ outputPath: path.join(outputRoot, model.fileName), html: model.html }))
-  try { await evidence.renderPngFiles(items) } catch (error) {
+  try { await evidence.renderPngFiles(items, { fullPage: true }) } catch (error) {
     if (!/Executable doesn't exist|browserType\.launch|PNG rendering failed|unknown error/i.test(error.message)) throw error
     const { chromium } = require('playwright'); const executablePath = ['C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe', 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe'].find(fs.existsSync)
     if (!executablePath) throw error
