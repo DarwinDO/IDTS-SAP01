@@ -514,7 +514,7 @@ function renderHtml(lines, accent = '#35d399') {
   </style></head><body><main>${body}</main></body></html>`
 }
 
-async function renderPngFiles(items) {
+async function renderPngFiles(items, { fullPage = false } = {}) {
   if (!items.length) return
   let chromium
   try {
@@ -535,7 +535,7 @@ async function renderPngFiles(items) {
     for (const item of items) {
       fs.mkdirSync(path.dirname(item.outputPath), { recursive: true })
       await page.setContent(item.html, { waitUntil: 'load' })
-      await page.screenshot({ path: item.outputPath, type: 'png' })
+      await page.screenshot({ path: item.outputPath, type: 'png', fullPage })
     }
   } catch (error) {
     failEvidence(`PNG rendering failed: ${error.message}`)
