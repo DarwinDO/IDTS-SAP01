@@ -1,0 +1,32 @@
+%% Figure 9 — Human-reviewed AI Advisory Processing
+flowchart LR
+  User([Authorized user]) --> Feature[Request Similar Bugs, Classification,\nHandoff Summary or Assignment Explanation]
+  Feature --> Input[CAP builds bounded allowlisted input]
+  Input --> Safety[Redact sensitive text\nand validate request limits]
+  Safety --> Provider{Configured provider\navailable?}
+  Provider -- Yes --> Route[Select feature-specific\nmodel alias and timeout]
+  Route --> Call[Call bounded AI provider]
+  Call --> Success{Valid grounded\nresponse?}
+  Provider -- No --> Fallback[Use deterministic fallback]
+  Success -- No --> Fallback
+  Success -- Yes --> Advisory[Normalize advisory output]
+  Fallback --> Advisory
+  Advisory --> Audit[(Persist sanitized AI suggestion\nand operational metric)]
+  Audit --> Review[Display advisory for human review]
+  Review --> Decision{Accept, Reject\nor Ignore?}
+  Decision --> ReviewState[(Record reviewer and\nreview state only)]
+  ReviewState --> Mutation{Separate authorized\nbusiness action requested?}
+  Mutation -- No --> NoMutation([Review recorded\nNo business mutation])
+  Mutation -- Yes --> Revalidate[Re-read Bug and revalidate\nrole, state and current catalogs]
+  Revalidate --> Apply{Action type}
+  Apply -- Apply Classification --> Classification[(Update validated classification\nand append history)]
+  Apply -- Confirm Duplicate --> Duplicate[(Create confirmed relationship\nwithout changing Bug status)]
+  Classification --> BusinessResult([Return validated business result])
+  Duplicate --> BusinessResult
+
+  classDef action fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  class User,Feature,Input,Safety,Route,Call,Fallback,Advisory,Review,Revalidate,NoMutation,BusinessResult action;
+  class Provider,Success,Decision,Mutation,Apply decision;
+  class Audit,ReviewState,Classification,Duplicate storage;

@@ -1,0 +1,26 @@
+%% Figure 7 — Role-aware Dashboard and Monitoring
+flowchart LR
+  User([Signed-in user]) --> Dashboard[Fiori role-aware Dashboard]
+  Dashboard --> Reads[Read scoped Bugs, status metrics\nand authorized workload data]
+  Reads --> Role{Resolved business role}
+
+  Role -- Tester --> Tester[Created by me\nNeed my input\nRetest required]
+  Role -- Developer --> Developer[Assigned work\nCurrent action items\nPersonal workload]
+  Role -- PM --> PM[All lifecycle-status metrics\nPending assignment and overdue\nDeveloper workload]
+
+  Tester --> Tile[Select tile or focus item]
+  Developer --> Tile
+  PM --> Tile
+  Tile --> List[Fiori List Report\nApply canonical filter and auto-search]
+
+  PM --> AiChoice{Open AI Activity?}
+  AiChoice -- Yes --> AiMetrics[Read sanitized 30-day metrics\nrequests, outcomes, latency\nand review decisions]
+  AiChoice -- No --> PM
+  AiMetrics --> AiDialog[Display read-only AI Activity dialog]
+
+  classDef action fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef role fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  class User,Dashboard,Reads,Tile,List,AiMetrics,AiDialog action;
+  class Role,AiChoice decision;
+  class Tester,Developer,PM role;

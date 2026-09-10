@@ -1,0 +1,33 @@
+%% Figure 6 — Comments, Attachments and History
+flowchart LR
+  User([Tester, assigned Developer or PM]) --> Detail[Fiori Bug Object Page]
+  Detail --> Choice{Comment or\nattachment?}
+
+  Choice -- Comment --> Comment[Submit comment\nand optional mentions]
+  Comment --> CommentGuard{Bug open, actor allowed,\ncontent and mentions valid?}
+  CommentGuard -- No --> CommentError[Safe 400/403 response\nNo mutation]
+  CommentGuard -- Yes --> CommentTx[(Persist Comment)]
+  CommentTx --> CommentHistory[Append comment HistoryEvent]
+  CommentHistory --> Mention[Notify valid mentioned users\nwith applicable email delivery]
+
+  Choice -- Attachment --> Draft[Edit Bug draft\nand attachment composition]
+  Draft --> AttachmentGuard{Actor allowed; metadata,\nmedia type and size valid?}
+  AttachmentGuard -- No --> AttachmentError[Safe 400/403 response\nNo active write]
+  AttachmentGuard -- Yes --> Store[Store binary through\nconfigured S3 adapter]
+  Store --> Metadata[(Keep attachment metadata\nin Bug draft)]
+  Metadata --> Save[Save and activate Bug draft]
+  Save --> Diff[Compare attachment metadata\nbefore and after SAVE]
+  Diff --> AttachmentHistory[Append add/remove HistoryEvent\nwithout embedding binary]
+
+  Mention --> Refresh[Refresh Comments and History sections]
+  AttachmentHistory --> Refresh
+  Refresh --> Result([Display persisted result])
+
+  classDef action fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class User,Detail,Comment,Draft,Store,Save,Diff,CommentHistory,Mention,AttachmentHistory,Refresh,Result action;
+  class Choice,CommentGuard,AttachmentGuard decision;
+  class CommentTx,Metadata storage;
+  class CommentError,AttachmentError deny;
