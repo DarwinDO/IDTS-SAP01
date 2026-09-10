@@ -24,4 +24,3 @@
 | 12 | `Figure-12-Business-Catalog-Governance.png` | `1DQlZg_5cNvdxZdfjR0sV8ch5L8kZJhzD` | 114,317 |
 
 Google Drive folder listing returned exactly these ten files with MIME type `image/png`; every byte size matched the repository PNG. The Technical Specification workbook itself was not modified.
-
