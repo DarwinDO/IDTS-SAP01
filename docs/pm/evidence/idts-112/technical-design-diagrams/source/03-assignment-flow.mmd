@@ -1,0 +1,37 @@
+%% Figure 4 — Developer Assignment and Pending Assignment
+flowchart LR
+  Coordinator([Tester or PM]) --> UI[Fiori assignment action]
+  UI --> Read[CAP reads Bug and\nassignment criteria]
+  Read --> Mutable{Authorized coordinator\nand mutable Bug?}
+  Mutable -- No --> Denied[403 denied\nNo business mutation]
+  Mutable -- Yes --> Classification{Active Component + Category\npair is valid?}
+  Classification -- No --> InvalidClass[400 validation error\nCorrect classification first]
+
+  Classification -- Yes --> Eligible[Build eligible Developer list]
+  Eligible --> Rules[Active profile and identity access\nAvailable and within workload capacity\nMatching Component Category responsibility\nOptional SAP Module scope]
+  Rules --> Candidates{Eligible candidates\navailable?}
+
+  Candidates -- Yes --> Review[Human reviews candidates\nand selects one Developer]
+  Review --> Assign[assignToDeveloper]
+  Assign --> Validate{Selected Developer\nstill eligible?}
+  Validate -- No --> Stale[400 safe error\nReload candidates — no mutation]
+  Validate -- Yes --> Assigned[(Transaction\nStatus = ASSIGNED\nAssignee = selected Developer\nNext processor = Developer)]
+
+  Candidates -- No --> PendingChoice[No assignee selected\nor explicit move to pending]
+  PendingChoice --> Pending[(Transaction\nStatus = PENDING_ASSIGNMENT\nAssignee = none\nNext processor = PM)]
+
+  Assigned --> History[Append typed HistoryEvent]
+  Pending --> History
+  History --> Notification[Create applicable notification\nand email-delivery record]
+  Notification --> Result([Return persisted Bug])
+
+  classDef actor fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef rules fill:#fff7df,stroke:#b47c18,color:#49320a;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class Coordinator,UI,Read,Review,Assign,History,Notification,Result actor;
+  class Mutable,Classification,Candidates,Validate decision;
+  class Eligible,Rules,PendingChoice rules;
+  class Assigned,Pending storage;
+  class Denied,InvalidClass,Stale deny;

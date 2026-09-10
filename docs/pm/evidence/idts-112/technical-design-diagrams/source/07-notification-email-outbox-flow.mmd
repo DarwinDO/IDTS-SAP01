@@ -1,0 +1,37 @@
+%% Figure 8 — Notification and Email Outbox Processing
+flowchart LR
+  Business[Bug or access action transaction] --> Write[Write notification source record\nand domain-specific delivery row]
+  Write --> Email{Email required and\nprovider configuration ready?}
+  Email -- No --> Skipped[(Delivery = SKIPPED\nor no delivery row)]
+  Email -- Yes --> Pending[(Delivery = PENDING)]
+  Skipped --> Commit{Business transaction\ncommitted?}
+  Pending --> Commit
+  Commit -- No --> Rollback[Rollback notification\nand delivery records]
+  Commit -- Yes --> PendingCheck{Pending delivery\nexists?}
+  PendingCheck -- No --> Complete([Delivery handling complete])
+  PendingCheck -- Yes --> Immediate[Post-commit immediate\noutbox kick]
+  PendingCheck -- Yes --> Scheduler[SAP Job Scheduling Service\nRecovery, retry and digest]
+  Immediate --> Processor[Protected CAP\nprocessEmailOutbox]
+  Scheduler --> Processor
+  Processor --> Batch[Process Bug, invitation, access\nand digest delivery queues]
+  Batch --> Eligible{Eligible by status, attempt,\nnext-attempt time and lock expiry?}
+  Eligible -- No --> Leave[Leave row for a later run]
+  Eligible -- Yes --> Claim[Conditionally claim row\nwith lock token and lease]
+  Claim --> Send[Send allowlisted message\nthrough configured provider]
+  Send --> Accepted{Provider accepted?}
+  Accepted -- Yes --> Sent[(Delivery = SENT\nClear lock and errors)]
+  Accepted -- No --> Failed[(Delivery = FAILED\nStore sanitized error)]
+  Failed --> Retry{Attempts remain?}
+  Retry -- Yes --> Backoff[Set bounded nextAttemptAt]
+  Backoff --> Scheduler
+  Retry -- No --> Final([Final failed delivery\nBusiness action remains committed])
+  Sent --> Complete
+
+  classDef action fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class Business,Write,Immediate,Scheduler,Processor,Batch,Claim,Send,Leave,Backoff,Complete action;
+  class Email,Commit,PendingCheck,Eligible,Accepted,Retry decision;
+  class Skipped,Pending,Sent,Failed storage;
+  class Rollback,Final deny;

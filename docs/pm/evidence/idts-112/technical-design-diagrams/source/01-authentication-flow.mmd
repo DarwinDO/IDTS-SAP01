@@ -1,0 +1,30 @@
+%% Figure 2 — User Authentication and Role Resolution
+flowchart LR
+  Browser([User browser\nSAP Fiori UI]) --> Router[SAP BTP AppRouter]
+  Router --> Session{Valid XSUAA\nsession?}
+  Session -- No --> SignIn[XSUAA sign-in]
+  SignIn --> Router
+
+  Session -- Yes --> Request[Forward authenticated\nOData V4 request]
+  Request --> CAP[CAP authentication layer\nResolve authenticated identity]
+  CAP --> UserStore[(Internal Users\nand role mapping)]
+  UserStore --> Active{Active internal user\nand exactly one\nbusiness role?}
+
+  Active -- No --> Denied[403 denied\nNo business mutation]
+  Active -- Yes --> Target{Requested\nUser Administration route?}
+
+  Target -- No --> Protected[Process protected\nBug Management request]
+  Target -- Yes --> Admin{PM business role\nand UserAdmin capability?}
+  Admin -- No --> AdminDenied[403 denied\nAdministration unavailable]
+  Admin -- Yes --> UserAdmin[Process protected\nUser Administration request]
+
+  classDef entry fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef ok fill:#eef9f0,stroke:#3a9361,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class Browser,Router,Request,CAP,SignIn entry;
+  class Session,Active,Target,Admin decision;
+  class UserStore storage;
+  class Protected,UserAdmin ok;
+  class Denied,AdminDenied deny;

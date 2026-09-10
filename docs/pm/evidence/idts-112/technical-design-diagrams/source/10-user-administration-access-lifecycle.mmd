@@ -1,0 +1,40 @@
+%% Figure 10 — User Administration Access Lifecycle
+flowchart LR
+  Admin([Active PM with UserAdmin]) --> UI[User Administration workspace]
+  UI --> Auth{CAP confirms exactly one PM role\nand UserAdmin capability?}
+  Auth -- No --> Denied[403 denied\nNo access mutation]
+  Auth -- Yes --> Action{Requested access action}
+  Action --> Onboard[(Create invitation or\nexisting-identity link request)]
+  Onboard --> Verify[Target user verifies signed SAP identity]
+  Verify --> Approval[Confirm or approve provisioning\nas the requested role requires]
+  Action --> ProviderChange[Change role, reactivate or revoke]
+  Action --> Suspend[Suspend local access]
+
+  Approval --> Rules{Role, identity, version and\nfinal-admin safeguards pass?}
+  ProviderChange --> Rules
+  Suspend --> Rules
+  Rules -- No --> Rejected[400/409 safe response\nAppend rejection audit when applicable]
+
+  Rules -- Yes --> Kind{Provider-backed action?}
+  Kind -- No: suspend --> Local[(Deactivate local user\nRevoke active sessions\nState = SUSPENDED)]
+  Local --> LocalAudit[Append access audit\nand eligible delivery]
+
+  Kind -- Yes --> Request[(Persist versioned request\nand UserAccessOperation\nKeep access fail-closed)]
+  Request --> Broker[Broker performs allowlisted\nread-before / write / read-after]
+  Broker --> Proof{Exact immutable identity and\nRole Collection readback?}
+  Proof -- No --> Failed[(Keep user inactive or suspended\nStore sanitized failure or reconcile state)]
+  Proof -- Yes --> Applied[(Atomically apply local role, capability\nand ACTIVE or REVOKED state)]
+  Failed --> Audit[Append immutable access audit]
+  Applied --> Audit
+  LocalAudit --> Result([Return sanitized administration result])
+  Audit --> Delivery[Create eligible inbox/email record\nafter verified outcome]
+  Delivery --> Result
+
+  classDef actor fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class Admin,UI,Verify,Approval,ProviderChange,Suspend,Broker,LocalAudit,Audit,Delivery,Result actor;
+  class Action,Auth,Rules,Kind,Proof decision;
+  class Onboard,Local,Request,Failed,Applied storage;
+  class Denied,Rejected deny;

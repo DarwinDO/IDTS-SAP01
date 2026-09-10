@@ -1,0 +1,32 @@
+%% Figure 11 — Caller-only My Notifications Inbox
+flowchart LR
+  User([Signed-in IDTS user]) --> Bell[Fiori notification bell\nand caller unread badge]
+  Bell --> Open[Open responsive inbox]
+  Open --> Call[NotificationService operations]
+  Call --> Identity{Exactly one active internal user\nand aligned business role?}
+  Identity -- No --> Denied[403 safe response\nNo inbox disclosure]
+  Identity -- Yes --> Scope[Apply recipient scope before\nfilter, order, paging or mutation]
+  Scope --> Search[Search bounded page\nAll / Bug / Access\nAll / Unread / Read]
+  Search --> Sources[(Hydrate allowlisted Bug notification\nor material access-audit source)]
+  Sources --> DTO[Return safe DTO in stable server order\n25 rows with Load More]
+  DTO --> List[Display title, summary, time,\nunread and action-required state]
+
+  List --> Choice{User action}
+  Choice -- Select item --> Mark[Attempt idempotent optimistic mark-read\nFailure does not block a safe target]
+  Mark --> Target{Stored target matches\nallowlisted same-origin route?}
+  Target -- Yes --> Navigate[Open active Bug or safe landing route]
+  Target -- No --> Stay[Keep inbox open\nDo not navigate]
+  Choice -- Mark all read --> Snapshot[Mark caller-owned unread rows\nat or before UI snapshot]
+  Choice -- Load more or filter --> Search
+  Snapshot --> Refresh[Refresh list and unread badge]
+  Navigate --> Refresh
+  Stay --> Refresh
+
+  classDef action fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class User,Bell,Open,Call,Scope,Search,DTO,List,Mark,Navigate,Stay,Snapshot,Refresh action;
+  class Identity,Choice,Target decision;
+  class Sources storage;
+  class Denied deny;

@@ -1,0 +1,30 @@
+%% Figure 5A — Lifecycle Action Processing
+flowchart LR
+  Actor([Authorized user]) --> UI[Fiori lifecycle action]
+  UI --> Action[CAP bound action]
+  Action --> Bug{Bug exists and current state\npermits this action?}
+  Bug -- No --> NotFound[404/409 safe response\nNo mutation]
+  Bug -- Yes --> Permission{Role, ownership and\nassignee checks pass?}
+  Permission -- No --> Forbidden[403 denied\nNo mutation]
+  Permission -- Yes --> Input{Required reason, note\nand assignee present?}
+  Input -- No --> BadRequest[400 validation response\nNo mutation]
+  Input -- Yes --> Transition{Allowed source-to-target\nstatus transition?}
+  Transition -- No --> Conflict[400 validation response\nNo mutation]
+  Transition -- Yes --> Patch[Build status, assignee and\nrejection-reason changes]
+  Patch --> Owner[Determine next processor\nDeveloper, Tester or PM queue]
+  Owner --> Transaction[(Single CAP transaction\nUpdate Bug and ownership)]
+  Transaction --> History[Append HistoryEvent\nand field-level HistoryLogs]
+  History --> Notify[Create applicable notification\nand email-delivery record]
+  Notify --> Commit{Transaction\ncommitted?}
+  Commit -- No --> Rollback[Rollback all database changes]
+  Commit -- Yes --> Kick[Post-commit immediate email kick\nScheduler remains recovery]
+  Kick --> Result([Return persisted Bug])
+
+  classDef action fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class Actor,UI,Action,Patch,Owner,History,Notify,Kick,Result action;
+  class Bug,Permission,Input,Transition,Commit decision;
+  class Transaction storage;
+  class NotFound,Forbidden,BadRequest,Conflict,Rollback deny;

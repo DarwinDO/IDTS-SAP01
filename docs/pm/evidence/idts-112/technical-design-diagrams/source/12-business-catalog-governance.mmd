@@ -1,0 +1,37 @@
+%% Figure 12 — Business Catalog Governance
+flowchart LR
+  Admin([Active PM with UserAdmin]) --> UI[Business Catalogs workspace\nModules, Components, Defect Categories and valid pairs]
+  UI --> Auth{CAP confirms exactly one PM role\nand UserAdmin capability?}
+  Auth -- No --> Denied[403 denied\nNo catalog disclosure or mutation]
+  Auth -- Yes --> Operation{Requested operation}
+  Operation -- Read/search --> Read[CAP returns authorized\nfiltered catalog rows]
+  Operation -- Create or edit --> Write[Normalize allowlisted fields\nand preserve immutable ID]
+  Operation -- Activate --> Activate[Validate ETag and active parents]
+  Operation -- Deactivate --> Impact[Read Bug, responsibility\nand active-child impact counts]
+  Operation -- Delete --> Delete[405 DELETE forbidden\nHistorical references preserved]
+
+  Write --> Guard{Valid code/name or pair, unique,\ncurrent ETag and active parents?}
+  Activate --> Guard
+  Impact --> Reason{Reason supplied and no active\nresponsibility or child dependency?}
+  Guard -- No --> Reject[400/404/409 safe response\nNo catalog mutation]
+  Reason -- No --> Reject
+  Guard -- Yes --> Persist[(Create or update catalog item)]
+  Reason -- Yes --> Deactivate[(Set active = false\nDo not rewrite historical Bugs)]
+
+  Persist --> Audit[Append allowlisted success audit\nwith safe before/after values]
+  Deactivate --> Audit
+  Reject --> RejectionAudit[Append sanitized rejection audit\nwhen a target is known]
+  Audit --> Reload[Reload catalog list and active value helps]
+  RejectionAudit --> Reload
+  Read --> Display([Display governed catalog state])
+  Reload --> Display
+  Delete --> Display
+
+  classDef actor fill:#eef5ff,stroke:#2b88d9,color:#172b4d;
+  classDef decision fill:#f2edff,stroke:#7f65c5,color:#172b4d;
+  classDef storage fill:#ecf8f1,stroke:#398b63,color:#172b4d;
+  classDef deny fill:#fff0f0,stroke:#c65353,color:#7a1e1e;
+  class Admin,UI,Read,Write,Activate,Impact,Audit,RejectionAudit,Reload,Display actor;
+  class Auth,Operation,Guard,Reason decision;
+  class Persist,Deactivate storage;
+  class Denied,Reject,Delete deny;
