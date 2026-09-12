@@ -11,6 +11,14 @@ const reviewCommentId = '10962'
 const reviewDate = '2026-08-04'
 const checkOnly = process.argv.includes('--check')
 const finalApprovedCaseIds = new Set(['UAT-COM-003'])
+const finalApprovalContract = {
+  executor: 'NhanT (DonHV support)',
+  mergeSha: '54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b',
+  bugId: '029435e3-abb7-4079-826a-394709f9eb50',
+  bugNumber: 'BUG-0021',
+  uiVersion: '0.0.16',
+  uiArtifactSha256: 'F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4'
+}
 
 const stalePrerequisite = new Set(['UAT-AI-007', 'UAT-ATT-002', 'UAT-ATT-003'])
 const historicalOldRuntime = new Set()
@@ -44,6 +52,40 @@ function classify (manifest) {
 function expectedReviewFor (manifest) {
   const [category, currentStatus] = classify(manifest)
   if (finalApprovedCaseIds.has(manifest.caseId)) {
+    const requireContract = (field, condition) => {
+      if (!condition) throw new Error(`Final approval contract mismatch: ${manifest.caseId}: ${field}`)
+    }
+    requireContract('executor', manifest.executor === finalApprovalContract.executor)
+    for (const field of ['sourceMergeSha', 'executionBaselineSha', 'deployedRuntimeSha']) {
+      requireContract(field, manifest[field] === finalApprovalContract.mergeSha)
+    }
+    requireContract('testRecord.bugId', manifest.testRecord?.bugId === finalApprovalContract.bugId)
+    requireContract('testRecord.bugNumber', manifest.testRecord?.bugNumber === finalApprovalContract.bugNumber)
+    requireContract('testRecord.uiVersion', manifest.testRecord?.uiVersion === finalApprovalContract.uiVersion)
+    requireContract('testRecord.uiArtifactSha256', manifest.testRecord?.uiArtifactSha256 === finalApprovalContract.uiArtifactSha256)
+    const oneThousand = manifest.liveAcceptance?.oneThousand
+    const oneThousandOne = manifest.liveAcceptance?.oneThousandOne
+    requireContract('liveAcceptance.oneThousand.inputLength', oneThousand?.inputLength === 1000)
+    requireContract('liveAcceptance.oneThousand.markerPrefix', oneThousand?.markerPrefix === 'UAT-COM-003-1000|')
+    requireContract('liveAcceptance.oneThousand.markerCountAfterReload', oneThousand?.markerCountAfterReload === 1)
+    requireContract('liveAcceptance.oneThousand.commentListCountAfterReload', oneThousand?.commentListCountAfterReload === 2)
+    requireContract('liveAcceptance.oneThousand.reloadResult', typeof oneThousand?.reloadResult === 'string' && oneThousand.reloadResult.length > 0)
+    requireContract('liveAcceptance.oneThousandOne.inputLength', oneThousandOne?.inputLength === 1001)
+    requireContract('liveAcceptance.oneThousandOne.markerPrefix', oneThousandOne?.markerPrefix === 'UAT-COM-003-1001|')
+    requireContract('liveAcceptance.oneThousandOne.markerCountAfterReload', oneThousandOne?.markerCountAfterReload === 0)
+    requireContract('liveAcceptance.oneThousandOne.httpStatus', oneThousandOne?.httpStatus === 400)
+    requireContract('liveAcceptance.oneThousandOne.commentListCountBefore', oneThousandOne?.commentListCountBefore === 2)
+    requireContract('liveAcceptance.oneThousandOne.commentListCountAfterReload', oneThousandOne?.commentListCountAfterReload === 2)
+    requireContract('liveAcceptance.oneThousandOne.capReason', oneThousandOne?.capReason === 'Comment cannot exceed 1000 characters.')
+    requireContract('liveAcceptance.oneThousandOne.partialOrTruncatedCommentStored', oneThousandOne?.partialOrTruncatedCommentStored === false)
+    requireContract('liveAcceptance.oneThousandOne.textAreaRetainedOnError', oneThousandOne?.textAreaRetainedOnError === true)
+    requireContract('historicalFailure.preserved', manifest.historicalFailure?.preserved === true)
+    requireContract('historicalFailure.candidateOutcome', manifest.historicalFailure?.candidateOutcome === 'DOES_NOT_MEET_EXPECTED_RESULT')
+    requireContract('historicalFailure.actualResult', typeof manifest.historicalFailure?.actualResult === 'string' && /1006-character.*accepted.*remained listed after reload/i.test(manifest.historicalFailure.actualResult))
+    const declaredEvidence = new Set((Array.isArray(manifest.evidence) ? manifest.evidence : []).map(item => `${item.id}:${item.file}`))
+    requireContract('evidence', declaredEvidence.has('UAT-COM-003-E03:03-live-1000-pass.png'))
+    requireContract('evidence', declaredEvidence.has('UAT-COM-003-E04:04-live-1001-rejected.png'))
+    requireContract('evidence', declaredEvidence.has('UAT-COM-003-E05:05-live-readback-receipt.json'))
     if (manifest.candidateExecutionStatus !== 'PASS' ||
       manifest.candidateOutcome !== 'MEETS_EXPECTED_RESULT' ||
       manifest.donhvLatestReview?.currentStatus !== 'FINAL_PASS_APPROVED' ||
@@ -150,8 +192,8 @@ const expectedDisposition = {
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
   if (candidateDisposition[status] !== expectedCount) throw new Error(`${status}: expected ${expectedCount}, got ${candidateDisposition[status] || 0}`)
 }
-if (evidenceReferences !== 77) throw new Error(`Evidence references: expected 77, got ${evidenceReferences}`)
-if (evidenceHashes.size !== 64) throw new Error(`Unique evidence hashes: expected 64, got ${evidenceHashes.size}`)
+if (evidenceReferences !== 78) throw new Error(`Evidence references: expected 78, got ${evidenceReferences}`)
+if (evidenceHashes.size !== 65) throw new Error(`Unique evidence hashes: expected 65, got ${evidenceHashes.size}`)
 
 const attachmentManifest = JSON.parse(fs.readFileSync(path.join(evidenceRoot, 'UAT-ATT-001', 'manifest.json'), 'utf8'))
 const attachmentText = JSON.stringify(attachmentManifest)
@@ -170,6 +212,13 @@ const summary = {
   counts,
   runtimeRerunPerformed: true,
   runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.',
+  finalApprovals: {
+    'UAT-COM-003': {
+      status: 'FINAL_PASS_APPROVED',
+      historicalFailurePreserved: true,
+      receipt: 'uat/UAT-COM-003/05-live-readback-receipt.json'
+    }
+  },
   workbookAndDriveChanged: false
 }
 

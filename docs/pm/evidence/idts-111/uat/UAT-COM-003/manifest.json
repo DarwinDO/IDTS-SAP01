@@ -83,6 +83,12 @@
       "file": "04-live-1001-rejected.png",
       "description": "Current PM runtime: safe Error dialog is visible while the full controlled UAT-COM-003-1001 input remains in the TextArea; no unrelated sensitive data is shown.",
       "sha256": "F35D860BD007EDCD53915C77A7F4AF5BD1C51B2B53FE70079503C54B1C8AE06F"
+    },
+    {
+      "id": "UAT-COM-003-E05",
+      "file": "05-live-readback-receipt.json",
+      "description": "Structured read-only Edge reload/readback: Comments contains two entries, the 1000 marker occurs once, and the 1001 marker occurs zero times; the prior 1001 rejection remains separately identified.",
+      "sha256": "9FF50BEF85E41B008A9B6BA7FB116DE994D9B36E324BB1E97FA3239E5A89CD62"
     }
   ],
   "historicalFailure": {
