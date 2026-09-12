@@ -11,8 +11,6 @@ const {
 } = require('./helpers')
 
 const {
-  importantChanges,
-  recordBugChangeSideEffects,
   recordDraftAttachmentSaveSideEffects
 } = require('./history')
 const {
@@ -111,7 +109,6 @@ async function handleDraftSave (req, entities, next) {
   await validateDraftForSave(req, entities)
   await captureDraftSaveState(req, entities)
   const result = await next()
-  await recordDraftBugSaveSideEffects(req, result, entities)
   await recordDraftAttachmentSaveSideEffects(req, result, entities)
   return result
 }
@@ -139,31 +136,17 @@ async function validateDraftForSave (req, entities) {
 }
 
 async function captureDraftSaveState (req, entities) {
-  // Chụp Bug active và attachment metadata trước SAVE vào `req` để bước sau tính diff.
+  // Chụp attachment metadata trước SAVE vào `req` để bước sau tính diff add/remove.
+  // Bug field history đã được active UPDATE của CAP ghi một lần; không chụp lại để tránh event trùng.
   // Đây là dữ liệu tạm trong một request, không phải field được lưu vào database.
   const bugID = bugIDFrom(req)
   if (!bugID) return
 
-  req._preSaveActiveBug = await readBug(req, entities, bugID)
   req._preSaveActiveAttachments = await cds.tx(req).run(
     SELECT.from(entities['Bugs.attachments'])
       .columns('ID', 'up__ID', 'filename', 'mimeType', 'fileSize')
       .where({ up__ID: bugID })
   )
-}
-
-async function recordDraftBugSaveSideEffects (req, data, entities) {
-  // Chỉ edit draft của Bug đã active mới có `oldBug`; create lần đầu không đi nhánh diff này.
-  // Sau persist, đọc bản active mới, tính field thực sự đổi rồi ghi History/Notification.
-  const oldBug = req._preSaveActiveBug
-  const bugID = data?.ID || bugIDFrom(req)
-  if (!oldBug || !bugID) return
-
-  const activeBug = await readBug(req, entities, bugID)
-  if (!activeBug) return
-
-  const changes = importantChanges(oldBug, activeBug)
-  await recordBugChangeSideEffects(req, entities, changes, activeBug)
 }
 
 module.exports = {

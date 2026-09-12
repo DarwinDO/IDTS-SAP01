@@ -31,6 +31,7 @@ const { readActiveIdentityAccessByUser } = require('../access/identity-readiness
 
 const { determineNextProcessor, validateAssignee, validateTransition } = require('./bug-write')
 const { assertBugOpenForMutation, enforceActionPermission } = require('./permissions')
+const { validateCommentContent } = require('./content')
 
 async function assignToDeveloper (req, entities) {
   // Action `assignToDeveloper` từ Object Page gọi vào đây. Hàm đọc Bug hiện tại, kiểm quyền điều phối,
@@ -150,10 +151,7 @@ async function addComment (req, entities, dependencies = {}) {
     return req.reject(403, 'Only Tester, Developer, or PM users can add comments.')
   }
 
-  const content = trimToNull(req.data.content)
-  if (!content) {
-    return req.reject(400, 'Comment content is required.', 'content')
-  }
+  const content = validateCommentContent(req, req.data.content)
 
   const tx = cds.tx(req)
   const recipients = await validateMentionRecipients({ tx, req, actor, mentionedUserIDs: req.data.mentionedUserIDs, entities })

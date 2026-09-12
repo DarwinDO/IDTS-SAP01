@@ -35,6 +35,24 @@ async function dispatchCreate (srv, entity, data) {
   return srv.dispatch(req)
 }
 
+async function countBugRows (entity, bugID) {
+  const rows = await cds.tx({ user: makeUser() }, tx =>
+    tx.run(SELECT.from(entity).columns('ID').where({ bug_ID: bugID }))
+  )
+  return rows.length
+}
+
+async function expectRejected (operation, statusCode, label) {
+  try {
+    await operation()
+  } catch (error) {
+    const actualStatus = Number(error.statusCode || error.status || error.code)
+    if (actualStatus === statusCode) return
+    throw new Error(`${label} returned ${actualStatus || 'unknown'} instead of ${statusCode}.`)
+  }
+  throw new Error(`${label} was accepted instead of returning ${statusCode}.`)
+}
+
 async function main () {
   fs.mkdirSync(TMP_DIR, { recursive: true })
   if (fs.existsSync(DB_FILE)) fs.unlinkSync(DB_FILE)
@@ -73,6 +91,54 @@ async function main () {
   )
   if (!commentRows.length) throw new Error('Programmatic comment verification failed.')
   console.log(`  PASS  comment row created: ${commentRows[0].ID}`)
+
+  console.log('')
+  console.log('SC-CA-B01 Comment length boundary is authoritative in CAP')
+  const boundaryText = 'a'.repeat(1000)
+  const boundaryReq = new cds.Request({
+    method: 'POST',
+    event: 'addComment',
+    target: srv.entities.Bugs,
+    params: [{ ID: BUG_ID, IsActiveEntity: true }],
+    data: { content: boundaryText },
+    user: makeUser()
+  })
+  await srv.dispatch(boundaryReq)
+  const storedBoundary = await cds.tx({ user: makeUser() }, tx =>
+    tx.run(SELECT.one.from(srv.entities.Comments).columns('content').where({ bug_ID: BUG_ID, content: boundaryText }))
+  )
+  if (storedBoundary?.content !== boundaryText || storedBoundary.content.length !== 1000) {
+    throw new Error('The accepted 1000-character comment was not persisted byte-for-byte.')
+  }
+
+  const countsBeforeOversized = {
+    comments: await countBugRows(srv.entities.Comments, BUG_ID),
+    history: await countBugRows(srv.entities.HistoryEvents, BUG_ID),
+    notifications: await countBugRows(srv.entities.Notifications, BUG_ID)
+  }
+  const oversizedText = 'b'.repeat(1001)
+  await expectRejected(() => srv.dispatch(new cds.Request({
+    method: 'POST',
+    event: 'addComment',
+    target: srv.entities.Bugs,
+    params: [{ ID: BUG_ID, IsActiveEntity: true }],
+    data: { content: oversizedText },
+    user: makeUser()
+  })), 400, 'Oversized addComment action')
+  await expectRejected(() => dispatchCreate(srv, srv.entities.Comments, {
+    bug_ID: BUG_ID,
+    content: oversizedText
+  }), 422, 'Direct Comment CREATE outside the supported bound action')
+
+  const countsAfterOversized = {
+    comments: await countBugRows(srv.entities.Comments, BUG_ID),
+    history: await countBugRows(srv.entities.HistoryEvents, BUG_ID),
+    notifications: await countBugRows(srv.entities.Notifications, BUG_ID)
+  }
+  if (JSON.stringify(countsAfterOversized) !== JSON.stringify(countsBeforeOversized)) {
+    throw new Error(`Oversized comment left partial side effects: before=${JSON.stringify(countsBeforeOversized)} after=${JSON.stringify(countsAfterOversized)}`)
+  }
+  console.log('  PASS  1000 characters persist; the supported action rejects 1001 with 400 and direct CREATE remains protocol-blocked with no partial side effects')
 
   console.log('')
   console.log('SC-CA-P02 Re-open same SQLite file to prove persistence')

@@ -263,3 +263,9 @@ Nút action trên Fiori chỉ là điểm bắt đầu trên UI. File này mới
 **English.** Lifecycle actions reuse the history ID as their notification source key. Resubmit and retest-owner reassignment select their stable event codes and require prompt email; assignment removal is planned by history as inbox-only. The action transaction still owns authorization and business updates.
 
 **Tiếng Việt.** Lifecycle action dùng lại history ID làm source key notification. Resubmit và đổi retest owner chọn stable event code và cần email prompt; bỏ assignment do history lập plan inbox-only. Transaction action vẫn sở hữu authorization và business update.
+
+## IDTS-127 comment length boundary (2026-09-12)
+
+**English.** `addComment` now calls `content.js#validateCommentContent` before mention validation, Comment INSERT, History creation, or notification scheduling. The supported bound action accepts exactly 1000 characters and rejects 1001 with HTTP 400. Because rejection happens before the transaction writes, Comment, History, and Notification counts remain unchanged. Direct composition-child CREATE remains separately blocked by CAP protocol rules and is not a substitute for testing the bound action used by Fiori.
+
+**Tiếng Việt.** `addComment` nay gọi `content.js#validateCommentContent` trước khi validate mention, INSERT Comment, tạo History hoặc schedule notification. Bound action được hỗ trợ nhận đúng 1000 ký tự và chặn 1001 bằng HTTP 400. Vì rejection xảy ra trước các lệnh ghi trong transaction nên số Comment, History và Notification giữ nguyên. Direct CREATE composition child vẫn bị rule protocol của CAP chặn riêng và không thay thế cho việc test bound action mà Fiori thật sự sử dụng.
