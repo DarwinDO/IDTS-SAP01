@@ -300,3 +300,10 @@ Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.c
 - Truth boundary: removed cases are not PASS, and retained BLOCKED/PARTIAL cases are not promoted. Exactly `UAT-COM-003` and `UAT-UX-003` remain final-approved. Historical Git/PR/Jira/workbook evidence is not rewritten.
 - Safety boundary: this is repository catalog/evidence curation only. No provider call, live test, BTP/HANA/user/role/data mutation, deployment, Jira transition, workbook generation or Drive synchronization is authorized by this decision.
 - Quyết định: xóa 13 case standalone đã được duyệt khỏi forward catalog; gộp Reject/Ignore vào `UAT-AI-010`. Catalog còn 77 case, evidence package NhanT còn 44 manifest với partition trung thực 24/8/12. Không biến case bị xóa hoặc BLOCKED/PARTIAL thành PASS và không thay đổi runtime/live data/workbook/Drive.
+
+### DEC-072 — Final-approve the controlled attachment lifecycle rerun (2026-09-13)
+
+- Decision: final-approve retained Attachment Cases 39–41 only after one exact 118-byte fixture completed upload persistence, download byte/hash identity, supported draft deletion, reload/readback, one audit event per Save, and authenticated stale-content HTTP 404.
+- Evidence boundary: preserve the older 44/54/47-byte and blocked attachment records as historical truth. The current cards show display numbers only, identify the catalog file, use executor `NhanT (DonHV support)`, and omit review-status labels; structured receipts keep machine provenance.
+- Resulting package: 44 manifests at 27 MEETS / 7 DOES_NOT_MEET / 10 BLOCKED, with 82 evidence references and 72 unique hashes. This decision changes evidence disposition only; it does not change product behavior, schema, deployment, provider, Jira, workbook or Drive.
+- Quyết định: chỉ final-approve Case attachment 39–41 sau khi một fixture đúng 118 byte hoàn tất upload persistence, download khớp byte/hash, xóa qua draft flow, reload/readback, mỗi Save đúng một audit event và content cũ trả HTTP 404. Giữ evidence cũ 44/54/47 byte và blocker làm lịch sử; không đổi source sản phẩm, schema, deploy, provider, Jira, workbook hoặc Drive.

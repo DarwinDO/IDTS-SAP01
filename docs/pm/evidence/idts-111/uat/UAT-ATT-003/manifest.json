@@ -1,33 +1,73 @@
 {
   "schemaVersion": "1.0",
   "caseId": "UAT-ATT-003",
+  "displayNumber": "41",
   "catalogStatus": "PREPARED",
-  "candidateExecutionStatus": "EXECUTION_BLOCKED_PENDING_PRECONDITION",
-  "executor": "NhanT",
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T17:04:00+07:00",
+  "executedAt": "2026-09-13T00:29:36+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
-  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
-  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "sourceMergeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "executionBaselineSha": "377343491153289f114cf8e462cc67c39f7f3048",
+  "deployedRuntimeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "testRecord": {
+    "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud",
+    "bugId": "029435e3-abb7-4079-826a-394709f9eb50",
+    "bugNumber": "BUG-0021",
+    "file": "idts-uat-attachment-roundtrip-20260912.txt",
+    "sizeBytes": 118,
+    "type": "text/plain",
+    "sha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D",
+    "uiVersion": "0.0.16"
+  },
   "expectedResult": "UI entry, metadata, and storage-object access are removed according to the supported delete contract.",
-  "actualResult": "Not executable: UAT-ATT-001 could not create a controlled attachment. Deleting an unrelated existing attachment was not authorized and would be destructive to team evidence.",
-  "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
-  "reviewBoundary": "Rerun after storage is restored and a disposable controlled attachment exists.",
-  "evidence": [],
+  "actualResult": "The exact controlled attachment was deleted through Edit, Delete and Save. After hard reload the attachment count was zero and the filename was absent. Fully loaded History increased from six to seven with exactly one Deleted attachment event. An authenticated same-origin GET to the old content reference returned HTTP 404. Bug business fields and Notifications were unchanged.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Final PASS approved from the supported draft-delete flow, hard-reload readback, single History event and authenticated HTTP 404 stale-access result. No Jira approval or Jira mutation is claimed.",
+  "liveAcceptance": {
+    "activeAttachmentCountBefore": 1,
+    "activeAttachmentCountAfterReload": 0,
+    "filenameAbsentAfterReload": true,
+    "historyCountBefore": 6,
+    "historyCountAfter": 7,
+    "newHistoryEvent": "Deleted attachment idts-uat-attachment-roundtrip-20260912.txt.",
+    "oldContentHttpStatus": 404,
+    "oldContentAccessible": false,
+    "businessFieldsUnchanged": true,
+    "notificationsUnchanged": true
+  },
+  "evidence": [
+    {
+      "id": "UAT-ATT-003-E01",
+      "file": "current-runtime-pass-card.png",
+      "description": "Complete mentor-facing Case 41 PASS card with delete, reload, History and stale-access readback.",
+      "sha256": "61D025C270DC426BA1CF811109ADE380B6AE41517FB6F3FC39D36D7C174DAB5B"
+    },
+    {
+      "id": "UAT-ATT-003-E02",
+      "file": "current-runtime-receipt.json",
+      "description": "Structured supported delete, reload, single-audit and authenticated HTTP 404 receipt.",
+      "sha256": "BE376E7362235E1D903A87BB1B149480EEE9AB65BC4FB14D7D178402A16FDA25"
+    }
+  ],
+  "historicalBlocker": {
+    "preserved": true,
+    "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
+    "actualResult": "The earlier run had no approved disposable controlled attachment and correctly refused to delete unrelated evidence."
+  },
   "privacyReview": {
     "status": "PASS",
-    "notes": "No unrelated attachment was deleted."
+    "notes": "The stale-access probe retains only sanitized HTTP status and boolean outcome; no URL, token, cookie, response body or attachment content is recorded."
   },
-  "issueClassification": "blocked by UAT-ATT-001 storage failure",
-  "limitations": [
-    "Missing disposable controlled attachment precondition."
-  ],
+  "issueClassification": "historical stale prerequisite resolved by the exact current-runtime controlled attachment chain",
+  "limitations": [],
   "donhvLatestReview": {
     "jiraCommentId": "10962",
-    "reviewDate": "2026-08-04",
-    "category": "STALE_PREREQUISITE_RERUN_REQUIRED",
-    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "reviewDate": "2026-09-13",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "FINAL_PASS_APPROVED",
     "preservesHistoricalCandidateTruth": true,
-    "finalPassApproved": false
+    "finalPassApproved": true
   }
 }

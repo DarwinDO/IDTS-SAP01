@@ -1,33 +1,73 @@
 {
   "schemaVersion": "1.0",
   "caseId": "UAT-ATT-002",
+  "displayNumber": "40",
   "catalogStatus": "PREPARED",
-  "candidateExecutionStatus": "EXECUTION_BLOCKED_PENDING_PRECONDITION",
-  "executor": "NhanT",
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-03T17:04:00+07:00",
+  "executedAt": "2026-09-13T00:29:36+07:00",
   "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
-  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
-  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "sourceMergeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "executionBaselineSha": "377343491153289f114cf8e462cc67c39f7f3048",
+  "deployedRuntimeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "testRecord": {
+    "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud",
+    "bugId": "029435e3-abb7-4079-826a-394709f9eb50",
+    "bugNumber": "BUG-0021",
+    "file": "idts-uat-attachment-roundtrip-20260912.txt",
+    "downloadedFilename": "idts-uat-attachment-roundtrip-20260912 (9).txt",
+    "sizeBytes": 118,
+    "type": "text/plain",
+    "sha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D",
+    "uiVersion": "0.0.16"
+  },
   "expectedResult": "Downloaded bytes match the original hash and filename/content type are safe.",
-  "actualResult": "Not executable: the supported upload in UAT-ATT-001 failed and no controlled downloadable attachment exists. Downloading an unrelated existing user/team file would violate evidence ownership and privacy boundaries.",
-  "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
-  "reviewBoundary": "Rerun after storage is restored and a controlled attachment is created.",
-  "evidence": [],
+  "actualResult": "Chrome completed the controlled attachment download. The downloaded file was exactly 118 bytes and its SHA-256 exactly matched the upload fixture. Chrome added the local suffix (9) only because prior copies existed; the attachment record was not mutated.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Final PASS approved from the authenticated download and independent local byte-length/SHA-256 readback. No Jira approval or Jira mutation is claimed.",
+  "liveAcceptance": {
+    "downloadCompleted": true,
+    "sourceSizeBytes": 118,
+    "downloadedSizeBytes": 118,
+    "sourceSha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D",
+    "downloadedSha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D",
+    "byteIdentity": true,
+    "attachmentStateUnchanged": true
+  },
+  "evidence": [
+    {
+      "id": "UAT-ATT-002-E01",
+      "file": "current-runtime-pass-card.png",
+      "description": "Complete mentor-facing Case 40 PASS card with byte/hash comparison and provenance.",
+      "sha256": "FA1C42653A3A2A978C7259A2D3CE7456AC6E520B7761262FCF4E4C11E006211E"
+    },
+    {
+      "id": "UAT-ATT-002-E02",
+      "file": "current-runtime-receipt.json",
+      "description": "Structured authenticated download and independent local hash readback receipt.",
+      "sha256": "8DF5A1717E69C22A42C0D8E538FEBA74494E1D1CF991044CF0CCBA8AB71F40B3"
+    }
+  ],
+  "historicalBlocker": {
+    "preserved": true,
+    "candidateOutcome": "NOT_EXECUTABLE_WITH_CURRENT_PRECONDITION",
+    "actualResult": "The earlier run had no controlled downloadable attachment because its upload prerequisite failed."
+  },
   "privacyReview": {
     "status": "PASS",
-    "notes": "No unrelated attachment was downloaded."
+    "notes": "Only controlled filename, size, media type and SHA-256 are retained; no attachment body, cookie, token or private endpoint is recorded."
   },
-  "issueClassification": "blocked by UAT-ATT-001 storage failure",
+  "issueClassification": "historical stale prerequisite resolved by the exact current-runtime controlled attachment chain",
   "limitations": [
-    "Missing controlled attachment precondition."
+    "Chrome added (9) to the local download filename because existing copies were present; exact length and SHA-256 prove byte identity."
   ],
   "donhvLatestReview": {
     "jiraCommentId": "10962",
-    "reviewDate": "2026-08-04",
-    "category": "STALE_PREREQUISITE_RERUN_REQUIRED",
-    "currentStatus": "RERUN_REQUIRED_CURRENT_RUNTIME",
+    "reviewDate": "2026-09-13",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "FINAL_PASS_APPROVED",
     "preservesHistoricalCandidateTruth": true,
-    "finalPassApproved": false
+    "finalPassApproved": true
   }
 }

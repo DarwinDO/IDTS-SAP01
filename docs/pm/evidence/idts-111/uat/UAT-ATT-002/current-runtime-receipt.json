@@ -1,0 +1,40 @@
+{
+  "schemaVersion": "1.0",
+  "receiptType": "IDTS-111-UAT-ATT-002-live-acceptance",
+  "caseId": "UAT-ATT-002",
+  "displayNumber": "40",
+  "result": "PASS",
+  "evidencePreparer": "NhanT (DonHV support)",
+  "manualVerifier": "DonHV",
+  "actorRole": "TESTER",
+  "evidenceFinalizedAt": "2026-09-13T00:29:36+07:00",
+  "downloadCompletedAtUtc": "2026-09-12T17:14:17Z",
+  "sourceBaselineSha": "377343491153289f114cf8e462cc67c39f7f3048",
+  "deployedRuntimeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "runtimeUiVersion": "0.0.16",
+  "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud",
+  "testDefinition": "docs/qa/idts-111-uat-catalog.json#UAT-ATT-002",
+  "controlledRecord": {
+    "bugId": "029435e3-abb7-4079-826a-394709f9eb50",
+    "bugNumber": "BUG-0021"
+  },
+  "fixture": {
+    "sourceFile": "idts-uat-attachment-roundtrip-20260912.txt",
+    "downloadedFilename": "idts-uat-attachment-roundtrip-20260912 (9).txt",
+    "sizeBytes": 118,
+    "mediaType": "text/plain",
+    "sourceSha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D",
+    "downloadedSha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D"
+  },
+  "observed": {
+    "downloadCompleted": true,
+    "byteLengthMatches": true,
+    "sha256Matches": true,
+    "chromeCollisionSuffixOnly": true,
+    "attachmentStateMutated": false
+  },
+  "privacy": "Only the controlled fixture path, size, media type and SHA-256 are retained; no attachment body, cookie, token or private endpoint is recorded.",
+  "limitations": [
+    "The local filename suffix '(9)' was added by Chrome because prior copies existed; byte length and SHA-256 prove content identity."
+  ]
+}

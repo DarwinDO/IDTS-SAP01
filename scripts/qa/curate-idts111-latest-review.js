@@ -10,7 +10,7 @@ const summaryPath = path.resolve('docs/pm/evidence/idts-111/latest-review-summar
 const reviewCommentId = '10962'
 const reviewDate = '2026-08-04'
 const checkOnly = process.argv.includes('--check')
-const finalApprovedCaseIds = new Set(['UAT-COM-003', 'UAT-UX-003'])
+const finalApprovedCaseIds = new Set(['UAT-COM-003', 'UAT-UX-003', 'UAT-ATT-001', 'UAT-ATT-002', 'UAT-ATT-003'])
 const finalApprovalContract = {
   sourceHead: 'e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34',
   executor: 'NhanT (DonHV support)',
@@ -24,11 +24,11 @@ const finalApprovalContract = {
   reviewBoundary: 'Final PASS approved under the parent-authorized user decision; no Jira approval or Jira mutation is claimed.'
 }
 
-const stalePrerequisite = new Set(['UAT-AI-007', 'UAT-ATT-002', 'UAT-ATT-003'])
+const stalePrerequisite = new Set(['UAT-AI-007'])
 const historicalOldRuntime = new Set()
 const defectRecheck = new Set()
 const currentRuntimePositive = new Set(['UAT-AUTH-005', 'UAT-COM-001', 'UAT-COM-004'])
-const fixtureProvenanceBlocked = new Set(['UAT-ATT-001'])
+const fixtureProvenanceBlocked = new Set()
 const currentRuntimeDefect = new Set(['UAT-BUG-008'])
 const currentRuntimePartial = new Set(['UAT-UX-002'])
 const semanticCorrection = new Set(['UAT-AI-008', 'UAT-AI-010', 'UAT-LIFE-014'])
@@ -230,6 +230,65 @@ function validateUx002PartialEvidence (manifest, manifestPath) {
   requireContract('receipt.sha256', Boolean(receiptEvidence) && String(receiptEvidence.sha256).toUpperCase() === hashEvidence(receiptPath))
 }
 
+function validateAttachmentFinalApproval (manifest, manifestPath) {
+  const requireContract = (field, condition) => {
+    if (!condition) throw new Error(`Attachment final approval contract mismatch: ${manifest.caseId}: ${field}`)
+  }
+  const expectedDisplay = { 'UAT-ATT-001': '39', 'UAT-ATT-002': '40', 'UAT-ATT-003': '41' }
+  const expectedFixtureSha = '5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D'
+  const expectedRuntimeSha = '54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b'
+  const expectedBaselineSha = '377343491153289f114cf8e462cc67c39f7f3048'
+  requireContract('displayNumber', manifest.displayNumber === expectedDisplay[manifest.caseId])
+  requireContract('result', manifest.candidateExecutionStatus === 'PASS' && manifest.candidateOutcome === 'MEETS_EXPECTED_RESULT')
+  requireContract('executor/role', manifest.executor === 'NhanT (DonHV support)' && manifest.actorRole === 'TESTER')
+  requireContract('baseline/runtime', manifest.executionBaselineSha === expectedBaselineSha && manifest.deployedRuntimeSha === expectedRuntimeSha)
+  requireContract('fixture', manifest.testRecord?.file === 'idts-uat-attachment-roundtrip-20260912.txt' && manifest.testRecord?.sizeBytes === 118 && manifest.testRecord?.type === 'text/plain' && manifest.testRecord?.sha256 === expectedFixtureSha)
+  requireContract('reviewBoundary', typeof manifest.reviewBoundary === 'string' && !/\b(?:pending|candidate|not final|unapproved|await(?:ing)?|needs?)\b/i.test(manifest.reviewBoundary))
+
+  const manifestPathResolved = manifestPath ? path.resolve(manifestPath) : path.join(evidenceRoot, manifest.caseId, 'manifest.json')
+  const caseDir = path.dirname(manifestPathResolved)
+  const receiptPath = path.join(caseDir, 'current-runtime-receipt.json')
+  const cardPath = path.join(caseDir, 'current-runtime-pass-card.png')
+  requireContract('artifacts.exist', fs.existsSync(receiptPath) && fs.existsSync(cardPath))
+  const receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'))
+  requireContract('receipt.identity', receipt.caseId === manifest.caseId && receipt.displayNumber === manifest.displayNumber && receipt.result === 'PASS')
+  requireContract('receipt.executor/role', receipt.evidencePreparer === manifest.executor && receipt.actorRole === manifest.actorRole)
+  requireContract('receipt.baseline/runtime', receipt.sourceBaselineSha === manifest.executionBaselineSha && receipt.deployedRuntimeSha === manifest.deployedRuntimeSha)
+  requireContract('receipt.fixture', (receipt.fixture?.file || receipt.fixture?.sourceFile) === manifest.testRecord.file && receipt.fixture?.sizeBytes === 118)
+  requireContract('receipt.fixtureSha', (receipt.fixture?.sha256 || receipt.fixture?.sourceSha256) === expectedFixtureSha)
+  const evidence = Array.isArray(manifest.evidence) ? manifest.evidence : []
+  for (const file of ['current-runtime-pass-card.png', 'current-runtime-receipt.json']) {
+    const item = evidence.find(entry => entry.file === file)
+    const evidencePath = path.join(caseDir, file)
+    requireContract(`evidence.${file}`, Boolean(item) && item.sha256 === hashEvidence(evidencePath))
+  }
+
+  if (manifest.caseId === 'UAT-ATT-001') {
+    requireContract('upload.readback', manifest.liveAcceptance?.draftAttachmentCount === 1 && manifest.liveAcceptance?.activeAttachmentCountAfterReload === 1 && manifest.liveAcceptance?.scanStatusAfterReload === 'Unscanned')
+    requireContract('upload.history', manifest.liveAcceptance?.historyCountBefore === 5 && manifest.liveAcceptance?.historyCountAfter === 6 && /^Added attachment /.test(manifest.liveAcceptance?.newHistoryEvent || ''))
+    requireContract('upload.historicalTruth', manifest.historicalFailure?.preserved === true && /44-byte, 54-byte and 47-byte/.test(manifest.historicalFailure?.actualResult || ''))
+  } else if (manifest.caseId === 'UAT-ATT-002') {
+    requireContract('download.hash', manifest.liveAcceptance?.sourceSizeBytes === 118 && manifest.liveAcceptance?.downloadedSizeBytes === 118 && manifest.liveAcceptance?.sourceSha256 === expectedFixtureSha && manifest.liveAcceptance?.downloadedSha256 === expectedFixtureSha && manifest.liveAcceptance?.byteIdentity === true)
+    requireContract('download.noMutation', manifest.liveAcceptance?.attachmentStateUnchanged === true)
+  } else {
+    requireContract('delete.readback', manifest.liveAcceptance?.activeAttachmentCountBefore === 1 && manifest.liveAcceptance?.activeAttachmentCountAfterReload === 0 && manifest.liveAcceptance?.filenameAbsentAfterReload === true)
+    requireContract('delete.history', manifest.liveAcceptance?.historyCountBefore === 6 && manifest.liveAcceptance?.historyCountAfter === 7 && /^Deleted attachment /.test(manifest.liveAcceptance?.newHistoryEvent || ''))
+    requireContract('delete.staleAccess', manifest.liveAcceptance?.oldContentHttpStatus === 404 && manifest.liveAcceptance?.oldContentAccessible === false)
+    requireContract('delete.invariants', manifest.liveAcceptance?.businessFieldsUnchanged === true && manifest.liveAcceptance?.notificationsUnchanged === true)
+  }
+
+  const expectedReview = {
+    jiraCommentId: reviewCommentId,
+    reviewDate: '2026-09-13',
+    category: 'CURRENT_RUNTIME_POSITIVE',
+    currentStatus: 'FINAL_PASS_APPROVED',
+    preservesHistoricalCandidateTruth: true,
+    finalPassApproved: true
+  }
+  requireContract('donhvLatestReview', JSON.stringify(manifest.donhvLatestReview) === JSON.stringify(expectedReview))
+  return expectedReview
+}
+
 function expectedReviewFor (manifest, manifestPath) {
   const [category, currentStatus] = classify(manifest)
   if (manifest.caseId === 'UAT-COM-003') {
@@ -291,6 +350,7 @@ function expectedReviewFor (manifest, manifestPath) {
     return expectedReview
   }
 
+  if (manifest.caseId.startsWith('UAT-ATT-00') && ['UAT-ATT-001', 'UAT-ATT-002', 'UAT-ATT-003'].includes(manifest.caseId)) return validateAttachmentFinalApproval(manifest, manifestPath)
   if (manifest.caseId === 'UAT-UX-003') return validateUx003FinalApproval(manifest, manifestPath)
   if (manifest.caseId === 'UAT-UX-002') validateUx002PartialEvidence(manifest, manifestPath)
 
@@ -361,14 +421,14 @@ for (const manifestPath of manifests) {
 const expected = {
   RETAINED_TRUTHFUL_POSITIVE: 19,
   VALID_PRECONDITION_BLOCKER: 9,
-  STALE_PREREQUISITE_RERUN_REQUIRED: 3,
+  STALE_PREREQUISITE_RERUN_REQUIRED: 1,
   CONFIRMED_DEFECT_RECHECK: 1,
   CATALOG_SEMANTIC_CORRECTION: 3,
   PHYSICAL_KEYBOARD_LIMITATION: 0,
   AI_DIAGNOSTIC_RERUN: 2,
-  CURRENT_RUNTIME_POSITIVE: 5,
+  CURRENT_RUNTIME_POSITIVE: 8,
   CURRENT_RUNTIME_NEGATIVE: 0,
-  FIXTURE_PROVENANCE_INCONSISTENT: 1,
+  FIXTURE_PROVENANCE_INCONSISTENT: 0,
   CURRENT_RUNTIME_PARTIAL_RECHECK: 1
 }
 
@@ -377,20 +437,20 @@ for (const [category, expectedCount] of Object.entries(expected)) {
 }
 
 const expectedDisposition = {
-  MEETS_EXPECTED_RESULT: 24,
-  DOES_NOT_MEET_EXPECTED_RESULT: 8,
-  BLOCKED: 12
+  MEETS_EXPECTED_RESULT: 27,
+  DOES_NOT_MEET_EXPECTED_RESULT: 7,
+  BLOCKED: 10
 }
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
   if (candidateDisposition[status] !== expectedCount) throw new Error(`${status}: expected ${expectedCount}, got ${candidateDisposition[status] || 0}`)
 }
-if (evidenceReferences !== 76) throw new Error(`Evidence references: expected 76, got ${evidenceReferences}`)
-if (evidenceHashes.size !== 66) throw new Error(`Unique evidence hashes: expected 66, got ${evidenceHashes.size}`)
+if (evidenceReferences !== 82) throw new Error(`Evidence references: expected 82, got ${evidenceReferences}`)
+if (evidenceHashes.size !== 72) throw new Error(`Unique evidence hashes: expected 72, got ${evidenceHashes.size}`)
 
 const attachmentManifest = JSON.parse(fs.readFileSync(path.join(evidenceRoot, 'UAT-ATT-001', 'manifest.json'), 'utf8'))
 const attachmentText = JSON.stringify(attachmentManifest)
-if (attachmentManifest.testRecord?.sizeBytes !== 44 || !attachmentText.includes('54-byte') || !attachmentText.includes('47-byte')) {
-  throw new Error('UAT-ATT-001 fixture provenance no longer exposes the preserved 44/54/47-byte inconsistency')
+if (attachmentManifest.testRecord?.sizeBytes !== 118 || attachmentManifest.testRecord?.sha256 !== '5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D' || !attachmentText.includes('44-byte, 54-byte and 47-byte')) {
+  throw new Error('UAT-ATT-001 must use the exact 118-byte fixture while preserving the historical 44/54/47-byte inconsistency')
 }
 
 const summary = {
@@ -405,23 +465,20 @@ const summary = {
   runtimeRerunPerformed: true,
   runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 Smart Assignment returned one candidate with no retry and Handoff matching transport telemetry was unavailable. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.',
   latestEvidenceUpdate: {
-    date: '2026-09-12',
-    caseId: 'UAT-UX-002',
-    result: 'PARTIAL',
-    localDeterministicRegression: {
-      script: 'scripts/qa/test-idts127-ux002-responsive-browser.js',
-      commit: '27675cf6f7f051e3dea15109f43162f08b490005',
-      mergedVia: 'ae64312136f1f741e8a4aa1a940ce7850d5967a7',
-      result: 'PASS',
-      scope: 'Local CAP plus temporary SQLite fixtures; not live provider/BTP acceptance.'
+    date: '2026-09-13',
+    caseId: 'UAT-ATT-003',
+    result: 'PASS',
+    attachmentChain: ['UAT-ATT-001', 'UAT-ATT-002', 'UAT-ATT-003'],
+    controlledFixture: {
+      file: 'idts-uat-attachment-roundtrip-20260912.txt',
+      sizeBytes: 118,
+      sha256: '5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D'
     },
-    currentEvidence: 'One approved Classification JPG plus one sanitized receipt; three historical PNGs remain integrity-tracked and labelled historical.',
+    currentEvidence: 'Three mentor-facing PASS cards plus three structured receipts cover upload persistence, download byte identity and supported deletion with stale access returning HTTP 404.',
     limitations: [
-      'Smart Assignment had one candidate, so the two-candidate check remains blocked and no retry was made.',
-      'Handoff UI settled but matching transport telemetry was unavailable.',
-      'AiSuggestions count delta was unavailable.'
+      'Upload persistence is accepted through supported Save plus hard-reload UI readback; no direct HANA or storage-console inspection is claimed.'
     ],
-    finalPassApproved: false
+    finalPassApproved: true
   },
   finalApprovals: {
     'UAT-COM-003': {
@@ -433,6 +490,21 @@ const summary = {
       status: 'FINAL_PASS_APPROVED',
       historicalFailurePreserved: true,
       receipt: 'uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json'
+    },
+    'UAT-ATT-001': {
+      status: 'FINAL_PASS_APPROVED',
+      historicalFailurePreserved: true,
+      receipt: 'uat/UAT-ATT-001/current-runtime-receipt.json'
+    },
+    'UAT-ATT-002': {
+      status: 'FINAL_PASS_APPROVED',
+      historicalFailurePreserved: true,
+      receipt: 'uat/UAT-ATT-002/current-runtime-receipt.json'
+    },
+    'UAT-ATT-003': {
+      status: 'FINAL_PASS_APPROVED',
+      historicalFailurePreserved: true,
+      receipt: 'uat/UAT-ATT-003/current-runtime-receipt.json'
     }
   },
   workbookAndDriveChanged: false
@@ -441,4 +513,4 @@ const summary = {
 if (!checkOnly) fs.writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8')
 console.log(JSON.stringify({ ...summary, mode: checkOnly ? 'CHECK_ONLY' : 'WRITE' }))
 
-module.exports = { classify, expectedReviewFor, finalApprovedCaseIds, validateUx003FinalApproval, validateUx002PartialEvidence, hashEvidence }
+module.exports = { classify, expectedReviewFor, finalApprovedCaseIds, validateUx003FinalApproval, validateUx002PartialEvidence, validateAttachmentFinalApproval, hashEvidence }

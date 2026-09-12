@@ -1,0 +1,49 @@
+{
+  "schemaVersion": "1.0",
+  "receiptType": "IDTS-111-UAT-ATT-003-live-acceptance",
+  "caseId": "UAT-ATT-003",
+  "displayNumber": "41",
+  "result": "PASS",
+  "evidencePreparer": "NhanT (DonHV support)",
+  "manualVerifier": "DonHV",
+  "actorRole": "TESTER",
+  "evidenceFinalizedAt": "2026-09-13T00:29:36+07:00",
+  "sourceBaselineSha": "377343491153289f114cf8e462cc67c39f7f3048",
+  "deployedRuntimeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "runtimeUiVersion": "0.0.16",
+  "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud",
+  "testDefinition": "docs/qa/idts-111-uat-catalog.json#UAT-ATT-003",
+  "controlledRecord": {
+    "bugId": "029435e3-abb7-4079-826a-394709f9eb50",
+    "bugNumber": "BUG-0021"
+  },
+  "fixture": {
+    "file": "idts-uat-attachment-roundtrip-20260912.txt",
+    "sizeBytes": 118,
+    "mediaType": "text/plain",
+    "sha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D"
+  },
+  "workflow": [
+    "Edit",
+    "Select only the controlled fixture",
+    "Delete and confirm",
+    "Save",
+    "Hard reload",
+    "Read back Attachments and fully load History",
+    "GET the old content reference with the same authenticated browser session"
+  ],
+  "observed": {
+    "activeAttachmentCountBefore": 1,
+    "activeAttachmentCountAfterReload": 0,
+    "filenameAbsentAfterReload": true,
+    "historyCountBefore": 6,
+    "historyCountAfter": 7,
+    "newHistoryEvent": "Deleted attachment idts-uat-attachment-roundtrip-20260912.txt.",
+    "oldContentHttpStatus": 404,
+    "oldContentAccessible": false,
+    "businessFieldsUnchanged": true,
+    "notificationsUnchanged": true
+  },
+  "privacy": "The stale-access probe records only sanitized HTTP status and boolean outcome; no URL, token, cookie, response body or attachment content is retained.",
+  "limitations": []
+}
