@@ -39,3 +39,28 @@ The broad app-local ESLint command is not a usable delta gate in this Windows ch
 ## Tiếng Việt
 
 Lỗi live là UI5 tự cắt comment 1.001 ký tự thành 1.000 ký tự trước khi gửi, nên backend nhận dữ liệu hợp lệ và đã lưu comment bị cắt. Bản sửa tối thiểu bỏ giới hạn cắt ngầm ở UI, gửi nguyên nội dung tới CAP và để CAP từ chối 1.001 ký tự mà không lưu một phần. Sau rollout UI-only phải kiểm tra lại cả mốc 1.000 và 1.001 ký tự trên live.
+
+## Final rollout, topology recovery, and live acceptance — 2026-09-12
+
+The source merge under acceptance is `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`. The deployed Bug Management UI is version `0.0.16`, artifact SHA-256 `F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4`.
+
+The first narrow content-descriptor rollout temporarily detached MTA metadata from the deployed topology. This was an operational metadata effect only: the existing services and data remained present. Selective CAP/AppRouter restages recovered the application topology; no `db-deployer` restage, schema deployment, migration, seed/import, or business-data mutation was performed. The four recorded deployment operations all finished:
+
+| Operation | Status |
+|---|---|
+| `3db5afe5-ae5b-11f1-8aff-eeee0a831123` | `FINISHED` |
+| `aa3e6a3e-ae5b-11f1-8aff-eeee0a831123` | `FINISHED` |
+| `619fd74d-ae5e-11f1-8b4e-eeee0a85d7b9` | `FINISHED` |
+| `e0d69079-ae5f-11f1-8b4e-eeee0a85d7b9` | `FINISHED` |
+
+Final topology readback retained CAP droplet `aa1a95d2-9efa-41cf-906b-2bd8430cf67f` and AppRouter droplet `fbece83e-e3b2-46f8-b031-5a4fa12ee04a`; the MTA lists both apps and six services. `npm run btp:demo:check` is `DEMO READY`.
+
+UAT-COM-003 is IDTS-111 display number `42` on controlled `BUG-0021` (Bug ID `029435e3-abb7-4079-826a-394709f9eb50`) in the DonHV PM session. The exact 1,000-character marker `UAT-COM-003-1000|` posted once and remained visible after reload. The one authorized 1,001-character attempt retained the full TextArea input, showed the safe generic Error dialog, reached CAP as HTTP `400` with `Comment cannot exceed 1000 characters`, and left the comment list unchanged at two entries; after reload the 1001 marker count was zero. Comments, History, Notifications, and Attachments remained rendered. Runtime screenshots are `03-live-1000-pass.png` (SHA-256 `55012D3F13E6114F277B0F4F209CA0F9C77E50FAC01892B843489F4980529609`) and `04-live-1001-rejected.png` (SHA-256 `F35D860BD007EDCD53915C77A7F4AF5BD1C51B2B53FE70079503C54B1C8AE06F`).
+
+This records the final PASS under the parent-authorized user decision. No Jira approval or Jira mutation is claimed; workbook, IDTS-110 cards, Drive, and live data outside the single authorized rejection attempt remain unchanged.
+
+### Kết quả rollout và kiểm tra live
+
+Lần rollout content descriptor hẹp đầu tiên chỉ làm tách metadata MTA tạm thời; services và dữ liệu hiện hữu vẫn còn. Đã khôi phục topology bằng restage có chọn lọc cho CAP/AppRouter, không restage `db-deployer`, không deploy schema/migration/seed/import và không mutation business data. Bốn operation ở trên đều `FINISHED`; droplet cuối là CAP `aa1a95d2-9efa-41cf-906b-2bd8430cf67f`, AppRouter `fbece83e-e3b2-46f8-b031-5a4fa12ee04a`, readiness `DEMO READY`.
+
+UAT-COM-003 là IDTS-111 display `42`, không phải card IDTS-110. Trong session PM DonHV, marker 1.000 ký tự lưu và hiển thị lại sau reload; lần thử 1.001 ký tự được phép duy nhất bị CAP trả HTTP `400`, hiện Error an toàn, không lưu marker 1.001 hay nội dung bị cắt. Đây là final PASS theo quyết định được ủy quyền; không mutation Jira.
