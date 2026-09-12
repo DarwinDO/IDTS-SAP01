@@ -684,16 +684,6 @@
   "artifacts": {
     "screenshots": [
       {
-        "path": "uat/UAT-UX-002/01-live-before.jpg",
-        "encoding": "jpeg",
-        "dimensions": {
-          "width": 834,
-          "height": 1112
-        },
-        "bytes": 81120,
-        "sha256": "92EE455BC81D70B7D317DA3CB9F1270BE9441A15E9BBA5662530CA9514E6655E"
-      },
-      {
         "path": "uat/UAT-UX-002/02-live-classification-review.jpg",
         "encoding": "jpeg",
         "dimensions": {
@@ -702,26 +692,6 @@
         },
         "bytes": 111931,
         "sha256": "4AAB3B429257FED80B2806D1F1745CAA2268AE357FB93C9945BCF929B218A0A1"
-      },
-      {
-        "path": "uat/UAT-UX-002/03-live-handoff-summary-top.jpg",
-        "encoding": "jpeg",
-        "dimensions": {
-          "width": 834,
-          "height": 1112
-        },
-        "bytes": 123618,
-        "sha256": "75A472C435F20FCACDB6E4E105CE74280E821492A86A0CD9725162BED2D13329"
-      },
-      {
-        "path": "uat/UAT-UX-002/04-live-final.jpg",
-        "encoding": "jpeg",
-        "dimensions": {
-          "width": 834,
-          "height": 1112
-        },
-        "bytes": 93449,
-        "sha256": "BF6CDA9A7FF015AA11EA0C12D46DFEC60A4DB662DECA4B76EA5BA63F7F20DAE6"
       }
     ],
     "receiptPath": "uat/UAT-UX-002/ux002-receipt.json"

@@ -14,17 +14,27 @@ const os = require('node:os')
 const path = require('node:path')
 const { randomUUID } = require('node:crypto')
 const { chromium } = require('playwright')
+
+process.env.CDS_LOG_LEVEL = process.env.CDS_LOG_LEVEL || 'warn'
+process.env.NODE_ENV = 'test'
+process.env.CDS_ENV = 'test'
+process.env.CDS_TEST_FAKE = 'true'
+process.env.CDS_PLUGIN_UI5_ACTIVE = 'false'
+
 const cds = require('@sap/cds')
+const cdsTest = require('@cap-js/cds-test')
 
 const { DELETE, INSERT } = cds.ql
 const { createSessionToken, hashToken, addMinutes } = require('../../srv/auth/passwords')
 const { createHarness } = require('./lib/browser-harness')
 
-const LOCAL_BASE_URL = 'http://localhost:4004'
-const BASE_URL = LOCAL_BASE_URL
-const APP_URL = `${BASE_URL}/idts.bugmanagementui/index.html`
-const IS_LOCAL = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(BASE_URL)
+const PROJECT_ROOT = path.resolve(__dirname, '..', '..')
+const LOCAL_BASE_URL_PATTERN = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i
 const VIEWPORT = { width: 834, height: 1112 }
+const AMBIENT_BASE_URL = String(process.env.IDTS_QA_BASE_URL || '').replace(/\/+$/, '')
+
+let BASE_URL
+let APP_URL
 
 const PM_USER = {
   ID: '10000000-0000-0000-0000-000000000001',
@@ -98,16 +108,13 @@ function pass (label) {
   console.log(`  PASS  ${label}`)
 }
 
-function assertAmbientBaseUrlIsolation () {
-  const ambientBaseUrl = String(process.env.IDTS_QA_BASE_URL || '').replace(/\/+$/, '')
-  assert.strictEqual(BASE_URL, LOCAL_BASE_URL)
-  if (ambientBaseUrl && ambientBaseUrl !== LOCAL_BASE_URL) {
-    assert.notStrictEqual(BASE_URL, ambientBaseUrl)
+function assertAmbientBaseUrlIsolation (serverUrl) {
+  assert.match(serverUrl, LOCAL_BASE_URL_PATTERN, 'cds-test must provide a localhost fixture URL')
+  if (AMBIENT_BASE_URL && !LOCAL_BASE_URL_PATTERN.test(AMBIENT_BASE_URL)) {
+    assert.notStrictEqual(serverUrl, AMBIENT_BASE_URL)
   }
   pass('ambient IDTS_QA_BASE_URL cannot override the deterministic localhost fixture target')
 }
-
-assertAmbientBaseUrlIsolation()
 
 async function launchBrowser () {
   const headless = !/^false$/i.test(process.env.IDTS_QA_HEADLESS || '')
@@ -172,14 +179,45 @@ async function createBugFixture (db) {
   return ID
 }
 
+async function runBounded (label, operation, timeoutMs = 15000) {
+  let timer
+  try {
+    return await Promise.race([
+      Promise.resolve().then(operation),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs)
+      })
+    ])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function closeServer (server) {
+  if (!server?.listening) return
+  await runBounded('CAP server shutdown', () => new Promise((resolve, reject) => {
+    server.close(error => error ? reject(error) : resolve())
+  }))
+}
+
 async function cleanup (db, bugID, sessionID) {
-  if (bugID) {
-    await db.run(DELETE.from('idts.cap.AiSuggestions').where({ bug_ID: bugID })).catch(() => {})
-    await db.run(DELETE.from('idts.cap.Bugs').where({ ID: bugID })).catch(() => {})
+  const failures = []
+  const attempt = async (label, operation) => {
+    try {
+      await operation()
+    } catch (error) {
+      failures.push(`${label}: ${error?.message || error}`)
+    }
   }
-  if (sessionID) {
-    await db.run(DELETE.from('idts.cap.AuthSessions').where({ ID: sessionID })).catch(() => {})
+
+  if (db && bugID) {
+    await attempt('AiSuggestions fixture deletion', () => db.run(DELETE.from('idts.cap.AiSuggestions').where({ bug_ID: bugID })))
+    await attempt('Bug fixture deletion', () => db.run(DELETE.from('idts.cap.Bugs').where({ ID: bugID })))
   }
+  if (db && sessionID) {
+    await attempt('AuthSessions fixture deletion', () => db.run(DELETE.from('idts.cap.AuthSessions').where({ ID: sessionID })))
+  }
+  if (failures.length) throw new Error(`CLEANUP FAILED: ${failures.join('; ')}`)
 }
 
 function json (body) {
@@ -191,7 +229,7 @@ function json (body) {
   }
 }
 
-function controlledSimilar (bugID) {
+function controlledSimilar () {
   return {
     '@odata.context': `${BASE_URL}/odata/v4/bug/$metadata#Collection(BugService.SimilarBugCandidate)`,
     value: [
@@ -362,7 +400,7 @@ function controlledHandoff (bugID) {
 
 async function installControlledResponses (page, bugID) {
   await page.route(/\/odata\/v4\/bug\/AssignableDevelopers/i, route => route.fulfill(json(controlledAssignable())))
-  await page.route(/\/odata\/v4\/bug\/suggestSimilarBugs/i, route => route.fulfill(json(controlledSimilar(bugID))))
+  await page.route(/\/odata\/v4\/bug\/suggestSimilarBugs/i, route => route.fulfill(json(controlledSimilar())))
   await page.route(/\/odata\/v4\/bug\/suggestClassification/i, route => route.fulfill(json(controlledClassification())))
   await page.route(/\/odata\/v4\/bug\/explainSmartAssignment/i, route => route.fulfill(json(controlledAssignment())))
   await page.route(/\/odata\/v4\/bug\/summarizeBugHandoff/i, route => route.fulfill(json(controlledHandoff(bugID))))
@@ -393,6 +431,8 @@ async function readTextGeometry (root, selectors, minimumLength) {
         textLength: text.length,
         clientWidth: node.clientWidth,
         scrollWidth: node.scrollWidth,
+        clientHeight: node.clientHeight,
+        scrollHeight: node.scrollHeight,
         whiteSpace: style.whiteSpace,
         visible: style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0
       }
@@ -420,6 +460,9 @@ async function readButtonGeometry (page, locator, label, requireEnabled) {
     }
     if (box.left < -1 || box.right > viewportWidth + 1) {
       issues.push(`${label}[${index}]: button bounds ${Math.round(box.left)}..${Math.round(box.right)} exceed ${viewportWidth}`)
+    }
+    if (box.top < -1 || box.bottom > (page.viewportSize()?.height || VIEWPORT.height) + 1) {
+      issues.push(`${label}[${index}]: button vertical bounds ${Math.round(box.top)}..${Math.round(box.bottom)} exceed viewport`)
     }
     const reachable = await button.evaluate(element => {
       const rect = element.getBoundingClientRect()
@@ -454,6 +497,9 @@ async function assertResponsiveLayout (page, options) {
       if (match.scrollWidth > match.clientWidth + 1) {
         issues.push(`${options.text.label}[${index}]: scrollWidth ${match.scrollWidth} exceeds clientWidth ${match.clientWidth}`)
       }
+      if (match.scrollHeight > match.clientHeight + 1) {
+        issues.push(`${options.text.label}[${index}]: vertical scrollHeight ${match.scrollHeight} exceeds clientHeight ${match.clientHeight}`)
+      }
       if (match.whiteSpace === 'nowrap') {
         issues.push(`${options.text.label}[${index}]: computed whiteSpace is nowrap`)
       }
@@ -471,7 +517,7 @@ async function runNegativeControl (page) {
     host.style.cssText = 'position:absolute;left:0;top:0;width:calc(100vw + 24px);height:40px;pointer-events:none;'
     const text = document.createElement('span')
     text.dataset.idtsLongText = 'true'
-    text.style.cssText = 'display:block;width:calc(100vw + 24px);white-space:nowrap;'
+    text.style.cssText = 'display:block;width:calc(100vw + 24px);height:8px;overflow:hidden;white-space:nowrap;'
     text.textContent = 'This synthetic negative control intentionally overflows the viewport and forbids wrapping so the geometry assertion must fail.'
     host.append(text)
     document.body.append(host)
@@ -497,8 +543,9 @@ async function runNegativeControl (page) {
 
   if (!failure) throw new Error('negative control unexpectedly passed nowrap/overflow geometry checks')
   assert.match(failure.message, /document overflow/)
+  assert.match(failure.message, /vertical scrollHeight/)
   assert.match(failure.message, /whiteSpace is nowrap/)
-  pass('negative control fails as expected for document overflow and nowrap text')
+  pass('negative control fails as expected for document overflow, vertical clipping, and nowrap text')
 }
 
 async function waitForDialog (page, title) {
@@ -516,17 +563,60 @@ function discardKnownUi5Warning (harness) {
   harness.state.consoleErrors = harness.state.consoleErrors.filter(message => !knownWarning.test(message))
 }
 
-async function main () {
-  if (!IS_LOCAL) throw new Error('IDTS-127 UAT-UX-002 browser QA requires localhost and temporary SQLite fixtures.')
+async function waitForObjectPageTrigger (page, trigger, label, harness) {
+  try {
+    await trigger.waitFor({ state: 'visible', timeout: 90000 })
+  } catch (error) {
+    const diagnostic = await page.evaluate(() => {
+      const bodyText = document.body?.innerText || ''
+      const buttonLabels = [...document.querySelectorAll('button')]
+        .map(button => (button.innerText || button.getAttribute('aria-label') || '').replace(/\s+/g, ' ').trim())
+        .filter(Boolean)
+        .slice(0, 40)
+      const controls = Object.values(window.sap?.ui?.getCore?.().mElements || {})
+        .map(control => {
+          let text = ''
+          try { text = control.getText?.() || control.getTitle?.() || '' } catch {}
+          return { text: String(text).replace(/\s+/g, ' ').trim(), visible: control.getVisible?.() }
+        })
+        .filter(control => /Similar Bugs|Classification Suggestions|Handoff Summary/i.test(control.text))
+      return {
+        url: location.href,
+        bodyTextLength: bodyText.length,
+        hasSimilarLabel: /Find Similar Bugs/i.test(bodyText),
+        hasClassificationLabel: /Review Classification Suggestions/i.test(bodyText),
+        hasHandoffLabel: /Review Handoff Summary/i.test(bodyText),
+        buttonLabels,
+        matchingControls: controls
+      }
+    }).catch(() => ({ url: page.url(), bodyTextLength: -1, buttonLabels: [], matchingControls: [] }))
+    console.error(`OBJECT PAGE DIAGNOSTICS ${JSON.stringify({ label, ...diagnostic, consoleErrorCount: harness.state.consoleErrors.length })}`)
+    throw error
+  }
+}
 
-  const db = await cds.connect.to('db')
+async function main () {
+  cds.env.requires.db = { impl: '@cap-js/sqlite', kind: 'sqlite', credentials: { url: ':memory:' } }
+  cds.env.requires.malwareScanner = { kind: 'malwareScanner-mocked', model: '@cap-js/attachments/srv/malware-scanner/malwareScanner-mocked' }
+  const test = cdsTest('serve', 'srv/service.cds', 'srv/auth.cds', 'srv/notification.cds', 'app/bug-management-ui/annotations.cds', '@sap/cds/srv/outbox', '@cap-js/attachments/srv/malware-scanner/malwareScanner-mocked', '--in-memory?').in(PROJECT_ROOT)
+  let db
   let evidenceDir
   let bugID
   let session
   let browser
   let context
+  let runError
+  let testServer
 
   try {
+    const started = await test
+    testServer = started?.server
+    assert.ok(testServer?.listening, 'cds-test must start a listening in-process CAP server')
+    BASE_URL = String(started?.url || '').replace(/\/+$/, '')
+    assertAmbientBaseUrlIsolation(BASE_URL)
+    APP_URL = `${BASE_URL}/idts.bugmanagementui/index.html`
+    db = cds.db
+    assert.ok(db?.isDatabaseService, 'cds-test must expose its isolated database service')
     evidenceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idts127-ux002-responsive-'))
     session = await createLocalSession(db)
     bugID = await createBugFixture(db)
@@ -564,8 +654,13 @@ async function main () {
       .first()
       .locator('.sapMInputValHelp, [role="button"][aria-label*="Value Help"], [title*="Value Help"]')
       .first()
-    for (const trigger of [similarTrigger, classificationTrigger, handoffTrigger, smartTrigger]) {
-      await trigger.waitFor({ state: 'visible', timeout: 90000 })
+    for (const [label, trigger] of [
+      ['Find Similar Bugs', similarTrigger],
+      ['Review Classification Suggestions', classificationTrigger],
+      ['Review Handoff Summary', handoffTrigger],
+      ['Smart Assign value help', smartTrigger]
+    ]) {
+      await waitForObjectPageTrigger(page, trigger, label, harness)
     }
     await waitForPageReady(page)
     await assertResponsiveLayout(page, {
@@ -669,11 +764,30 @@ async function main () {
     })
     await harness.assertNoBlockingSignals('IDTS-127 UAT-UX-002 responsive browser completion')
     console.log('RESULT: PASS')
+  } catch (error) {
+    runError = error
+    throw error
   } finally {
-    await context?.close().catch(() => {})
-    await browser?.close().catch(() => {})
-    await cleanup(db, bugID, session?.sessionID)
-    if (evidenceDir) fs.rmSync(evidenceDir, { recursive: true, force: true })
+    const cleanupFailures = []
+    const attemptCleanup = async (label, operation) => {
+      try {
+        await operation()
+      } catch (error) {
+        cleanupFailures.push(`${label}: ${error?.message || error}`)
+      }
+    }
+    await attemptCleanup('browser context close', () => context?.close())
+    await attemptCleanup('browser close', () => browser?.close())
+    await attemptCleanup('fixture cleanup', () => cleanup(db, bugID, session?.sessionID))
+    await attemptCleanup('CAP server close', () => closeServer(testServer))
+    await attemptCleanup('CAP runtime shutdown', () => runBounded('CAP runtime shutdown', () => cds.shutdown()))
+    await attemptCleanup('temporary evidence cleanup', () => {
+      if (evidenceDir) fs.rmSync(evidenceDir, { recursive: true, force: true })
+    })
+    if (cleanupFailures.length) {
+      console.error(`CLEANUP FAIL: ${cleanupFailures.join('; ')}`)
+      if (!runError) throw new Error(`CLEANUP FAILED: ${cleanupFailures.join('; ')}`)
+    }
   }
 }
 

@@ -13,9 +13,10 @@
   },
   "expectedResult": "Responsive pop-ins/wrapping preserve labels, values, and actions.",
   "currentResult": "PARTIAL",
+  "result": "PARTIAL",
   "actualResult": "Local deterministic responsive regression PASS at 834 x 1112 on commit 88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6 using temporary SQLite fixtures and controlled responses. The live PM UI recheck is PARTIAL: Similar Bugs showed 5 prior candidates, Classification showed 5 rows with HTTP 200, Smart Assignment showed 1 candidate with no retry, and Handoff Summary settled in the UI while matching transport telemetry was unavailable. No Apply, Assign, Confirm Duplicate, Accept, Save, Edit, workflow, business-data or provider mutation action was invoked; Bug status, assignee, current owner, comments, and attachments remained unchanged; AiSuggestions count delta was unavailable. Full UAT PASS is not claimed.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
-  "reviewBoundary": "PARTIAL candidate accepted for curation: the local deterministic responsive regression is PASS and live Similar Bugs, Classification, and Handoff UI checks are positive. Smart Assignment remains blocked at one candidate with no retry, and Handoff transport telemetry was unavailable. This case is not final-approved.",
+  "reviewBoundary": "PARTIAL candidate accepted for curation: the local deterministic responsive regression is PASS and live Similar Bugs, Classification, and Handoff UI checks are positive. Smart Assignment remains blocked at one candidate with no retry, and Handoff transport telemetry was unavailable. This case remains non-approved.",
   "localDeterministicRegression": {
     "result": "PASS",
     "script": "scripts/qa/test-idts127-ux002-responsive-browser.js",
@@ -84,10 +85,10 @@
     {
       "id": "UAT-UX-002-E01",
       "file": "01-tablet-list-report.png",
-      "description": "Historical 2026-08-03 tablet List Report; superseded by the 2026-09-12 live-before JPG.",
+      "description": "Historical 2026-08-03 tablet List Report; retained for audit and superseded only by current receipt/measurement evidence.",
       "sha256": "40F7232F8495431B8A129AC716625704EED524D08E2259F1C10E1CC4D4A3F959",
       "historical": true,
-      "supersededBy": "01-live-before.jpg"
+      "supersededBy": "ux002-receipt.json"
     },
     {
       "id": "UAT-UX-002-E02",
@@ -108,43 +109,22 @@
   "evidence": [
     {
       "id": "UAT-UX-002-E04",
-      "file": "01-live-before.jpg",
-      "description": "Current live PM-session tablet Object Page before review-only AI dialogs at 834 x 1112.",
-      "sha256": "92EE455BC81D70B7D317DA3CB9F1270BE9441A15E9BBA5662530CA9514E6655E",
-      "historical": false
-    },
-    {
-      "id": "UAT-UX-002-E05",
       "file": "02-live-classification-review.jpg",
       "description": "Current live Classification Suggestions review with five visible rows and wrapped text at 834 x 1112.",
       "sha256": "4AAB3B429257FED80B2806D1F1745CAA2268AE357FB93C9945BCF929B218A0A1",
       "historical": false
     },
     {
-      "id": "UAT-UX-002-E06",
-      "file": "03-live-handoff-summary-top.jpg",
-      "description": "Current live Handoff Summary UI after the settled review-only call; transport telemetry was unavailable.",
-      "sha256": "75A472C435F20FCACDB6E4E105CE74280E821492A86A0CD9725162BED2D13329",
-      "historical": false
-    },
-    {
-      "id": "UAT-UX-002-E07",
-      "file": "04-live-final.jpg",
-      "description": "Current live PM-session final state with all review dialogs closed and Bug fields unchanged.",
-      "sha256": "BF6CDA9A7FF015AA11EA0C12D46DFEC60A4DB662DECA4B76EA5BA63F7F20DAE6",
-      "historical": false
-    },
-    {
-      "id": "UAT-UX-002-E08",
+      "id": "UAT-UX-002-E05",
       "file": "ux002-receipt.json",
       "description": "Sanitized current live receipt preserving the four-call ledger, measurements, invariants, limitations, and local regression provenance.",
-      "sha256": "DDA02958D42AC4551B39A12570401137DDE6DADC2622E388BB14D511B8DB3533",
+      "sha256": "991E3283E16E2DFC138900A1F0C42851830B3080C3AD430E76AAE9E252E728D8",
       "historical": false
     },
     {
       "id": "UAT-UX-002-E01",
       "file": "01-tablet-list-report.png",
-      "description": "Historical 2026-08-03 evidence retained for audit; superseded by the current live-before JPG.",
+      "description": "Historical 2026-08-03 evidence retained for audit; superseded only by current receipt/measurement evidence.",
       "sha256": "40F7232F8495431B8A129AC716625704EED524D08E2259F1C10E1CC4D4A3F959",
       "historical": true
     },
@@ -165,7 +145,7 @@
   ],
   "privacyReview": {
     "status": "PASS",
-      "notes": "Receipt paths, tab/session identifiers, emails, credentials, cookies, tokens, and private endpoints were removed or not included. The four committed JPGs are the approved non-sensitive captures; the Smart Assignment capture remains external only."
+    "notes": "Receipt paths, tab/session identifiers, emails, credentials, cookies, tokens, and private endpoints were removed or not included. Only the committed Classification JPG is the approved non-sensitive current capture; the other live captures were removed from the repository."
   },
   "issueClassification": "current-runtime partial recheck; local responsive regression passes, live Smart Assignment has one candidate without retry, and Handoff matching transport telemetry is unavailable",
   "limitations": [
@@ -178,7 +158,7 @@
     "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
     "category": "CURRENT_RUNTIME_PARTIAL_RECHECK",
-    "currentStatus": "CURRENT_RUNTIME_PARTIAL_RECHECK_NEEDS_CANDIDATE_FIXTURE",
+    "currentStatus": "CURRENT_RUNTIME_PARTIAL_RECHECK",
     "preservesHistoricalCandidateTruth": true,
     "finalPassApproved": false
   }

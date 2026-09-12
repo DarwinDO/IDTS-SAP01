@@ -1,10 +1,10 @@
 {
   "jiraCommentId": "10962",
   "reviewDate": "2026-08-04",
-  "curatedAtBaselineHead": "88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6",
+  "curatedAtBaselineHead": "5efa1dcae0a725a3a328eef1ddff3f15a2768351",
   "manifests": 57,
-  "evidenceReferences": 84,
-  "uniqueEvidenceHashes": 71,
+  "evidenceReferences": 81,
+  "uniqueEvidenceHashes": 68,
   "currentDisposition": {
     "MEETS_EXPECTED_RESULT": 24,
     "DOES_NOT_MEET_EXPECTED_RESULT": 10,
@@ -35,7 +35,7 @@
       "result": "PASS",
       "scope": "Local CAP plus temporary SQLite fixtures; not live provider/BTP acceptance."
     },
-    "currentEvidence": "Four approved JPG captures plus one sanitized receipt; three historical PNGs remain integrity-tracked and labelled historical.",
+    "currentEvidence": "One approved Classification JPG plus one sanitized receipt; three historical PNGs remain integrity-tracked and labelled historical.",
     "limitations": [
       "Smart Assignment had one candidate, so the two-candidate check remains blocked and no retry was made.",
       "Handoff UI settled but matching transport telemetry was unavailable.",
