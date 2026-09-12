@@ -10,15 +10,15 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 
 - Assigned to NhanT: 57 cases.
 - Candidate packages prepared: 57/57; no assigned case remains unattempted or unpackaged.
-- Candidate partition: 23 MEETS / 11 DOES_NOT_MEET / 23 BLOCKED. `UAT-COM-003` is the sole final UAT PASS approved under the parent-authorized decision; the other 56 cases remain candidate evidence, corrections, or blockers and are not final-approved.
+- Candidate partition: 24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved under the parent-authorized decision; the other 55 cases remain candidate evidence, corrections, or blockers and are not final-approved.
 - Only three stale prerequisites remain: `UAT-AI-007`, `UAT-ATT-002`, `UAT-ATT-003`.
 - Historical defect candidates were rechecked: `UAT-AUTH-005` and `UAT-COM-003` are current candidate positives, with `UAT-COM-003` final-approved; `UAT-BUG-008` remains a current candidate negative, and `UAT-UX-002` is partial pending a matching wrapping fixture.
 - 5 catalog/semantic corrections are preserved separately from product defects.
-- 1 physical-keyboard limitation still requires NhanT's manual confirmation.
+- 1 physical-keyboard closure is now DonHV-human-attested; the historical Browser automation limitation remains preserved.
 - 2 AI diagnostic reruns require immutable suggestion ID plus sanitized Network/audit and no-mutation proof.
 - `UAT-COM-001` is a current candidate positive. NhanT's ATT-001 negative remains historically intact, while DonHV blocks acceptance because its 44/54/47-byte fixture provenance is inconsistent.
 - Retained visual evidence: 77 PNG references plus one structured JSON readback receipt (78 evidence references, 65 unique SHA-256 values); every manifest reference and hash must pass the fresh integrity gate.
-- Reviewer-approved final PASS: `UAT-COM-003` only. No other case is final-approved, and the approved catalog remains unchanged at 90 `PREPARED`.
+- Reviewer-approved final PASS: exactly `UAT-COM-003` and `UAT-UX-003`. No other case is final-approved, and the approved catalog remains unchanged at 90 `PREPARED`.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
 ## Historical candidate DOES NOT MEET cases (2026-08-03 runtime)
@@ -88,8 +88,8 @@ This section is historical. IDTS-116 changed the current runtime after these obs
 
 ## 2026-08-04 remediation status
 
-- All 57 manifests now contain `donhvLatestReview` metadata keyed to Jira comment `10962`; only `UAT-COM-003` has `FINAL_PASS_APPROVED`, while the other candidate outcomes remain pending or blocked.
-- Machine-readable partition: `latest-review-summary.json` (23 MEETS / 11 DOES_NOT_MEET / 23 BLOCKED; current-runtime negative count 0).
+- All 57 manifests now contain `donhvLatestReview` metadata keyed to Jira comment `10962`; exactly `UAT-COM-003` and `UAT-UX-003` have `FINAL_PASS_APPROVED`, while the other candidate outcomes remain pending or blocked.
+- Machine-readable partition: `latest-review-summary.json` (24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED; current-runtime negative count 0).
 - Current-runtime reruns already captured by NhanT remain preserved; this DonHV curation does not execute or rewrite them.
 - Final workbook and Drive remain unchanged.
 
@@ -102,10 +102,16 @@ This section is historical. IDTS-116 changed the current runtime after these obs
 - `UAT-AUTH-005`: current candidate PASS; the protected route redirected to SAP Sign In after logout.
 - `UAT-BUG-008`: current candidate FAIL; one title Save again produced two identical audit events.
 - `UAT-UX-002`: partial; action label fits at 834 x 1112, but no Similar Bugs candidates existed to test reason wrapping.
-- `UAT-AI-005`: failure reproduced with no partial mutation; immutable suggestion ID and sanitized Network response remain unavailable. `UAT-UX-003` remains physical-keyboard-only.
+- `UAT-AI-005`: failure reproduced with no partial mutation; immutable suggestion ID and sanitized Network response remain unavailable. `UAT-UX-003` is final-approved from DonHV's physical-keyboard attestation; its historical Browser automation limitation remains preserved.
 
 ## 2026-09-12 final-approved current readback
 
 `UAT-COM-003` is the sole final UAT PASS approved under the parent-authorized decision. The approved PR #405 source head is `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34`; the exact source, execution, and deployed runtime SHA is `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`. The deployed Bug Management UI is version `0.0.16` with artifact SHA-256 `F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4`. On controlled `BUG-0021` (`029435e3-abb7-4079-826a-394709f9eb50`), the read-only Edge reload receipt [`05-live-readback-receipt.json`](uat/UAT-COM-003/05-live-readback-receipt.json) records two Comments entries, one `UAT-COM-003-1000|` marker, and zero `UAT-COM-003-1001|` markers. No live data was mutated during this readback.
 
-The prior authorized 1001-character attempt remains a separate recorded event: CAP returned HTTP `400` with `Comment cannot exceed 1000 characters.`, the TextArea retained the input, the Comments count stayed at two after reload, and no truncated or partial comment was stored. Its historical pre-fix 1006-character failure remains preserved in the manifest and is not rewritten as a current result. The current partition is 23 MEETS / 11 DOES_NOT_MEET / 23 BLOCKED, with current-runtime negative count 0; the other 56 cases are not final-approved. The workbook, IDTS-110 artifacts, Google Drive, Jira, and unrelated live data remain unchanged.
+The prior authorized 1001-character attempt remains a separate recorded event: CAP returned HTTP `400` with `Comment cannot exceed 1000 characters.`, the TextArea retained the input, the Comments count stayed at two after reload, and no truncated or partial comment was stored. Its historical pre-fix 1006-character failure remains preserved in the manifest and is not rewritten as a current result. The current partition is 24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED, with current-runtime negative count 0; the other 55 cases are not final-approved. The workbook, IDTS-110 artifacts, Google Drive, Jira, and unrelated live data remain unchanged.
+
+## 2026-09-12 final-approved UAT-UX-003 physical-keyboard attestation
+
+DonHV physically executed the exact seven-outcome checklist against the deployed runtime truth already present in the baseline: visible focus; Tab reaches Find Similar Bugs/core controls; Enter opens Similar Bugs; arrow keys navigate the composite list; Tab reaches dialog actions; Escape closes; focus returns to the trigger. The structured receipt [`02-manual-physical-keyboard-attestation.json`](uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json) is bound to source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`, deployed runtime `67b1bf86169e9696c9365ef4846b99ffae30d4e2`, receipt SHA-256 `F1B9CA7548E46EFA1A8AB9C1310134090F53AA599A8742D7D60D13DE0B25C858`, and the existing E01 PNG/hash. The physical sequence is human-attested; no browser simulation, invented device/timestamp, or raw keylog is claimed. The historical Browser failure remains under `historicalAutomationLimitation`.
+
+The current partition is 24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED across 57 manifests. Exactly `UAT-COM-003` and `UAT-UX-003` are final-approved; all other cases remain candidate evidence, corrections, or blockers. The workbook, IDTS-110 artifacts, Google Drive, Jira, runtime, database, provider and live data remain unchanged.

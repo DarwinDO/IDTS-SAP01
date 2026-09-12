@@ -1,13 +1,13 @@
 {
   "jiraCommentId": "10962",
   "reviewDate": "2026-08-04",
-  "curatedAtBaselineHead": "e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34",
+  "curatedAtBaselineHead": "4ab336388fb744b82abdfe6ef8f7c334b4075428",
   "manifests": 57,
   "evidenceReferences": 78,
   "uniqueEvidenceHashes": 65,
   "currentDisposition": {
-    "MEETS_EXPECTED_RESULT": 23,
-    "DOES_NOT_MEET_EXPECTED_RESULT": 11,
+    "MEETS_EXPECTED_RESULT": 24,
+    "DOES_NOT_MEET_EXPECTED_RESULT": 10,
     "BLOCKED": 23
   },
   "counts": {
@@ -17,19 +17,24 @@
     "STALE_PREREQUISITE_RERUN_REQUIRED": 3,
     "CATALOG_SEMANTIC_CORRECTION": 5,
     "FIXTURE_PROVENANCE_INCONSISTENT": 1,
-    "CURRENT_RUNTIME_POSITIVE": 4,
+    "CURRENT_RUNTIME_POSITIVE": 5,
     "CONFIRMED_DEFECT_RECHECK": 1,
     "CURRENT_RUNTIME_NEGATIVE": 0,
     "CURRENT_RUNTIME_PARTIAL_RECHECK": 1,
-    "PHYSICAL_KEYBOARD_LIMITATION": 1
+    "PHYSICAL_KEYBOARD_LIMITATION": 0
   },
   "runtimeRerunPerformed": true,
-  "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.",
+  "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.",
   "finalApprovals": {
     "UAT-COM-003": {
       "status": "FINAL_PASS_APPROVED",
       "historicalFailurePreserved": true,
       "receipt": "uat/UAT-COM-003/05-live-readback-receipt.json"
+    },
+    "UAT-UX-003": {
+      "status": "FINAL_PASS_APPROVED",
+      "historicalFailurePreserved": true,
+      "receipt": "uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json"
     }
   },
   "workbookAndDriveChanged": false

@@ -3,10 +3,10 @@
 ## Review baseline
 
 - Candidate PR: `#270`.
-- Historical reviewer baseline: `44721f53fe2f7588d38f6d6c79ffb0c33026d5d3`; latest pre-commit curation baseline: `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34`.
+- Historical reviewer baseline: `44721f53fe2f7588d38f6d6c79ffb0c33026d5d3`; latest curation source baseline: `4ab336388fb744b82abdfe6ef8f7c334b4075428`.
 - Execution baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`.
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
-- Final-approved `UAT-COM-003` readback is bound to PR #405 source head `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34` and approved source/deployed merge `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`.
+- Final-approved `UAT-COM-003` readback remains bound to PR #405 source head `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34` and approved source/deployed merge `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`; `UAT-UX-003` is additionally final-approved from DonHV's 2026-09-12 physical-keyboard attestation at source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
 - Evidence integrity: 57 manifests, 77 image references plus one structured JSON readback receipt (78 evidence references, 65 unique hashes), with zero missing files or hash mismatches in the fresh curation check. The final exact-head gate is still required after commit.
 
@@ -70,24 +70,24 @@
 | UAT-LIFE-015 | BLOCKED | FIXTURE_IDENTITY_BLOCKER | Requires a NhanT-owned Rejected record with correction flow. |
 | UAT-UX-001 | MEETS | ACCEPTED_EVIDENCE | Desktop readability/reachability demonstrated. |
 | UAT-UX-002 | DOES_NOT_MEET | PARTIAL_RECHECK | Current geometry no longer confirms action clipping; candidate reason wrapping still needs a matching fixture before a product-defect conclusion. |
-| UAT-UX-003 | DOES_NOT_MEET | TEST_HARNESS_LIMITATION | Enter/Escape/focus return passed; automated Tab translation is insufficient. Confirm with a physical keyboard before filing an accessibility defect. |
+| UAT-UX-003 | MEETS | FINAL_PASS_APPROVED | DonHV physically confirmed visible focus; Tab reaches Find Similar Bugs/core controls and dialog actions; Enter opens Similar Bugs; arrow keys navigate the composite list; Escape closes; focus returns to the trigger. The prior Browser automation limitation and E01 screenshot remain historical. |
 | UAT-UX-004 | MEETS | ACCEPTED_EVIDENCE | Safe error copy/no raw diagnostic demonstrated. |
 | UAT-UX-005 | MEETS | ACCEPTED_EVIDENCE | Reload/idempotent committed state demonstrated. |
 
 ## Review totals
 
-- Current candidate partition is **23 MEETS / 11 DOES_NOT_MEET / 23 BLOCKED** across 57 manifests. `UAT-COM-003` is the sole final UAT PASS approved under the parent-authorized decision; the other 56 cases remain candidate evidence, corrections, or blockers and are not final-approved.
+- Current candidate partition is **24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED** across 57 manifests. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved under the parent-authorized decision; the other 55 cases remain candidate evidence, corrections, or blockers and are not final-approved.
 - Current reviewer disposition retains truthful evidence but separately blocks ATT-001 because the preserved fixture sizes are inconsistent.
 - Only `UAT-AI-007`, `UAT-ATT-002` and `UAT-ATT-003` retain stale prerequisites after the current-runtime reruns.
-- AI-005/009 still need immutable suggestion ID plus sanitized Network/audit evidence; UX-002 needs a matching wrapping fixture; UX-003 needs NhanT's physical Tab confirmation.
+- AI-005/009 still need immutable suggestion ID plus sanitized Network/audit evidence; UX-002 needs a matching wrapping fixture. UX-003's physical sequence is human-attested; its historical Browser automation limitation remains preserved.
 
 ## Gate decision
 
-The IDTS-111 evidence package is internally consistent and may be retained as truthful candidate evidence. `UAT-COM-003` alone is final PASS approved under the parent-authorized decision; the remaining 56 cases must not be interpreted as final UAT approval. Merge remains gated by NhanT personally reading and acknowledging briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`, by a fresh exact-head QA gate, and by the PR body preserving the candidate/blocker truth above. The UAT workbook and Google Drive artifact remain unchanged.
+The IDTS-111 evidence package is internally consistent and may be retained as truthful candidate evidence. Exactly `UAT-COM-003` and `UAT-UX-003` are final PASS approved under the parent-authorized decision; the remaining 55 cases must not be interpreted as final UAT approval. Merge remains gated by NhanT personally reading and acknowledging briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`, by a fresh exact-head QA gate, and by the PR body preserving the candidate/blocker truth above. The UAT workbook and Google Drive artifact remain unchanged.
 
 ## Current rerun state
 
-NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. Current-runtime evidence is retained, but ATT-001 is reviewer-blocked because its recorded 44/54/47-byte fixture provenance is inconsistent. AI-005/009 still need immutable suggestion ID and sanitized Network/audit evidence; UX-002 needs a matching fixture and UX-003 needs physical-keyboard confirmation. The workbook and Drive artifact remain unchanged.
+NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. Current-runtime evidence is retained, but ATT-001 is reviewer-blocked because its recorded 44/54/47-byte fixture provenance is inconsistent. AI-005/009 still need immutable suggestion ID and sanitized Network/audit evidence; UX-002 needs a matching fixture. DonHV's UX-003 physical-keyboard attestation is final-approved, while the Browser automation limitation remains historical. The workbook and Drive artifact remain unchanged.
 
 ### 2026-08-04 current-runtime addendum
 
@@ -100,3 +100,9 @@ Current deployed reruns now supersede the old-runtime behavior for `UAT-COM-001`
 - `UAT-ATT-001` remains NhanT's candidate negative, but DonHV disposition is **BLOCKED — fixture provenance inconsistent**. The raw 44/54/47-byte records are intentionally unchanged pending member reconciliation.
 - Remaining human/diagnostic gaps are explicit: AI immutable suggestion ID/Network response, a matching UX-002 wrapping fixture, and NhanT physical-keyboard confirmation for UX-003.
 - Machine-readable curation uses Jira comment `10962`, pre-commit curation baseline `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34`, 57 manifests, 78 evidence references and 65 unique hashes. The final-approved `UAT-COM-003` receipt is `uat/UAT-COM-003/05-live-readback-receipt.json`; final commit SHA is recorded in the PR/Jira handoff after commit to avoid self-referential metadata.
+
+### 2026-09-12 UAT-UX-003 physical-keyboard closure
+
+- DonHV manually executed the seven attested outcomes on the deployed runtime truth already recorded in the baseline (`67b1bf86169e9696c9365ef4846b99ffae30d4e2`): visible focus; Tab reaches Find Similar Bugs/core controls; Enter opens Similar Bugs; arrows navigate the composite list; Tab reaches dialog actions; Escape closes; focus returns to trigger.
+- The new receipt `uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json` is bound to current source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`, receipt SHA-256 `F1B9CA7548E46EFA1A8AB9C1310134090F53AA599A8742D7D60D13DE0B25C858`, and the existing E01 PNG/hash. No browser simulation, device/timestamp invention, or raw keylog is claimed; the former Browser failure remains under `historicalAutomationLimitation`.
+- Current truth is **24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED**; exactly `UAT-COM-003` and `UAT-UX-003` are final-approved. Workbook, Drive, Jira, runtime, database, provider and live data remain unchanged.
