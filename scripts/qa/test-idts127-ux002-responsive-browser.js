@@ -179,7 +179,7 @@ async function createBugFixture (db) {
   return ID
 }
 
-async function runBounded (label, operation, timeoutMs = 15000) {
+async function withTimeout (label, operation, timeoutMs = 15000) {
   let timer
   try {
     return await Promise.race([
@@ -195,18 +195,19 @@ async function runBounded (label, operation, timeoutMs = 15000) {
 
 async function closeServer (server) {
   if (!server?.listening) return
-  await runBounded('CAP server shutdown', () => new Promise((resolve, reject) => {
+  await withTimeout('CAP server shutdown', () => new Promise((resolve, reject) => {
     server.close(error => error ? reject(error) : resolve())
   }))
+  if (server.listening) throw new Error('CAP server remains listening after shutdown')
 }
 
 async function cleanup (db, bugID, sessionID) {
   const failures = []
   const attempt = async (label, operation) => {
     try {
-      await operation()
+      await withTimeout(label, operation)
     } catch (error) {
-      failures.push(`${label}: ${error?.message || error}`)
+      failures.push({ label, error })
     }
   }
 
@@ -217,7 +218,11 @@ async function cleanup (db, bugID, sessionID) {
   if (db && sessionID) {
     await attempt('AuthSessions fixture deletion', () => db.run(DELETE.from('idts.cap.AuthSessions').where({ ID: sessionID })))
   }
-  if (failures.length) throw new Error(`CLEANUP FAILED: ${failures.join('; ')}`)
+  if (failures.length) {
+    const error = new Error(`CLEANUP FAILED: ${failures.map(failure => `${failure.label}: ${failure.error?.message || failure.error}`).join('; ')}`)
+    error.failures = failures
+    throw error
+  }
 }
 
 function json (body) {
@@ -422,11 +427,43 @@ async function readDocumentGeometry (page) {
 
 async function readTextGeometry (root, selectors, minimumLength) {
   return root.evaluate((element, { selectors: selectorList, minimumLength: min }) => {
+    function nearestScrollContainer (node) {
+      let ancestor = node.parentElement
+      while (ancestor) {
+        const style = window.getComputedStyle(ancestor)
+        const scrollableY = /^(auto|scroll|overlay)$/.test(style.overflowY) && ancestor.scrollHeight > ancestor.clientHeight + 1
+        const scrollableX = /^(auto|scroll|overlay)$/.test(style.overflowX) && ancestor.scrollWidth > ancestor.clientWidth + 1
+        if (scrollableY || scrollableX) {
+          const rect = ancestor.getBoundingClientRect()
+          return {
+            top: rect.top,
+            bottom: rect.bottom,
+            left: rect.left,
+            right: rect.right,
+            clientHeight: ancestor.clientHeight,
+            scrollHeight: ancestor.scrollHeight,
+            clientWidth: ancestor.clientWidth,
+            scrollWidth: ancestor.scrollWidth,
+            overflowY: style.overflowY,
+            overflowX: style.overflowX
+          }
+        }
+        ancestor = ancestor.parentElement
+      }
+      return null
+    }
+
     const nodes = [...new Set(selectorList.flatMap(selector => [...element.querySelectorAll(selector)]))]
     return nodes.map(node => {
       const style = window.getComputedStyle(node)
       const rect = node.getBoundingClientRect()
       const text = (node.innerText || node.textContent || '').replace(/\s+/g, ' ').trim()
+      const container = nearestScrollContainer(node)
+      const fullyVisibleInViewport = rect.top >= -1 && rect.bottom <= window.innerHeight + 1 && rect.left >= -1 && rect.right <= window.innerWidth + 1
+      const intersectsContainer = Boolean(container && rect.bottom > container.top + 1 && rect.top < container.bottom - 1 && rect.right > container.left + 1 && rect.left < container.right - 1)
+      const partiallyClippedByContainer = Boolean(container && intersectsContainer && (
+        rect.top < container.top - 1 || rect.bottom > container.bottom + 1 || rect.left < container.left - 1 || rect.right > container.right + 1
+      ))
       return {
         textLength: text.length,
         clientWidth: node.clientWidth,
@@ -434,9 +471,16 @@ async function readTextGeometry (root, selectors, minimumLength) {
         clientHeight: node.clientHeight,
         scrollHeight: node.scrollHeight,
         whiteSpace: style.whiteSpace,
-        visible: style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0
+        visible: style.display !== 'none' && style.visibility !== 'hidden' && rect.width > 0 && rect.height > 0,
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        fullyVisibleInViewport,
+        container,
+        partiallyClippedByContainer
       }
-    }).filter(item => item.visible && item.textLength >= min)
+    }).filter(item => item.textLength >= min)
   }, { selectors, minimumLength })
 }
 
@@ -445,6 +489,7 @@ async function readButtonGeometry (page, locator, label, requireEnabled) {
   const count = await locator.count()
   if (!count) return [`${label}: button is missing`]
   const viewportWidth = page.viewportSize()?.width || VIEWPORT.width
+  const viewportHeight = page.viewportSize()?.height || VIEWPORT.height
 
   for (let index = 0; index < count; index += 1) {
     const button = locator.nth(index)
@@ -452,7 +497,6 @@ async function readButtonGeometry (page, locator, label, requireEnabled) {
       issues.push(`${label}[${index}]: button is not visible`)
       continue
     }
-    await button.scrollIntoViewIfNeeded().catch(() => {})
     const box = await button.boundingBox()
     if (!box || box.width <= 0 || box.height <= 0) {
       issues.push(`${label}[${index}]: button has no reachable box`)
@@ -461,8 +505,37 @@ async function readButtonGeometry (page, locator, label, requireEnabled) {
     if (box.left < -1 || box.right > viewportWidth + 1) {
       issues.push(`${label}[${index}]: button bounds ${Math.round(box.left)}..${Math.round(box.right)} exceed ${viewportWidth}`)
     }
-    if (box.top < -1 || box.bottom > (page.viewportSize()?.height || VIEWPORT.height) + 1) {
+    if (box.top < -1 || box.bottom > viewportHeight + 1) {
       issues.push(`${label}[${index}]: button vertical bounds ${Math.round(box.top)}..${Math.round(box.bottom)} exceed viewport`)
+    }
+    const geometry = await button.evaluate(element => {
+      function nearestScrollContainer (node) {
+        let ancestor = node.parentElement
+        while (ancestor) {
+          const style = window.getComputedStyle(ancestor)
+          const scrollableY = /^(auto|scroll|overlay)$/.test(style.overflowY) && ancestor.scrollHeight > ancestor.clientHeight + 1
+          const scrollableX = /^(auto|scroll|overlay)$/.test(style.overflowX) && ancestor.scrollWidth > ancestor.clientWidth + 1
+          if (scrollableY || scrollableX) {
+            const rect = ancestor.getBoundingClientRect()
+            return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right }
+          }
+          ancestor = ancestor.parentElement
+        }
+        return null
+      }
+      const rect = element.getBoundingClientRect()
+      const container = nearestScrollContainer(element)
+      return {
+        top: rect.top,
+        bottom: rect.bottom,
+        left: rect.left,
+        right: rect.right,
+        container,
+        fullyWithinContainer: !container || (rect.top >= container.top - 1 && rect.bottom <= container.bottom + 1 && rect.left >= container.left - 1 && rect.right <= container.right + 1)
+      }
+    }).catch(() => null)
+    if (geometry?.container && !geometry.fullyWithinContainer) {
+      issues.push(`${label}[${index}]: button bounds ${Math.round(geometry.left)}..${Math.round(geometry.right)} / ${Math.round(geometry.top)}..${Math.round(geometry.bottom)} exceed nearest scroll container`)
     }
     const reachable = await button.evaluate(element => {
       const rect = element.getBoundingClientRect()
@@ -493,7 +566,15 @@ async function assertResponsiveLayout (page, options) {
     if (matches.length < (options.text.minimumMatches || 1)) {
       issues.push(`${options.text.label}: fewer than ${options.text.minimumMatches || 1} long text containers were rendered`)
     }
+    const visibleMatches = matches.filter(match => match.visible && match.fullyVisibleInViewport && !match.partiallyClippedByContainer)
+    if (visibleMatches.length < (options.text.minimumVisibleMatches || 1)) {
+      issues.push(`${options.text.label}: no representative long text row is currently fully visible in the viewport`)
+    }
     for (const [index, match] of matches.entries()) {
+      if (!match.visible) {
+        issues.push(`${options.text.label}[${index}]: long text row has no rendered box`)
+        continue
+      }
       if (match.scrollWidth > match.clientWidth + 1) {
         issues.push(`${options.text.label}[${index}]: scrollWidth ${match.scrollWidth} exceeds clientWidth ${match.clientWidth}`)
       }
@@ -502,6 +583,12 @@ async function assertResponsiveLayout (page, options) {
       }
       if (match.whiteSpace === 'nowrap') {
         issues.push(`${options.text.label}[${index}]: computed whiteSpace is nowrap`)
+      }
+      if (match.partiallyClippedByContainer) {
+        const container = match.container
+        issues.push(`${options.text.label}[${index}]: text bounds ${Math.round(match.top)}..${Math.round(match.bottom)} are partially clipped by container ${Math.round(container.top)}..${Math.round(container.bottom)}`)
+      } else if (!match.container && !match.fullyVisibleInViewport) {
+        issues.push(`${options.text.label}[${index}]: text bounds ${Math.round(match.top)}..${Math.round(match.bottom)} exceed viewport`)
       }
     }
   }
@@ -546,6 +633,51 @@ async function runNegativeControl (page) {
   assert.match(failure.message, /vertical scrollHeight/)
   assert.match(failure.message, /whiteSpace is nowrap/)
   pass('negative control fails as expected for document overflow, vertical clipping, and nowrap text')
+
+  const clippingControlID = `${controlID}-clipping`
+  await page.evaluate(id => {
+    const dialog = document.createElement('div')
+    dialog.id = id
+    dialog.style.cssText = 'position:fixed;left:20px;top:80px;width:320px;height:100px;overflow:auto;contain:layout;background:#fff;'
+    const rowText = 'A long responsive row must remain readable inside the bounded dialog content viewport.'
+    for (const text of [rowText, `${rowText} A second row is intentionally positioned below the current viewport.`]) {
+      const row = document.createElement('div')
+      row.dataset.idtsLongRow = 'true'
+      row.style.cssText = 'display:block;width:300px;height:80px;line-height:18px;overflow:visible;white-space:normal;'
+      row.textContent = text
+      dialog.append(row)
+    }
+    const button = document.createElement('button')
+    button.textContent = 'Clipped action'
+    button.style.cssText = 'display:block;margin-top:8px;'
+    dialog.append(button)
+    document.body.append(dialog)
+    dialog.scrollTop = 30
+  }, clippingControlID)
+
+  let clippingFailure
+  try {
+    await assertResponsiveLayout(page, {
+      label: 'negative clipping control',
+      buttons: [{ locator: page.locator(`#${clippingControlID} button`), label: 'Clipped action' }],
+      text: {
+        root: page.locator(`#${clippingControlID}`),
+        selectors: ['[data-idts-long-row]'],
+        minimumLength: 40,
+        minimumMatches: 2,
+        label: 'clipped dialog rows'
+      }
+    })
+  } catch (error) {
+    clippingFailure = error
+  } finally {
+    await page.evaluate(id => document.getElementById(id)?.remove(), clippingControlID)
+  }
+
+  if (!clippingFailure) throw new Error('negative clipping control unexpectedly passed row/button visibility checks')
+  assert.match(clippingFailure.message, /partially clipped|container vertical bounds/i)
+  assert.match(clippingFailure.message, /button bounds .*exceed nearest scroll container/i)
+  pass('negative control fails as expected for clipped dialog rows and an unscrolled action')
 }
 
 async function waitForDialog (page, title) {
@@ -595,7 +727,45 @@ async function waitForObjectPageTrigger (page, trigger, label, harness) {
   }
 }
 
+async function inspectCurrentButtons (page, buttons, label) {
+  for (const button of buttons) {
+    await button.locator.scrollIntoViewIfNeeded()
+    await assertResponsiveLayout(page, {
+      label: `${label}: ${button.label}`,
+      buttons: [{ locator: button.locator, label: button.label, requireEnabled: button.requireEnabled === true }]
+    })
+  }
+}
+
+async function runCleanupNegativeControl () {
+  let timeoutFailure
+  try {
+    await withTimeout('synthetic cleanup timeout', () => new Promise(resolve => setTimeout(resolve, 25)), 5)
+  } catch (error) {
+    timeoutFailure = error
+  }
+  assert.match(timeoutFailure?.message || '', /synthetic cleanup timeout timed out/)
+
+  let operationFailure
+  try {
+    await withTimeout('synthetic cleanup error', () => {
+      throw new Error('synthetic cleanup error')
+    }, 50)
+  } catch (error) {
+    operationFailure = error
+  }
+  assert.match(operationFailure?.message || '', /synthetic cleanup error/)
+  pass('cleanup timeout and operation errors remain observable')
+}
+
+function assertDatabaseUnavailable (db) {
+  if (!db) return
+  const poolCount = Object.keys(db.pools || {}).length
+  if (db.dbc || poolCount) throw new Error(`in-memory database remains available after shutdown (pools=${poolCount})`)
+}
+
 async function main () {
+  await runCleanupNegativeControl()
   cds.env.requires.db = { impl: '@cap-js/sqlite', kind: 'sqlite', credentials: { url: ':memory:' } }
   cds.env.requires.malwareScanner = { kind: 'malwareScanner-mocked', model: '@cap-js/attachments/srv/malware-scanner/malwareScanner-mocked' }
   const test = cdsTest('serve', 'srv/service.cds', 'srv/auth.cds', 'srv/notification.cds', 'app/bug-management-ui/annotations.cds', '@sap/cds/srv/outbox', '@cap-js/attachments/srv/malware-scanner/malwareScanner-mocked', '--in-memory?').in(PROJECT_ROOT)
@@ -663,15 +833,12 @@ async function main () {
       await waitForObjectPageTrigger(page, trigger, label, harness)
     }
     await waitForPageReady(page)
-    await assertResponsiveLayout(page, {
-      label: 'Object Page primary triggers',
-      buttons: [
-        { locator: similarTrigger, label: 'Find Similar Bugs trigger', requireEnabled: true },
-        { locator: classificationTrigger, label: 'Classification trigger', requireEnabled: true },
-        { locator: handoffTrigger, label: 'Handoff Summary trigger', requireEnabled: true },
-        { locator: smartTrigger, label: 'Smart Assign value-help trigger', requireEnabled: true }
-      ]
-    })
+    await inspectCurrentButtons(page, [
+      { locator: similarTrigger, label: 'Find Similar Bugs trigger', requireEnabled: true },
+      { locator: classificationTrigger, label: 'Classification trigger', requireEnabled: true },
+      { locator: handoffTrigger, label: 'Handoff Summary trigger', requireEnabled: true },
+      { locator: smartTrigger, label: 'Smart Assign value-help trigger', requireEnabled: true }
+    ], 'Object Page primary triggers')
     await harness.assertNoBlockingSignals('Object Page shell')
     pass('Object Page shell and all AI primary triggers stay visible and reachable')
 
@@ -753,15 +920,12 @@ async function main () {
     pass('Handoff Summary renders long summary, missing information, and timeline content without document overflow or nowrap')
     await closeDialog(handoffDialog)
 
-    await assertResponsiveLayout(page, {
-      label: 'Object Page after dialog cleanup',
-      buttons: [
-        { locator: similarTrigger, label: 'Find Similar Bugs trigger', requireEnabled: true },
-        { locator: classificationTrigger, label: 'Classification trigger', requireEnabled: true },
-        { locator: handoffTrigger, label: 'Handoff Summary trigger', requireEnabled: true },
-        { locator: smartTrigger, label: 'Smart Assign value-help trigger', requireEnabled: true }
-      ]
-    })
+    await inspectCurrentButtons(page, [
+      { locator: similarTrigger, label: 'Find Similar Bugs trigger', requireEnabled: true },
+      { locator: classificationTrigger, label: 'Classification trigger', requireEnabled: true },
+      { locator: handoffTrigger, label: 'Handoff Summary trigger', requireEnabled: true },
+      { locator: smartTrigger, label: 'Smart Assign value-help trigger', requireEnabled: true }
+    ], 'Object Page after dialog cleanup')
     await harness.assertNoBlockingSignals('IDTS-127 UAT-UX-002 responsive browser completion')
     console.log('RESULT: PASS')
   } catch (error) {
@@ -771,22 +935,33 @@ async function main () {
     const cleanupFailures = []
     const attemptCleanup = async (label, operation) => {
       try {
-        await operation()
+        await withTimeout(label, operation)
       } catch (error) {
-        cleanupFailures.push(`${label}: ${error?.message || error}`)
+        cleanupFailures.push({ label, error })
       }
     }
     await attemptCleanup('browser context close', () => context?.close())
     await attemptCleanup('browser close', () => browser?.close())
     await attemptCleanup('fixture cleanup', () => cleanup(db, bugID, session?.sessionID))
     await attemptCleanup('CAP server close', () => closeServer(testServer))
-    await attemptCleanup('CAP runtime shutdown', () => runBounded('CAP runtime shutdown', () => cds.shutdown()))
-    await attemptCleanup('temporary evidence cleanup', () => {
-      if (evidenceDir) fs.rmSync(evidenceDir, { recursive: true, force: true })
+    await attemptCleanup('CAP runtime shutdown', () => {
+      if (!testServer) return
+      if (typeof cds.shutdown !== 'function') throw new Error('CAP runtime shutdown is unavailable')
+      return cds.shutdown()
+    })
+    await attemptCleanup('in-memory DB disconnect', () => db?.disconnect?.())
+    await attemptCleanup('in-memory DB shutdown check', () => assertDatabaseUnavailable(db))
+    await attemptCleanup('temporary evidence cleanup', async () => {
+      if (!evidenceDir) return
+      await fs.promises.rm(evidenceDir, { recursive: true, force: true })
+      if (fs.existsSync(evidenceDir)) throw new Error('temporary evidence directory still exists')
     })
     if (cleanupFailures.length) {
-      console.error(`CLEANUP FAIL: ${cleanupFailures.join('; ')}`)
-      if (!runError) throw new Error(`CLEANUP FAILED: ${cleanupFailures.join('; ')}`)
+      const cleanupError = new Error(`CLEANUP FAILED: ${cleanupFailures.map(failure => `${failure.label}: ${failure.error?.message || failure.error}`).join('; ')}`)
+      cleanupError.failures = cleanupFailures
+      console.error(`CLEANUP FAIL: ${cleanupError.message}`)
+      if (runError) throw new AggregateError([runError, cleanupError], 'IDTS-127 test and cleanup failed')
+      throw cleanupError
     }
   }
 }
@@ -794,5 +969,6 @@ async function main () {
 main().catch(error => {
   console.error('RESULT: FAIL')
   console.error(error?.stack || error)
+  for (const nested of error?.errors || []) console.error(`CAUSE: ${nested?.stack || nested}`)
   process.exit(1)
 })
