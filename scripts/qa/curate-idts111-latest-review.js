@@ -161,6 +161,58 @@ function validateUx003FinalApproval (manifest, manifestPath) {
   return expectedReview
 }
 
+function validateUx002PartialEvidence (manifest, manifestPath) {
+  const requireContract = (field, condition) => {
+    if (!condition) throw new Error(`UAT-UX-002 evidence contract mismatch: ${field}`)
+  }
+  const evidence = Array.isArray(manifest.evidence) ? manifest.evidence : []
+  const currentFiles = [
+    '01-live-before.jpg',
+    '02-live-classification-review.jpg',
+    '03-live-handoff-summary-top.jpg',
+    '04-live-final.jpg',
+    'ux002-receipt.json'
+  ]
+  for (const file of currentFiles) {
+    const item = evidence.find(entry => entry.file === file)
+    requireContract(`currentEvidence.${file}`, Boolean(item && item.historical === false))
+  }
+
+  const historicalFiles = [
+    '01-tablet-list-report.png',
+    '02-tablet-object-page.png',
+    '03-tablet-ai-dialog.png'
+  ]
+  const historicalEvidence = Array.isArray(manifest.historicalEvidence) ? manifest.historicalEvidence : []
+  requireContract('historicalEvidence.files', historicalEvidence.length === historicalFiles.length && historicalFiles.every(file => {
+    const item = historicalEvidence.find(entry => entry.file === file)
+    const topLevel = evidence.find(entry => entry.file === file)
+    return Boolean(item && item.historical === true && topLevel && topLevel.historical === true && item.sha256 === topLevel.sha256)
+  }))
+
+  const receiptPath = path.join(path.dirname(path.join(evidenceRoot, manifest.caseId, 'manifest.json')), 'ux002-receipt.json')
+  requireContract('receipt.exists', fs.existsSync(receiptPath))
+  let receipt
+  try {
+    receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'))
+  } catch {
+    throw new Error('UAT-UX-002 evidence contract mismatch: receipt.JSON')
+  }
+  requireContract('receipt.result', receipt.result === 'PARTIAL')
+  requireContract('receipt.bugIdentity', receipt.operator?.exactBugId === 'fe16378d-88fe-4f70-8301-5cbcea4f3d6a' && receipt.operator?.bugNumber === 'BUG-0016')
+  requireContract('receipt.viewport', receipt.operator?.viewport?.width === 834 && receipt.operator?.viewport?.height === 1112)
+  requireContract('receipt.totalProviderCalls', receipt.authorization?.totalProviderCalls === 4 && receipt.callLedger?.length === 4)
+  requireContract('receipt.providerCounts', receipt.callLedger?.[0]?.candidateCount === 5 && receipt.callLedger?.[1]?.uiSuggestionRowCount === 5 && receipt.callLedger?.[2]?.candidateCount === 1 && receipt.callLedger?.[2]?.noRetry === true)
+  requireContract('receipt.handoffTelemetry', receipt.callLedger?.[3]?.uiSettled === true && receipt.callLedger?.[3]?.networkMatchingEventsObserved === 0 && receipt.callLedger?.[3]?.transportEventStatus === 'UNAVAILABLE_NOT_OBSERVED')
+  requireContract('receipt.noAuditDeltaClaim', receipt.audit?.delta === null && receipt.audit?.aiSuggestionsBeforeCount === null && receipt.audit?.aiSuggestionsAfterCount === null)
+  requireContract('receipt.localRegression', receipt.provenance?.localDeterministicRegression?.result === 'PASS' && receipt.provenance?.localDeterministicRegression?.commit === '88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6')
+  const receiptText = fs.readFileSync(receiptPath, 'utf8')
+  requireContract('receipt.sanitized', !/(?:[A-Z]:[\\/]|\.staging|tabId|sessionId|freshTabId|@|donhv|nhant|sangvn|datdt|smart-assignment\.png)/i.test(receiptText))
+  requireContract('receipt.screenshotAllowlist', receipt.artifacts?.screenshots?.length === 4 && receipt.artifacts.screenshots.every(item => currentFiles.slice(0, 4).includes(path.posix.basename(item.path)) && item.encoding === 'jpeg'))
+  const receiptEvidence = evidence.find(entry => entry.file === 'ux002-receipt.json')
+  requireContract('receipt.sha256', Boolean(receiptEvidence) && String(receiptEvidence.sha256).toUpperCase() === hashEvidence(receiptPath))
+}
+
 function expectedReviewFor (manifest, manifestPath) {
   const [category, currentStatus] = classify(manifest)
   if (manifest.caseId === 'UAT-COM-003') {
@@ -223,6 +275,7 @@ function expectedReviewFor (manifest, manifestPath) {
   }
 
   if (manifest.caseId === 'UAT-UX-003') return validateUx003FinalApproval(manifest, manifestPath)
+  if (manifest.caseId === 'UAT-UX-002') validateUx002PartialEvidence(manifest, manifestPath)
 
   if (manifest.donhvLatestReview?.currentStatus === 'FINAL_PASS_APPROVED' ||
     manifest.donhvLatestReview?.finalPassApproved === true) {
@@ -314,8 +367,8 @@ const expectedDisposition = {
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
   if (candidateDisposition[status] !== expectedCount) throw new Error(`${status}: expected ${expectedCount}, got ${candidateDisposition[status] || 0}`)
 }
-if (evidenceReferences !== 79) throw new Error(`Evidence references: expected 79, got ${evidenceReferences}`)
-if (evidenceHashes.size !== 66) throw new Error(`Unique evidence hashes: expected 66, got ${evidenceHashes.size}`)
+if (evidenceReferences !== 84) throw new Error(`Evidence references: expected 84, got ${evidenceReferences}`)
+if (evidenceHashes.size !== 71) throw new Error(`Unique evidence hashes: expected 71, got ${evidenceHashes.size}`)
 
 const attachmentManifest = JSON.parse(fs.readFileSync(path.join(evidenceRoot, 'UAT-ATT-001', 'manifest.json'), 'utf8'))
 const attachmentText = JSON.stringify(attachmentManifest)
@@ -333,7 +386,7 @@ const summary = {
   currentDisposition: expectedDisposition,
   counts,
   runtimeRerunPerformed: true,
-  runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.',
+  runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 Smart Assignment returned one candidate with no retry and Handoff matching transport telemetry was unavailable. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.',
   finalApprovals: {
     'UAT-COM-003': {
       status: 'FINAL_PASS_APPROVED',

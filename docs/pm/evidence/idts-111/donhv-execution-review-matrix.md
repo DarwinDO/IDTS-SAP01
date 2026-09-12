@@ -8,7 +8,7 @@
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
 - Final-approved `UAT-COM-003` readback remains bound to PR #405 source head `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34` and approved source/deployed merge `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`; `UAT-UX-003` is additionally final-approved from DonHV's 2026-09-12 physical-keyboard attestation at source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
-- Evidence integrity: 57 manifests, 77 image references plus two structured JSON receipts (79 evidence references, 66 unique hashes), with zero missing files or hash mismatches in the fresh curation check. The final exact-head gate is still required after commit.
+- Evidence integrity: 57 manifests, 81 image references plus three structured JSON receipts (84 evidence references, 71 unique hashes), with zero missing files or hash mismatches in the fresh curation check. The final exact-head gate is still required after commit.
 
 `ACCEPTED_EVIDENCE` means that the submitted evidence truthfully supports the observed result. It does not mean that a blocked case passed, that a product defect is fixed, or that the final UAT workbook is approved.
 
@@ -69,7 +69,7 @@
 | UAT-LIFE-014 | DOES_NOT_MEET | CATALOG_MISMATCH | Current `closeBug` contract does not require a reason; revise catalog or make a separate approved business-rule change. Do not label current behavior a product defect. |
 | UAT-LIFE-015 | BLOCKED | FIXTURE_IDENTITY_BLOCKER | Requires a NhanT-owned Rejected record with correction flow. |
 | UAT-UX-001 | MEETS | ACCEPTED_EVIDENCE | Desktop readability/reachability demonstrated. |
-| UAT-UX-002 | DOES_NOT_MEET | PARTIAL_RECHECK | Current geometry no longer confirms action clipping; candidate reason wrapping still needs a matching fixture before a product-defect conclusion. |
+| UAT-UX-002 | DOES_NOT_MEET | PARTIAL_RECHECK | Local deterministic 834 x 1112 regression is PASS; live Similar Bugs (5 candidates), Classification (5 rows / HTTP 200) and Handoff UI are positive. Smart Assignment returned one candidate with no retry, and Handoff matching transport telemetry was unavailable, so the case remains PARTIAL and not final-approved. |
 | UAT-UX-003 | MEETS | FINAL_PASS_APPROVED | DonHV physically confirmed visible focus; Tab reaches Find Similar Bugs/core controls and dialog actions; Enter opens Similar Bugs; arrow keys navigate the composite list; Escape closes; focus returns to the trigger. The prior Browser automation limitation and E01 screenshot remain historical. |
 | UAT-UX-004 | MEETS | ACCEPTED_EVIDENCE | Safe error copy/no raw diagnostic demonstrated. |
 | UAT-UX-005 | MEETS | ACCEPTED_EVIDENCE | Reload/idempotent committed state demonstrated. |
@@ -79,7 +79,7 @@
 - Current candidate partition is **24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED** across 57 manifests. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved under the parent-authorized decision; the other 55 cases remain candidate evidence, corrections, or blockers and are not final-approved.
 - Current reviewer disposition retains truthful evidence but separately blocks ATT-001 because the preserved fixture sizes are inconsistent.
 - Only `UAT-AI-007`, `UAT-ATT-002` and `UAT-ATT-003` retain stale prerequisites after the current-runtime reruns.
-- AI-005/009 still need immutable suggestion ID plus sanitized Network/audit evidence; UX-002 needs a matching wrapping fixture. UX-003's physical sequence is human-attested; its historical Browser automation limitation remains preserved.
+- AI-005/009 still need immutable suggestion ID plus sanitized Network/audit evidence; UX-002 remains PARTIAL because Smart Assignment returned one candidate without retry and Handoff matching transport telemetry was unavailable. UX-003's physical sequence is human-attested; its historical Browser automation limitation remains preserved.
 
 ## Gate decision
 
@@ -87,7 +87,7 @@ The IDTS-111 evidence package is internally consistent and may be retained as tr
 
 ## Current rerun state
 
-NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. Current-runtime evidence is retained, but ATT-001 is reviewer-blocked because its recorded 44/54/47-byte fixture provenance is inconsistent. AI-005/009 still need immutable suggestion ID and sanitized Network/audit evidence; UX-002 needs a matching fixture. DonHV's UX-003 physical-keyboard attestation is final-approved, while the Browser automation limitation remains historical. The workbook and Drive artifact remain unchanged.
+NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. Current-runtime evidence is retained, but ATT-001 is reviewer-blocked because its recorded 44/54/47-byte fixture provenance is inconsistent. AI-005/009 still need immutable suggestion ID and sanitized Network/audit evidence; UX-002 is now a current PARTIAL recheck with local responsive PASS, a one-candidate Smart Assignment blocker, and unavailable Handoff matching transport telemetry. DonHV's UX-003 physical-keyboard attestation is final-approved, while the Browser automation limitation remains historical. The workbook and Drive artifact remain unchanged.
 
 ### 2026-08-04 current-runtime addendum
 
@@ -99,10 +99,17 @@ This historical 2026-08-04 addendum records deployed reruns that superseded the 
 - Fresh current-runtime PNGs now document `UAT-AUTH-005` signed-out confirmation plus protected-route SAP Sign In redirect, and `UAT-BUG-008` duplicate History rows.
 - `UAT-ATT-001` remains NhanT's candidate negative, but DonHV disposition is **BLOCKED — fixture provenance inconsistent**. The raw 44/54/47-byte records are intentionally unchanged pending member reconciliation.
 - Remaining human/diagnostic gaps are explicit: AI immutable suggestion ID/Network response, a matching UX-002 wrapping fixture, and NhanT physical-keyboard confirmation for UX-003.
-- Machine-readable curation uses Jira comment `10962`, source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`, 57 manifests, 79 evidence references and 66 unique hashes. The final-approved receipts are `uat/UAT-COM-003/05-live-readback-receipt.json` and `uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json`; final commit SHA is recorded in the PR/Jira handoff after commit to avoid self-referential metadata.
+- Machine-readable curation uses Jira comment `10962`, source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`, 57 manifests, 84 evidence references and 71 unique hashes. The final-approved receipts are `uat/UAT-COM-003/05-live-readback-receipt.json` and `uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json`; the new UAT-UX-002 receipt is PARTIAL and not an approval artifact. Final commit SHA is recorded in the PR/Jira handoff after commit to avoid self-referential metadata.
 
 ### 2026-09-12 UAT-UX-003 physical-keyboard closure
 
 - DonHV manually executed the seven attested outcomes on the deployed runtime truth already recorded in the baseline (`67b1bf86169e9696c9365ef4846b99ffae30d4e2`): visible focus; Tab reaches Find Similar Bugs/core controls; Enter opens Similar Bugs; arrows navigate the composite list; Tab reaches dialog actions; Escape closes; focus returns to trigger.
 - The new receipt `uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json` is bound to current source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`, receipt SHA-256 `F1B9CA7548E46EFA1A8AB9C1310134090F53AA599A8742D7D60D13DE0B25C858`, and the existing E01 PNG/hash. No browser simulation, device/timestamp invention, or raw keylog is claimed; the former Browser failure remains under `historicalAutomationLimitation`.
 - Current truth is **24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED**; exactly `UAT-COM-003` and `UAT-UX-003` are final-approved. Workbook, Drive, Jira, runtime, database, provider and live data remain unchanged.
+
+### 2026-09-12 UAT-UX-002 partial evidence integration
+
+- The current UAT-UX-002 execution is by `NhanT (DonHV support)` in the DonHV PM session at viewport `834 x 1112` against controlled Bug `BUG-0016` (`fe16378d-88fe-4f70-8301-5cbcea4f3d6a`). The local deterministic regression `scripts/qa/test-idts127-ux002-responsive-browser.js` is PASS at commit `88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6`; this is local SQLite/controlled-response evidence, not live BTP/provider proof.
+- The live ledger has exactly four provider calls: prior Similar Bugs with five candidates and no repeat, Classification with five rows and HTTP 200, Smart Assignment with one candidate and no retry, and Handoff Summary with settled UI. Handoff matching transport telemetry was unavailable, so no transport status is inferred. No Apply, Assign, Confirm Duplicate, Accept, Save, Edit, workflow, business-data or provider mutation was invoked; Bug state invariants remained unchanged and AiSuggestions count delta was unavailable.
+- Four approved JPEG captures (`01-live-before.jpg`, `02-live-classification-review.jpg`, `03-live-handoff-summary-top.jpg`, `04-live-final.jpg`) plus sanitized `ux002-receipt.json` are current evidence. The three historical PNGs remain hash-tracked and labelled historical; Smart Assignment, duplicate Handoff Top 2 and lower Handoff captures remain outside the repository.
+- Candidate disposition remains `DOES_NOT_MEET_EXPECTED_RESULT` with curation category `CURRENT_RUNTIME_PARTIAL_RECHECK`; `finalPassApproved` remains false. The aggregate partition remains **24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED**, and only `UAT-COM-003` and `UAT-UX-003` remain final-approved. Workbook, Drive, Jira, BTP, database, provider and live data remain unchanged.
