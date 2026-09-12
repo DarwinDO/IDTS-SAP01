@@ -1,3 +1,5 @@
+> Historical PR-body snapshot. Current forward scope is 77 catalog cases and 44 retained NhanT manifests at 24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED; see `latest-review-summary.json` and DEC-071.
+
 ## Summary
 
 - Preserve the approved English-only 90-case IDTS-111 UAT catalog and add NhanT's complete 57-case candidate execution package.

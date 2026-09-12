@@ -6,7 +6,7 @@
   "owner": "DonHV",
   "approvalStatus": "APPROVED_FOR_EXECUTION",
   "executionTruth": {
-    "prepared": 90,
+    "prepared": 77,
     "executed": 0,
     "passed": 0,
     "failed": 0,
@@ -67,146 +67,8 @@
       "limitation": null
     },
     {
-      "caseId": "UAT-AUTH-002",
-      "displayNumber": "2",
-      "language": "EN",
-      "domain": "Authentication",
-      "journey": "Sign in and session",
-      "title": "Unmapped SAP identity is denied safely",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "AUTHORIZATION",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Use a valid SAP identity with no active IDTS mapping.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Open the AppRouter URL.",
-        "Complete SAP sign-in."
-      ],
-      "expectedResult": "Access is denied with a safe business message and no Bug data is shown.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/auth.js"
-        },
-        {
-          "file": "app/bug-management-ui/webapp/login-page.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
-      "caseId": "UAT-AUTH-003",
-      "displayNumber": "3",
-      "language": "EN",
-      "domain": "Authentication",
-      "journey": "Sign in and session",
-      "title": "Role mismatch is denied safely",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "AUTHORIZATION",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Platform role and mapped IDTS role intentionally differ.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Open the AppRouter URL.",
-        "Complete SAP sign-in."
-      ],
-      "expectedResult": "HTTP 403 is handled safely; role internals and protected data are not exposed.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/auth.js"
-        },
-        {
-          "file": "app/bug-management-ui/webapp/login-page.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
-      "caseId": "UAT-AUTH-004",
-      "displayNumber": "4",
-      "language": "EN",
-      "domain": "Authentication",
-      "journey": "Sign in and session",
-      "title": "Expired session redirects to sign-in",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "RECOVERY",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Tester session is expired.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Reload a protected application route.",
-        "Complete sign-in again."
-      ],
-      "expectedResult": "The user is redirected to SAP sign-in and can resume without a blank page or raw error.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/auth.js"
-        },
-        {
-          "file": "app/bug-management-ui/webapp/login-page.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
       "caseId": "UAT-AUTH-005",
-      "displayNumber": "5",
+      "displayNumber": "2",
       "language": "EN",
       "domain": "Authentication",
       "journey": "Sign in and session",
@@ -252,7 +114,7 @@
     },
     {
       "caseId": "UAT-BUG-001",
-      "displayNumber": "6",
+      "displayNumber": "3",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -300,7 +162,7 @@
     },
     {
       "caseId": "UAT-BUG-002",
-      "displayNumber": "7",
+      "displayNumber": "4",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -347,7 +209,7 @@
     },
     {
       "caseId": "UAT-BUG-003",
-      "displayNumber": "8",
+      "displayNumber": "5",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -394,7 +256,7 @@
     },
     {
       "caseId": "UAT-BUG-004",
-      "displayNumber": "9",
+      "displayNumber": "6",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -440,55 +302,8 @@
       "limitation": null
     },
     {
-      "caseId": "UAT-BUG-005",
-      "displayNumber": "10",
-      "language": "EN",
-      "domain": "Bug creation",
-      "journey": "Create and save Bug",
-      "title": "Invalid classification pair prevents save",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "NEGATIVE",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "New Bug draft is open.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Choose an Application Component and incompatible Defect Category.",
-        "Complete other required values.",
-        "Choose Create."
-      ],
-      "expectedResult": "HTTP 400 is shown as a safe field message and no invalid active Bug is stored.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/bug-service/drafts.js"
-        },
-        {
-          "file": "srv/bug-service/bug-write.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
       "caseId": "UAT-BUG-006",
-      "displayNumber": "11",
+      "displayNumber": "7",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -535,7 +350,7 @@
     },
     {
       "caseId": "UAT-BUG-007",
-      "displayNumber": "12",
+      "displayNumber": "8",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -582,7 +397,7 @@
     },
     {
       "caseId": "UAT-BUG-008",
-      "displayNumber": "13",
+      "displayNumber": "9",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -629,7 +444,7 @@
     },
     {
       "caseId": "UAT-BUG-009",
-      "displayNumber": "14",
+      "displayNumber": "10",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -676,7 +491,7 @@
     },
     {
       "caseId": "UAT-CLS-001",
-      "displayNumber": "15",
+      "displayNumber": "11",
       "language": "EN",
       "domain": "Classification",
       "journey": "Classify a Bug",
@@ -721,7 +536,7 @@
     },
     {
       "caseId": "UAT-CLS-002",
-      "displayNumber": "16",
+      "displayNumber": "12",
       "language": "EN",
       "domain": "Classification",
       "journey": "Classify a Bug",
@@ -767,54 +582,8 @@
       "limitation": null
     },
     {
-      "caseId": "UAT-CLS-003",
-      "displayNumber": "17",
-      "language": "EN",
-      "domain": "Classification",
-      "journey": "Classify a Bug",
-      "title": "Inactive code-list value is rejected",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "NEGATIVE",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "An inactive classification value is available through a controlled direct request.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Submit the inactive value.",
-        "Observe the response and reload."
-      ],
-      "expectedResult": "The request is rejected safely and stored classification remains unchanged.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/bug-service/bug-write.js"
-        },
-        {
-          "file": "srv/ai/classification-suggestion.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
       "caseId": "UAT-CLS-004",
-      "displayNumber": "18",
+      "displayNumber": "13",
       "language": "EN",
       "domain": "Classification",
       "journey": "Classify a Bug",
@@ -860,7 +629,7 @@
     },
     {
       "caseId": "UAT-ASG-001",
-      "displayNumber": "19",
+      "displayNumber": "14",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -908,7 +677,7 @@
     },
     {
       "caseId": "UAT-ASG-002",
-      "displayNumber": "20",
+      "displayNumber": "15",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -956,7 +725,7 @@
     },
     {
       "caseId": "UAT-ASG-003",
-      "displayNumber": "21",
+      "displayNumber": "16",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -1004,7 +773,7 @@
     },
     {
       "caseId": "UAT-ASG-004",
-      "displayNumber": "22",
+      "displayNumber": "17",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -1054,7 +823,7 @@
     },
     {
       "caseId": "UAT-ASG-005",
-      "displayNumber": "23",
+      "displayNumber": "18",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -1103,7 +872,7 @@
     },
     {
       "caseId": "UAT-ASG-006",
-      "displayNumber": "24",
+      "displayNumber": "19",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -1151,7 +920,7 @@
     },
     {
       "caseId": "UAT-ASG-007",
-      "displayNumber": "25",
+      "displayNumber": "20",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -1201,7 +970,7 @@
     },
     {
       "caseId": "UAT-ASG-008",
-      "displayNumber": "26",
+      "displayNumber": "21",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -1249,7 +1018,7 @@
     },
     {
       "caseId": "UAT-LIFE-001",
-      "displayNumber": "27",
+      "displayNumber": "22",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1296,7 +1065,7 @@
     },
     {
       "caseId": "UAT-LIFE-002",
-      "displayNumber": "28",
+      "displayNumber": "23",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1343,7 +1112,7 @@
     },
     {
       "caseId": "UAT-LIFE-003",
-      "displayNumber": "29",
+      "displayNumber": "24",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1390,7 +1159,7 @@
     },
     {
       "caseId": "UAT-LIFE-004",
-      "displayNumber": "30",
+      "displayNumber": "25",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1437,7 +1206,7 @@
     },
     {
       "caseId": "UAT-LIFE-005",
-      "displayNumber": "31",
+      "displayNumber": "26",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1484,7 +1253,7 @@
     },
     {
       "caseId": "UAT-LIFE-006",
-      "displayNumber": "32",
+      "displayNumber": "27",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1531,7 +1300,7 @@
     },
     {
       "caseId": "UAT-LIFE-007",
-      "displayNumber": "33",
+      "displayNumber": "28",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1578,7 +1347,7 @@
     },
     {
       "caseId": "UAT-LIFE-008",
-      "displayNumber": "34",
+      "displayNumber": "29",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1625,7 +1394,7 @@
     },
     {
       "caseId": "UAT-LIFE-009",
-      "displayNumber": "35",
+      "displayNumber": "30",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1672,7 +1441,7 @@
     },
     {
       "caseId": "UAT-LIFE-010",
-      "displayNumber": "36",
+      "displayNumber": "31",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1719,7 +1488,7 @@
     },
     {
       "caseId": "UAT-LIFE-011",
-      "displayNumber": "37",
+      "displayNumber": "32",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1765,7 +1534,7 @@
     },
     {
       "caseId": "UAT-LIFE-012",
-      "displayNumber": "38",
+      "displayNumber": "33",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1811,7 +1580,7 @@
     },
     {
       "caseId": "UAT-LIFE-013",
-      "displayNumber": "39",
+      "displayNumber": "34",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -1856,7 +1625,7 @@
     },
     {
       "caseId": "UAT-COM-001",
-      "displayNumber": "40",
+      "displayNumber": "35",
       "language": "EN",
       "domain": "Comments",
       "journey": "Collaborate on a Bug",
@@ -1903,7 +1672,7 @@
     },
     {
       "caseId": "UAT-COM-002",
-      "displayNumber": "41",
+      "displayNumber": "36",
       "language": "EN",
       "domain": "Comments",
       "journey": "Collaborate on a Bug",
@@ -1949,7 +1718,7 @@
     },
     {
       "caseId": "UAT-COM-003",
-      "displayNumber": "42",
+      "displayNumber": "37",
       "language": "EN",
       "domain": "Comments",
       "journey": "Collaborate on a Bug",
@@ -1994,7 +1763,7 @@
     },
     {
       "caseId": "UAT-COM-004",
-      "displayNumber": "43",
+      "displayNumber": "38",
       "language": "EN",
       "domain": "Comments",
       "journey": "Collaborate on a Bug",
@@ -2039,7 +1808,7 @@
     },
     {
       "caseId": "UAT-ATT-001",
-      "displayNumber": "44",
+      "displayNumber": "39",
       "language": "EN",
       "domain": "Attachments",
       "journey": "Manage Bug evidence",
@@ -2088,7 +1857,7 @@
     },
     {
       "caseId": "UAT-ATT-002",
-      "displayNumber": "45",
+      "displayNumber": "40",
       "language": "EN",
       "domain": "Attachments",
       "journey": "Manage Bug evidence",
@@ -2135,7 +1904,7 @@
     },
     {
       "caseId": "UAT-ATT-003",
-      "displayNumber": "46",
+      "displayNumber": "41",
       "language": "EN",
       "domain": "Attachments",
       "journey": "Manage Bug evidence",
@@ -2182,97 +1951,8 @@
       "limitation": null
     },
     {
-      "caseId": "UAT-ATT-004",
-      "displayNumber": "47",
-      "language": "EN",
-      "domain": "Attachments",
-      "journey": "Manage Bug evidence",
-      "title": "Unsupported file type is rejected",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "NEGATIVE",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Active Bug is open.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Select an unsupported file type."
-      ],
-      "expectedResult": "Upload is blocked with a safe message and no metadata or object is created.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/bug-service/content.js"
-        },
-        {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
-      "caseId": "UAT-ATT-005",
-      "displayNumber": "48",
-      "language": "EN",
-      "domain": "Attachments",
-      "journey": "Manage Bug evidence",
-      "title": "Oversized file is rejected",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "BOUNDARY",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Active Bug is open.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Select a file larger than the allowed limit."
-      ],
-      "expectedResult": "Upload is blocked before unsafe persistence and the Bug remains usable.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/bug-service/content.js"
-        },
-        {
-          "file": "app/bug-management-ui/webapp/ext/sections/BugCollaboration.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
       "caseId": "UAT-ATT-006",
-      "displayNumber": "49",
+      "displayNumber": "42",
       "language": "EN",
       "domain": "Attachments",
       "journey": "Manage Bug evidence",
@@ -2318,7 +1998,7 @@
     },
     {
       "caseId": "UAT-AUD-001",
-      "displayNumber": "50",
+      "displayNumber": "43",
       "language": "EN",
       "domain": "Audit and notification",
       "journey": "Verify side effects",
@@ -2370,7 +2050,7 @@
     },
     {
       "caseId": "UAT-AUD-002",
-      "displayNumber": "51",
+      "displayNumber": "44",
       "language": "EN",
       "domain": "Audit and notification",
       "journey": "Verify side effects",
@@ -2422,7 +2102,7 @@
     },
     {
       "caseId": "UAT-NOT-001",
-      "displayNumber": "52",
+      "displayNumber": "45",
       "language": "EN",
       "domain": "Audit and notification",
       "journey": "Verify side effects",
@@ -2475,7 +2155,7 @@
     },
     {
       "caseId": "UAT-NOT-002",
-      "displayNumber": "53",
+      "displayNumber": "46",
       "language": "EN",
       "domain": "Audit and notification",
       "journey": "Verify side effects",
@@ -2527,7 +2207,7 @@
     },
     {
       "caseId": "UAT-EMAIL-001",
-      "displayNumber": "54",
+      "displayNumber": "47",
       "language": "EN",
       "domain": "Audit and notification",
       "journey": "Verify side effects",
@@ -2581,7 +2261,7 @@
     },
     {
       "caseId": "UAT-EMAIL-002",
-      "displayNumber": "55",
+      "displayNumber": "48",
       "language": "EN",
       "domain": "Audit and notification",
       "journey": "Verify side effects",
@@ -2634,7 +2314,7 @@
     },
     {
       "caseId": "UAT-MON-001",
-      "displayNumber": "56",
+      "displayNumber": "49",
       "language": "EN",
       "domain": "Monitoring",
       "journey": "PM monitors work",
@@ -2679,7 +2359,7 @@
     },
     {
       "caseId": "UAT-MON-002",
-      "displayNumber": "57",
+      "displayNumber": "50",
       "language": "EN",
       "domain": "Monitoring",
       "journey": "PM monitors work",
@@ -2723,7 +2403,7 @@
     },
     {
       "caseId": "UAT-MON-003",
-      "displayNumber": "58",
+      "displayNumber": "51",
       "language": "EN",
       "domain": "Monitoring",
       "journey": "PM monitors work",
@@ -2768,7 +2448,7 @@
     },
     {
       "caseId": "UAT-MON-004",
-      "displayNumber": "59",
+      "displayNumber": "52",
       "language": "EN",
       "domain": "Monitoring",
       "journey": "PM monitors work",
@@ -2812,7 +2492,7 @@
     },
     {
       "caseId": "UAT-MON-005",
-      "displayNumber": "60",
+      "displayNumber": "53",
       "language": "EN",
       "domain": "Monitoring",
       "journey": "PM monitors work",
@@ -2857,7 +2537,7 @@
     },
     {
       "caseId": "UAT-AI-001",
-      "displayNumber": "61",
+      "displayNumber": "54",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -2902,7 +2582,7 @@
     },
     {
       "caseId": "UAT-AI-002",
-      "displayNumber": "62",
+      "displayNumber": "55",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -2949,7 +2629,7 @@
     },
     {
       "caseId": "UAT-AI-003",
-      "displayNumber": "63",
+      "displayNumber": "56",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -2994,7 +2674,7 @@
     },
     {
       "caseId": "UAT-AI-004",
-      "displayNumber": "64",
+      "displayNumber": "57",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -3039,7 +2719,7 @@
     },
     {
       "caseId": "UAT-AI-005",
-      "displayNumber": "65",
+      "displayNumber": "58",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -3086,7 +2766,7 @@
     },
     {
       "caseId": "UAT-AI-006",
-      "displayNumber": "66",
+      "displayNumber": "59",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -3131,7 +2811,7 @@
     },
     {
       "caseId": "UAT-AI-007",
-      "displayNumber": "67",
+      "displayNumber": "60",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -3173,7 +2853,7 @@
     },
     {
       "caseId": "UAT-AI-008",
-      "displayNumber": "68",
+      "displayNumber": "61",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -3214,7 +2894,7 @@
     },
     {
       "caseId": "UAT-AI-009",
-      "displayNumber": "69",
+      "displayNumber": "62",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -3263,23 +2943,23 @@
     },
     {
       "caseId": "UAT-AI-010",
-      "displayNumber": "70",
+      "displayNumber": "63",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
-      "title": "AI review decision survives reload",
+      "title": "Reject and Ignore AI review decisions survive reload",
       "actorRole": "TESTER",
       "executionOwner": "NhanT",
       "classification": "PERSISTENCE",
       "priority": "HIGH",
       "requirementReferences": [],
-      "preconditions": "A pending AI suggestion exists.",
+      "preconditions": "A pending AI suggestion exists for each decision variant.",
       "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
       "steps": [
-        "Accept, Reject, or Ignore the suggestion.",
-        "Reload and reopen the dialog."
+        "Choose Reject, confirm, reload, and reopen the same suggestion.",
+        "Repeat with a separate pending suggestion and choose Ignore."
       ],
-      "expectedResult": "Review state, reviewer, and timestamp persist; the same decision cannot be applied twice.",
+      "expectedResult": "REJECTED and IGNORED each persist once with reviewer and timestamp; neither decision mutates Bug business state or can be applied twice.",
       "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
       "sourceTrace": [
         {
@@ -3308,100 +2988,8 @@
       "limitation": null
     },
     {
-      "caseId": "UAT-AI-011",
-      "displayNumber": "71",
-      "language": "EN",
-      "domain": "AI advisory",
-      "journey": "Review AI assistance",
-      "title": "Rate-limited provider uses safe local fallback",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "RECOVERY",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Controlled provider rate limit or active cooldown is available.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Open one AI feature.",
-        "Observe result and Network.",
-        "Avoid repeated retry."
-      ],
-      "expectedResult": "Safe local output is identified clearly, no raw 429/provider diagnostic appears, and no unintended mutation occurs.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/ai/provider.js"
-        },
-        {
-          "file": "srv/ai/review.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
-      "caseId": "UAT-AI-012",
-      "displayNumber": "72",
-      "language": "EN",
-      "domain": "AI advisory",
-      "journey": "Review AI assistance",
-      "title": "Prompt-injection text is treated as Bug data",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "SECURITY",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Controlled Bug text contains an instruction-like phrase.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Run each affected advisory flow.",
-        "Inspect output and side effects."
-      ],
-      "expectedResult": "The phrase does not override system constraints, expose secrets, or trigger an action.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/ai/provider.js"
-        },
-        {
-          "file": "srv/ai/review.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
       "caseId": "UAT-AI-013",
-      "displayNumber": "73",
+      "displayNumber": "64",
       "language": "EN",
       "domain": "AI advisory",
       "journey": "Review AI assistance",
@@ -3443,7 +3031,7 @@
     },
     {
       "caseId": "UAT-ROLE-001",
-      "displayNumber": "74",
+      "displayNumber": "65",
       "language": "EN",
       "domain": "Role coverage",
       "journey": "Cross-role business acceptance",
@@ -3488,7 +3076,7 @@
     },
     {
       "caseId": "UAT-ROLE-002",
-      "displayNumber": "75",
+      "displayNumber": "66",
       "language": "EN",
       "domain": "Role coverage",
       "journey": "Cross-role business acceptance",
@@ -3533,7 +3121,7 @@
     },
     {
       "caseId": "UAT-BUG-010",
-      "displayNumber": "76",
+      "displayNumber": "67",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -3583,7 +3171,7 @@
     },
     {
       "caseId": "UAT-BUG-011",
-      "displayNumber": "77",
+      "displayNumber": "68",
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
@@ -3628,7 +3216,7 @@
     },
     {
       "caseId": "UAT-ASG-009",
-      "displayNumber": "78",
+      "displayNumber": "69",
       "language": "EN",
       "domain": "Assignment",
       "journey": "Assign or reassign Developer",
@@ -3675,7 +3263,7 @@
     },
     {
       "caseId": "UAT-LIFE-014",
-      "displayNumber": "79",
+      "displayNumber": "70",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -3722,7 +3310,7 @@
     },
     {
       "caseId": "UAT-LIFE-015",
-      "displayNumber": "80",
+      "displayNumber": "71",
       "language": "EN",
       "domain": "Lifecycle",
       "journey": "Progress Bug status",
@@ -3768,7 +3356,7 @@
     },
     {
       "caseId": "UAT-ATT-007",
-      "displayNumber": "81",
+      "displayNumber": "72",
       "language": "EN",
       "domain": "Attachments",
       "journey": "Manage Bug evidence",
@@ -3813,193 +3401,8 @@
       "limitation": null
     },
     {
-      "caseId": "UAT-AUD-003",
-      "displayNumber": "82",
-      "language": "EN",
-      "domain": "Audit and notification",
-      "journey": "Inspect audit history",
-      "title": "History show-more loads older events in order",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "PERSISTENCE",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Bug has more history events than the initial display limit.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Open History.",
-        "Choose Show More.",
-        "Compare ordering and event count."
-      ],
-      "expectedResult": "Older events load once in chronological presentation order without duplicates or missing change details.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/bug-service/history.js"
-        },
-        {
-          "file": "srv/bug-service/history-read-models.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "before/after and reload/readback screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
-      "caseId": "UAT-AI-014",
-      "displayNumber": "83",
-      "language": "EN",
-      "domain": "AI advisory",
-      "journey": "Review AI assistance",
-      "title": "Reject AI suggestion persists without business mutation",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "PERSISTENCE",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Pending AI suggestion exists.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Choose Reject.",
-        "Confirm and reload."
-      ],
-      "expectedResult": "Review state becomes REJECTED once; Bug fields, workflow, duplicate links, history, and notifications remain unchanged.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/ai/provider.js"
-        },
-        {
-          "file": "srv/ai/review.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "before/after and reload/readback screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
-      "caseId": "UAT-AI-015",
-      "displayNumber": "84",
-      "language": "EN",
-      "domain": "AI advisory",
-      "journey": "Review AI assistance",
-      "title": "Ignore AI suggestion persists without business mutation",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "PERSISTENCE",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "Pending AI suggestion exists.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Choose Ignore.",
-        "Confirm and reload."
-      ],
-      "expectedResult": "Review state becomes IGNORED once; Bug fields, workflow, duplicate links, history, and notifications remain unchanged.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/ai/provider.js"
-        },
-        {
-          "file": "srv/ai/review.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "before/after and reload/readback screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
-      "caseId": "UAT-AI-016",
-      "displayNumber": "85",
-      "language": "EN",
-      "domain": "AI advisory",
-      "journey": "Review AI assistance",
-      "title": "Stale accepted classification cannot overwrite newer Bug data",
-      "actorRole": "TESTER",
-      "executionOwner": "NhanT",
-      "classification": "NEGATIVE",
-      "priority": "HIGH",
-      "requirementReferences": [],
-      "preconditions": "An accepted suggestion exists and source classification has since changed.",
-      "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
-      "steps": [
-        "Attempt Apply Classification.",
-        "Reload the Bug."
-      ],
-      "expectedResult": "The stale apply is rejected safely and the newer classification remains unchanged.",
-      "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
-      "sourceTrace": [
-        {
-          "file": "srv/ai/classification-suggestion.js"
-        },
-        {
-          "file": "srv/ai/classification-apply.js"
-        }
-      ],
-      "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
-      "evidenceRequirements": [
-        "case-specific UI screenshot",
-        "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "sanitized Network status or safe error screenshot"
-      ],
-      "execution": {
-        "status": "PREPARED",
-        "executor": null,
-        "executedAt": null,
-        "deploySha": null,
-        "actualResult": null,
-        "evidenceIds": [],
-        "reviewer": null,
-        "reviewedAt": null
-      },
-      "limitation": null
-    },
-    {
       "caseId": "UAT-UX-001",
-      "displayNumber": "86",
+      "displayNumber": "73",
       "language": "EN",
       "domain": "Usability",
       "journey": "Cross-cutting browser behavior",
@@ -4043,7 +3446,7 @@
     },
     {
       "caseId": "UAT-UX-002",
-      "displayNumber": "87",
+      "displayNumber": "74",
       "language": "EN",
       "domain": "Usability",
       "journey": "Cross-cutting browser behavior",
@@ -4088,7 +3491,7 @@
     },
     {
       "caseId": "UAT-UX-003",
-      "displayNumber": "88",
+      "displayNumber": "75",
       "language": "EN",
       "domain": "Usability",
       "journey": "Cross-cutting browser behavior",
@@ -4135,7 +3538,7 @@
     },
     {
       "caseId": "UAT-UX-004",
-      "displayNumber": "89",
+      "displayNumber": "76",
       "language": "EN",
       "domain": "Usability",
       "journey": "Cross-cutting browser behavior",
@@ -4181,7 +3584,7 @@
     },
     {
       "caseId": "UAT-UX-005",
-      "displayNumber": "90",
+      "displayNumber": "77",
       "language": "EN",
       "domain": "Usability",
       "journey": "Cross-cutting browser behavior",

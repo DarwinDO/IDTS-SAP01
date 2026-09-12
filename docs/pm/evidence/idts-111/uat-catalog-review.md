@@ -6,7 +6,7 @@
 
 DonHV approved the generated English-only SAP BTP UAT catalog in the dedicated Codex working thread on 2026-08-02. The approval authorizes assigned members to execute their cases only after the live BTP baseline/readiness is frozen. It does not mark any case as PASS and does not approve workbook or Drive synchronization.
 
-The catalog replaces the six broad historic Prepared rows with 90 atomic business-observable cases. It does not import the old 21 PASS regression results and does not claim that any current BTP UAT was executed.
+The forward catalog retains 77 atomic business-observable cases after DonHV's approved deadline-scope reduction. It does not import old PASS regression results and does not claim that any current BTP UAT was executed inside the planning catalog.
 
 ## Baseline and ownership
 
@@ -28,7 +28,7 @@ The catalog replaces the six broad historic Prepared rows with 90 atomic busines
 
 | Status | Count |
 | --- | ---: |
-| PREPARED | 90 |
+| PREPARED | 77 |
 | Executed | 0 |
 | PASS | 0 |
 | FAIL | 0 |
@@ -38,21 +38,21 @@ The catalog replaces the six broad historic Prepared rows with 90 atomic busines
 
 | Domain | Cases |
 | --- | ---: |
-| Authentication | 5 |
+| Authentication | 2 |
 | Role coverage | 2 |
-| Bug creation | 11 |
-| Classification | 4 |
+| Bug creation | 10 |
+| Classification | 3 |
 | Assignment | 9 |
 | Lifecycle | 15 |
 | Comments | 4 |
-| Attachments | 7 |
-| Audit and notification/email | 7 |
+| Attachments | 5 |
+| Audit and notification/email | 6 |
 | Monitoring | 5 |
-| AI advisory | 16 |
+| AI advisory | 11 |
 | Usability/resilience | 5 |
-| **Total** | **90** |
+| **Total** | **77** |
 
-The catalog contains 15 positive, 14 negative, 9 authorization, 7 boundary, 7 recovery, 4 integration, 32 persistence and 2 security cases. The categories overlap business journeys only through separate observable claims; one case does not hide several outcomes.
+The catalog contains 15 positive, 10 negative, 8 authorization, 6 boundary, 5 recovery, 4 integration, 28 persistence and 1 security case. Reject and Ignore are explicit variants inside `UAT-AI-010`; the other retained cases remain independently observable.
 
 ## Review corrections
 
