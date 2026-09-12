@@ -9,6 +9,7 @@
  */
 
 const assert = require('node:assert/strict')
+const { EventEmitter } = require('node:events')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
@@ -31,6 +32,7 @@ const { createHarness } = require('./lib/browser-harness')
 const PROJECT_ROOT = path.resolve(__dirname, '..', '..')
 const LOCAL_BASE_URL_PATTERN = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i
 const VIEWPORT = { width: 834, height: 1112 }
+const BROWSER_LAUNCH_TIMEOUT_MS = 30000
 const AMBIENT_BASE_URL = String(process.env.IDTS_QA_BASE_URL || '').replace(/\/+$/, '')
 
 let BASE_URL
@@ -122,17 +124,14 @@ async function launchBrowser () {
   for (const channel of ['msedge', 'chrome', undefined]) {
     let browserServer
     try {
-      browserServer = await chromium.launchServer({ ...(channel ? { channel } : {}), headless })
-      const browser = await chromium.connect(browserServer.wsEndpoint())
+      browserServer = await chromium.launchServer({ ...(channel ? { channel } : {}), headless, timeout: BROWSER_LAUNCH_TIMEOUT_MS })
+      const browser = await chromium.connect(browserServer.wsEndpoint(), { timeout: BROWSER_LAUNCH_TIMEOUT_MS })
       return { browser, browserServer }
     } catch (error) {
-      lastError = error
-      if (browserServer) {
-        try {
-          await browserServer.kill()
-        } catch (killError) {
-          lastError = new AggregateError([error, killError], 'Playwright browser launch cleanup failed')
-        }
+      try {
+        lastError = await cleanupFailedBrowserLaunch(browserServer, error)
+      } catch (cleanupError) {
+        throw cleanupError
       }
     }
   }
@@ -352,6 +351,19 @@ async function forceCloseBrowserServer (browserServer, label) {
     }
   }
   assertBrowserServerExited(browserServer, label)
+}
+
+async function cleanupFailedBrowserLaunch (browserServer, launchError) {
+  if (!browserServer) return launchError
+  try {
+    await forceCloseBrowserServer(browserServer, 'browser launch failure cleanup')
+    return launchError
+  } catch (cleanupError) {
+    const aggregate = new AggregateError([launchError, cleanupError], 'Playwright browser launch cleanup failed')
+    aggregate.fatalTeardown = cleanupError?.fatalTeardown === true
+    aggregate.operationSettled = cleanupError?.operationSettled
+    throw aggregate
+  }
 }
 
 async function closeServer (server) {
@@ -989,6 +1001,54 @@ async function runCleanupNegativeControl () {
   assert.equal(settlementFallbackInvoked, true, 'settlement timeout must invoke its fallback')
   assert.equal(settlementFailure?.fatalTeardown, true, 'settlement timeout must be fatal')
   assert.equal(settlementFailure?.operationSettled, false, 'settlement timeout must report unsettled primary operation')
+
+  const launchConnectError = new Error('synthetic browser connect failure')
+  const launchChild = new EventEmitter()
+  launchChild.pid = 99999
+  launchChild.exitCode = null
+  launchChild.signalCode = null
+  launchChild.kill = () => {
+    launchChild.exitCode = 0
+    launchChild.emit('exit', 0, null)
+    return true
+  }
+  const launchServer = {
+    killCalls: 0,
+    process: () => launchChild,
+    kill: async () => {
+      launchServer.killCalls += 1
+      launchChild.exitCode = 0
+      launchChild.emit('exit', 0, null)
+    }
+  }
+  const preservedConnectError = await cleanupFailedBrowserLaunch(launchServer, launchConnectError)
+  assert.equal(preservedConnectError, launchConnectError, 'connect failure must remain the launch result')
+  assert.equal(launchServer.killCalls, 1, 'connect failure must invoke bounded BrowserServer cleanup')
+  assert.equal(launchChild.exitCode, 0, 'connect failure cleanup must settle the browser child')
+
+  const cleanupConnectError = new Error('synthetic browser cleanup failure')
+  const failingChild = new EventEmitter()
+  failingChild.pid = 99998
+  failingChild.exitCode = null
+  failingChild.signalCode = null
+  failingChild.kill = () => {
+    failingChild.exitCode = 0
+    failingChild.emit('exit', 0, null)
+    return true
+  }
+  const failingLaunchServer = {
+    process: () => failingChild,
+    kill: async () => { throw cleanupConnectError }
+  }
+  let launchAggregate
+  try {
+    await cleanupFailedBrowserLaunch(failingLaunchServer, launchConnectError)
+  } catch (error) {
+    launchAggregate = error
+  }
+  assert.ok(launchAggregate instanceof AggregateError, 'connect cleanup failure must be aggregated')
+  assert.equal(launchAggregate.errors?.[0], launchConnectError, 'launch error must remain an aggregate cause')
+  assert.match(launchAggregate.errors?.[1]?.message || '', /synthetic browser cleanup failure/)
   pass('cleanup timeout invokes fallback, waits for settlement, and surfaces fallback/settlement errors')
 }
 
