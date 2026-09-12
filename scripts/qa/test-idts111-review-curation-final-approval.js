@@ -23,7 +23,7 @@ process.argv = [process.execPath, path.resolve('scripts/qa/curate-idts111-latest
 const { expectedReviewFor, finalApprovedCaseIds } = require('./curate-idts111-latest-review')
 process.argv = previousArgv
 
-assert.deepEqual([...finalApprovedCaseIds], ['UAT-COM-003'])
+assert.deepEqual([...finalApprovedCaseIds], ['UAT-COM-003', 'UAT-UX-003'])
 assert.deepEqual(expectedReviewFor(approvedManifest), approvedManifest.donhvLatestReview)
 assert.equal(expectedReviewFor(otherManifest).finalPassApproved, false)
 

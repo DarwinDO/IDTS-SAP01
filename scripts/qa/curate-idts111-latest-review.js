@@ -10,7 +10,7 @@ const summaryPath = path.resolve('docs/pm/evidence/idts-111/latest-review-summar
 const reviewCommentId = '10962'
 const reviewDate = '2026-08-04'
 const checkOnly = process.argv.includes('--check')
-const finalApprovedCaseIds = new Set(['UAT-COM-003'])
+const finalApprovedCaseIds = new Set(['UAT-COM-003', 'UAT-UX-003'])
 const finalApprovalContract = {
   sourceHead: 'e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34',
   executor: 'NhanT (DonHV support)',
@@ -33,7 +33,14 @@ const currentRuntimeDefect = new Set(['UAT-BUG-008'])
 const currentRuntimePartial = new Set(['UAT-UX-002'])
 const semanticCorrection = new Set(['UAT-AI-008', 'UAT-AI-010', 'UAT-AI-014', 'UAT-AI-015', 'UAT-LIFE-014'])
 const aiDiagnostic = new Set(['UAT-AI-005', 'UAT-AI-009'])
-const physicalKeyboard = new Set(['UAT-UX-003'])
+
+function hashEvidence (filePath) {
+  const bytes = fs.readFileSync(filePath)
+  const content = path.extname(filePath).toLowerCase() === '.json'
+    ? Buffer.from(bytes.toString('utf8').replace(/\r\n/g, '\n'), 'utf8')
+    : bytes
+  return crypto.createHash('sha256').update(content).digest('hex').toUpperCase()
+}
 
 function classify (manifest) {
   const id = manifest.caseId
@@ -47,7 +54,6 @@ function classify (manifest) {
   if (defectRecheck.has(id)) return ['CONFIRMED_DEFECT_RECHECK', 'RERUN_REQUIRED_CURRENT_RUNTIME']
   if (semanticCorrection.has(id)) return ['CATALOG_SEMANTIC_CORRECTION', 'REVIEW_CORRECTION_REQUIRED']
   if (aiDiagnostic.has(id)) return ['AI_DIAGNOSTIC_RERUN', 'RERUN_REQUIRES_IMMUTABLE_ID_NETWORK_AUDIT']
-  if (physicalKeyboard.has(id)) return ['PHYSICAL_KEYBOARD_LIMITATION', 'MEMBER_MANUAL_CONFIRMATION_REQUIRED']
   if (manifest.candidateExecutionStatus === 'EXECUTION_BLOCKED_PENDING_PRECONDITION') return ['VALID_PRECONDITION_BLOCKER', 'BLOCKED']
   if (manifest.candidateOutcome === 'MEETS_EXPECTED_RESULT') return ['RETAINED_TRUTHFUL_POSITIVE', 'CANDIDATE_EVIDENCE_RETAINED']
   throw new Error(`Unclassified manifest: ${id}`)
@@ -106,7 +112,7 @@ function validateFinalApprovalReceipt (manifest, manifestPath, requireContract) 
   const receiptEvidence = evidence.find(item => item.file === '05-live-readback-receipt.json')
   receiptContract('evidence.05-live-readback-receipt.json', Boolean(receiptEvidence), true)
   if (receiptEvidence) {
-    const actualReceiptHash = crypto.createHash('sha256').update(fs.readFileSync(receiptPath)).digest('hex').toUpperCase()
+    const actualReceiptHash = hashEvidence(receiptPath)
     receiptContract('evidence.05-live-readback-receipt.json.sha256', String(receiptEvidence.sha256 || '').toUpperCase(), actualReceiptHash)
   }
   const screenshotReferences = Array.isArray(receipt.screenshotReferences) ? receipt.screenshotReferences : []
@@ -117,9 +123,47 @@ function validateFinalApprovalReceipt (manifest, manifestPath, requireContract) 
   }
 }
 
+function validateUx003FinalApproval (manifest, manifestPath) {
+  const requireContract = (field, condition) => {
+    if (!condition) throw new Error(`Final approval contract mismatch: ${manifest.caseId}: ${field}`)
+  }
+  const resolvedManifestPath = manifestPath ? path.resolve(manifestPath) : path.join(evidenceRoot, manifest.caseId, 'manifest.json')
+  const attestationPath = path.join(path.dirname(resolvedManifestPath), '02-manual-physical-keyboard-attestation.json')
+  requireContract('attestation.exists', fs.existsSync(attestationPath))
+  let attestation
+  try {
+    attestation = JSON.parse(fs.readFileSync(attestationPath, 'utf8'))
+  } catch {
+    throw new Error(`Final approval receipt mismatch: ${manifest.caseId}: JSON`)
+  }
+  const evidence = Array.isArray(manifest.evidence) ? manifest.evidence : []
+  const attestationEvidence = evidence.find(item => item.file === '02-manual-physical-keyboard-attestation.json')
+  requireContract('evidence.attestation', Boolean(attestationEvidence))
+  if (attestationEvidence) requireContract('evidence.attestation.sha256', String(attestationEvidence.sha256 || '').toUpperCase() === hashEvidence(attestationPath))
+  requireContract('attestation.fields', JSON.stringify(Object.keys(attestation).sort()) === JSON.stringify(['caseId', 'date', 'deployedRuntimeTruth', 'evidencePreparer', 'evidenceReference', 'limitation', 'manualVerifier', 'outcomes', 'result', 'schemaVersion', 'sourceHead'].sort()))
+  requireContract('attestation.schema/case', attestation.schemaVersion === '1.0' && attestation.caseId === manifest.caseId)
+  requireContract('attestation.verifier/preparer/date', attestation.manualVerifier === 'DonHV' && manifest.manualVerifier === 'DonHV' && attestation.evidencePreparer === 'NhanT (DonHV support)' && manifest.evidencePreparer === attestation.evidencePreparer && attestation.date === '2026-09-12')
+  const outcomes = attestation.outcomes || {}
+  const outcomeFields = ['visibleFocus', 'tabReachesFindSimilarBugsAndCoreControls', 'enterOpensSimilarBugs', 'arrowKeysNavigateCompositeList', 'tabReachesDialogActions', 'escapeClosesDialog', 'focusReturnsToTrigger']
+  requireContract('attestation.outcomes', Object.keys(outcomes).length === outcomeFields.length && outcomeFields.every(field => outcomes[field] === true))
+  requireContract('attestation.result/sourceHead', attestation.result === 'PASS' && attestation.sourceHead === '4ab336388fb744b82abdfe6ef8f7c334b4075428' && manifest.currentSourceHead === attestation.sourceHead)
+  requireContract('attestation.deployedRuntimeTruth', attestation.deployedRuntimeTruth?.deployedRuntimeSha === manifest.deployedRuntimeSha && attestation.deployedRuntimeTruth?.deployedRuntimeSha === '67b1bf86169e9696c9365ef4846b99ffae30d4e2' && attestation.deployedRuntimeTruth?.source === 'existing UAT-UX-003 baseline manifest; no new deployment claimed')
+  requireContract('attestation.evidenceReference', attestation.evidenceReference?.file === '01-focus-return-after-keyboard-dialog.png' && attestation.evidenceReference?.sha256 === '4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9')
+  const e01Path = path.join(path.dirname(resolvedManifestPath), attestation.evidenceReference?.file || '')
+  requireContract('attestation.evidenceReference.file/hash', fs.existsSync(e01Path) && hashEvidence(e01Path) === attestation.evidenceReference.sha256)
+  requireContract('attestation.limitation', attestation.limitation === 'The physical keyboard sequence is human-attested; no browser automation, simulated key events, device, timestamp, or raw keylog is claimed.')
+  const historical = manifest.historicalAutomationLimitation
+  requireContract('historicalAutomationLimitation', historical?.preserved === true && historical.executor === 'NhanT' && historical.candidateExecutionStatus === 'EXECUTED_PENDING_DONHV_REVIEW' && historical.candidateOutcome === 'DOES_NOT_MEET_EXPECTED_RESULT' && historical.evidenceReference?.id === 'UAT-UX-003-E01' && historical.evidenceReference.file === '01-focus-return-after-keyboard-dialog.png' && historical.evidenceReference.sha256 === attestation.evidenceReference.sha256)
+  requireContract('historicalAutomationLimitation.failure', typeof historical.actualResult === 'string' && /Tab.*did not advance/i.test(historical.actualResult) && /Browser.*physical keyboard/i.test(historical.limitation || ''))
+  requireContract('manifest.currentPass', manifest.candidateExecutionStatus === 'PASS' && manifest.candidateOutcome === 'MEETS_EXPECTED_RESULT' && manifest.executor === 'DonHV' && typeof manifest.reviewBoundary === 'string' && !/\b(?:pending|candidate|not final|unapproved|await(?:ing)?|needs?)\b/i.test(manifest.reviewBoundary))
+  const expectedReview = { jiraCommentId: reviewCommentId, reviewDate: '2026-09-12', category: 'CURRENT_RUNTIME_POSITIVE', currentStatus: 'FINAL_PASS_APPROVED', preservesHistoricalCandidateTruth: true, finalPassApproved: true }
+  requireContract('donhvLatestReview', JSON.stringify(manifest.donhvLatestReview) === JSON.stringify(expectedReview))
+  return expectedReview
+}
+
 function expectedReviewFor (manifest, manifestPath) {
   const [category, currentStatus] = classify(manifest)
-  if (finalApprovedCaseIds.has(manifest.caseId)) {
+  if (manifest.caseId === 'UAT-COM-003') {
     const requireContract = (field, condition) => {
       if (!condition) throw new Error(`Final approval contract mismatch: ${manifest.caseId}: ${field}`)
     }
@@ -178,6 +222,8 @@ function expectedReviewFor (manifest, manifestPath) {
     return expectedReview
   }
 
+  if (manifest.caseId === 'UAT-UX-003') return validateUx003FinalApproval(manifest, manifestPath)
+
   if (manifest.donhvLatestReview?.currentStatus === 'FINAL_PASS_APPROVED' ||
     manifest.donhvLatestReview?.finalPassApproved === true) {
     throw new Error(`Final approval is not allowlisted: ${manifest.caseId}`)
@@ -224,7 +270,7 @@ for (const manifestPath of manifests) {
   for (const item of evidence) {
     const evidencePath = path.join(path.dirname(manifestPath), item.file || '')
     if (!item.file || !fs.existsSync(evidencePath)) throw new Error(`Missing evidence for ${manifest.caseId}: ${item.file || '<empty>'}`)
-    const actualHash = crypto.createHash('sha256').update(fs.readFileSync(evidencePath)).digest('hex').toUpperCase()
+    const actualHash = hashEvidence(evidencePath)
     const declaredHash = String(item.sha256 || '').toUpperCase()
     if (actualHash !== declaredHash) throw new Error(`Evidence SHA-256 mismatch: ${manifest.caseId}/${item.file}`)
     evidenceHashes.add(actualHash)
@@ -248,9 +294,9 @@ const expected = {
   STALE_PREREQUISITE_RERUN_REQUIRED: 3,
   CONFIRMED_DEFECT_RECHECK: 1,
   CATALOG_SEMANTIC_CORRECTION: 5,
-  PHYSICAL_KEYBOARD_LIMITATION: 1,
+  PHYSICAL_KEYBOARD_LIMITATION: 0,
   AI_DIAGNOSTIC_RERUN: 2,
-  CURRENT_RUNTIME_POSITIVE: 4,
+  CURRENT_RUNTIME_POSITIVE: 5,
   CURRENT_RUNTIME_NEGATIVE: 0,
   FIXTURE_PROVENANCE_INCONSISTENT: 1,
   CURRENT_RUNTIME_PARTIAL_RECHECK: 1
@@ -261,15 +307,15 @@ for (const [category, expectedCount] of Object.entries(expected)) {
 }
 
 const expectedDisposition = {
-  MEETS_EXPECTED_RESULT: 23,
-  DOES_NOT_MEET_EXPECTED_RESULT: 11,
+  MEETS_EXPECTED_RESULT: 24,
+  DOES_NOT_MEET_EXPECTED_RESULT: 10,
   BLOCKED: 23
 }
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
   if (candidateDisposition[status] !== expectedCount) throw new Error(`${status}: expected ${expectedCount}, got ${candidateDisposition[status] || 0}`)
 }
-if (evidenceReferences !== 78) throw new Error(`Evidence references: expected 78, got ${evidenceReferences}`)
-if (evidenceHashes.size !== 65) throw new Error(`Unique evidence hashes: expected 65, got ${evidenceHashes.size}`)
+if (evidenceReferences !== 79) throw new Error(`Evidence references: expected 79, got ${evidenceReferences}`)
+if (evidenceHashes.size !== 66) throw new Error(`Unique evidence hashes: expected 66, got ${evidenceHashes.size}`)
 
 const attachmentManifest = JSON.parse(fs.readFileSync(path.join(evidenceRoot, 'UAT-ATT-001', 'manifest.json'), 'utf8'))
 const attachmentText = JSON.stringify(attachmentManifest)
@@ -287,12 +333,17 @@ const summary = {
   currentDisposition: expectedDisposition,
   counts,
   runtimeRerunPerformed: true,
-  runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.',
+  runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.',
   finalApprovals: {
     'UAT-COM-003': {
       status: 'FINAL_PASS_APPROVED',
       historicalFailurePreserved: true,
       receipt: 'uat/UAT-COM-003/05-live-readback-receipt.json'
+    },
+    'UAT-UX-003': {
+      status: 'FINAL_PASS_APPROVED',
+      historicalFailurePreserved: true,
+      receipt: 'uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json'
     }
   },
   workbookAndDriveChanged: false
@@ -301,4 +352,4 @@ const summary = {
 if (!checkOnly) fs.writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8')
 console.log(JSON.stringify({ ...summary, mode: checkOnly ? 'CHECK_ONLY' : 'WRITE' }))
 
-module.exports = { classify, expectedReviewFor, finalApprovedCaseIds }
+module.exports = { classify, expectedReviewFor, finalApprovedCaseIds, validateUx003FinalApproval, hashEvidence }

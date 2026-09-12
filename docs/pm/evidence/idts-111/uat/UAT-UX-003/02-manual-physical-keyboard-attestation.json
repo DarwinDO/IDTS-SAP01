@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-UX-003",
+  "manualVerifier": "DonHV",
+  "evidencePreparer": "NhanT (DonHV support)",
+  "date": "2026-09-12",
+  "outcomes": {
+    "visibleFocus": true,
+    "tabReachesFindSimilarBugsAndCoreControls": true,
+    "enterOpensSimilarBugs": true,
+    "arrowKeysNavigateCompositeList": true,
+    "tabReachesDialogActions": true,
+    "escapeClosesDialog": true,
+    "focusReturnsToTrigger": true
+  },
+  "result": "PASS",
+  "sourceHead": "4ab336388fb744b82abdfe6ef8f7c334b4075428",
+  "deployedRuntimeTruth": {
+    "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+    "source": "existing UAT-UX-003 baseline manifest; no new deployment claimed"
+  },
+  "evidenceReference": {
+    "file": "01-focus-return-after-keyboard-dialog.png",
+    "sha256": "4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9"
+  },
+  "limitation": "The physical keyboard sequence is human-attested; no browser automation, simulated key events, device, timestamp, or raw keylog is claimed."
+}
