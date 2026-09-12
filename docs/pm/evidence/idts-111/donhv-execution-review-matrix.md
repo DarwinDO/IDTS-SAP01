@@ -8,7 +8,7 @@
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
 - Final-approved `UAT-COM-003` readback remains bound to PR #405 source head `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34` and approved source/deployed merge `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`; `UAT-UX-003` is additionally final-approved from DonHV's 2026-09-12 physical-keyboard attestation at source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
-- Evidence integrity: 57 manifests, 78 image references plus three structured JSON receipts (81 evidence references, 68 unique hashes), with zero missing files or hash mismatches in the fresh curation check. The final exact-head gate is still required after commit.
+- Evidence integrity after DonHV's deadline-scope reduction: 44 manifests, 76 evidence references and 66 unique hashes, with zero missing files or hash mismatches in the fresh curation check. The forward planning catalog contains 77 cases. The final exact-head gate is still required after commit.
 
 `ACCEPTED_EVIDENCE` means that the submitted evidence truthfully supports the observed result. It does not mean that a blocked case passed, that a product defect is fixed, or that the final UAT workbook is approved.
 
@@ -23,36 +23,23 @@
 | UAT-AI-007 | BLOCKED | ACCEPTED_BLOCKER | Requires a controlled persisted comment after IDTS-116 is resolved. |
 | UAT-AI-008 | DOES_NOT_MEET | CATALOG_MISMATCH | Handoff shows stored user while Object Page shows business role/queue label; revise expectation to compare like-for-like semantics. |
 | UAT-AI-009 | DOES_NOT_MEET | ENVIRONMENT_SESSION_BLOCKER | Protected AssignableDevelopers read returned 401 while the page remained open; rerun with Network evidence under IDTS-114/115. |
-| UAT-AI-010 | DOES_NOT_MEET | CATALOG_MISMATCH | Reopening generates a new suggestion ID; prove persistence against the original immutable ID rather than expecting a new dialog to stay Rejected. |
-| UAT-AI-011 | BLOCKED | ACCEPTED_BLOCKER | Requires a controlled rate-limit/cooldown fixture; do not create load by repeated calls. |
-| UAT-AI-012 | BLOCKED | ACCEPTED_BLOCKER | Requires a dedicated sanitized prompt-injection Bug. |
-| UAT-AI-014 | DOES_NOT_MEET | CATALOG_MISMATCH | Same new-suggestion-ID issue as UAT-AI-010; rerun with audit readback. |
-| UAT-AI-015 | DOES_NOT_MEET | CATALOG_MISMATCH | Same new-suggestion-ID issue as UAT-AI-010; rerun with audit readback. |
-| UAT-AI-016 | BLOCKED | ACCEPTED_BLOCKER | Requires a stable accepted suggestion and controlled stale-source mutation. |
+| UAT-AI-010 | DOES_NOT_MEET | CATALOG_MISMATCH | Consolidated Reject and Ignore variants both returned to Pending after reload. Prove persistence against each original immutable suggestion ID rather than expecting a newly generated dialog to retain the old decision. |
 | UAT-ATT-001 | DOES_NOT_MEET | BLOCKED — fixture provenance inconsistent | Preserve NhanT's observed failure and all evidence unchanged. The manifest records 44 bytes while retained evidence descriptions refer to 54-byte and 47-byte fixtures, so DonHV cannot accept this as one traceable exact fixture until NhanT reconciles identity and size. |
 | UAT-ATT-002 | BLOCKED | ACCEPTED_BLOCKER | Depends on successful controlled upload. |
 | UAT-ATT-003 | BLOCKED | ACCEPTED_BLOCKER | Depends on a DonHV-approved controlled attachment; do not delete unrelated evidence. |
-| UAT-ATT-004 | BLOCKED | TEST_HARNESS_LIMITATION | Browser chooser blocked the file before application validation; rerun using native/manual chooser. |
-| UAT-ATT-005 | BLOCKED | INSUFFICIENT_EVIDENCE | Current run cannot distinguish client size filtering from the broken upload path. |
 | UAT-ATT-006 | MEETS | ACCEPTED_EVIDENCE | Safe failure and no orphan metadata were demonstrated. |
-| UAT-AUD-003 | BLOCKED | ACCEPTED_BLOCKER | Requires a controlled high-history fixture. |
 | UAT-AUTH-001 | MEETS | ACCEPTED_EVIDENCE | Mapped Tester XSUAA session and protected app access demonstrated. |
-| UAT-AUTH-002 | BLOCKED | MEMBER_IDENTITY_BLOCKER | Requires a member-owned unmapped SAP identity. |
-| UAT-AUTH-003 | BLOCKED | MEMBER_IDENTITY_BLOCKER | Requires a controlled mismatched-role identity. |
-| UAT-AUTH-004 | BLOCKED | ENVIRONMENT_BLOCKER | Requires controlled XSUAA/session expiry; Smart Assign 401 is not expiry proof. |
 | UAT-AUTH-005 | MEETS | ACCEPTED_EVIDENCE | Current rerun shows logout ended the session and reopening the protected route redirected to SAP Sign In. The earlier blank-route result remains historical evidence under IDTS-117. |
 | UAT-BUG-001 | MEETS | ACCEPTED_EVIDENCE | Create without assignee and Pending Assignment persistence demonstrated. |
 | UAT-BUG-002 | MEETS | ACCEPTED_EVIDENCE | Create with assignee and reload persistence demonstrated. |
 | UAT-BUG-003 | MEETS | ACCEPTED_EVIDENCE | Required Title validation demonstrated. |
 | UAT-BUG-004 | MEETS | ACCEPTED_EVIDENCE | Required Description validation demonstrated. |
-| UAT-BUG-005 | BLOCKED | ACCEPTED_BLOCKER | Requires an approved direct-request fixture for incompatible classification. |
 | UAT-BUG-006 | MEETS | ACCEPTED_EVIDENCE | Reproduction fields persisted after Create/reload. |
 | UAT-BUG-007 | MEETS | ACCEPTED_EVIDENCE | Discarded draft did not create an active Bug. |
 | UAT-BUG-008 | DOES_NOT_MEET | CONFIRMED_PRODUCT_DEFECT | One draft save can hit draft-save and generic active UPDATE audit paths, matching the duplicate Edit evidence; tracked by IDTS-119. |
 | UAT-BUG-009 | MEETS | ACCEPTED_EVIDENCE | Back/forward navigation preserved isolated draft state. |
 | UAT-CLS-001 | MEETS | ACCEPTED_EVIDENCE | Compatible active value-help entries demonstrated. |
 | UAT-CLS-002 | MEETS | ACCEPTED_EVIDENCE | Smart Assign selection and reload persistence demonstrated. |
-| UAT-CLS-003 | BLOCKED | ACCEPTED_BLOCKER | Requires an inactive-code/direct-request fixture. |
 | UAT-CLS-004 | MEETS | ACCEPTED_EVIDENCE | Description-only edit did not mutate classification/ownership. |
 | UAT-COM-001 | MEETS | ACCEPTED_EVIDENCE | Current rerun shows one controlled Tester comment persisted after reload. The earlier safe posting failure is retained as historical IDTS-116 evidence. |
 | UAT-COM-002 | MEETS | ACCEPTED_EVIDENCE | Empty-comment validation demonstrated. |
@@ -76,14 +63,14 @@
 
 ## Review totals
 
-- Current candidate partition is **24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED** across 57 manifests. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved under the parent-authorized decision; the other 55 cases remain candidate evidence, corrections, or blockers and are not final-approved.
+- Current candidate partition is **24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED** across 44 retained manifests. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved; the other 42 cases remain candidate evidence, corrections, or blockers and are not final-approved.
 - Current reviewer disposition retains truthful evidence but separately blocks ATT-001 because the preserved fixture sizes are inconsistent.
 - Only `UAT-AI-007`, `UAT-ATT-002` and `UAT-ATT-003` retain stale prerequisites after the current-runtime reruns.
 - AI-005/009 still need immutable suggestion ID plus sanitized Network/audit evidence; UX-002 remains PARTIAL because Smart Assignment returned one candidate without retry and Handoff matching transport telemetry was unavailable. UX-003's physical sequence is human-attested; its historical Browser automation limitation remains preserved.
 
 ## Gate decision
 
-The IDTS-111 evidence package is internally consistent and may be retained as truthful candidate evidence. Exactly `UAT-COM-003` and `UAT-UX-003` are final PASS approved under the parent-authorized decision; the remaining 55 cases must not be interpreted as final UAT approval. Merge remains gated by NhanT personally reading and acknowledging briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`, by a fresh exact-head QA gate, and by the PR body preserving the candidate/blocker truth above. The UAT workbook and Google Drive artifact remain unchanged.
+The retained IDTS-111 evidence package is internally consistent and may be kept as truthful candidate evidence. Exactly `UAT-COM-003` and `UAT-UX-003` are final PASS approved; the remaining 42 cases must not be interpreted as final UAT approval. Merge remains gated by a fresh exact-head QA gate and by the PR body preserving the candidate/blocker truth above. The UAT workbook and Google Drive artifact remain unchanged.
 
 ## Current rerun state
 

@@ -11,10 +11,14 @@
   "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "testRecord": {
     "bugNumber": "BUG-0026",
-    "decision": "Reject"
+    "decision": "Reject",
+    "consolidatedDecisions": [
+      "Reject",
+      "Ignore"
+    ]
   },
-  "expectedResult": "Review state, reviewer, and timestamp persist after reload; the same decision cannot be applied twice.",
-  "actualResult": "The dialog displayed Rejected and disabled all decision buttons immediately. After browser refresh and reopening, it displayed Pending review again and re-enabled Accept, Reject, and Ignore, so the decision was not durably presented and could be applied again.",
+  "expectedResult": "REJECTED and IGNORED each persist once with reviewer and timestamp; neither decision mutates Bug business state or can be applied twice.",
+  "actualResult": "Both consolidated variants disabled decisions immediately, but each returned to Pending review after browser refresh. Reject and Ignore therefore did not remain durably presented; business fields and workflow remained unchanged.",
   "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
   "reviewBoundary": "DonHV must review whether a new suggestion was incorrectly regenerated or the prior review state was lost before approving FAIL/Jira disposition.",
   "evidence": [
@@ -29,6 +33,43 @@
       "file": "02-decision-lost-after-reload.png",
       "description": "Pending review returned after reload with decisions enabled.",
       "sha256": "183579C90C6DBC0475446DE5D7BEB22D3682F08282E38FE9BF2811EB5783127D"
+    },
+    {
+      "id": "UAT-AI-010-E03",
+      "file": "ignore-01-pending-before-decision.png",
+      "description": "Ignore variant was pending before the decision.",
+      "sha256": "CBDEDDD2A0E403C0445CA6DD2866743AE5396FFBF6E305BE0C9ED8009554F363"
+    },
+    {
+      "id": "UAT-AI-010-E04",
+      "file": "ignore-02-immediate.png",
+      "description": "Ignored state appeared immediately with decisions disabled.",
+      "sha256": "28801E023B550E792CA0FBA053BD0C15ACD8B299B74E38A5B1D3F456BFE31475"
+    },
+    {
+      "id": "UAT-AI-010-E05",
+      "file": "ignore-03-pending-again-after-reload.png",
+      "description": "Ignore variant returned to Pending review after reload.",
+      "sha256": "E645C6E3EB05E70695EE4538F88308BD62993F00FB52448008A5D4FD47E8AD76"
+    }
+  ],
+  "consolidatedDecisionVariants": [
+    {
+      "decision": "Reject",
+      "formerCaseId": "UAT-AI-014",
+      "evidenceIds": [
+        "UAT-AI-010-E01",
+        "UAT-AI-010-E02"
+      ]
+    },
+    {
+      "decision": "Ignore",
+      "formerCaseId": "UAT-AI-015",
+      "evidenceIds": [
+        "UAT-AI-010-E03",
+        "UAT-AI-010-E04",
+        "UAT-AI-010-E05"
+      ]
     }
   ],
   "privacyReview": {
@@ -37,7 +78,8 @@
   },
   "issueClassification": "product defect candidate - AI review decision not durable",
   "limitations": [
-    "The UI does not expose an immutable suggestion ID, so DonHV should confirm whether reopening regenerated a new suggestion versus lost the prior suggestion state; either behavior violates this case's same-decision persistence expectation."
+    "The UI does not expose an immutable suggestion ID, so DonHV should confirm whether reopening regenerated a new suggestion versus lost the prior suggestion state; either behavior violates this case's same-decision persistence expectation.",
+    "Former UAT-AI-014 and UAT-AI-015 are consolidated here as Reject and Ignore variants; their standalone catalog entries were removed by DonHV's deadline-scope decision."
   ],
   "donhvLatestReview": {
     "jiraCommentId": "10962",

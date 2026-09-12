@@ -292,3 +292,11 @@ Khi retry, reconcile hoac reconcile lease het han rotate `UserAccessOperations.c
 - History: retain prior Knowledge Gate evidence and references as historical records. Do not rewrite old PRs, Jira comments, scores or learning evidence; they no longer authorize or block current work.
 - Quyết định: bỏ Knowledge Gate bắt buộc đầu task, yêu cầu điểm/PASS, khai báo PR body, enforcement QA Depth và chặn Jira/merge. Giữ ownership map, learning note, Debug Lab, mentor mode, teach-back, quiz và selector deterministic như công cụ học tùy chọn, chỉ dùng khi user yêu cầu rõ.
 - Boundary: SAP490 Mentor-Review Briefing Gate riêng vẫn bắt buộc và không đổi vì đây là xác nhận hồ sơ nộp, không phải đánh giá học code. Các gate kỹ thuật, security, authorization, persistence/reload, UI/UX, review và release hiện có không đổi.
+
+### DEC-071 — Reduce the forward IDTS-111 UAT catalog for the submission deadline (2026-09-12)
+
+- Decision: remove 13 explicitly approved standalone cases from the forward planning catalog. Eleven high-cost controlled-environment edge cases are removed, while standalone Reject and Ignore cases are consolidated as decision variants under retained `UAT-AI-010`.
+- Resulting scope: the official forward catalog changes from 90 to 77 `PREPARED` cases. NhanT's retained evidence package changes from 57 to 44 manifests with a truthful partition of 24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED and 76 evidence references / 66 unique hashes.
+- Truth boundary: removed cases are not PASS, and retained BLOCKED/PARTIAL cases are not promoted. Exactly `UAT-COM-003` and `UAT-UX-003` remain final-approved. Historical Git/PR/Jira/workbook evidence is not rewritten.
+- Safety boundary: this is repository catalog/evidence curation only. No provider call, live test, BTP/HANA/user/role/data mutation, deployment, Jira transition, workbook generation or Drive synchronization is authorized by this decision.
+- Quyết định: xóa 13 case standalone đã được duyệt khỏi forward catalog; gộp Reject/Ignore vào `UAT-AI-010`. Catalog còn 77 case, evidence package NhanT còn 44 manifest với partition trung thực 24/8/12. Không biến case bị xóa hoặc BLOCKED/PARTIAL thành PASS và không thay đổi runtime/live data/workbook/Drive.

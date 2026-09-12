@@ -1,27 +1,25 @@
 {
   "jiraCommentId": "10962",
   "reviewDate": "2026-08-04",
-  "curatedAtBaselineHead": "5efa1dcae0a725a3a328eef1ddff3f15a2768351",
-  "manifests": 57,
-  "evidenceReferences": 81,
-  "uniqueEvidenceHashes": 68,
+  "curatedAtBaselineHead": "ae64312136f1f741e8a4aa1a940ce7850d5967a7",
+  "manifests": 44,
+  "evidenceReferences": 76,
+  "uniqueEvidenceHashes": 66,
   "currentDisposition": {
     "MEETS_EXPECTED_RESULT": 24,
-    "DOES_NOT_MEET_EXPECTED_RESULT": 10,
-    "BLOCKED": 23
+    "DOES_NOT_MEET_EXPECTED_RESULT": 8,
+    "BLOCKED": 12
   },
   "counts": {
     "RETAINED_TRUTHFUL_POSITIVE": 19,
-    "VALID_PRECONDITION_BLOCKER": 20,
+    "VALID_PRECONDITION_BLOCKER": 9,
     "AI_DIAGNOSTIC_RERUN": 2,
     "STALE_PREREQUISITE_RERUN_REQUIRED": 3,
-    "CATALOG_SEMANTIC_CORRECTION": 5,
+    "CATALOG_SEMANTIC_CORRECTION": 3,
     "FIXTURE_PROVENANCE_INCONSISTENT": 1,
     "CURRENT_RUNTIME_POSITIVE": 5,
     "CONFIRMED_DEFECT_RECHECK": 1,
-    "CURRENT_RUNTIME_NEGATIVE": 0,
-    "CURRENT_RUNTIME_PARTIAL_RECHECK": 1,
-    "PHYSICAL_KEYBOARD_LIMITATION": 0
+    "CURRENT_RUNTIME_PARTIAL_RECHECK": 1
   },
   "runtimeRerunPerformed": true,
   "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 Smart Assignment returned one candidate with no retry and Handoff matching transport telemetry was unavailable. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.",
@@ -31,7 +29,8 @@
     "result": "PARTIAL",
     "localDeterministicRegression": {
       "script": "scripts/qa/test-idts127-ux002-responsive-browser.js",
-      "commit": "88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6",
+      "commit": "27675cf6f7f051e3dea15109f43162f08b490005",
+      "mergedVia": "ae64312136f1f741e8a4aa1a940ce7850d5967a7",
       "result": "PASS",
       "scope": "Local CAP plus temporary SQLite fixtures; not live provider/BTP acceptance."
     },

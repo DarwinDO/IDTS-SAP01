@@ -31,7 +31,7 @@ const currentRuntimePositive = new Set(['UAT-AUTH-005', 'UAT-COM-001', 'UAT-COM-
 const fixtureProvenanceBlocked = new Set(['UAT-ATT-001'])
 const currentRuntimeDefect = new Set(['UAT-BUG-008'])
 const currentRuntimePartial = new Set(['UAT-UX-002'])
-const semanticCorrection = new Set(['UAT-AI-008', 'UAT-AI-010', 'UAT-AI-014', 'UAT-AI-015', 'UAT-LIFE-014'])
+const semanticCorrection = new Set(['UAT-AI-008', 'UAT-AI-010', 'UAT-LIFE-014'])
 const aiDiagnostic = new Set(['UAT-AI-005', 'UAT-AI-009'])
 
 function hashEvidence (filePath) {
@@ -313,7 +313,7 @@ const caseDirectories = fs.readdirSync(evidenceRoot, { withFileTypes: true })
   .filter(entry => entry.isDirectory())
 const manifests = caseDirectories.map(entry => path.join(evidenceRoot, entry.name, 'manifest.json'))
 
-if (manifests.length !== 57) throw new Error(`Manifest count: expected 57, got ${manifests.length}`)
+if (manifests.length !== 44) throw new Error(`Manifest count: expected 44, got ${manifests.length}`)
 for (const manifestPath of manifests) {
   if (!fs.existsSync(manifestPath)) throw new Error(`Missing manifest: ${path.relative(process.cwd(), manifestPath)}`)
 }
@@ -360,10 +360,10 @@ for (const manifestPath of manifests) {
 
 const expected = {
   RETAINED_TRUTHFUL_POSITIVE: 19,
-  VALID_PRECONDITION_BLOCKER: 20,
+  VALID_PRECONDITION_BLOCKER: 9,
   STALE_PREREQUISITE_RERUN_REQUIRED: 3,
   CONFIRMED_DEFECT_RECHECK: 1,
-  CATALOG_SEMANTIC_CORRECTION: 5,
+  CATALOG_SEMANTIC_CORRECTION: 3,
   PHYSICAL_KEYBOARD_LIMITATION: 0,
   AI_DIAGNOSTIC_RERUN: 2,
   CURRENT_RUNTIME_POSITIVE: 5,
@@ -378,14 +378,14 @@ for (const [category, expectedCount] of Object.entries(expected)) {
 
 const expectedDisposition = {
   MEETS_EXPECTED_RESULT: 24,
-  DOES_NOT_MEET_EXPECTED_RESULT: 10,
-  BLOCKED: 23
+  DOES_NOT_MEET_EXPECTED_RESULT: 8,
+  BLOCKED: 12
 }
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
   if (candidateDisposition[status] !== expectedCount) throw new Error(`${status}: expected ${expectedCount}, got ${candidateDisposition[status] || 0}`)
 }
-if (evidenceReferences !== 81) throw new Error(`Evidence references: expected 81, got ${evidenceReferences}`)
-if (evidenceHashes.size !== 68) throw new Error(`Unique evidence hashes: expected 68, got ${evidenceHashes.size}`)
+if (evidenceReferences !== 76) throw new Error(`Evidence references: expected 76, got ${evidenceReferences}`)
+if (evidenceHashes.size !== 66) throw new Error(`Unique evidence hashes: expected 66, got ${evidenceHashes.size}`)
 
 const attachmentManifest = JSON.parse(fs.readFileSync(path.join(evidenceRoot, 'UAT-ATT-001', 'manifest.json'), 'utf8'))
 const attachmentText = JSON.stringify(attachmentManifest)
@@ -404,6 +404,25 @@ const summary = {
   counts,
   runtimeRerunPerformed: true,
   runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 Smart Assignment returned one candidate with no retry and Handoff matching transport telemetry was unavailable. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.',
+  latestEvidenceUpdate: {
+    date: '2026-09-12',
+    caseId: 'UAT-UX-002',
+    result: 'PARTIAL',
+    localDeterministicRegression: {
+      script: 'scripts/qa/test-idts127-ux002-responsive-browser.js',
+      commit: '27675cf6f7f051e3dea15109f43162f08b490005',
+      mergedVia: 'ae64312136f1f741e8a4aa1a940ce7850d5967a7',
+      result: 'PASS',
+      scope: 'Local CAP plus temporary SQLite fixtures; not live provider/BTP acceptance.'
+    },
+    currentEvidence: 'One approved Classification JPG plus one sanitized receipt; three historical PNGs remain integrity-tracked and labelled historical.',
+    limitations: [
+      'Smart Assignment had one candidate, so the two-candidate check remains blocked and no retry was made.',
+      'Handoff UI settled but matching transport telemetry was unavailable.',
+      'AiSuggestions count delta was unavailable.'
+    ],
+    finalPassApproved: false
+  },
   finalApprovals: {
     'UAT-COM-003': {
       status: 'FINAL_PASS_APPROVED',

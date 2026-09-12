@@ -6,19 +6,19 @@ Role: Tester
 Execution baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`
 Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 
-## Current DonHV review partition (Jira comment 10962)
+## Current DonHV review partition (supersedes Jira comment 10962 counts)
 
-- Assigned to NhanT: 57 cases.
-- Candidate packages prepared: 57/57; no assigned case remains unattempted or unpackaged.
-- Candidate partition: 24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved under the parent-authorized decision; the other 55 cases remain candidate evidence, corrections, or blockers and are not final-approved.
+- Assigned to NhanT after DonHV's deadline-scope reduction: 44 retained cases.
+- Candidate packages retained: 44/44.
+- Candidate partition: 24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved; the other 42 cases remain candidate evidence, corrections, or blockers and are not final-approved.
 - Only three stale prerequisites remain: `UAT-AI-007`, `UAT-ATT-002`, `UAT-ATT-003`.
 - Historical defect candidates were rechecked: `UAT-AUTH-005` and `UAT-COM-003` are current candidate positives, with `UAT-COM-003` final-approved; `UAT-BUG-008` remains a current candidate negative, and `UAT-UX-002` is a current PARTIAL recheck with local responsive PASS, one-candidate Smart Assignment coverage, and unavailable Handoff matching transport telemetry.
-- 5 catalog/semantic corrections are preserved separately from product defects.
+- 3 catalog/semantic corrections are preserved separately from product defects. Reject and Ignore evidence is consolidated under `UAT-AI-010`.
 - 1 physical-keyboard closure is now DonHV-human-attested; the historical Browser automation limitation remains preserved.
 - 2 AI diagnostic reruns require immutable suggestion ID plus sanitized Network/audit and no-mutation proof.
 - `UAT-COM-001` is a current candidate positive. NhanT's ATT-001 negative remains historically intact, while DonHV blocks acceptance because its 44/54/47-byte fixture provenance is inconsistent.
-- Retained evidence: 78 image references plus three structured JSON receipts (81 evidence references, 68 unique SHA-256 values); every manifest reference and hash must pass the fresh integrity gate.
-- Reviewer-approved final PASS: exactly `UAT-COM-003` and `UAT-UX-003`. No other case is final-approved, and the approved catalog remains unchanged at 90 `PREPARED`.
+- Retained evidence: 76 evidence references and 66 unique SHA-256 values; every manifest reference and hash must pass the fresh integrity gate.
+- Reviewer-approved final PASS: exactly `UAT-COM-003` and `UAT-UX-003`. No other case is final-approved; the forward planning catalog contains 77 `PREPARED` cases.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
 ## Historical candidate DOES NOT MEET cases (2026-08-03 runtime)
@@ -63,18 +63,18 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 
 ## Verification
 
-- 57 manifests parsed successfully.
-- 81 evidence references exist; the fresh integrity gate verifies existence and recorded SHA-256, including both final-approval receipts and the new sanitized UAT-UX-002 receipt.
+- 44 manifests parsed successfully.
+- 76 evidence references exist; the fresh integrity gate verifies existence and recorded SHA-256, including both final-approval receipts and the sanitized UAT-UX-002 receipt.
 - `npm.cmd run qa:secret-scan` -> PASS.
 - `git diff --check` -> PASS.
-- Catalog integrity -> 90/90 `PREPARED`; catalog file has no diff.
+- Catalog integrity -> 77/77 `PREPARED`; display numbers are continuous from 1 through 77.
 - OfficeCLI preflight `1.0.143` PASS. No workbook validation or Drive synchronization was needed because this PR changes evidence/metadata only.
 
 ## DonHV review actions
 
-1. Review the remaining 10 DOES_NOT_MEET candidates and disposition them in Jira/catalog; exactly `UAT-COM-003` and `UAT-UX-003` are final-approved PASS.
+1. Review the remaining 8 DOES_NOT_MEET candidates; exactly `UAT-COM-003` and `UAT-UX-003` are final-approved PASS.
 2. Decide whether `UAT-ATT-006` is sufficient with inferred storage failure or requires a controlled S3 outage rerun.
-3. Provision the identities, roles, state fixtures, service fixes, and direct-request controls listed in the 25 blocked manifests, then assign reruns where required.
+3. Provision only the identities, roles and state fixtures required by the 12 retained blocked manifests, then assign reruns where required.
 4. Only after reviewer decisions, update the approved catalog and generate/synchronize the final English `UAT_EN_PREPARED` workbook.
 
 ## Targeted rerun closure (2026-08-03)
