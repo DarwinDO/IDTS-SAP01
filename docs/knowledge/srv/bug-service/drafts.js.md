@@ -16,7 +16,7 @@ A Fiori draft is a temporary database version of a Bug. `NEW` creates it, each e
 
 - `service.js` NEW handler → `prepareDraftNew(req, actor)` → writes authenticated reporter into draft payload.
 - `service.js` PATCH handler → `prepareDraftPatch(req, entities)` → reads current draft, merges partial input, validates code lists, derives bridge ID → CAP persists patch.
-- `service.js` SAVE handler → `handleDraftSave(req, entities, next)` → validates full draft → captures old active state → `next()` activates draft → history and attachment side effects.
+- `service.js` SAVE handler → `handleDraftSave(req, entities, next)` → validates full draft → captures active attachment metadata → `next()` activates draft → attachment add/remove side effects. CAP's active `UPDATE` path records Bug-field history once.
 
 #### Walkthrough and side effects
 
@@ -26,11 +26,11 @@ A Fiori draft is a temporary database version of a Bug. `NEW` creates it, each e
 
 `handleDraftSave` is middleware. `next()` is the exact point where control returns to CAP and database activation occurs. Before `next()`, failures prevent activation. After `next()`, the returned active Bug can be used for audit and attachment handling.
 
-`captureDraftSaveState` stores active Bug and attachment metadata on the request. `recordDraftBugSaveSideEffects` reads the new active Bug after activation and records only meaningful differences.
+`captureDraftSaveState` stores only active attachment metadata on the request. Bug-field changes are already processed once by the active `UPDATE` hooks during CAP activation; recording them again in `SAVE` would duplicate the same Edit event.
 
 #### Debug lab order
 
-Use Browser Network to identify NEW, PATCH, or SAVE. Break first in the matching function. For PATCH inspect `bugID`, `req.data`, `currentDraft`, `merged`, and `componentCategory`. For SAVE step through `validateDraftForSave` → `captureDraftSaveState` → `next()` → side effects. Inspect the database only after stepping over `next()`; before that point the active row is not expected to contain the draft changes.
+Use Browser Network to identify NEW, PATCH, or SAVE. Break first in the matching function. For PATCH inspect `bugID`, `req.data`, `currentDraft`, `merged`, and `componentCategory`. For SAVE step through `validateDraftForSave` → `captureDraftSaveState` → `next()` → attachment side effects. Inspect the active `UPDATE` request created inside `next()` when debugging Bug-field History; the `SAVE` handler must not write that event a second time.
 
 #### Failure and safe editing
 
@@ -46,7 +46,7 @@ Fiori draft là phiên bản tạm của Bug trong database. `NEW` tạo draft, 
 
 - NEW handler trong `service.js` → `prepareDraftNew(req, actor)` → ghi reporter đã xác thực vào payload draft.
 - PATCH handler trong `service.js` → `prepareDraftPatch(req, entities)` → đọc draft hiện tại, merge input một phần, kiểm code-list, suy ra bridge ID → CAP persist patch.
-- SAVE handler trong `service.js` → `handleDraftSave(req, entities, next)` → kiểm toàn draft → chụp trạng thái active cũ → `next()` activate draft → side effect history và attachment.
+- SAVE handler trong `service.js` → `handleDraftSave(req, entities, next)` → kiểm toàn draft → chụp attachment metadata active → `next()` activate draft → side effect attachment add/remove. Đường active `UPDATE` của CAP ghi Bug-field history đúng một lần.
 
 #### Walkthrough và side effect
 
@@ -56,11 +56,11 @@ Fiori draft là phiên bản tạm của Bug trong database. `NEW` tạo draft, 
 
 `handleDraftSave` là middleware. `next()` là đúng điểm control quay lại CAP và database activation diễn ra. Lỗi trước `next()` ngăn activation. Sau `next()`, Bug active trả về mới dùng được để xử lý audit và attachment.
 
-`captureDraftSaveState` lưu Bug active và attachment metadata vào request. `recordDraftBugSaveSideEffects` đọc Bug active mới sau activation và chỉ ghi khác biệt có ý nghĩa.
+`captureDraftSaveState` chỉ lưu attachment metadata active vào request. Thay đổi Bug field đã được active `UPDATE` hooks xử lý một lần trong lúc CAP activate; nếu ghi lại trong `SAVE` sẽ tạo hai Edit event giống nhau.
 
 #### Thứ tự Debug Lab
 
-Dùng Browser Network xác định request là NEW, PATCH hay SAVE. Break đầu tiên trong hàm tương ứng. Với PATCH, xem `bugID`, `req.data`, `currentDraft`, `merged`, `componentCategory`. Với SAVE, step qua `validateDraftForSave` → `captureDraftSaveState` → `next()` → side effects. Chỉ kiểm database sau khi step qua `next()`; trước điểm đó active row chưa có thay đổi draft là đúng.
+Dùng Browser Network xác định request là NEW, PATCH hay SAVE. Break đầu tiên trong hàm tương ứng. Với PATCH, xem `bugID`, `req.data`, `currentDraft`, `merged`, `componentCategory`. Với SAVE, step qua `validateDraftForSave` → `captureDraftSaveState` → `next()` → attachment side effects. Khi debug History của Bug field, kiểm active `UPDATE` request được tạo bên trong `next()`; SAVE handler không được ghi event đó lần thứ hai.
 
 #### Failure path và sửa an toàn
 
@@ -221,3 +221,9 @@ Hai lần kiểm tra là có chủ ý: PATCH thường chỉ chứa một field 
 **English.** Before draft activation, the SAVE flow keeps a sanitized snapshot of active attachment metadata. After activation it compares attachment IDs to identify committed additions and removals. This makes the Bug SAVE transaction the single audit boundary: a delete that is later discarded does not create history, while a committed delete creates its audit once.
 
 **Tiếng Việt.** Trước khi activate draft, luồng SAVE giữ snapshot đã làm sạch của metadata attachment active. Sau activation, hệ thống so sánh attachment ID để tìm phần đã thêm và đã xóa thật sự. Bug SAVE là audit boundary duy nhất: xóa rồi discard không tạo history, còn xóa đã commit chỉ tạo audit một lần.
+
+## IDTS-119 / UAT-BUG-008 single Edit audit (2026-09-12)
+
+**English.** CAP draft activation internally updates the active Bug, so the registered active `before/after UPDATE` hooks already compute the final changed fields and write one grouped Edit event. The previous `handleDraftSave` path also compared the old/new active Bug after `next()` and wrote the same event again. The duplicate path was removed. `SAVE` still performs final validation and still owns attachment before/after comparison; only Bug-field History is delegated to the single active `UPDATE` path. Verify with the real local OData sequence `draftEdit → PATCH draft → draftActivate`, not a direct active UPDATE alone.
+
+**Tiếng Việt.** Khi activate draft, CAP tự cập nhật Bug active nên các hook active `before/after UPDATE` đã tính field thay đổi cuối cùng và ghi một grouped Edit event. Trước đây `handleDraftSave` còn so sánh Bug active cũ/mới sau `next()` rồi ghi lại đúng event đó lần nữa. Đường trùng đã được xóa. `SAVE` vẫn validate lần cuối và vẫn sở hữu so sánh attachment trước/sau; chỉ History của Bug field được giao cho một đường active `UPDATE` duy nhất. Phải verify bằng chuỗi OData local thật `draftEdit → PATCH draft → draftActivate`, không chỉ dùng direct active UPDATE.

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
-  "catalog": "IDTS-111 SAP490 UAT EN v0.3 candidate",
-  "baselineSha": "447da1dab80418847d806040e6b2060b0916cb63",
-  "generatedAt": "2026-08-02",
+  "catalog": "IDTS-111 SAP490 UAT EN v0.4 candidate",
+  "baselineSha": "e019f7799fd30a419fafb048b41653d72a837083",
+  "generatedAt": "2026-09-12",
   "owner": "DonHV",
   "approvalStatus": "APPROVED_FOR_EXECUTION",
   "executionTruth": {
@@ -3537,34 +3537,37 @@
       "language": "EN",
       "domain": "Bug creation",
       "journey": "Create and save Bug",
-      "title": "PM creates a valid Bug",
+      "title": "PM cannot create a new Bug",
       "actorRole": "PM",
       "executionOwner": "DonHV",
-      "classification": "PERSISTENCE",
+      "classification": "AUTHORIZATION",
       "priority": "HIGH",
       "requirementReferences": [],
-      "preconditions": "PM is signed in and active code-list values exist.",
+      "preconditions": "PM is signed in and has no Tester business role.",
       "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
       "steps": [
-        "Choose Create Bug.",
-        "Enter required values.",
-        "Save and reload."
+        "Inspect the List Report actions.",
+        "Attempt the protected NEW draft request directly.",
+        "Reload the Bug list."
       ],
-      "expectedResult": "One active Bug is created with PM as authenticated reporter and server-derived workflow state.",
+      "expectedResult": "Create Bug is not available to PM; the direct request returns HTTP 403 and no draft or active Bug is created.",
       "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
       "sourceTrace": [
         {
-          "file": "srv/bug-service/drafts.js"
+          "file": "srv/bug-service/permissions.js"
         },
         {
-          "file": "srv/bug-service/bug-write.js"
+          "file": "app/bug-management-ui/webapp/Component.js"
+        },
+        {
+          "file": "app/bug-management-ui/webapp/manifest.json"
         }
       ],
       "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
       "evidenceRequirements": [
         "case-specific UI screenshot",
         "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
-        "before/after and reload/readback screenshot"
+        "sanitized Network status or safe error screenshot"
       ],
       "execution": {
         "status": "PREPARED",
@@ -4098,10 +4101,12 @@
       "preconditions": "Desktop browser is open.",
       "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
       "steps": [
-        "Use keyboard navigation through create, comment, and one dialog.",
-        "Close the dialog."
+        "Use Tab to reach Create, comment, and one dialog trigger.",
+        "Open the dialog with Enter.",
+        "Use arrow keys within composite list controls and Tab to reach dialog actions.",
+        "Close the dialog with Escape."
       ],
-      "expectedResult": "Focus order is logical, visible, and returns to the triggering control.",
+      "expectedResult": "Focus is visible; Tab follows the page/dialog order, arrow keys navigate items inside a list, and closing the dialog returns focus to its trigger.",
       "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
       "sourceTrace": [
         {

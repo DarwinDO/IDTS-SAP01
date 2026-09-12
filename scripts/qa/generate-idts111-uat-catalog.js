@@ -11,7 +11,7 @@ const path = require('path')
 
 const ROOT = path.resolve(__dirname, '..', '..')
 const OUTPUT = path.join(ROOT, 'docs', 'qa', 'idts-111-uat-catalog.json')
-const BASELINE_SHA = '447da1dab80418847d806040e6b2060b0916cb63'
+const BASELINE_SHA = 'e019f7799fd30a419fafb048b41653d72a837083'
 
 const trace = {
   auth: ['srv/auth.js', 'app/bug-management-ui/webapp/login-page.js'],
@@ -197,7 +197,7 @@ simple('Role coverage', 'Cross-role business acceptance', 'PM', 'DonHV', trace.a
 ])
 
 simple('Bug creation', 'Create and save Bug', 'PM', 'DonHV', trace.draft, [
-  { id: 'UAT-BUG-010', title: 'PM creates a valid Bug', kind: 'PERSISTENCE', precondition: 'PM is signed in and active code-list values exist.', steps: ['Choose Create Bug.', 'Enter required values.', 'Save and reload.'], expected: 'One active Bug is created with PM as authenticated reporter and server-derived workflow state.' },
+  { id: 'UAT-BUG-010', title: 'PM cannot create a new Bug', kind: 'AUTHORIZATION', precondition: 'PM is signed in and has no Tester business role.', steps: ['Inspect the List Report actions.', 'Attempt the protected NEW draft request directly.', 'Reload the Bug list.'], expected: 'Create Bug is not available to PM; the direct request returns HTTP 403 and no draft or active Bug is created.', source: ['srv/bug-service/permissions.js', 'app/bug-management-ui/webapp/Component.js', 'app/bug-management-ui/webapp/manifest.json'] },
   { id: 'UAT-BUG-011', title: 'Developer cannot create a new Bug', kind: 'AUTHORIZATION', actor: 'DEVELOPER', owner: 'DatDT', precondition: 'Developer is signed in.', steps: ['Attempt the NEW draft request.'], expected: 'HTTP 403 is returned and no draft or active Bug is created.' }
 ])
 
@@ -227,7 +227,7 @@ simple('AI advisory', 'Review AI assistance', 'TESTER', 'NhanT', trace.ai, [
 simple('Usability', 'Cross-cutting browser behavior', 'TESTER', 'NhanT', trace.draft, [
   { id: 'UAT-UX-001', title: 'Desktop layout remains readable at 100 percent zoom', precondition: 'List Report and Object Page are available.', steps: ['Review major screens and dialogs at 100% zoom.'], expected: 'No clipping, horizontal overflow, vertical word breaking, or unreachable action is present.' },
   { id: 'UAT-UX-002', title: 'Tablet layout keeps primary actions usable', precondition: 'Supported tablet viewport is available.', steps: ['Open List Report, Object Page, and AI dialogs.', 'Navigate all primary actions.'], expected: 'Responsive pop-ins/wrapping preserve labels, values, and actions.' },
-  { id: 'UAT-UX-003', title: 'Keyboard and focus order support core flows', kind: 'BOUNDARY', precondition: 'Desktop browser is open.', steps: ['Use keyboard navigation through create, comment, and one dialog.', 'Close the dialog.'], expected: 'Focus order is logical, visible, and returns to the triggering control.' },
+  { id: 'UAT-UX-003', title: 'Keyboard and focus order support core flows', kind: 'BOUNDARY', precondition: 'Desktop browser is open.', steps: ['Use Tab to reach Create, comment, and one dialog trigger.', 'Open the dialog with Enter.', 'Use arrow keys within composite list controls and Tab to reach dialog actions.', 'Close the dialog with Escape.'], expected: 'Focus is visible; Tab follows the page/dialog order, arrow keys navigate items inside a list, and closing the dialog returns focus to its trigger.' },
   { id: 'UAT-UX-004', title: 'Unexpected backend error is sanitized', kind: 'RECOVERY', precondition: 'Controlled safe server failure is available.', steps: ['Trigger the failure.', 'Inspect UI, Console, and Network status.'], expected: 'The UI shows a safe actionable message without SQL, stack trace, provider body, token, or private endpoint.' },
   { id: 'UAT-UX-005', title: 'Reload does not lose committed business state', kind: 'PERSISTENCE', precondition: 'A controlled action has just succeeded.', steps: ['Reload the page.', 'Reopen the affected section.'], expected: 'Committed state and audit remain present and no action is duplicated.' }
 ])
@@ -255,9 +255,9 @@ validate()
 
 const result = {
   schemaVersion: 1,
-  catalog: 'IDTS-111 SAP490 UAT EN v0.3 candidate',
+  catalog: 'IDTS-111 SAP490 UAT EN v0.4 candidate',
   baselineSha: BASELINE_SHA,
-  generatedAt: '2026-08-02',
+  generatedAt: '2026-09-12',
   owner: 'DonHV',
   approvalStatus: 'APPROVED_FOR_EXECUTION',
   executionTruth: { prepared: cases.length, executed: 0, passed: 0, failed: 0, blocked: 0 },

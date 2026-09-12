@@ -1,10 +1,18 @@
-# IDTS-111 — UAT EN v0.3 catalog, execution and integration
+# IDTS-111 — UAT EN catalog history, execution and integration
 
 - Catalog owner/approver and final integrator: DonHV
 - Execution support: NhanT, SangVN and DatDT
 - Due: 2026-08-04
-- Status: DonHV curation in progress; candidate partition is 22 MEETS / 12 DOES_NOT_MEET / 23 BLOCKED, with ATT-001 reviewer-blocked for inconsistent fixture provenance
+- Status: IDTS-127 remediation in progress; the latest reviewed Jira partition is 54 MEETS / 16 NOT MET / 11 BLOCK / 9 PREPARED. No new category is final UAT PASS until deployed evidence is reviewed.
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
+
+## 2026-09-12 forward remediation catalog
+
+- The original UAT EN v0.3 catalog and its execution evidence are historical records. Their baseline `447da1dab80418847d806040e6b2060b0916cb63`, screenshots, manifests, candidate outcomes, and workbook bytes remain unchanged.
+- The tracked `docs/qa/idts-111-uat-catalog.json` is now the forward UAT EN v0.4 planning candidate generated from pre-change baseline `e019f7799fd30a419fafb048b41653d72a837083` for IDTS-127 retest.
+- v0.4 corrects `UAT-BUG-010` to the canonical Tester-only Bug-create rule and clarifies `UAT-UX-003` with SAPUI5 composite-list keyboard semantics. These are forward expectation corrections, not retroactive edits to v0.3 evidence.
+- The v0.4 catalog remains planning truth: 90 `PREPARED`, 0 executed, 0 passed, 0 failed, and 0 blocked inside the catalog file. Runtime disposition is maintained separately under IDTS-127.
+- No official SAP490 workbook or Google Drive file has been generated, replaced, or synchronized from v0.4.
 
 ## Workflow
 
@@ -14,9 +22,9 @@
 4. DonHV executes PM, database and integration cases, then reviews every result.
 5. DonHV alone generates UAT EN v0.3 and updates the same Drive ID after reviewed execution evidence is complete.
 
-## Current candidate
+## Historical v0.3 candidate
 
-- Catalog: `docs/qa/idts-111-uat-catalog.json`.
+- Historical catalog provenance: UAT EN v0.3 execution/review artifacts under `docs/pm/evidence/idts-111/`. The tracked generator/output now represent the forward v0.4 planning candidate described above.
 - Frozen baseline: `447da1dab80418847d806040e6b2060b0916cb63`.
 - Cases: 90 atomic English-only cases.
 - Approval: DonHV approved for execution on 2026-08-02.

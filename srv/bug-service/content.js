@@ -14,13 +14,21 @@ const {
   trimToNull
 } = require('./helpers')
 
+const MAX_COMMENT_LENGTH = 1000
+
+function validateCommentContent (req, value) {
+  const content = trimToNull(value)
+  if (!content) return req.reject(400, 'Comment content is required.', 'content')
+  if (content.length > MAX_COMMENT_LENGTH) {
+    return req.reject(400, 'Comment cannot exceed 1000 characters.', 'content')
+  }
+  return content
+}
+
 async function prepareCommentCreate (req, entities) {
   // Chạy trước CREATE Comment active/draft. Hàm gắn Bug cha và author từ request đã xác thực,
   // đồng thời chặn nội dung rỗng; client không được tự giả author bằng payload.
-  req.data.content = trimToNull(req.data.content)
-  if (!req.data.content) {
-    return req.reject(400, 'Comment content is required.', 'content')
-  }
+  req.data.content = validateCommentContent(req, req.data.content)
 
   const bug = await readParentBugForContent(req, entities, req.data.bug_ID)
   if (!bug) return req.reject(404, 'Bug not found.')
@@ -204,6 +212,7 @@ async function readParentBugForComment (req, entities) {
 }
 
 module.exports = {
+  validateCommentContent,
   readParentBugForContent,
   prepareCommentCreate,
   prepareCommentMutation,
