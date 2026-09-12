@@ -3,7 +3,7 @@
 - Catalog owner/approver and final integrator: DonHV
 - Execution support: NhanT, SangVN and DatDT
 - Due: 2026-08-04
-- Status: IDTS-127 deadline-scope reduction in progress; the forward catalog now contains 77 `PREPARED` cases and the retained NhanT evidence package contains 44 manifests at 24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED. No new category is final UAT PASS until deployed evidence is reviewed.
+- Status: IDTS-127 deadline-scope execution continues; the forward catalog contains 77 `PREPARED` cases and the retained NhanT evidence package contains 44 manifests at 27 MEETS / 7 DOES_NOT_MEET / 10 BLOCKED. Attachment Cases 39–41 now have final-approved deployed evidence.
 - Jira: https://dutassociation.atlassian.net/browse/IDTS-111
 
 ## 2026-09-12 forward remediation catalog
@@ -30,9 +30,9 @@
 - Cases: 77 retained atomic English-only cases.
 - Approval: DonHV approved for execution on 2026-08-02.
 - Approved forward catalog truth: 77 `PREPARED`, 0 executed results stored inside the planning catalog.
-- NhanT package: 44/44 retained manifests with candidate partition 24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED. Exactly `UAT-COM-003` and `UAT-UX-003` are final-approved; no other category is final UAT PASS.
+- NhanT package: 44/44 retained manifests with candidate partition 27 MEETS / 7 DOES_NOT_MEET / 10 BLOCKED. Exactly `UAT-COM-003`, `UAT-UX-003`, and `UAT-ATT-001..003` are final-approved.
 - DonHV review is kept separate from NhanT's candidate partition. The current curation categories are 19 retained positives, 3 current-runtime positives, 20 accepted precondition blockers, 5 catalog corrections, 3 stale prerequisites, 2 AI diagnostic reruns, 1 fixture-provenance block, 1 current-runtime negative, 1 confirmed defect recheck, 1 partial recheck, and 1 physical-keyboard limitation. These categories do not create final UAT PASS. See `docs/pm/evidence/idts-111/donhv-execution-review-matrix.md`.
-- Current evidence gaps: ATT-001 needs exact fixture identity/size reconciliation; AI-005/009 need immutable suggestion ID plus sanitized Network/audit; UX-002 needs a matching fixture; UX-003 needs NhanT's physical Tab confirmation. Only AI-007, ATT-002 and ATT-003 retain stale prerequisites.
+- Current evidence gaps: AI-005/009 need immutable suggestion ID plus sanitized Network/audit; UX-002 remains PARTIAL because Smart Assignment returned one candidate and Handoff matching telemetry was unavailable. Only AI-007 retains a stale prerequisite.
 - Knowledge gate: NhanT acknowledged briefing SHA `3e78b495cb8feb56188cc446b827d47e040e1b98`; Jira comments `10908` (IDTS-110) and `10909` (IDTS-111).
 - Final targeted-rerun handoff: commit `adb66e8`, PR #270 body refreshed, Jira IDTS-111 comment `10925`.
 - Candidate execution summary: `docs/pm/evidence/idts-111/execution-summary.md`.
@@ -52,4 +52,4 @@ Assigned members may now execute after running the readiness check for their ses
 - Remaining gaps: immutable AI suggestion ID plus sanitized Network response, a Similar Bugs candidate fixture for tablet wrapping, NhanT physical-keyboard confirmation, and existing role/service fixtures.
 - DonHV still owns final disposition and `UAT_EN_PREPARED` synchronization.
 
-NhanT's retained candidate package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 76 evidence references (66 unique hashes) across 44 manifests. DonHV's partition is 24 MEETS, 8 DOES_NOT_MEET and 12 BLOCKED; ATT-001 remains reviewer-blocked because its preserved fixture sizes are inconsistent. DonHV still owns review, catalog decisions, Jira disposition, final workbook generation and same-ID Drive synchronization.
+NhanT's retained package uses the authenticated SAP BTP UI and member-owned Tester identity. It contains 82 evidence references (72 unique hashes) across 44 manifests. DonHV's partition is 27 MEETS, 7 DOES_NOT_MEET and 10 BLOCKED; Attachment Cases 39–41 are final-approved from one exact 118-byte fixture chain while older failures remain historical. DonHV still owns remaining review, catalog decisions, Jira disposition, final workbook generation and same-ID Drive synchronization.

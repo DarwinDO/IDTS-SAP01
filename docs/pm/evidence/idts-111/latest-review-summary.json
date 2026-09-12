@@ -1,46 +1,46 @@
 {
   "jiraCommentId": "10962",
   "reviewDate": "2026-08-04",
-  "curatedAtBaselineHead": "ae64312136f1f741e8a4aa1a940ce7850d5967a7",
+  "curatedAtBaselineHead": "377343491153289f114cf8e462cc67c39f7f3048",
   "manifests": 44,
-  "evidenceReferences": 76,
-  "uniqueEvidenceHashes": 66,
+  "evidenceReferences": 82,
+  "uniqueEvidenceHashes": 72,
   "currentDisposition": {
-    "MEETS_EXPECTED_RESULT": 24,
-    "DOES_NOT_MEET_EXPECTED_RESULT": 8,
-    "BLOCKED": 12
+    "MEETS_EXPECTED_RESULT": 27,
+    "DOES_NOT_MEET_EXPECTED_RESULT": 7,
+    "BLOCKED": 10
   },
   "counts": {
     "RETAINED_TRUTHFUL_POSITIVE": 19,
     "VALID_PRECONDITION_BLOCKER": 9,
     "AI_DIAGNOSTIC_RERUN": 2,
-    "STALE_PREREQUISITE_RERUN_REQUIRED": 3,
+    "STALE_PREREQUISITE_RERUN_REQUIRED": 1,
     "CATALOG_SEMANTIC_CORRECTION": 3,
-    "FIXTURE_PROVENANCE_INCONSISTENT": 1,
-    "CURRENT_RUNTIME_POSITIVE": 5,
+    "CURRENT_RUNTIME_POSITIVE": 8,
     "CONFIRMED_DEFECT_RECHECK": 1,
     "CURRENT_RUNTIME_PARTIAL_RECHECK": 1
   },
   "runtimeRerunPerformed": true,
   "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 Smart Assignment returned one candidate with no retry and Handoff matching transport telemetry was unavailable. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.",
   "latestEvidenceUpdate": {
-    "date": "2026-09-12",
-    "caseId": "UAT-UX-002",
-    "result": "PARTIAL",
-    "localDeterministicRegression": {
-      "script": "scripts/qa/test-idts127-ux002-responsive-browser.js",
-      "commit": "27675cf6f7f051e3dea15109f43162f08b490005",
-      "mergedVia": "ae64312136f1f741e8a4aa1a940ce7850d5967a7",
-      "result": "PASS",
-      "scope": "Local CAP plus temporary SQLite fixtures; not live provider/BTP acceptance."
-    },
-    "currentEvidence": "One approved Classification JPG plus one sanitized receipt; three historical PNGs remain integrity-tracked and labelled historical.",
-    "limitations": [
-      "Smart Assignment had one candidate, so the two-candidate check remains blocked and no retry was made.",
-      "Handoff UI settled but matching transport telemetry was unavailable.",
-      "AiSuggestions count delta was unavailable."
+    "date": "2026-09-13",
+    "caseId": "UAT-ATT-003",
+    "result": "PASS",
+    "attachmentChain": [
+      "UAT-ATT-001",
+      "UAT-ATT-002",
+      "UAT-ATT-003"
     ],
-    "finalPassApproved": false
+    "controlledFixture": {
+      "file": "idts-uat-attachment-roundtrip-20260912.txt",
+      "sizeBytes": 118,
+      "sha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D"
+    },
+    "currentEvidence": "Three mentor-facing PASS cards plus three structured receipts cover upload persistence, download byte identity and supported deletion with stale access returning HTTP 404.",
+    "limitations": [
+      "Upload persistence is accepted through supported Save plus hard-reload UI readback; no direct HANA or storage-console inspection is claimed."
+    ],
+    "finalPassApproved": true
   },
   "finalApprovals": {
     "UAT-COM-003": {
@@ -52,6 +52,21 @@
       "status": "FINAL_PASS_APPROVED",
       "historicalFailurePreserved": true,
       "receipt": "uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json"
+    },
+    "UAT-ATT-001": {
+      "status": "FINAL_PASS_APPROVED",
+      "historicalFailurePreserved": true,
+      "receipt": "uat/UAT-ATT-001/current-runtime-receipt.json"
+    },
+    "UAT-ATT-002": {
+      "status": "FINAL_PASS_APPROVED",
+      "historicalFailurePreserved": true,
+      "receipt": "uat/UAT-ATT-002/current-runtime-receipt.json"
+    },
+    "UAT-ATT-003": {
+      "status": "FINAL_PASS_APPROVED",
+      "historicalFailurePreserved": true,
+      "receipt": "uat/UAT-ATT-003/current-runtime-receipt.json"
     }
   },
   "workbookAndDriveChanged": false

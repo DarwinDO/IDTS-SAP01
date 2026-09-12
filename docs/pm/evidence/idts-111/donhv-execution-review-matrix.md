@@ -6,9 +6,9 @@
 - Historical reviewer baseline: `44721f53fe2f7588d38f6d6c79ffb0c33026d5d3`; latest curation source baseline: `4ab336388fb744b82abdfe6ef8f7c334b4075428`.
 - Execution baseline: `fbea12cd996d8c1e13bd834fd6e054c8a37c32e6`.
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
-- Final-approved `UAT-COM-003` readback remains bound to PR #405 source head `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34` and approved source/deployed merge `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`; `UAT-UX-003` is additionally final-approved from DonHV's 2026-09-12 physical-keyboard attestation at source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`.
+- Final-approved `UAT-COM-003` readback remains bound to PR #405 source head `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34` and approved source/deployed merge `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`; `UAT-UX-003` is final-approved from DonHV's 2026-09-12 physical-keyboard attestation. `UAT-ATT-001..003` are final-approved from the exact 118-byte controlled upload/download/delete chain completed on 2026-09-13 against the same deployed merge.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
-- Evidence integrity after DonHV's deadline-scope reduction: 44 manifests, 76 evidence references and 66 unique hashes, with zero missing files or hash mismatches in the fresh curation check. The forward planning catalog contains 77 cases. The final exact-head gate is still required after commit.
+- Evidence integrity after the attachment closure: 44 manifests, 82 evidence references and 72 unique hashes, with zero missing files or hash mismatches in the fresh curation check. The forward planning catalog contains 77 cases. The final exact-head gate is still required after commit.
 
 `ACCEPTED_EVIDENCE` means that the submitted evidence truthfully supports the observed result. It does not mean that a blocked case passed, that a product defect is fixed, or that the final UAT workbook is approved.
 
@@ -24,9 +24,9 @@
 | UAT-AI-008 | DOES_NOT_MEET | CATALOG_MISMATCH | Handoff shows stored user while Object Page shows business role/queue label; revise expectation to compare like-for-like semantics. |
 | UAT-AI-009 | DOES_NOT_MEET | ENVIRONMENT_SESSION_BLOCKER | Protected AssignableDevelopers read returned 401 while the page remained open; rerun with Network evidence under IDTS-114/115. |
 | UAT-AI-010 | DOES_NOT_MEET | CATALOG_MISMATCH | Consolidated Reject and Ignore variants both returned to Pending after reload. Prove persistence against each original immutable suggestion ID rather than expecting a newly generated dialog to retain the old decision. |
-| UAT-ATT-001 | DOES_NOT_MEET | BLOCKED — fixture provenance inconsistent | Preserve NhanT's observed failure and all evidence unchanged. The manifest records 44 bytes while retained evidence descriptions refer to 54-byte and 47-byte fixtures, so DonHV cannot accept this as one traceable exact fixture until NhanT reconciles identity and size. |
-| UAT-ATT-002 | BLOCKED | ACCEPTED_BLOCKER | Depends on successful controlled upload. |
-| UAT-ATT-003 | BLOCKED | ACCEPTED_BLOCKER | Depends on a DonHV-approved controlled attachment; do not delete unrelated evidence. |
+| UAT-ATT-001 | MEETS | FINAL_PASS_APPROVED | Exact 118-byte controlled fixture survived Edit/Upload/Save and hard reload; one Added attachment History event was recorded and Bug fields were unchanged. Historical 44/54/47-byte evidence remains preserved. |
+| UAT-ATT-002 | MEETS | FINAL_PASS_APPROVED | Authenticated download completed at 118 bytes and its SHA-256 exactly matched the upload fixture; Chrome's `(9)` suffix was local collision handling only. |
+| UAT-ATT-003 | MEETS | FINAL_PASS_APPROVED | Supported Edit/Delete/Save removed the exact fixture; reload showed zero attachments, History added one Delete event, and authenticated stale-content GET returned HTTP 404. |
 | UAT-ATT-006 | MEETS | ACCEPTED_EVIDENCE | Safe failure and no orphan metadata were demonstrated. |
 | UAT-AUTH-001 | MEETS | ACCEPTED_EVIDENCE | Mapped Tester XSUAA session and protected app access demonstrated. |
 | UAT-AUTH-005 | MEETS | ACCEPTED_EVIDENCE | Current rerun shows logout ended the session and reopening the protected route redirected to SAP Sign In. The earlier blank-route result remains historical evidence under IDTS-117. |
@@ -63,18 +63,25 @@
 
 ## Review totals
 
-- Current candidate partition is **24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED** across 44 retained manifests. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved; the other 42 cases remain candidate evidence, corrections, or blockers and are not final-approved.
-- Current reviewer disposition retains truthful evidence but separately blocks ATT-001 because the preserved fixture sizes are inconsistent.
-- Only `UAT-AI-007`, `UAT-ATT-002` and `UAT-ATT-003` retain stale prerequisites after the current-runtime reruns.
+- Current candidate partition is **27 MEETS / 7 DOES_NOT_MEET / 10 BLOCKED** across 44 retained manifests. Exactly `UAT-COM-003`, `UAT-UX-003`, and `UAT-ATT-001..003` are final UAT PASS approved; the other 39 cases remain candidate evidence, corrections, or blockers and are not final-approved.
+- ATT-001's historical inconsistent fixture records remain visible, while the final result is bound to one exact 118-byte fixture and SHA-256 across upload, download and delete.
+- Only `UAT-AI-007` retains the stale-prerequisite curation category after the attachment reruns.
 - AI-005/009 still need immutable suggestion ID plus sanitized Network/audit evidence; UX-002 remains PARTIAL because Smart Assignment returned one candidate without retry and Handoff matching transport telemetry was unavailable. UX-003's physical sequence is human-attested; its historical Browser automation limitation remains preserved.
 
 ## Gate decision
 
-The retained IDTS-111 evidence package is internally consistent and may be kept as truthful candidate evidence. Exactly `UAT-COM-003` and `UAT-UX-003` are final PASS approved; the remaining 42 cases must not be interpreted as final UAT approval. Merge remains gated by a fresh exact-head QA gate and by the PR body preserving the candidate/blocker truth above. The UAT workbook and Google Drive artifact remain unchanged.
+The retained IDTS-111 evidence package is internally consistent. Exactly `UAT-COM-003`, `UAT-UX-003`, and `UAT-ATT-001..003` are final PASS approved; the remaining 39 cases must not be interpreted as final UAT approval. Merge remains gated by a fresh exact-head QA gate and by the PR body preserving the candidate/blocker truth above. The UAT workbook and Google Drive artifact remain unchanged.
 
 ## Current rerun state
 
-NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. Current-runtime evidence is retained, but ATT-001 is reviewer-blocked because its recorded 44/54/47-byte fixture provenance is inconsistent. AI-005/009 still need immutable suggestion ID and sanitized Network/audit evidence; UX-002 is now a current PARTIAL recheck with local responsive PASS, a one-candidate Smart Assignment blocker, and unavailable Handoff matching transport telemetry. DonHV's UX-003 physical-keyboard attestation is final-approved, while the Browser automation limitation remains historical. The workbook and Drive artifact remain unchanged.
+NhanT recorded the required acknowledgment in the repository and Jira comments `10908`/`10909`. The attachment chain now has current-runtime final PASS evidence using one exact controlled 118-byte fixture; its older inconsistent/failing records remain historical. AI-005/009 still need immutable suggestion ID and sanitized Network/audit evidence; UX-002 remains PARTIAL with one-candidate Smart Assignment coverage and unavailable Handoff matching transport telemetry. The workbook and Drive artifact remain unchanged.
+
+### 2026-09-13 UAT attachment lifecycle closure
+
+- `UAT-ATT-001`: Edit/Upload/Save plus hard reload retained one exact 118-byte `text/plain` fixture and added one History event.
+- `UAT-ATT-002`: the Chrome download was 118 bytes and SHA-256 `5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D`, exactly matching the source fixture.
+- `UAT-ATT-003`: Edit/Delete/Save plus hard reload removed the UI entry; History increased by one Delete event and same-session authenticated GET of the old content reference returned HTTP 404.
+- Three full-height mentor cards and three structured receipts are hash-tracked. The cards display only Case 39/40/41, name the catalog file, use executor `NhanT (DonHV support)`, and contain no review-status label.
 
 ### 2026-08-04 current-runtime addendum
 

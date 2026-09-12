@@ -10,15 +10,15 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 
 - Assigned to NhanT after DonHV's deadline-scope reduction: 44 retained cases.
 - Candidate packages retained: 44/44.
-- Candidate partition: 24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved; the other 42 cases remain candidate evidence, corrections, or blockers and are not final-approved.
-- Only three stale prerequisites remain: `UAT-AI-007`, `UAT-ATT-002`, `UAT-ATT-003`.
+- Candidate partition: 27 MEETS / 7 DOES_NOT_MEET / 10 BLOCKED. Exactly `UAT-COM-003`, `UAT-UX-003`, and `UAT-ATT-001..003` are final UAT PASS approved; the other 39 cases remain candidate evidence, corrections, or blockers and are not final-approved.
+- Only one stale-prerequisite curation item remains: `UAT-AI-007`.
 - Historical defect candidates were rechecked: `UAT-AUTH-005` and `UAT-COM-003` are current candidate positives, with `UAT-COM-003` final-approved; `UAT-BUG-008` remains a current candidate negative, and `UAT-UX-002` is a current PARTIAL recheck with local responsive PASS, one-candidate Smart Assignment coverage, and unavailable Handoff matching transport telemetry.
 - 3 catalog/semantic corrections are preserved separately from product defects. Reject and Ignore evidence is consolidated under `UAT-AI-010`.
 - 1 physical-keyboard closure is now DonHV-human-attested; the historical Browser automation limitation remains preserved.
 - 2 AI diagnostic reruns require immutable suggestion ID plus sanitized Network/audit and no-mutation proof.
-- `UAT-COM-001` is a current candidate positive. NhanT's ATT-001 negative remains historically intact, while DonHV blocks acceptance because its 44/54/47-byte fixture provenance is inconsistent.
-- Retained evidence: 76 evidence references and 66 unique SHA-256 values; every manifest reference and hash must pass the fresh integrity gate.
-- Reviewer-approved final PASS: exactly `UAT-COM-003` and `UAT-UX-003`. No other case is final-approved; the forward planning catalog contains 77 `PREPARED` cases.
+- `UAT-COM-001` is a current candidate positive. The historical ATT-001 failure/provenance inconsistency remains intact, while the new exact 118-byte attachment chain is final-approved.
+- Retained evidence: 82 evidence references and 72 unique SHA-256 values; every manifest reference and hash must pass the fresh integrity gate.
+- Reviewer-approved final PASS: exactly `UAT-COM-003`, `UAT-UX-003`, and `UAT-ATT-001..003`. No other case is final-approved; the forward planning catalog contains 77 `PREPARED` cases.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
 ## Historical candidate DOES NOT MEET cases (2026-08-03 runtime)

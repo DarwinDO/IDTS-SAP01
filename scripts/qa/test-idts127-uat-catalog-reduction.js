@@ -49,14 +49,44 @@ assert.equal(curation.status, 0, `${curation.stdout}\n${curation.stderr}`)
 const summary = JSON.parse(fs.readFileSync(summaryPath, 'utf8'))
 assert.equal(summary.manifests, 44)
 assert.deepEqual(summary.currentDisposition, {
-  MEETS_EXPECTED_RESULT: 24,
-  DOES_NOT_MEET_EXPECTED_RESULT: 8,
-  BLOCKED: 12
+  MEETS_EXPECTED_RESULT: 27,
+  DOES_NOT_MEET_EXPECTED_RESULT: 7,
+  BLOCKED: 10
 })
-assert.equal(summary.evidenceReferences, 76)
-assert.equal(summary.uniqueEvidenceHashes, 66)
-assert.equal(summary.latestEvidenceUpdate?.caseId, 'UAT-UX-002')
-assert.equal(summary.latestEvidenceUpdate?.result, 'PARTIAL')
-assert.equal(summary.latestEvidenceUpdate?.finalPassApproved, false)
+assert.equal(summary.evidenceReferences, 82)
+assert.equal(summary.uniqueEvidenceHashes, 72)
+assert.equal(summary.latestEvidenceUpdate?.caseId, 'UAT-ATT-003')
+assert.equal(summary.latestEvidenceUpdate?.result, 'PASS')
+assert.equal(summary.latestEvidenceUpdate?.finalPassApproved, true)
+
+const attachmentFixture = {
+  name: 'idts-uat-attachment-roundtrip-20260912.txt',
+  sizeBytes: 118,
+  sha256: '5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D'
+}
+for (const caseId of ['UAT-ATT-001', 'UAT-ATT-002', 'UAT-ATT-003']) {
+  const caseDir = path.join(evidenceRoot, caseId)
+  const manifest = JSON.parse(fs.readFileSync(path.join(caseDir, 'manifest.json'), 'utf8'))
+  assert.equal(manifest.candidateExecutionStatus, 'PASS', `${caseId} must be final PASS`)
+  assert.equal(manifest.candidateOutcome, 'MEETS_EXPECTED_RESULT', `${caseId} outcome must meet expected result`)
+  assert.equal(manifest.executor, 'NhanT (DonHV support)')
+  assert.equal(manifest.actorRole, 'TESTER')
+  assert.equal(manifest.testRecord.file, attachmentFixture.name)
+  assert.equal(manifest.testRecord.sizeBytes, attachmentFixture.sizeBytes)
+  assert.equal(manifest.testRecord.sha256, attachmentFixture.sha256)
+  assert.equal(manifest.donhvLatestReview?.finalPassApproved, true)
+  assert.equal(manifest.donhvLatestReview?.currentStatus, 'FINAL_PASS_APPROVED')
+  assert.doesNotMatch(JSON.stringify(manifest), /PENDING_DONHV_REVIEW/)
+
+  for (const file of ['current-runtime-pass-card.png', 'current-runtime-receipt.json']) {
+    const evidence = manifest.evidence.find(item => item.file === file)
+    assert.ok(evidence, `${caseId} must declare ${file}`)
+    assert.equal(evidence.sha256, require('node:crypto').createHash('sha256').update(
+      file.endsWith('.json')
+        ? Buffer.from(fs.readFileSync(path.join(caseDir, file), 'utf8').replace(/\r\n/g, '\n'), 'utf8')
+        : fs.readFileSync(path.join(caseDir, file))
+    ).digest('hex').toUpperCase())
+  }
+}
 
 console.log('IDTS-127 UAT catalog reduction regression: PASS')

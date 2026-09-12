@@ -1,4 +1,4 @@
-> Historical PR-body snapshot. Current forward scope is 77 catalog cases and 44 retained NhanT manifests at 24 MEETS / 8 DOES_NOT_MEET / 12 BLOCKED; see `latest-review-summary.json` and DEC-071.
+> Historical PR-body snapshot. Current forward scope is 77 catalog cases and 44 retained NhanT manifests at 27 MEETS / 7 DOES_NOT_MEET / 10 BLOCKED; Attachment Cases 39–41 are final-approved. See `latest-review-summary.json`, DEC-071 and DEC-072.
 
 ## Summary
 

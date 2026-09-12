@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0",
+  "receiptType": "IDTS-111-UAT-ATT-001-live-acceptance",
+  "caseId": "UAT-ATT-001",
+  "displayNumber": "39",
+  "result": "PASS",
+  "evidencePreparer": "NhanT (DonHV support)",
+  "manualVerifier": "DonHV",
+  "actorRole": "TESTER",
+  "evidenceFinalizedAt": "2026-09-13T00:29:36+07:00",
+  "sourceBaselineSha": "377343491153289f114cf8e462cc67c39f7f3048",
+  "deployedRuntimeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "runtimeUiVersion": "0.0.16",
+  "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud",
+  "testDefinition": "docs/qa/idts-111-uat-catalog.json#UAT-ATT-001",
+  "controlledRecord": {
+    "bugId": "029435e3-abb7-4079-826a-394709f9eb50",
+    "bugNumber": "BUG-0021"
+  },
+  "fixture": {
+    "file": "idts-uat-attachment-roundtrip-20260912.txt",
+    "sizeBytes": 118,
+    "mediaType": "text/plain",
+    "sha256": "5EF00CD5CE956BF488F16BEEC5E54E97B9CF2F8CB6C60C318D5F74D98E1BA51D"
+  },
+  "workflow": [
+    "Edit",
+    "Upload the controlled fixture",
+    "Save",
+    "Hard reload",
+    "Read back Attachments and History"
+  ],
+  "observed": {
+    "draftAttachmentCount": 1,
+    "activeAttachmentCountAfterReload": 1,
+    "activeFilenameAfterReload": "idts-uat-attachment-roundtrip-20260912.txt",
+    "scanStatusAfterReload": "Unscanned",
+    "historyCountBefore": 5,
+    "historyCountAfter": 6,
+    "newHistoryEvent": "Added attachment idts-uat-attachment-roundtrip-20260912.txt.",
+    "businessFieldsUnchanged": true
+  },
+  "privacy": "Controlled text fixture only; no credential, token, email, attachment body, or unrelated user data is retained in this receipt.",
+  "limitations": [
+    "HANA metadata and storage persistence are accepted through the supported UI Save plus hard-reload readback contract; no direct database or storage-console inspection is claimed."
+  ]
+}
