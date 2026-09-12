@@ -1,0 +1,91 @@
+{
+  "schemaVersion": "1.0",
+  "receiptType": "IDTS-111-UAT-COM-003-live-readback",
+  "caseId": "UAT-COM-003",
+  "approvedSourceHead": "e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34",
+  "approvedMergeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "deployedRuntimeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "runtimeUiVersion": "0.0.16",
+  "runtimeUiArtifactSha256": "F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4",
+  "capturedAt": "2026-09-12T12:54:17.180+07:00",
+  "captureProvenance": {
+    "browser": "Microsoft Edge",
+    "profile": "Profile 1",
+    "session": "Existing signed-in DonHV PM session",
+    "route": "https://f5648117trial-dev-idts-sap01-approuter.cfapps.ap21.hana.ondemand.com/idtsbugmanagementui/index.html#/Bugs(ID=029435e3-abb7-4079-826a-394709f9eb50,IsActiveEntity=true)",
+    "tabId": "149227453",
+    "observedVia": "Accessibility tree and read-only DOM readback",
+    "actions": [
+      "Reloaded the active BUG-0021 route",
+      "Selected the Comments section",
+      "Read the rendered Comments list and marker occurrences"
+    ],
+    "mutation": "No comment, Bug, History, Notification, Attachment, or other live-data mutation was performed."
+  },
+  "currentReadOnlyReload": {
+    "bugId": "029435e3-abb7-4079-826a-394709f9eb50",
+    "bugNumber": "BUG-0021",
+    "actor": "DonHV",
+    "actorRole": "Project Manager",
+    "surface": "Comments",
+    "commentListCount": 2,
+    "markerCounts": {
+      "UAT-COM-003-1000|": 1,
+      "UAT-COM-003-1001|": 0
+    },
+    "result": "Current reload/readback matches the approved 1000-marker persistence and absent 1001-marker boundary outcome."
+  },
+  "liveAcceptanceReference": {
+    "source": "manifest.json liveAcceptance plus retained live screenshots",
+    "oneThousand": {
+      "inputLength": 1000,
+      "markerPrefix": "UAT-COM-003-1000|",
+      "markerCountAfterReload": 1,
+      "commentListCountAfterReload": 2
+    },
+    "oneThousandOne": {
+      "inputLength": 1001,
+      "markerPrefix": "UAT-COM-003-1001|",
+      "markerCountAfterReload": 0,
+      "commentListCountBefore": 2,
+      "commentListCountAfterReload": 2,
+      "httpStatus": 400,
+      "capReason": "Comment cannot exceed 1000 characters.",
+      "partialOrTruncatedCommentStored": false
+    }
+  },
+  "screenshotReferences": [
+    {
+      "file": "03-live-1000-pass.png",
+      "sha256": "55012D3F13E6114F277B0F4F209CA0F9C77E50FAC01892B843489F4980529609",
+      "role": "Prior live 1000-character acceptance screenshot"
+    },
+    {
+      "file": "04-live-1001-rejected.png",
+      "sha256": "F35D860BD007EDCD53915C77A7F4AF5BD1C51B2B53FE70079503C54B1C8AE06F",
+      "role": "Prior live 1001-character rejection screenshot"
+    }
+  ],
+  "evidenceLimitation": "The retained screenshots visually support the UI state but do not display every machine-read value; exact lengths, marker counts, total counts, and HTTP status are therefore recorded from the structured manifest/readback records, not inferred from pixels.",
+  "priorRecordedRejection": {
+    "distinctFromCurrentReadOnlyReload": true,
+    "event": "Prior authorized 1001-character post attempt",
+    "inputLength": 1001,
+    "markerPrefix": "UAT-COM-003-1001|",
+    "httpStatus": 400,
+    "capReason": "Comment cannot exceed 1000 characters.",
+    "textAreaRetainedOnError": true,
+    "commentListCountBefore": 2,
+    "commentListCountAfterReload": 2,
+    "markerCountAfterReload": 0,
+    "partialOrTruncatedCommentStored": false,
+    "captureProvenance": {
+      "recordedAt": "2026-09-12T11:44:52+07:00",
+      "recordedAtBasis": "manifest.json executedAt; this is the recorded execution time, not a fabricated raw network timestamp",
+      "manifest": "manifest.json",
+      "screenshot": "04-live-1001-rejected.png",
+      "screenshotSha256": "F35D860BD007EDCD53915C77A7F4AF5BD1C51B2B53FE70079503C54B1C8AE06F",
+      "note": "The retained screenshot and manifest record the safe Error dialog, HTTP 400, CAP reason, unchanged count, and absent marker; no raw credential, cookie, or provider payload is retained."
+    }
+  }
+}

@@ -1,46 +1,131 @@
 {
   "schemaVersion": "1.0",
-  "catalogStatus": "PREPARED",
-  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
-  "executor": "NhanT",
-  "actorRole": "TESTER",
-  "executedAt": "2026-08-04T16:43:26+07:00",
-  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
-  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
-  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
   "caseId": "UAT-COM-003",
-  "expectedResult": "Input beyond the supported 1000-character limit is rejected safely and no truncated or partial comment is stored.",
-  "actualResult": "A 1006-character controlled comment was accepted with 'Comment posted' and remained listed after reload instead of being rejected. The UI collapses it behind MORE, so the boundary contract is violated.",
-  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
-  "reviewBoundary": "Current-runtime candidate defect; DonHV must review and route product ownership before approved FAIL.",
-  "evidence": [
+  "displayNumber": "42",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "actorRole": "PM",
+  "executedAt": "2026-09-12T11:44:52+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "sourceMergeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "executionBaselineSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "deployedRuntimeSha": "54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b",
+  "testRecord": {
+    "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud",
+    "runtimeUrl": "https://f5648117trial-dev-idts-sap01-approuter.cfapps.ap21.hana.ondemand.com/idtsbugmanagementui/index.html#/Bugs(ID=029435e3-abb7-4079-826a-394709f9eb50,IsActiveEntity=true)",
+    "bugId": "029435e3-abb7-4079-826a-394709f9eb50",
+    "bugNumber": "BUG-0021",
+    "actorDisplayName": "DonHV",
+    "actorRole": "Project Manager",
+    "uiVersion": "0.0.16",
+    "uiArtifactSha256": "F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4"
+  },
+  "deploymentOperations": [
     {
-      "id": "UAT-COM-003-E01",
-      "file": "01-current-runtime-posted.png",
-      "description": "Oversized controlled comment accepted by the UI.",
-      "sha256": "B674BD1894D8C4D0BC67D6BCB45DF74FC685BDC858F282FB9BEFC7BB533C1B1C"
+      "operationId": "3db5afe5-ae5b-11f1-8aff-eeee0a831123",
+      "status": "FINISHED"
     },
     {
-      "id": "UAT-COM-003-E02",
-      "file": "02-current-runtime-reload.png",
-      "description": "Oversized comment remains listed after reload.",
-      "sha256": "E2D63B68FCA474765EEC6AD4FE619959197F1EE0774FF103F6D586BBA559BB25"
+      "operationId": "aa3e6a3e-ae5b-11f1-8aff-eeee0a831123",
+      "status": "FINISHED"
+    },
+    {
+      "operationId": "619fd74d-ae5e-11f1-8b4e-eeee0a85d7b9",
+      "status": "FINISHED"
+    },
+    {
+      "operationId": "e0d69079-ae5f-11f1-8b4e-eeee0a85d7b9",
+      "status": "FINISHED"
     }
   ],
+  "expectedResult": "Input beyond the supported 1000-character limit is rejected safely and no truncated or partial comment is stored.",
+  "actualResult": "On the current UI-only runtime, the PM entered an exact 1000-character controlled marker, posted it successfully, and saw it after reload. The one allowed exact 1001-character marker was retained in the TextArea, rejected by CAP with HTTP 400, showed a safe UI Error dialog, and was absent after reload with no truncated or partial comment stored.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Final PASS approved under the parent-authorized user decision; no Jira approval or Jira mutation is claimed.",
+  "liveAcceptance": {
+    "oneThousand": {
+      "inputLength": 1000,
+      "markerPrefix": "UAT-COM-003-1000|",
+      "postResult": "Comment posted successfully.",
+      "reloadResult": "The marker is visibly present once in Comments after reload.",
+      "commentListCountAfterReload": 2,
+      "markerCountAfterReload": 1,
+      "screenshot": "03-live-1000-pass.png"
+    },
+    "oneThousandOne": {
+      "inputLength": 1001,
+      "markerPrefix": "UAT-COM-003-1001|",
+      "textAreaRetainedOnError": true,
+      "uiResult": "Safe generic Error dialog: The comment could not be posted. Please refresh and try again.",
+      "httpStatus": 400,
+      "capReason": "Comment cannot exceed 1000 characters.",
+      "commentListCountBefore": 2,
+      "commentListCountAfterReload": 2,
+      "markerCountAfterReload": 0,
+      "partialOrTruncatedCommentStored": false,
+      "screenshot": "04-live-1001-rejected.png"
+    },
+    "fieldBoundary": {
+      "maxLengthAttribute": null,
+      "maxLengthProperty": -1
+    }
+  },
+  "evidence": [
+    {
+      "id": "UAT-COM-003-E03",
+      "file": "03-live-1000-pass.png",
+      "description": "Current PM runtime after reload: Comments visibly shows the single UAT-COM-003-1000 marker.",
+      "sha256": "55012D3F13E6114F277B0F4F209CA0F9C77E50FAC01892B843489F4980529609"
+    },
+    {
+      "id": "UAT-COM-003-E04",
+      "file": "04-live-1001-rejected.png",
+      "description": "Current PM runtime: safe Error dialog is visible while the full controlled UAT-COM-003-1001 input remains in the TextArea; no unrelated sensitive data is shown.",
+      "sha256": "F35D860BD007EDCD53915C77A7F4AF5BD1C51B2B53FE70079503C54B1C8AE06F"
+    },
+    {
+      "id": "UAT-COM-003-E05",
+      "file": "05-live-readback-receipt.json",
+      "description": "Structured read-only Edge reload/readback: Comments contains two entries, the 1000 marker occurs once, and the 1001 marker occurs zero times; the prior 1001 rejection remains separately identified.",
+      "sha256": "9FF50BEF85E41B008A9B6BA7FB116DE994D9B36E324BB1E97FA3239E5A89CD62"
+    }
+  ],
+  "historicalFailure": {
+    "preserved": true,
+    "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+    "actualResult": "A 1006-character controlled comment was accepted with Comment posted and remained listed after reload instead of being rejected. The UI collapsed it behind MORE, so the boundary contract was violated.",
+    "reviewBoundary": "Historical pre-fix runtime failure retained for traceability; it is not overwritten by the current candidate result.",
+    "evidence": [
+      {
+        "id": "UAT-COM-003-E01",
+        "file": "01-current-runtime-posted.png",
+        "description": "Historical oversized controlled comment accepted by the pre-fix UI.",
+        "sha256": "B674BD1894D8C4D0BC67D6BCB45DF74FC685BDC858F282FB9BEFC7BB533C1B1C"
+      },
+      {
+        "id": "UAT-COM-003-E02",
+        "file": "02-current-runtime-reload.png",
+        "description": "Historical oversized comment remained listed after reload.",
+        "sha256": "E2D63B68FCA474765EEC6AD4FE619959197F1EE0774FF103F6D586BBA559BB25"
+      }
+    ]
+  },
   "privacyReview": {
     "status": "PASS",
-    "notes": "No unauthorized identity, mutation, request, comment, attachment, or unrelated user data was used."
+    "notes": "The controlled PM Bug route and screenshots contain only the Bug number, controlled marker text, actor display name/role, and safe UI state; no credential, token, email, or unrelated private data was used."
   },
-  "issueClassification": "product defect candidate - oversized comment accepted and persisted",
+  "issueClassification": "historical deployed-runtime boundary failure resolved in current UI runtime; final PASS evidence meets expected result",
   "limitations": [
-    "The collapsed UI does not expose the complete stored value without opening MORE; acceptance and post-reload presence are sufficient to prove rejection did not occur."
+    "The safe UI message is generic; the browser console/network evidence exposes the exact CAP reason and HTTP 400.",
+    "The rejection screenshot visibly shows the retained controlled input, while the exact 1001-character length and no-persistence result are recorded from the PM TextArea accessibility readback and post-reload Comments readback."
   ],
   "donhvLatestReview": {
     "jiraCommentId": "10962",
     "reviewDate": "2026-08-04",
-    "category": "CURRENT_RUNTIME_NEGATIVE",
-    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "FINAL_PASS_APPROVED",
     "preservesHistoricalCandidateTruth": true,
-    "finalPassApproved": false
+    "finalPassApproved": true
   }
 }

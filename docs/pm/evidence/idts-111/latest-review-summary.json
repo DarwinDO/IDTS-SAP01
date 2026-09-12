@@ -1,13 +1,13 @@
 {
   "jiraCommentId": "10962",
   "reviewDate": "2026-08-04",
-  "curatedAtBaselineHead": "70fb5558ba11cf5c8aa977d797b5690fb42b07f4",
+  "curatedAtBaselineHead": "e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34",
   "manifests": 57,
-  "evidenceReferences": 77,
-  "uniqueEvidenceHashes": 64,
+  "evidenceReferences": 78,
+  "uniqueEvidenceHashes": 65,
   "currentDisposition": {
-    "MEETS_EXPECTED_RESULT": 22,
-    "DOES_NOT_MEET_EXPECTED_RESULT": 12,
+    "MEETS_EXPECTED_RESULT": 23,
+    "DOES_NOT_MEET_EXPECTED_RESULT": 11,
     "BLOCKED": 23
   },
   "counts": {
@@ -17,13 +17,20 @@
     "STALE_PREREQUISITE_RERUN_REQUIRED": 3,
     "CATALOG_SEMANTIC_CORRECTION": 5,
     "FIXTURE_PROVENANCE_INCONSISTENT": 1,
-    "CURRENT_RUNTIME_POSITIVE": 3,
+    "CURRENT_RUNTIME_POSITIVE": 4,
     "CONFIRMED_DEFECT_RECHECK": 1,
-    "CURRENT_RUNTIME_NEGATIVE": 1,
+    "CURRENT_RUNTIME_NEGATIVE": 0,
     "CURRENT_RUNTIME_PARTIAL_RECHECK": 1,
     "PHYSICAL_KEYBOARD_LIMITATION": 1
   },
   "runtimeRerunPerformed": true,
   "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture and UAT-UX-003 still needs NhanT physical-keyboard confirmation.",
+  "finalApprovals": {
+    "UAT-COM-003": {
+      "status": "FINAL_PASS_APPROVED",
+      "historicalFailurePreserved": true,
+      "receipt": "uat/UAT-COM-003/05-live-readback-receipt.json"
+    }
+  },
   "workbookAndDriveChanged": false
 }
