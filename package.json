@@ -121,6 +121,7 @@
     "qa:idts75:browser": "node scripts/qa/test-idts75-classification-review-browser.js",
     "qa:idts76:programmatic": "node scripts/qa/test-idts76-handoff-summary-ui.js",
     "qa:idts76:browser": "node scripts/qa/test-idts76-handoff-summary-browser.js",
+    "qa:idts127:ux002:browser": "node scripts/qa/test-idts127-ux002-responsive-browser.js",
     "qa:idts77:programmatic": "node scripts/qa/test-idts77-ai-action-placement.js",
     "qa:idts91:programmatic": "node scripts/qa/test-idts91-ai-review-actions.js",
     "qa:idts92:programmatic": "node scripts/qa/test-idts92-ai-review-ui.js",
