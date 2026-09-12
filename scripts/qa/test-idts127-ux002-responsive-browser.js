@@ -118,14 +118,25 @@ function assertAmbientBaseUrlIsolation (serverUrl) {
 
 async function launchBrowser () {
   const headless = !/^false$/i.test(process.env.IDTS_QA_HEADLESS || '')
-  for (const channel of ['msedge', 'chrome']) {
+  let lastError
+  for (const channel of ['msedge', 'chrome', undefined]) {
+    let browserServer
     try {
-      return await chromium.launch({ channel, headless })
+      browserServer = await chromium.launchServer({ ...(channel ? { channel } : {}), headless })
+      const browser = await chromium.connect(browserServer.wsEndpoint())
+      return { browser, browserServer }
     } catch (error) {
-      void error
+      lastError = error
+      if (browserServer) {
+        try {
+          await browserServer.kill()
+        } catch (killError) {
+          lastError = new AggregateError([error, killError], 'Playwright browser launch cleanup failed')
+        }
+      }
     }
   }
-  return chromium.launch({ headless })
+  throw lastError || new Error('Playwright browser launch failed')
 }
 
 async function createLocalSession (db) {
@@ -179,25 +190,119 @@ async function createBugFixture (db) {
   return ID
 }
 
-async function withTimeout (label, operation, timeoutMs = 15000) {
+async function boundedTeardown (label, operation, { timeoutMs = 15000, fallback } = {}) {
+  assert.equal(typeof fallback, 'function', `${label} requires an explicit fallback`)
+  let operationSettled = false
+  const primary = Promise.resolve().then(operation).then(
+    value => {
+      operationSettled = true
+      return value
+    },
+    error => {
+      operationSettled = true
+      throw error
+    }
+  )
   let timer
+  let timedOut = false
   try {
-    return await Promise.race([
-      Promise.resolve().then(operation),
-      new Promise((_, reject) => {
-        timer = setTimeout(() => reject(new Error(`${label} timed out after ${timeoutMs}ms`)), timeoutMs)
-      })
-    ])
+    const deadline = new Promise((_, reject) => {
+      timer = setTimeout(() => {
+        timedOut = true
+        reject(new Error(`${label} timed out after ${timeoutMs}ms`))
+      }, timeoutMs)
+    })
+    // The race only starts the explicit fallback. Awaiting primary below keeps
+    // a timed-out operation from becoming fire-and-forget teardown work.
+    return await Promise.race([primary, deadline])
+  } catch (error) {
+    if (!timedOut) throw error
+
+    let fallbackError
+    try {
+      await fallback(error)
+    } catch (error) {
+      fallbackError = error
+    }
+
+    let settlementError
+    try {
+      await primary
+    } catch (error) {
+      settlementError = error
+    }
+
+    const causes = [error]
+    if (fallbackError) causes.push(fallbackError)
+    if (settlementError) causes.push(settlementError)
+    if (fallbackError || settlementError) {
+      const aggregate = new AggregateError(causes, [
+        error.message,
+        fallbackError && `fallback: ${fallbackError.message || fallbackError}`,
+        settlementError && `settlement: ${settlementError.message || settlementError}`
+      ].filter(Boolean).join('; '))
+      aggregate.operationSettled = operationSettled
+      aggregate.fallbackInvoked = true
+      throw aggregate
+    }
+    error.operationSettled = operationSettled
+    error.fallbackInvoked = true
+    throw error
   } finally {
     clearTimeout(timer)
   }
 }
 
+async function awaitSettledLocalTeardown (label, operation, timeoutMs = 15000) {
+  // @cap-js/sqlite uses DatabaseSync for this in-memory fixture and has no
+  // AbortSignal. Await settlement, then report an overrun instead of orphaning
+  // a local promise that could race the dependent shutdown.
+  const startedAt = Date.now()
+  try {
+    const result = await operation()
+    const elapsedMs = Date.now() - startedAt
+    if (elapsedMs > timeoutMs) {
+      const error = new Error(`${label} exceeded ${timeoutMs}ms before settling`)
+      error.operationSettled = true
+      throw error
+    }
+    return result
+  } catch (error) {
+    error.operationSettled = true
+    throw error
+  }
+}
+
+function assertBrowserServerExited (browserServer, label) {
+  const child = browserServer?.process?.()
+  if (!child) return
+  if (child.exitCode === null && child.signalCode === null) {
+    throw new Error(`${label}: browser server process ${child.pid} remains alive`)
+  }
+}
+
+async function forceCloseBrowserServer (browserServer, label) {
+  if (!browserServer) throw new Error(`${label}: browser server is unavailable for force-close`)
+  const child = browserServer.process?.()
+  if (child && (child.exitCode !== null || child.signalCode !== null)) return
+  if (typeof browserServer.kill !== 'function') throw new Error(`${label}: Playwright BrowserServer.kill() is unavailable`)
+  // BrowserServer.kill is Playwright's supported force-close API and waits for
+  // the child process to exit before returning.
+  await browserServer.kill()
+  assertBrowserServerExited(browserServer, label)
+}
+
 async function closeServer (server) {
   if (!server?.listening) return
-  await withTimeout('CAP server shutdown', () => new Promise((resolve, reject) => {
+  await boundedTeardown('CAP server shutdown', () => new Promise((resolve, reject) => {
     server.close(error => error ? reject(error) : resolve())
-  }))
+  }), {
+    fallback: () => {
+      if (typeof server.closeAllConnections !== 'function') throw new Error('CAP server force-close API is unavailable')
+      server.closeAllConnections()
+      server.closeIdleConnections?.()
+    }
+  })
   if (server.listening) throw new Error('CAP server remains listening after shutdown')
 }
 
@@ -205,7 +310,7 @@ async function cleanup (db, bugID, sessionID) {
   const failures = []
   const attempt = async (label, operation) => {
     try {
-      await withTimeout(label, operation)
+      await awaitSettledLocalTeardown(label, operation)
     } catch (error) {
       failures.push({ label, error })
     }
@@ -738,24 +843,53 @@ async function inspectCurrentButtons (page, buttons, label) {
 }
 
 async function runCleanupNegativeControl () {
+  let fallbackInvoked = false
+  let operationSettled = false
+  const abortController = new AbortController()
   let timeoutFailure
   try {
-    await withTimeout('synthetic cleanup timeout', () => new Promise(resolve => setTimeout(resolve, 25)), 5)
+    await boundedTeardown('synthetic cleanup timeout', () => new Promise((_, reject) => {
+      abortController.signal.addEventListener('abort', () => {
+        operationSettled = true
+        reject(new Error('synthetic cleanup aborted'))
+      }, { once: true })
+    }), {
+      timeoutMs: 5,
+      fallback: () => {
+        fallbackInvoked = true
+        abortController.abort()
+      }
+    })
   } catch (error) {
     timeoutFailure = error
   }
   assert.match(timeoutFailure?.message || '', /synthetic cleanup timeout timed out/)
+  assert.match(timeoutFailure?.message || '', /synthetic cleanup aborted/)
+  assert.equal(fallbackInvoked, true, 'cleanup timeout must invoke its fallback')
+  assert.equal(operationSettled, true, 'cleanup fallback must settle the timed-out operation')
+  assert.equal(timeoutFailure?.operationSettled, true, 'cleanup timeout must report settled primary operation')
 
-  let operationFailure
+  let fallbackFailure
+  let slowOperationSettled = false
   try {
-    await withTimeout('synthetic cleanup error', () => {
-      throw new Error('synthetic cleanup error')
-    }, 50)
+    await boundedTeardown('synthetic fallback failure', () => new Promise(resolve => {
+      setTimeout(() => {
+        slowOperationSettled = true
+        resolve()
+      }, 20)
+    }), {
+      timeoutMs: 5,
+      fallback: () => {
+        throw new Error('synthetic fallback failure')
+      }
+    })
   } catch (error) {
-    operationFailure = error
+    fallbackFailure = error
   }
-  assert.match(operationFailure?.message || '', /synthetic cleanup error/)
-  pass('cleanup timeout and operation errors remain observable')
+  assert.match(fallbackFailure?.message || '', /synthetic fallback failure/)
+  assert.equal(slowOperationSettled, true, 'fallback failure must still wait for primary settlement')
+  assert.equal(fallbackFailure?.operationSettled, true, 'fallback failure must report settled primary operation')
+  pass('cleanup timeout invokes fallback, waits for settlement, and surfaces fallback/settlement errors')
 }
 
 function assertDatabaseUnavailable (db) {
@@ -774,6 +908,7 @@ async function main () {
   let bugID
   let session
   let browser
+  let browserServer
   let context
   let runError
   let testServer
@@ -790,7 +925,10 @@ async function main () {
     evidenceDir = fs.mkdtempSync(path.join(os.tmpdir(), 'idts127-ux002-responsive-'))
     session = await createLocalSession(db)
     bugID = await createBugFixture(db)
-    browser = await launchBrowser()
+    const launchedBrowser = await launchBrowser()
+    browser = launchedBrowser.browser
+    browserServer = launchedBrowser.browserServer
+    assert.ok(browserServer?.process?.(), 'Playwright BrowserServer must expose its child process for force-close fallback')
     context = await browser.newContext({ viewport: VIEWPORT })
     await injectSession(context, session)
     const page = await context.newPage()
@@ -935,27 +1073,34 @@ async function main () {
     const cleanupFailures = []
     const attemptCleanup = async (label, operation) => {
       try {
-        await withTimeout(label, operation)
+        await operation()
       } catch (error) {
         cleanupFailures.push({ label, error })
       }
     }
-    await attemptCleanup('browser context close', () => context?.close())
-    await attemptCleanup('browser close', () => browser?.close())
+    await attemptCleanup('browser context close', () => boundedTeardown('browser context close', () => context?.close(), {
+      fallback: () => forceCloseBrowserServer(browserServer, 'browser context close fallback')
+    }))
+    await attemptCleanup('browser close', () => boundedTeardown('browser close', () => browser?.close({ reason: 'IDTS-127 teardown' }), {
+      fallback: () => forceCloseBrowserServer(browserServer, 'browser close fallback')
+    }))
+    await attemptCleanup('browser server close', () => boundedTeardown('browser server close', () => browserServer?.close(), {
+      fallback: () => forceCloseBrowserServer(browserServer, 'browser server close fallback')
+    }))
     await attemptCleanup('fixture cleanup', () => cleanup(db, bugID, session?.sessionID))
     await attemptCleanup('CAP server close', () => closeServer(testServer))
-    await attemptCleanup('CAP runtime shutdown', () => {
+    await attemptCleanup('CAP runtime shutdown', () => awaitSettledLocalTeardown('CAP runtime shutdown', () => {
       if (!testServer) return
       if (typeof cds.shutdown !== 'function') throw new Error('CAP runtime shutdown is unavailable')
       return cds.shutdown()
-    })
-    await attemptCleanup('in-memory DB disconnect', () => db?.disconnect?.())
-    await attemptCleanup('in-memory DB shutdown check', () => assertDatabaseUnavailable(db))
-    await attemptCleanup('temporary evidence cleanup', async () => {
+    }))
+    await attemptCleanup('in-memory DB disconnect', () => awaitSettledLocalTeardown('in-memory DB disconnect', () => db?.disconnect?.()))
+    await attemptCleanup('in-memory DB shutdown check', () => awaitSettledLocalTeardown('in-memory DB shutdown check', () => assertDatabaseUnavailable(db)))
+    await attemptCleanup('temporary evidence cleanup', () => awaitSettledLocalTeardown('temporary evidence cleanup', () => {
       if (!evidenceDir) return
-      await fs.promises.rm(evidenceDir, { recursive: true, force: true })
+      fs.rmSync(evidenceDir, { recursive: true, force: true })
       if (fs.existsSync(evidenceDir)) throw new Error('temporary evidence directory still exists')
-    })
+    }))
     if (cleanupFailures.length) {
       const cleanupError = new Error(`CLEANUP FAILED: ${cleanupFailures.map(failure => `${failure.label}: ${failure.error?.message || failure.error}`).join('; ')}`)
       cleanupError.failures = cleanupFailures
