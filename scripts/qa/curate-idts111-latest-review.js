@@ -12,12 +12,16 @@ const reviewDate = '2026-08-04'
 const checkOnly = process.argv.includes('--check')
 const finalApprovedCaseIds = new Set(['UAT-COM-003'])
 const finalApprovalContract = {
+  sourceHead: 'e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34',
   executor: 'NhanT (DonHV support)',
   mergeSha: '54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b',
   bugId: '029435e3-abb7-4079-826a-394709f9eb50',
   bugNumber: 'BUG-0021',
+  actorRole: 'Project Manager',
+  environment: 'SAP BTP AppRouter + XSUAA + SAP HANA Cloud',
   uiVersion: '0.0.16',
-  uiArtifactSha256: 'F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4'
+  uiArtifactSha256: 'F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4',
+  reviewBoundary: 'Final PASS approved under the parent-authorized user decision; no Jira approval or Jira mutation is claimed.'
 }
 
 const stalePrerequisite = new Set(['UAT-AI-007', 'UAT-ATT-002', 'UAT-ATT-003'])
@@ -49,7 +53,71 @@ function classify (manifest) {
   throw new Error(`Unclassified manifest: ${id}`)
 }
 
-function expectedReviewFor (manifest) {
+function validateFinalApprovalReceipt (manifest, manifestPath, requireContract) {
+  const resolvedManifestPath = manifestPath
+    ? path.resolve(manifestPath)
+    : path.join(evidenceRoot, manifest.caseId, 'manifest.json')
+  const receiptPath = path.join(path.dirname(resolvedManifestPath), '05-live-readback-receipt.json')
+  if (!fs.existsSync(receiptPath)) throw new Error(`Missing final approval receipt: ${manifest.caseId}`)
+  let receipt
+  try {
+    receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'))
+  } catch {
+    throw new Error(`Final approval receipt mismatch: ${manifest.caseId}: JSON`)
+  }
+
+  const receiptContract = (field, actual, expected) => requireContract(`receipt.${field}`, actual === expected)
+  receiptContract('receiptType', receipt.receiptType, 'IDTS-111-UAT-COM-003-live-readback')
+  receiptContract('caseId', receipt.caseId, manifest.caseId)
+  receiptContract('approvedSourceHead', receipt.approvedSourceHead, finalApprovalContract.sourceHead)
+  receiptContract('approvedMergeSha', receipt.approvedMergeSha, manifest.sourceMergeSha)
+  receiptContract('deployedRuntimeSha', receipt.deployedRuntimeSha, manifest.deployedRuntimeSha)
+  receiptContract('runtimeUiVersion', receipt.runtimeUiVersion, manifest.testRecord?.uiVersion)
+  receiptContract('runtimeUiArtifactSha256', receipt.runtimeUiArtifactSha256, manifest.testRecord?.uiArtifactSha256)
+
+  const current = receipt.currentReadOnlyReload
+  receiptContract('currentReadOnlyReload.bugId', current?.bugId, manifest.testRecord?.bugId)
+  receiptContract('currentReadOnlyReload.bugNumber', current?.bugNumber, manifest.testRecord?.bugNumber)
+  receiptContract('currentReadOnlyReload.actor', current?.actor, manifest.testRecord?.actorDisplayName)
+  receiptContract('currentReadOnlyReload.actorRole', current?.actorRole, manifest.testRecord?.actorRole)
+  receiptContract('currentReadOnlyReload.commentListCount', current?.commentListCount, manifest.liveAcceptance?.oneThousand?.commentListCountAfterReload)
+  receiptContract('currentReadOnlyReload.markerCounts.1000', current?.markerCounts?.['UAT-COM-003-1000|'], manifest.liveAcceptance?.oneThousand?.markerCountAfterReload)
+  receiptContract('currentReadOnlyReload.markerCounts.1001', current?.markerCounts?.['UAT-COM-003-1001|'], manifest.liveAcceptance?.oneThousandOne?.markerCountAfterReload)
+
+  const boundary = receipt.liveAcceptanceReference
+  receiptContract('liveAcceptanceReference.oneThousand.inputLength', boundary?.oneThousand?.inputLength, manifest.liveAcceptance?.oneThousand?.inputLength)
+  receiptContract('liveAcceptanceReference.oneThousand.markerCountAfterReload', boundary?.oneThousand?.markerCountAfterReload, manifest.liveAcceptance?.oneThousand?.markerCountAfterReload)
+  receiptContract('liveAcceptanceReference.oneThousand.commentListCountAfterReload', boundary?.oneThousand?.commentListCountAfterReload, manifest.liveAcceptance?.oneThousand?.commentListCountAfterReload)
+  receiptContract('liveAcceptanceReference.oneThousandOne.inputLength', boundary?.oneThousandOne?.inputLength, manifest.liveAcceptance?.oneThousandOne?.inputLength)
+  receiptContract('liveAcceptanceReference.oneThousandOne.markerCountAfterReload', boundary?.oneThousandOne?.markerCountAfterReload, manifest.liveAcceptance?.oneThousandOne?.markerCountAfterReload)
+  receiptContract('liveAcceptanceReference.oneThousandOne.commentListCountBefore', boundary?.oneThousandOne?.commentListCountBefore, manifest.liveAcceptance?.oneThousandOne?.commentListCountBefore)
+  receiptContract('liveAcceptanceReference.oneThousandOne.commentListCountAfterReload', boundary?.oneThousandOne?.commentListCountAfterReload, manifest.liveAcceptance?.oneThousandOne?.commentListCountAfterReload)
+  receiptContract('liveAcceptanceReference.oneThousandOne.httpStatus', boundary?.oneThousandOne?.httpStatus, manifest.liveAcceptance?.oneThousandOne?.httpStatus)
+  receiptContract('liveAcceptanceReference.oneThousandOne.capReason', boundary?.oneThousandOne?.capReason, manifest.liveAcceptance?.oneThousandOne?.capReason)
+  receiptContract('liveAcceptanceReference.oneThousandOne.partialOrTruncatedCommentStored', boundary?.oneThousandOne?.partialOrTruncatedCommentStored, manifest.liveAcceptance?.oneThousandOne?.partialOrTruncatedCommentStored)
+
+  const rejection = receipt.priorRecordedRejection
+  receiptContract('priorRecordedRejection.inputLength', rejection?.inputLength, 1001)
+  receiptContract('priorRecordedRejection.httpStatus', rejection?.httpStatus, 400)
+  receiptContract('priorRecordedRejection.capReason', rejection?.capReason, 'Comment cannot exceed 1000 characters.')
+  receiptContract('priorRecordedRejection.partialOrTruncatedCommentStored', rejection?.partialOrTruncatedCommentStored, false)
+
+  const evidence = Array.isArray(manifest.evidence) ? manifest.evidence : []
+  const receiptEvidence = evidence.find(item => item.file === '05-live-readback-receipt.json')
+  receiptContract('evidence.05-live-readback-receipt.json', Boolean(receiptEvidence), true)
+  if (receiptEvidence) {
+    const actualReceiptHash = crypto.createHash('sha256').update(fs.readFileSync(receiptPath)).digest('hex').toUpperCase()
+    receiptContract('evidence.05-live-readback-receipt.json.sha256', String(receiptEvidence.sha256 || '').toUpperCase(), actualReceiptHash)
+  }
+  const screenshotReferences = Array.isArray(receipt.screenshotReferences) ? receipt.screenshotReferences : []
+  for (const file of ['03-live-1000-pass.png', '04-live-1001-rejected.png']) {
+    const manifestEvidence = evidence.find(item => item.file === file)
+    const receiptEvidence = screenshotReferences.find(item => item.file === file)
+    receiptContract(`screenshotReferences.${file}`, Boolean(manifestEvidence && receiptEvidence && receiptEvidence.sha256 === manifestEvidence.sha256), true)
+  }
+}
+
+function expectedReviewFor (manifest, manifestPath) {
   const [category, currentStatus] = classify(manifest)
   if (finalApprovedCaseIds.has(manifest.caseId)) {
     const requireContract = (field, condition) => {
@@ -61,8 +129,11 @@ function expectedReviewFor (manifest) {
     }
     requireContract('testRecord.bugId', manifest.testRecord?.bugId === finalApprovalContract.bugId)
     requireContract('testRecord.bugNumber', manifest.testRecord?.bugNumber === finalApprovalContract.bugNumber)
+    requireContract('testRecord.actorRole', manifest.testRecord?.actorRole === finalApprovalContract.actorRole)
+    requireContract('testRecord.environment', manifest.testRecord?.environment === finalApprovalContract.environment)
     requireContract('testRecord.uiVersion', manifest.testRecord?.uiVersion === finalApprovalContract.uiVersion)
     requireContract('testRecord.uiArtifactSha256', manifest.testRecord?.uiArtifactSha256 === finalApprovalContract.uiArtifactSha256)
+    requireContract('reviewBoundary', manifest.reviewBoundary === finalApprovalContract.reviewBoundary && !/\b(?:pending|candidate|not final|unapproved|await(?:ing)?|needs?)\b/i.test(manifest.reviewBoundary || ''))
     const oneThousand = manifest.liveAcceptance?.oneThousand
     const oneThousandOne = manifest.liveAcceptance?.oneThousandOne
     requireContract('liveAcceptance.oneThousand.inputLength', oneThousand?.inputLength === 1000)
@@ -86,13 +157,14 @@ function expectedReviewFor (manifest) {
     requireContract('evidence', declaredEvidence.has('UAT-COM-003-E03:03-live-1000-pass.png'))
     requireContract('evidence', declaredEvidence.has('UAT-COM-003-E04:04-live-1001-rejected.png'))
     requireContract('evidence', declaredEvidence.has('UAT-COM-003-E05:05-live-readback-receipt.json'))
+    validateFinalApprovalReceipt(manifest, manifestPath, requireContract)
     if (manifest.candidateExecutionStatus !== 'PASS' ||
       manifest.candidateOutcome !== 'MEETS_EXPECTED_RESULT' ||
       manifest.donhvLatestReview?.currentStatus !== 'FINAL_PASS_APPROVED' ||
       manifest.donhvLatestReview?.finalPassApproved !== true) {
       throw new Error(`Final approval metadata mismatch: ${manifest.caseId}`)
     }
-    return {
+    const expectedReview = {
       jiraCommentId: reviewCommentId,
       reviewDate,
       category,
@@ -100,6 +172,10 @@ function expectedReviewFor (manifest) {
       preservesHistoricalCandidateTruth: true,
       finalPassApproved: true
     }
+    if (JSON.stringify(manifest.donhvLatestReview) !== JSON.stringify(expectedReview)) {
+      throw new Error(`Final approval metadata mismatch: ${manifest.caseId}`)
+    }
+    return expectedReview
   }
 
   if (manifest.donhvLatestReview?.currentStatus === 'FINAL_PASS_APPROVED' ||
@@ -153,7 +229,7 @@ for (const manifestPath of manifests) {
     if (actualHash !== declaredHash) throw new Error(`Evidence SHA-256 mismatch: ${manifest.caseId}/${item.file}`)
     evidenceHashes.add(actualHash)
   }
-  const expectedReview = expectedReviewFor(manifest)
+  const expectedReview = expectedReviewFor(manifest, manifestPath)
   if (historicalOldRuntime.has(manifest.caseId)) expectedReview.historicalEvidenceOnly = true
   if (checkOnly) {
     if (JSON.stringify(manifest.donhvLatestReview) !== JSON.stringify(expectedReview)) {
