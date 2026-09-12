@@ -10,12 +10,12 @@ const summaryPath = path.resolve('docs/pm/evidence/idts-111/latest-review-summar
 const reviewCommentId = '10962'
 const reviewDate = '2026-08-04'
 const checkOnly = process.argv.includes('--check')
+const finalApprovedCaseIds = new Set(['UAT-COM-003'])
 
 const stalePrerequisite = new Set(['UAT-AI-007', 'UAT-ATT-002', 'UAT-ATT-003'])
 const historicalOldRuntime = new Set()
 const defectRecheck = new Set()
 const currentRuntimePositive = new Set(['UAT-AUTH-005', 'UAT-COM-001', 'UAT-COM-004'])
-const currentRuntimeNegative = new Set(['UAT-COM-003'])
 const fixtureProvenanceBlocked = new Set(['UAT-ATT-001'])
 const currentRuntimeDefect = new Set(['UAT-BUG-008'])
 const currentRuntimePartial = new Set(['UAT-UX-002'])
@@ -25,9 +25,9 @@ const physicalKeyboard = new Set(['UAT-UX-003'])
 
 function classify (manifest) {
   const id = manifest.caseId
+  if (finalApprovedCaseIds.has(id)) return ['CURRENT_RUNTIME_POSITIVE', 'FINAL_PASS_APPROVED']
   if (currentRuntimePositive.has(id)) return ['CURRENT_RUNTIME_POSITIVE', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
   if (fixtureProvenanceBlocked.has(id)) return ['FIXTURE_PROVENANCE_INCONSISTENT', 'BLOCKED_FIXTURE_PROVENANCE_INCONSISTENT']
-  if (currentRuntimeNegative.has(id)) return ['CURRENT_RUNTIME_NEGATIVE', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
   if (currentRuntimeDefect.has(id)) return ['CONFIRMED_DEFECT_RECHECK', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
   if (currentRuntimePartial.has(id)) return ['CURRENT_RUNTIME_PARTIAL_RECHECK', 'CURRENT_RUNTIME_PARTIAL_RECHECK_NEEDS_CANDIDATE_FIXTURE']
   if (stalePrerequisite.has(id)) return ['STALE_PREREQUISITE_RERUN_REQUIRED', 'RERUN_REQUIRED_CURRENT_RUNTIME']
@@ -39,6 +39,40 @@ function classify (manifest) {
   if (manifest.candidateExecutionStatus === 'EXECUTION_BLOCKED_PENDING_PRECONDITION') return ['VALID_PRECONDITION_BLOCKER', 'BLOCKED']
   if (manifest.candidateOutcome === 'MEETS_EXPECTED_RESULT') return ['RETAINED_TRUTHFUL_POSITIVE', 'CANDIDATE_EVIDENCE_RETAINED']
   throw new Error(`Unclassified manifest: ${id}`)
+}
+
+function expectedReviewFor (manifest) {
+  const [category, currentStatus] = classify(manifest)
+  if (finalApprovedCaseIds.has(manifest.caseId)) {
+    if (manifest.candidateExecutionStatus !== 'PASS' ||
+      manifest.candidateOutcome !== 'MEETS_EXPECTED_RESULT' ||
+      manifest.donhvLatestReview?.currentStatus !== 'FINAL_PASS_APPROVED' ||
+      manifest.donhvLatestReview?.finalPassApproved !== true) {
+      throw new Error(`Final approval metadata mismatch: ${manifest.caseId}`)
+    }
+    return {
+      jiraCommentId: reviewCommentId,
+      reviewDate,
+      category,
+      currentStatus,
+      preservesHistoricalCandidateTruth: true,
+      finalPassApproved: true
+    }
+  }
+
+  if (manifest.donhvLatestReview?.currentStatus === 'FINAL_PASS_APPROVED' ||
+    manifest.donhvLatestReview?.finalPassApproved === true) {
+    throw new Error(`Final approval is not allowlisted: ${manifest.caseId}`)
+  }
+
+  return {
+    jiraCommentId: reviewCommentId,
+    reviewDate,
+    category,
+    currentStatus,
+    preservesHistoricalCandidateTruth: true,
+    finalPassApproved: false
+  }
 }
 
 const caseDirectories = fs.readdirSync(evidenceRoot, { withFileTypes: true })
@@ -77,16 +111,7 @@ for (const manifestPath of manifests) {
     if (actualHash !== declaredHash) throw new Error(`Evidence SHA-256 mismatch: ${manifest.caseId}/${item.file}`)
     evidenceHashes.add(actualHash)
   }
-  const [category, currentStatus] = classify(manifest)
-  const expectedReview = {
-    jiraCommentId: reviewCommentId,
-    reviewDate,
-    category,
-    currentStatus,
-    preservesHistoricalCandidateTruth: true,
-    finalPassApproved: false
-  }
-  if (expectedReview.finalPassApproved !== false) throw new Error(`Final PASS is forbidden in candidate package: ${manifest.caseId}`)
+  const expectedReview = expectedReviewFor(manifest)
   if (historicalOldRuntime.has(manifest.caseId)) expectedReview.historicalEvidenceOnly = true
   if (checkOnly) {
     if (JSON.stringify(manifest.donhvLatestReview) !== JSON.stringify(expectedReview)) {
@@ -96,7 +121,7 @@ for (const manifestPath of manifests) {
     manifest.donhvLatestReview = expectedReview
     fs.writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8')
   }
-  counts[category] = (counts[category] || 0) + 1
+  counts[expectedReview.category] = (counts[expectedReview.category] || 0) + 1
 }
 
 const expected = {
@@ -107,19 +132,19 @@ const expected = {
   CATALOG_SEMANTIC_CORRECTION: 5,
   PHYSICAL_KEYBOARD_LIMITATION: 1,
   AI_DIAGNOSTIC_RERUN: 2,
-  CURRENT_RUNTIME_POSITIVE: 3,
-  CURRENT_RUNTIME_NEGATIVE: 1,
+  CURRENT_RUNTIME_POSITIVE: 4,
+  CURRENT_RUNTIME_NEGATIVE: 0,
   FIXTURE_PROVENANCE_INCONSISTENT: 1,
   CURRENT_RUNTIME_PARTIAL_RECHECK: 1
 }
 
 for (const [category, expectedCount] of Object.entries(expected)) {
-  if (counts[category] !== expectedCount) throw new Error(`${category}: expected ${expectedCount}, got ${counts[category] || 0}`)
+  if ((counts[category] || 0) !== expectedCount) throw new Error(`${category}: expected ${expectedCount}, got ${counts[category] || 0}`)
 }
 
 const expectedDisposition = {
-  MEETS_EXPECTED_RESULT: 22,
-  DOES_NOT_MEET_EXPECTED_RESULT: 12,
+  MEETS_EXPECTED_RESULT: 23,
+  DOES_NOT_MEET_EXPECTED_RESULT: 11,
   BLOCKED: 23
 }
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
@@ -150,3 +175,5 @@ const summary = {
 
 if (!checkOnly) fs.writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8')
 console.log(JSON.stringify({ ...summary, mode: checkOnly ? 'CHECK_ONLY' : 'WRITE' }))
+
+module.exports = { classify, expectedReviewFor, finalApprovedCaseIds }
