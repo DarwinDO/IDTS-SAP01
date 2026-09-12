@@ -8,7 +8,7 @@
 - Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`.
 - Final-approved `UAT-COM-003` readback remains bound to PR #405 source head `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34` and approved source/deployed merge `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`; `UAT-UX-003` is additionally final-approved from DonHV's 2026-09-12 physical-keyboard attestation at source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`.
 - Reviewer: DonHV, with independent read-only agent reviews used only as advisory input.
-- Evidence integrity: 57 manifests, 77 image references plus one structured JSON readback receipt (78 evidence references, 65 unique hashes), with zero missing files or hash mismatches in the fresh curation check. The final exact-head gate is still required after commit.
+- Evidence integrity: 57 manifests, 77 image references plus two structured JSON receipts (79 evidence references, 66 unique hashes), with zero missing files or hash mismatches in the fresh curation check. The final exact-head gate is still required after commit.
 
 `ACCEPTED_EVIDENCE` means that the submitted evidence truthfully supports the observed result. It does not mean that a blocked case passed, that a product defect is fixed, or that the final UAT workbook is approved.
 
@@ -91,7 +91,7 @@ NhanT recorded the required acknowledgment in the repository and Jira comments `
 
 ### 2026-08-04 current-runtime addendum
 
-Current deployed reruns now supersede the old-runtime behavior for `UAT-COM-001`, `UAT-AUTH-005`, and `UAT-COM-003`, which are current candidate PASS; `UAT-COM-003` is the sole final PASS approved under the parent-authorized decision. Its structured read-only receipt records the post-reload Comments count and marker counts, while the pre-fix 1006-character failure remains historical. `UAT-ATT-001` and `UAT-BUG-008` remain candidate failures with fresh evidence. `UAT-COM-004` passes sanitization/no-execution, `UAT-UX-002` is only partially rechecked, and `UAT-AI-005` still lacks the immutable suggestion ID and sanitized Network response required for diagnostic closure. `UAT-UX-003` remains a physical-keyboard handoff. DonHV still owns final disposition and workbook/Drive synchronization.
+This historical 2026-08-04 addendum records deployed reruns that superseded the old-runtime behavior for `UAT-COM-001`, `UAT-AUTH-005`, and `UAT-COM-003`, which were current candidate PASS at that point; `UAT-UX-003` was then a physical-keyboard handoff. The current 2026-09-12 UX003 closure is recorded below, while the historical Browser automation limitation remains preserved. Its structured COM003 read-only receipt records the post-reload Comments count and marker counts, while the pre-fix 1006-character failure remains historical. `UAT-ATT-001` and `UAT-BUG-008` remain candidate failures with fresh evidence. `UAT-COM-004` passes sanitization/no-execution, `UAT-UX-002` is only partially rechecked, and `UAT-AI-005` still lacks the immutable suggestion ID and sanitized Network response required for diagnostic closure. DonHV still owns final disposition and workbook/Drive synchronization.
 
 ### Latest DoNHV comment 10962 remediation (2026-08-04)
 
@@ -99,7 +99,7 @@ Current deployed reruns now supersede the old-runtime behavior for `UAT-COM-001`
 - Fresh current-runtime PNGs now document `UAT-AUTH-005` signed-out confirmation plus protected-route SAP Sign In redirect, and `UAT-BUG-008` duplicate History rows.
 - `UAT-ATT-001` remains NhanT's candidate negative, but DonHV disposition is **BLOCKED — fixture provenance inconsistent**. The raw 44/54/47-byte records are intentionally unchanged pending member reconciliation.
 - Remaining human/diagnostic gaps are explicit: AI immutable suggestion ID/Network response, a matching UX-002 wrapping fixture, and NhanT physical-keyboard confirmation for UX-003.
-- Machine-readable curation uses Jira comment `10962`, pre-commit curation baseline `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34`, 57 manifests, 78 evidence references and 65 unique hashes. The final-approved `UAT-COM-003` receipt is `uat/UAT-COM-003/05-live-readback-receipt.json`; final commit SHA is recorded in the PR/Jira handoff after commit to avoid self-referential metadata.
+- Machine-readable curation uses Jira comment `10962`, source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`, 57 manifests, 79 evidence references and 66 unique hashes. The final-approved receipts are `uat/UAT-COM-003/05-live-readback-receipt.json` and `uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json`; final commit SHA is recorded in the PR/Jira handoff after commit to avoid self-referential metadata.
 
 ### 2026-09-12 UAT-UX-003 physical-keyboard closure
 

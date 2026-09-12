@@ -17,7 +17,7 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 - 1 physical-keyboard closure is now DonHV-human-attested; the historical Browser automation limitation remains preserved.
 - 2 AI diagnostic reruns require immutable suggestion ID plus sanitized Network/audit and no-mutation proof.
 - `UAT-COM-001` is a current candidate positive. NhanT's ATT-001 negative remains historically intact, while DonHV blocks acceptance because its 44/54/47-byte fixture provenance is inconsistent.
-- Retained visual evidence: 77 PNG references plus one structured JSON readback receipt (78 evidence references, 65 unique SHA-256 values); every manifest reference and hash must pass the fresh integrity gate.
+- Retained evidence: 77 PNG references plus two structured JSON receipts (79 evidence references, 66 unique SHA-256 values); every manifest reference and hash must pass the fresh integrity gate.
 - Reviewer-approved final PASS: exactly `UAT-COM-003` and `UAT-UX-003`. No other case is final-approved, and the approved catalog remains unchanged at 90 `PREPARED`.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
@@ -64,7 +64,7 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 ## Verification
 
 - 57 manifests parsed successfully.
-- 78 evidence references exist; the fresh integrity gate verifies existence and recorded SHA-256, including `uat/UAT-COM-003/05-live-readback-receipt.json`.
+- 79 evidence references exist; the fresh integrity gate verifies existence and recorded SHA-256, including both final-approval receipts.
 - `npm.cmd run qa:secret-scan` -> PASS.
 - `git diff --check` -> PASS.
 - Catalog integrity -> 90/90 `PREPARED`; catalog file has no diff.
@@ -72,7 +72,7 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 
 ## DonHV review actions
 
-1. Review the remaining 11 DOES_NOT_MEET candidates and disposition them in Jira/catalog; `UAT-COM-003` is already the sole final-approved PASS.
+1. Review the remaining 10 DOES_NOT_MEET candidates and disposition them in Jira/catalog; exactly `UAT-COM-003` and `UAT-UX-003` are final-approved PASS.
 2. Decide whether `UAT-ATT-006` is sufficient with inferred storage failure or requires a controlled S3 outage rerun.
 3. Provision the identities, roles, state fixtures, service fixes, and direct-request controls listed in the 25 blocked manifests, then assign reruns where required.
 4. Only after reviewer decisions, update the approved catalog and generate/synchronize the final English `UAT_EN_PREPARED` workbook.
@@ -106,7 +106,7 @@ This section is historical. IDTS-116 changed the current runtime after these obs
 
 ## 2026-09-12 final-approved current readback
 
-`UAT-COM-003` is the sole final UAT PASS approved under the parent-authorized decision. The approved PR #405 source head is `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34`; the exact source, execution, and deployed runtime SHA is `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`. The deployed Bug Management UI is version `0.0.16` with artifact SHA-256 `F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4`. On controlled `BUG-0021` (`029435e3-abb7-4079-826a-394709f9eb50`), the read-only Edge reload receipt [`05-live-readback-receipt.json`](uat/UAT-COM-003/05-live-readback-receipt.json) records two Comments entries, one `UAT-COM-003-1000|` marker, and zero `UAT-COM-003-1001|` markers. No live data was mutated during this readback.
+Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved under the parent-authorized decision. The approved PR #405 source head is `e3c8977cbdd981c90133e8e4c27fc8d7b6f44d34`; the exact source, execution, and deployed runtime SHA is `54ad1b824d74f57e5d1a6e9dbd6208cd80768d8b`. The deployed Bug Management UI is version `0.0.16` with artifact SHA-256 `F7949863FAD1677878B5E649155586FA8526683DCEDD7720213E0CC88FBB7AF4`. On controlled `BUG-0021` (`029435e3-abb7-4079-826a-394709f9eb50`), the read-only Edge reload receipt [`05-live-readback-receipt.json`](uat/UAT-COM-003/05-live-readback-receipt.json) records two Comments entries, one `UAT-COM-003-1000|` marker, and zero `UAT-COM-003-1001|` markers. No live data was mutated during this readback.
 
 The prior authorized 1001-character attempt remains a separate recorded event: CAP returned HTTP `400` with `Comment cannot exceed 1000 characters.`, the TextArea retained the input, the Comments count stayed at two after reload, and no truncated or partial comment was stored. Its historical pre-fix 1006-character failure remains preserved in the manifest and is not rewritten as a current result. The current partition is 24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED, with current-runtime negative count 0; the other 55 cases are not final-approved. The workbook, IDTS-110 artifacts, Google Drive, Jira, and unrelated live data remain unchanged.
 

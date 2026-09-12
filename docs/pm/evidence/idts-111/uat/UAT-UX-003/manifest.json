@@ -17,6 +17,12 @@
   "reviewBoundary": "Final PASS approved under the parent-authorized physical-keyboard attestation; the historical Browser automation limitation remains preserved.",
   "evidence": [
     {
+      "id": "UAT-UX-003-E01",
+      "file": "01-focus-return-after-keyboard-dialog.png",
+      "description": "Visible focus returned to Find Similar Bugs after keyboard-opened dialog was closed with Escape.",
+      "sha256": "4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9"
+    },
+    {
       "id": "UAT-UX-003-E02",
       "file": "02-manual-physical-keyboard-attestation.json",
       "description": "DonHV human attestation of the physical keyboard sequence; no simulated browser key result is claimed.",
@@ -38,14 +44,12 @@
       "tabAttempts": 9,
       "tabAdvanced": false
     },
-    "evidence": [
-      {
-        "id": "UAT-UX-003-E01",
-        "file": "01-focus-return-after-keyboard-dialog.png",
-        "description": "Visible focus returned to Find Similar Bugs after keyboard-opened dialog was closed with Escape.",
-        "sha256": "4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9"
-      }
-    ],
+    "evidenceReference": {
+      "id": "UAT-UX-003-E01",
+      "file": "01-focus-return-after-keyboard-dialog.png",
+      "description": "Visible focus returned to Find Similar Bugs after keyboard-opened dialog was closed with Escape.",
+      "sha256": "4493FF9E511A68DEBF408285F96555F73C5AFDB0FE0D02AD1D83AF6479E984E9"
+    },
     "limitation": "The approved Browser surface may translate Tab differently from a physical keyboard; DonHV manual confirmation is required before treating this as a confirmed accessibility defect."
   },
   "privacyReview": {

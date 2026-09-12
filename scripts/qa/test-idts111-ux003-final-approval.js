@@ -5,13 +5,14 @@ const crypto = require('node:crypto')
 const fs = require('node:fs')
 const os = require('node:os')
 const path = require('node:path')
-const { spawnSync } = require('node:child_process')
+const { execFileSync, spawnSync } = require('node:child_process')
 
 const projectRoot = process.cwd()
 const evidenceRoot = path.join(projectRoot, 'docs/pm/evidence/idts-111/uat')
 const realUxManifestPath = path.join(evidenceRoot, 'UAT-UX-003/manifest.json')
 const realUxManifest = JSON.parse(fs.readFileSync(realUxManifestPath, 'utf8'))
 const historicalEvidence = realUxManifest.historicalAutomationLimitation?.evidence?.[0] || realUxManifest.evidence[0]
+const BASELINE_SOURCE_HEAD = '4ab336388fb744b82abdfe6ef8f7c334b4075428'
 const historicalRecord = realUxManifest.historicalAutomationLimitation || {
   executor: realUxManifest.executor,
   candidateExecutionStatus: realUxManifest.candidateExecutionStatus,
@@ -78,7 +79,7 @@ function buildFinalManifest (attestationHash) {
     actualResult: 'DonHV physically executed the seven-step keyboard sequence and observed visible focus, control-to-control Tab navigation, Enter dialog opening, arrow-key composite-list navigation, dialog-action reachability, Escape close, and focus return to the trigger.',
     candidateOutcome: 'MEETS_EXPECTED_RESULT',
     reviewBoundary: 'Final PASS approved under the parent-authorized physical-keyboard attestation; the historical Browser automation limitation remains preserved.',
-    evidence: [{
+    evidence: [historicalEvidence, {
       id: 'UAT-UX-003-E02',
       file: '02-manual-physical-keyboard-attestation.json',
       description: 'DonHV human attestation of the physical keyboard sequence; no simulated browser key result is claimed.',
@@ -93,7 +94,7 @@ function buildFinalManifest (attestationHash) {
       actualResult: historicalRecord.actualResult,
       reviewBoundary: historicalRecord.reviewBoundary,
       keyboardTrace: historicalRecord.keyboardTrace,
-      evidence: [historicalEvidence],
+      evidenceReference: historicalEvidence,
       limitation: historicalRecord.limitation
     },
     limitations: [buildAttestation().limitation],
@@ -116,12 +117,6 @@ function loadCheckerInTempRepo () {
   const sourceScript = path.join(projectRoot, 'scripts/qa/curate-idts111-latest-review.js')
   const temporaryScript = path.join(temporary, 'scripts/qa/curate-idts111-latest-review.js')
   fs.copyFileSync(sourceScript, temporaryScript)
-
-  // The copied baseline must get past the known raw-CRLF COM003 receipt mismatch
-  // so this test can reach the missing UX003 branch on the pre-fix checker.
-  const temporaryComReceiptPath = path.join(temporaryEvidenceRoot, 'UAT-COM-003/05-live-readback-receipt.json')
-  const temporaryComReceipt = fs.readFileSync(temporaryComReceiptPath, 'utf8').replace(/\r\n/g, '\n')
-  fs.writeFileSync(temporaryComReceiptPath, temporaryComReceipt, 'utf8')
 
   const git = args => {
     const result = spawnSync('git', args, { cwd: temporary, encoding: 'utf8' })
@@ -163,6 +158,17 @@ check('UX003 final approval is allowlisted', () => {
   assert.equal(finalApprovedCaseIds.has('UAT-UX-003'), true)
 })
 
+check('exact baseline checker does not allowlist UX003 while current source does', () => {
+  let baselineSource
+  try {
+    baselineSource = execFileSync('git', ['show', `${BASELINE_SOURCE_HEAD}:scripts/qa/curate-idts111-latest-review.js`], { encoding: 'utf8' })
+  } catch (error) {
+    throw new Error(`Baseline checker unavailable at ${BASELINE_SOURCE_HEAD}: ${error.message}`)
+  }
+  assert.match(baselineSource, /const finalApprovedCaseIds = new Set\(\['UAT-COM-003'\]\)/)
+  assert.equal(finalApprovedCaseIds.has('UAT-UX-003'), true)
+})
+
 check('UX003 validator is exported', () => {
   assert.equal(typeof validateUx003FinalApproval, 'function')
 })
@@ -197,6 +203,48 @@ check('UX003 final manifest satisfies the exact approval contract', () => {
 
 check('expectedReviewFor dispatches UX003 to final approval', () => {
   assert.deepEqual(expectedReviewFor(finalManifest, manifestPath), finalManifest.donhvLatestReview)
+})
+
+function withAttestationVariant (mutate, assertion) {
+  const variant = structuredClone(attestation)
+  mutate(variant)
+  writeJson(attestationPath, variant)
+  const variantManifest = structuredClone(finalManifest)
+  variantManifest.evidence.find(item => item.file === '02-manual-physical-keyboard-attestation.json').sha256 = rawSha256(attestationPath)
+  try {
+    assertion(variantManifest)
+  } finally {
+    writeJson(attestationPath, attestation)
+  }
+}
+
+check('false attestation outcome is rejected', () => {
+  withAttestationVariant(variant => {
+    variant.outcomes.arrowKeysNavigateCompositeList = false
+  }, variantManifest => {
+    assert.throws(() => validateUx003FinalApproval(variantManifest, manifestPath), /attestation\.outcomes/)
+  })
+})
+
+check('pending current review boundary is rejected', () => {
+  const variantManifest = structuredClone(finalManifest)
+  variantManifest.reviewBoundary = 'Final PASS approved; pending DonHV review'
+  assert.throws(() => validateUx003FinalApproval(variantManifest, manifestPath), /manifest\.currentPass/)
+})
+
+check('malformed attestation hash is rejected', () => {
+  const variantManifest = structuredClone(finalManifest)
+  variantManifest.evidence.find(item => item.file === '02-manual-physical-keyboard-attestation.json').sha256 = '0'.repeat(64)
+  assert.throws(() => validateUx003FinalApproval(variantManifest, manifestPath), /evidence\.attestation\.sha256/)
+})
+
+check('malformed attestation content is rejected', () => {
+  fs.writeFileSync(attestationPath, '{', 'utf8')
+  try {
+    assert.throws(() => validateUx003FinalApproval(finalManifest, manifestPath), /Final approval receipt mismatch: UAT-UX-003: JSON/)
+  } finally {
+    writeJson(attestationPath, attestation)
+  }
 })
 
 check('write mode fails before UX003 review normalization', () => {

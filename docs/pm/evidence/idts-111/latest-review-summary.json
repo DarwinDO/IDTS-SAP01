@@ -3,8 +3,8 @@
   "reviewDate": "2026-08-04",
   "curatedAtBaselineHead": "4ab336388fb744b82abdfe6ef8f7c334b4075428",
   "manifests": 57,
-  "evidenceReferences": 78,
-  "uniqueEvidenceHashes": 65,
+  "evidenceReferences": 79,
+  "uniqueEvidenceHashes": 66,
   "currentDisposition": {
     "MEETS_EXPECTED_RESULT": 24,
     "DOES_NOT_MEET_EXPECTED_RESULT": 10,

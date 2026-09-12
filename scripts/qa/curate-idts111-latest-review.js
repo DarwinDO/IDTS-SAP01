@@ -33,7 +33,6 @@ const currentRuntimeDefect = new Set(['UAT-BUG-008'])
 const currentRuntimePartial = new Set(['UAT-UX-002'])
 const semanticCorrection = new Set(['UAT-AI-008', 'UAT-AI-010', 'UAT-AI-014', 'UAT-AI-015', 'UAT-LIFE-014'])
 const aiDiagnostic = new Set(['UAT-AI-005', 'UAT-AI-009'])
-const physicalKeyboard = new Set(['UAT-UX-003'])
 
 function hashEvidence (filePath) {
   const bytes = fs.readFileSync(filePath)
@@ -55,7 +54,6 @@ function classify (manifest) {
   if (defectRecheck.has(id)) return ['CONFIRMED_DEFECT_RECHECK', 'RERUN_REQUIRED_CURRENT_RUNTIME']
   if (semanticCorrection.has(id)) return ['CATALOG_SEMANTIC_CORRECTION', 'REVIEW_CORRECTION_REQUIRED']
   if (aiDiagnostic.has(id)) return ['AI_DIAGNOSTIC_RERUN', 'RERUN_REQUIRES_IMMUTABLE_ID_NETWORK_AUDIT']
-  if (physicalKeyboard.has(id)) return ['PHYSICAL_KEYBOARD_LIMITATION', 'MEMBER_MANUAL_CONFIRMATION_REQUIRED']
   if (manifest.candidateExecutionStatus === 'EXECUTION_BLOCKED_PENDING_PRECONDITION') return ['VALID_PRECONDITION_BLOCKER', 'BLOCKED']
   if (manifest.candidateOutcome === 'MEETS_EXPECTED_RESULT') return ['RETAINED_TRUTHFUL_POSITIVE', 'CANDIDATE_EVIDENCE_RETAINED']
   throw new Error(`Unclassified manifest: ${id}`)
@@ -155,7 +153,7 @@ function validateUx003FinalApproval (manifest, manifestPath) {
   requireContract('attestation.evidenceReference.file/hash', fs.existsSync(e01Path) && hashEvidence(e01Path) === attestation.evidenceReference.sha256)
   requireContract('attestation.limitation', attestation.limitation === 'The physical keyboard sequence is human-attested; no browser automation, simulated key events, device, timestamp, or raw keylog is claimed.')
   const historical = manifest.historicalAutomationLimitation
-  requireContract('historicalAutomationLimitation', historical?.preserved === true && historical.executor === 'NhanT' && historical.candidateExecutionStatus === 'EXECUTED_PENDING_DONHV_REVIEW' && historical.candidateOutcome === 'DOES_NOT_MEET_EXPECTED_RESULT' && historical.evidence?.some(item => item.file === '01-focus-return-after-keyboard-dialog.png' && item.sha256 === attestation.evidenceReference.sha256))
+  requireContract('historicalAutomationLimitation', historical?.preserved === true && historical.executor === 'NhanT' && historical.candidateExecutionStatus === 'EXECUTED_PENDING_DONHV_REVIEW' && historical.candidateOutcome === 'DOES_NOT_MEET_EXPECTED_RESULT' && historical.evidenceReference?.id === 'UAT-UX-003-E01' && historical.evidenceReference.file === '01-focus-return-after-keyboard-dialog.png' && historical.evidenceReference.sha256 === attestation.evidenceReference.sha256)
   requireContract('historicalAutomationLimitation.failure', typeof historical.actualResult === 'string' && /Tab.*did not advance/i.test(historical.actualResult) && /Browser.*physical keyboard/i.test(historical.limitation || ''))
   requireContract('manifest.currentPass', manifest.candidateExecutionStatus === 'PASS' && manifest.candidateOutcome === 'MEETS_EXPECTED_RESULT' && manifest.executor === 'DonHV' && typeof manifest.reviewBoundary === 'string' && !/\b(?:pending|candidate|not final|unapproved|await(?:ing)?|needs?)\b/i.test(manifest.reviewBoundary))
   const expectedReview = { jiraCommentId: reviewCommentId, reviewDate: '2026-09-12', category: 'CURRENT_RUNTIME_POSITIVE', currentStatus: 'FINAL_PASS_APPROVED', preservesHistoricalCandidateTruth: true, finalPassApproved: true }
@@ -316,8 +314,8 @@ const expectedDisposition = {
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
   if (candidateDisposition[status] !== expectedCount) throw new Error(`${status}: expected ${expectedCount}, got ${candidateDisposition[status] || 0}`)
 }
-if (evidenceReferences !== 78) throw new Error(`Evidence references: expected 78, got ${evidenceReferences}`)
-if (evidenceHashes.size !== 65) throw new Error(`Unique evidence hashes: expected 65, got ${evidenceHashes.size}`)
+if (evidenceReferences !== 79) throw new Error(`Evidence references: expected 79, got ${evidenceReferences}`)
+if (evidenceHashes.size !== 66) throw new Error(`Unique evidence hashes: expected 66, got ${evidenceHashes.size}`)
 
 const attachmentManifest = JSON.parse(fs.readFileSync(path.join(evidenceRoot, 'UAT-ATT-001', 'manifest.json'), 'utf8'))
 const attachmentText = JSON.stringify(attachmentManifest)
