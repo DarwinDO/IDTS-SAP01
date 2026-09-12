@@ -1,10 +1,10 @@
 {
   "jiraCommentId": "10962",
   "reviewDate": "2026-08-04",
-  "curatedAtBaselineHead": "4ab336388fb744b82abdfe6ef8f7c334b4075428",
+  "curatedAtBaselineHead": "5efa1dcae0a725a3a328eef1ddff3f15a2768351",
   "manifests": 57,
-  "evidenceReferences": 79,
-  "uniqueEvidenceHashes": 66,
+  "evidenceReferences": 81,
+  "uniqueEvidenceHashes": 68,
   "currentDisposition": {
     "MEETS_EXPECTED_RESULT": 24,
     "DOES_NOT_MEET_EXPECTED_RESULT": 10,
@@ -24,7 +24,25 @@
     "PHYSICAL_KEYBOARD_LIMITATION": 0
   },
   "runtimeRerunPerformed": true,
-  "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.",
+  "runtimeRerunLimitation": "AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 Smart Assignment returned one candidate with no retry and Handoff matching transport telemetry was unavailable. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.",
+  "latestEvidenceUpdate": {
+    "date": "2026-09-12",
+    "caseId": "UAT-UX-002",
+    "result": "PARTIAL",
+    "localDeterministicRegression": {
+      "script": "scripts/qa/test-idts127-ux002-responsive-browser.js",
+      "commit": "88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6",
+      "result": "PASS",
+      "scope": "Local CAP plus temporary SQLite fixtures; not live provider/BTP acceptance."
+    },
+    "currentEvidence": "One approved Classification JPG plus one sanitized receipt; three historical PNGs remain integrity-tracked and labelled historical.",
+    "limitations": [
+      "Smart Assignment had one candidate, so the two-candidate check remains blocked and no retry was made.",
+      "Handoff UI settled but matching transport telemetry was unavailable.",
+      "AiSuggestions count delta was unavailable."
+    ],
+    "finalPassApproved": false
+  },
   "finalApprovals": {
     "UAT-COM-003": {
       "status": "FINAL_PASS_APPROVED",

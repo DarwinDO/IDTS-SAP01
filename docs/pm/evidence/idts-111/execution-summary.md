@@ -12,12 +12,12 @@ Deployed runtime: `67b1bf86169e9696c9365ef4846b99ffae30d4e2`
 - Candidate packages prepared: 57/57; no assigned case remains unattempted or unpackaged.
 - Candidate partition: 24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED. Exactly `UAT-COM-003` and `UAT-UX-003` are final UAT PASS approved under the parent-authorized decision; the other 55 cases remain candidate evidence, corrections, or blockers and are not final-approved.
 - Only three stale prerequisites remain: `UAT-AI-007`, `UAT-ATT-002`, `UAT-ATT-003`.
-- Historical defect candidates were rechecked: `UAT-AUTH-005` and `UAT-COM-003` are current candidate positives, with `UAT-COM-003` final-approved; `UAT-BUG-008` remains a current candidate negative, and `UAT-UX-002` is partial pending a matching wrapping fixture.
+- Historical defect candidates were rechecked: `UAT-AUTH-005` and `UAT-COM-003` are current candidate positives, with `UAT-COM-003` final-approved; `UAT-BUG-008` remains a current candidate negative, and `UAT-UX-002` is a current PARTIAL recheck with local responsive PASS, one-candidate Smart Assignment coverage, and unavailable Handoff matching transport telemetry.
 - 5 catalog/semantic corrections are preserved separately from product defects.
 - 1 physical-keyboard closure is now DonHV-human-attested; the historical Browser automation limitation remains preserved.
 - 2 AI diagnostic reruns require immutable suggestion ID plus sanitized Network/audit and no-mutation proof.
 - `UAT-COM-001` is a current candidate positive. NhanT's ATT-001 negative remains historically intact, while DonHV blocks acceptance because its 44/54/47-byte fixture provenance is inconsistent.
-- Retained evidence: 77 PNG references plus two structured JSON receipts (79 evidence references, 66 unique SHA-256 values); every manifest reference and hash must pass the fresh integrity gate.
+- Retained evidence: 78 image references plus three structured JSON receipts (81 evidence references, 68 unique SHA-256 values); every manifest reference and hash must pass the fresh integrity gate.
 - Reviewer-approved final PASS: exactly `UAT-COM-003` and `UAT-UX-003`. No other case is final-approved, and the approved catalog remains unchanged at 90 `PREPARED`.
 - Final `UAT_EN_PREPARED` workbook and Google Drive: unchanged; DonHV remains final integrator.
 
@@ -64,7 +64,7 @@ Each blocked manifest records the exact missing precondition, why the NhanT sess
 ## Verification
 
 - 57 manifests parsed successfully.
-- 79 evidence references exist; the fresh integrity gate verifies existence and recorded SHA-256, including both final-approval receipts.
+- 81 evidence references exist; the fresh integrity gate verifies existence and recorded SHA-256, including both final-approval receipts and the new sanitized UAT-UX-002 receipt.
 - `npm.cmd run qa:secret-scan` -> PASS.
 - `git diff --check` -> PASS.
 - Catalog integrity -> 90/90 `PREPARED`; catalog file has no diff.
@@ -115,3 +115,10 @@ The prior authorized 1001-character attempt remains a separate recorded event: C
 DonHV physically executed the exact seven-outcome checklist against the deployed runtime truth already present in the baseline: visible focus; Tab reaches Find Similar Bugs/core controls; Enter opens Similar Bugs; arrow keys navigate the composite list; Tab reaches dialog actions; Escape closes; focus returns to the trigger. The structured receipt [`02-manual-physical-keyboard-attestation.json`](uat/UAT-UX-003/02-manual-physical-keyboard-attestation.json) is bound to source baseline `4ab336388fb744b82abdfe6ef8f7c334b4075428`, deployed runtime `67b1bf86169e9696c9365ef4846b99ffae30d4e2`, receipt SHA-256 `F1B9CA7548E46EFA1A8AB9C1310134090F53AA599A8742D7D60D13DE0B25C858`, and the existing E01 PNG/hash. The physical sequence is human-attested; no browser simulation, invented device/timestamp, or raw keylog is claimed. The historical Browser failure remains under `historicalAutomationLimitation`.
 
 The current partition is 24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED across 57 manifests. Exactly `UAT-COM-003` and `UAT-UX-003` are final-approved; all other cases remain candidate evidence, corrections, or blockers. The workbook, IDTS-110 artifacts, Google Drive, Jira, runtime, database, provider and live data remain unchanged.
+
+## 2026-09-12 UAT-UX-002 partial recheck and evidence integration
+
+- Current execution: `NhanT (DonHV support)` in the DonHV PM session at viewport `834 x 1112`, controlled Bug `BUG-0016` (`fe16378d-88fe-4f70-8301-5cbcea4f3d6a`). The local deterministic regression `scripts/qa/test-idts127-ux002-responsive-browser.js` is PASS at commit `88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6`; its controlled SQLite/responses are not live BTP/provider acceptance.
+- Live result is PARTIAL with exactly four provider calls: prior Similar Bugs (5 candidates, not repeated), Classification (5 rows, HTTP 200), Smart Assignment (1 candidate, no retry), and Handoff Summary (UI settled). Matching Handoff transport telemetry was unavailable; no transport status is inferred. No Apply, Assign, Confirm Duplicate, Accept, Save, Edit, workflow, business-data or provider mutation was invoked. Status, assignee, current owner, comments and attachments stayed unchanged; AiSuggestions count delta was unavailable.
+- Current evidence adds one approved Classification JPEG plus sanitized `uat/UAT-UX-002/ux002-receipt.json` and retains the three historical PNGs with hashes and historical labels. The Smart Assignment, before-state, Handoff Top 2, and final captures remain excluded from the repository because they are unnecessary or privacy-sensitive.
+- Candidate outcome remains `DOES_NOT_MEET_EXPECTED_RESULT`; curation category remains `CURRENT_RUNTIME_PARTIAL_RECHECK`; `finalPassApproved` remains false. The aggregate partition remains **24 MEETS / 10 DOES_NOT_MEET / 23 BLOCKED** across 57 manifests, with only `UAT-COM-003` and `UAT-UX-003` final-approved. Current integrity totals are 81 evidence references and 68 unique SHA-256 values. Workbook, Drive, Jira, BTP, database, provider and live data remain unchanged.

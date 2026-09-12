@@ -48,7 +48,7 @@ function classify (manifest) {
   if (currentRuntimePositive.has(id)) return ['CURRENT_RUNTIME_POSITIVE', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
   if (fixtureProvenanceBlocked.has(id)) return ['FIXTURE_PROVENANCE_INCONSISTENT', 'BLOCKED_FIXTURE_PROVENANCE_INCONSISTENT']
   if (currentRuntimeDefect.has(id)) return ['CONFIRMED_DEFECT_RECHECK', 'CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW']
-  if (currentRuntimePartial.has(id)) return ['CURRENT_RUNTIME_PARTIAL_RECHECK', 'CURRENT_RUNTIME_PARTIAL_RECHECK_NEEDS_CANDIDATE_FIXTURE']
+  if (currentRuntimePartial.has(id)) return ['CURRENT_RUNTIME_PARTIAL_RECHECK', 'CURRENT_RUNTIME_PARTIAL_RECHECK']
   if (stalePrerequisite.has(id)) return ['STALE_PREREQUISITE_RERUN_REQUIRED', 'RERUN_REQUIRED_CURRENT_RUNTIME']
   if (historicalOldRuntime.has(id)) return ['HISTORICAL_OLD_RUNTIME_NEGATIVE', 'RERUN_REQUIRED_CURRENT_RUNTIME']
   if (defectRecheck.has(id)) return ['CONFIRMED_DEFECT_RECHECK', 'RERUN_REQUIRED_CURRENT_RUNTIME']
@@ -161,6 +161,75 @@ function validateUx003FinalApproval (manifest, manifestPath) {
   return expectedReview
 }
 
+function validateUx002PartialEvidence (manifest, manifestPath) {
+  const requireContract = (field, condition) => {
+    if (!condition) throw new Error(`UAT-UX-002 evidence contract mismatch: ${field}`)
+  }
+  const evidence = Array.isArray(manifest.evidence) ? manifest.evidence : []
+  const currentFiles = [
+    '02-live-classification-review.jpg',
+    'ux002-receipt.json'
+  ]
+  for (const file of currentFiles) {
+    const item = evidence.find(entry => entry.file === file)
+    requireContract(`currentEvidence.${file}`, Boolean(item && item.historical === false))
+  }
+
+  const historicalFiles = [
+    '01-tablet-list-report.png',
+    '02-tablet-object-page.png',
+    '03-tablet-ai-dialog.png'
+  ]
+  const historicalEvidence = Array.isArray(manifest.historicalEvidence) ? manifest.historicalEvidence : []
+  requireContract('historicalEvidence.files', historicalEvidence.length === historicalFiles.length && historicalFiles.every(file => {
+    const item = historicalEvidence.find(entry => entry.file === file)
+    const topLevel = evidence.find(entry => entry.file === file)
+    return Boolean(item && item.historical === true && topLevel && topLevel.historical === true && item.sha256 === topLevel.sha256)
+  }))
+
+  const receiptPath = path.join(path.dirname(path.join(evidenceRoot, manifest.caseId, 'manifest.json')), 'ux002-receipt.json')
+  requireContract('receipt.exists', fs.existsSync(receiptPath))
+  let receipt
+  try {
+    receipt = JSON.parse(fs.readFileSync(receiptPath, 'utf8'))
+  } catch {
+    throw new Error('UAT-UX-002 evidence contract mismatch: receipt.JSON')
+  }
+  const review = manifest.donhvLatestReview || {}
+  requireContract('manifest.result', manifest.currentResult === 'PARTIAL' && manifest.result === 'PARTIAL')
+  requireContract('manifest.candidateOutcome', manifest.candidateOutcome === 'DOES_NOT_MEET_EXPECTED_RESULT')
+  requireContract('manifest.reviewMetadata', review.finalPassApproved === false && review.currentStatus === 'CURRENT_RUNTIME_PARTIAL_RECHECK')
+  requireContract('manifest.reviewBoundary', typeof manifest.reviewBoundary === 'string' && !/\b(?:pending|final[\s-]?pass|final-approved|await(?:ing)?|needs?)\b/i.test(manifest.reviewBoundary))
+  requireContract('manifest.localRegression', manifest.localDeterministicRegression?.result === 'PASS' && manifest.localDeterministicRegression?.commit === '88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6')
+  requireContract('manifest.bugIdentity', manifest.liveRecheck?.bug?.id === 'fe16378d-88fe-4f70-8301-5cbcea4f3d6a' && manifest.liveRecheck?.bug?.number === 'BUG-0016')
+  requireContract('receipt.result', receipt.result === 'PARTIAL' && /fewer than 2 candidates/i.test(receipt.resultReason || ''))
+  requireContract('receipt.bugIdentity', receipt.operator?.exactBugId === manifest.liveRecheck?.bug?.id && receipt.operator?.bugNumber === manifest.liveRecheck?.bug?.number)
+  requireContract('receipt.viewport', receipt.operator?.viewport?.width === 834 && receipt.operator?.viewport?.height === 1112)
+  const ledger = receipt.callLedger
+  const expectedFeatures = ['Similar Bugs', 'Classification Review', 'Smart Assignment explanation', 'Handoff Summary']
+  requireContract('receipt.callLedgerShape', Array.isArray(ledger) && ledger.length === 4 && ledger.every((entry, index) => entry.ordinal === index + 1) && new Set(ledger.map(entry => entry.ordinal)).size === 4 && ledger.map(entry => entry.feature).every((feature, index) => feature === expectedFeatures[index]))
+  requireContract('receipt.providerCallSum', ledger.reduce((sum, entry) => sum + entry.providerCalls, 0) === 4)
+  requireContract('receipt.authorization', receipt.authorization?.totalProviderCalls === 4 && receipt.authorization?.duplicateSimilarCallMade === false)
+  requireContract('receipt.similarBugs', ledger[0]?.providerCalls === 1 && ledger[0]?.candidateCount === 5 && ledger[0]?.source === 'prior owner; not reinvoked')
+  requireContract('receipt.classification', ledger[1]?.providerCalls === 1 && ledger[1]?.uiSuggestionRowCount === 5 && ledger[1]?.httpStatus === 200)
+  requireContract('receipt.smartAssignment', ledger[2]?.providerCalls === 1 && ledger[2]?.candidateCount === 1 && ledger[2]?.noRetry === true && ledger[2]?.status === 'PARTIAL')
+  requireContract('receipt.handoffTelemetry', ledger[3]?.providerCalls === 1 && ledger[3]?.status === 'PASS_UI_TELEMETRY_GAP' && ledger[3]?.uiSettled === true && ledger[3]?.networkMatchingEventsObserved === 0 && ledger[3]?.browserActionAttempts === 2 && /timeout/i.test(ledger[3]?.firstClickOutcome || '') && /no dialog\/network/i.test(ledger[3]?.firstClickOutcome || '') && /settled/i.test(ledger[3]?.secondClickOutcome || '') && ledger[3]?.transportEventStatus === 'UNAVAILABLE_NOT_OBSERVED')
+  requireContract('receipt.forbiddenActions', Array.isArray(receipt.authorization?.forbiddenActionsInvoked) && receipt.authorization.forbiddenActionsInvoked.length === 0)
+  const receiptInvariants = receipt.businessSnapshot?.invariants || {}
+  const manifestMutation = manifest.liveRecheck?.businessMutation || {}
+  const invariantFields = ['statusUnchanged', 'assigneeUnchanged', 'ownerUnchanged', 'commentsUnchanged', 'attachmentsUnchanged']
+  requireContract('receipt.businessInvariants', invariantFields.every(field => receiptInvariants[field] === true))
+  const manifestInvariantFields = ['statusUnchanged', 'assigneeUnchanged', 'currentOwnerUnchanged', 'commentsUnchanged', 'attachmentsUnchanged']
+  requireContract('manifest.businessInvariants', manifestMutation.forbiddenActionsInvoked?.length === 0 && manifestInvariantFields.every(field => manifestMutation[field] === true) && manifestMutation.aiSuggestionsCountDelta === null)
+  requireContract('receipt.noAuditDeltaClaim', receipt.audit?.delta === null && receipt.audit?.aiSuggestionsBeforeCount === null && receipt.audit?.aiSuggestionsAfterCount === null && receipt.audit?.originalPreCallCountCaptured === false)
+  requireContract('receipt.localRegression', receipt.provenance?.localDeterministicRegression?.result === 'PASS' && receipt.provenance?.localDeterministicRegression?.commit === '88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6')
+  const receiptText = fs.readFileSync(receiptPath, 'utf8')
+  requireContract('receipt.sanitized', !/(?:[A-Z]:[\\/]|\.staging|tabId|sessionId|freshTabId|@|donhv|nhant|sangvn|datdt|smart-assignment\.png|01-live-before\.jpg|03-live-handoff-summary-top\.jpg|04-live-final\.jpg)/i.test(receiptText))
+  requireContract('receipt.screenshotAllowlist', receipt.artifacts?.screenshots?.length === 1 && receipt.artifacts.screenshots[0]?.path === 'uat/UAT-UX-002/02-live-classification-review.jpg' && receipt.artifacts.screenshots[0]?.encoding === 'jpeg' && receipt.artifacts.screenshots[0]?.bytes === 111931 && receipt.artifacts.screenshots[0]?.sha256 === evidence.find(item => item.file === '02-live-classification-review.jpg')?.sha256)
+  const receiptEvidence = evidence.find(entry => entry.file === 'ux002-receipt.json')
+  requireContract('receipt.sha256', Boolean(receiptEvidence) && String(receiptEvidence.sha256).toUpperCase() === hashEvidence(receiptPath))
+}
+
 function expectedReviewFor (manifest, manifestPath) {
   const [category, currentStatus] = classify(manifest)
   if (manifest.caseId === 'UAT-COM-003') {
@@ -223,6 +292,7 @@ function expectedReviewFor (manifest, manifestPath) {
   }
 
   if (manifest.caseId === 'UAT-UX-003') return validateUx003FinalApproval(manifest, manifestPath)
+  if (manifest.caseId === 'UAT-UX-002') validateUx002PartialEvidence(manifest, manifestPath)
 
   if (manifest.donhvLatestReview?.currentStatus === 'FINAL_PASS_APPROVED' ||
     manifest.donhvLatestReview?.finalPassApproved === true) {
@@ -314,8 +384,8 @@ const expectedDisposition = {
 for (const [status, expectedCount] of Object.entries(expectedDisposition)) {
   if (candidateDisposition[status] !== expectedCount) throw new Error(`${status}: expected ${expectedCount}, got ${candidateDisposition[status] || 0}`)
 }
-if (evidenceReferences !== 79) throw new Error(`Evidence references: expected 79, got ${evidenceReferences}`)
-if (evidenceHashes.size !== 66) throw new Error(`Unique evidence hashes: expected 66, got ${evidenceHashes.size}`)
+if (evidenceReferences !== 81) throw new Error(`Evidence references: expected 81, got ${evidenceReferences}`)
+if (evidenceHashes.size !== 68) throw new Error(`Unique evidence hashes: expected 68, got ${evidenceHashes.size}`)
 
 const attachmentManifest = JSON.parse(fs.readFileSync(path.join(evidenceRoot, 'UAT-ATT-001', 'manifest.json'), 'utf8'))
 const attachmentText = JSON.stringify(attachmentManifest)
@@ -333,7 +403,7 @@ const summary = {
   currentDisposition: expectedDisposition,
   counts,
   runtimeRerunPerformed: true,
-  runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 candidate-row wrapping still needs a matching fixture. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.',
+  runtimeRerunLimitation: 'AI immutable suggestion IDs and sanitized Network responses remain unavailable; UAT-UX-002 Smart Assignment returned one candidate with no retry and Handoff matching transport telemetry was unavailable. UAT-UX-003 physical-keyboard evidence is human-attested and its historical Browser limitation remains preserved.',
   finalApprovals: {
     'UAT-COM-003': {
       status: 'FINAL_PASS_APPROVED',
@@ -352,4 +422,4 @@ const summary = {
 if (!checkOnly) fs.writeFileSync(summaryPath, `${JSON.stringify(summary, null, 2)}\n`, 'utf8')
 console.log(JSON.stringify({ ...summary, mode: checkOnly ? 'CHECK_ONLY' : 'WRITE' }))
 
-module.exports = { classify, expectedReviewFor, finalApprovedCaseIds, validateUx003FinalApproval, hashEvidence }
+module.exports = { classify, expectedReviewFor, finalApprovedCaseIds, validateUx003FinalApproval, validateUx002PartialEvidence, hashEvidence }

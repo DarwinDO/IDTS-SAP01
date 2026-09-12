@@ -1,0 +1,705 @@
+{
+  "schema": "idts127-ux002-receipt-v1",
+  "generatedAt": "2026-09-12T09:52:38.323Z",
+  "task": "UAT-UX-002",
+  "result": "PARTIAL",
+  "resultReason": "Smart Assignment returned fewer than 2 candidates; no Smart retry was made.",
+  "operator": {
+    "exactBugId": "fe16378d-88fe-4f70-8301-5cbcea4f3d6a",
+    "bugNumber": "BUG-0016",
+    "identityVerified": {
+      "currentActionOwner": "Project Manager"
+    },
+    "viewport": {
+      "width": 834,
+      "height": 1112
+    }
+  },
+  "authorization": {
+    "priorSimilarBugsCall": {
+      "count": 1,
+      "candidateCount": 5,
+      "source": "prior owner/user ledger",
+      "reinvoked": false
+    },
+    "resumedProviderCalls": 3,
+    "totalProviderCalls": 4,
+    "duplicateSimilarCallMade": false,
+    "forbiddenActionsInvoked": []
+  },
+  "callLedger": [
+    {
+      "ordinal": 1,
+      "feature": "Similar Bugs",
+      "status": "PASS",
+      "providerCalls": 1,
+      "candidateCount": 5,
+      "source": "prior owner; not reinvoked"
+    },
+    {
+      "ordinal": 2,
+      "feature": "Classification Review",
+      "status": "PASS",
+      "providerCalls": 1,
+      "endpointAction": "suggestClassification",
+      "transport": "direct OData POST",
+      "httpStatus": 200,
+      "uiSuggestionRowCount": 5,
+      "reviewActionsInvoked": []
+    },
+    {
+      "ordinal": 3,
+      "feature": "Smart Assignment explanation",
+      "status": "PARTIAL",
+      "providerCalls": 1,
+      "endpointAction": "explainSmartAssignment",
+      "transport": "OData $batch",
+      "batchRequestCount": 4,
+      "batchResponseStatuses": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "candidateCount": 1,
+      "providerExplanationVisible": true,
+      "providerUiStatus": "AI-generated explanation; Ready for review; confidence 99%",
+      "noRetry": true,
+      "reviewActionsInvoked": []
+    },
+    {
+      "ordinal": 4,
+      "feature": "Handoff Summary",
+      "status": "PASS_UI_TELEMETRY_GAP",
+      "providerCalls": 1,
+      "endpointAction": "summarizeBugHandoff",
+      "uiSettled": true,
+      "reviewStatus": "Pending review",
+      "warningVisible": true,
+      "summaryVisible": true,
+      "verifiedTimelineVisible": true,
+      "networkMatchingEventsObserved": 0,
+      "transportEventStatus": "UNAVAILABLE_NOT_OBSERVED",
+      "browserActionAttempts": 2,
+      "firstClickOutcome": "automation timeout; reobservation showed no dialog/network",
+      "secondClickOutcome": "dialog settled",
+      "reviewActionsInvoked": []
+    }
+  ],
+  "businessSnapshot": {
+    "before": {
+      "bodyTextLength": 1941,
+      "hasBugId": true,
+      "statusPendingAssignment": true,
+      "assigneeEmpty": true,
+      "currentOwnerProjectManager": true,
+      "commentsEmpty": true,
+      "historyNoEvents": true,
+      "attachmentsEmpty": true,
+      "dialogCount": 0
+    },
+    "after": {
+      "bodyTextLength": 2811,
+      "hasBugId": true,
+      "statusPendingAssignment": true,
+      "assigneeEmpty": true,
+      "currentOwnerProjectManager": true,
+      "commentsEmpty": true,
+      "attachmentsEmpty": true,
+      "dialogCount": 0,
+      "historyNoLongerEmpty": true,
+      "existingHistoryEventCount": 5
+    },
+    "invariants": {
+      "statusUnchanged": true,
+      "assigneeUnchanged": true,
+      "ownerUnchanged": true,
+      "commentsUnchanged": true,
+      "attachmentsUnchanged": true,
+      "allDialogsClosed": true
+    },
+    "historyHydrationNote": "Initial snapshot captured lazy placeholder No history events yet; final readback loaded 5 pre-existing events. This is UI hydration, not treated as provider mutation."
+  },
+  "audit": {
+    "aiSuggestionsBeforeCount": null,
+    "aiSuggestionsAfterCount": null,
+    "delta": null,
+    "originalPreCallCountCaptured": false,
+    "afterCountReadAttempt": "same-origin AiSuggestions count read was not obtainable: page evaluation exposed no fetch; no count inferred.",
+    "visibleAiSuggestionsSection": false,
+    "limitation": "No visible AiSuggestions section and no original pre-call count. Action UI/network evidence does not prove an audit-row count; count remains unknown."
+  },
+  "uiMeasurements": {
+    "initial": {
+      "viewport": {
+        "clientHeight": 1112,
+        "clientWidth": 834,
+        "innerHeight": 1112,
+        "innerWidth": 834,
+        "scrollHeight": 1112,
+        "scrollWidth": 834
+      },
+      "controls": [
+        {
+          "text": "Reassign Retest Owner",
+          "textLength": 21,
+          "disabled": false,
+          "x": 568,
+          "y": 62,
+          "width": 159,
+          "height": 32
+        },
+        {
+          "text": "Find Similar Bugs",
+          "textLength": 17,
+          "disabled": false,
+          "x": 64,
+          "y": 632,
+          "width": 145,
+          "height": 32
+        },
+        {
+          "text": "Review Classification Suggestions",
+          "textLength": 33,
+          "disabled": false,
+          "x": 305,
+          "y": 949,
+          "width": 246,
+          "height": 32
+        },
+        {
+          "text": "Review Handoff Summary",
+          "textLength": 22,
+          "disabled": false,
+          "x": 565,
+          "y": 2071,
+          "width": 198,
+          "height": 32
+        }
+      ],
+      "bodyTextLength": 1941
+    },
+    "classification": {
+      "viewport": {
+        "clientHeight": 1112,
+        "clientWidth": 834,
+        "innerHeight": 1112,
+        "innerWidth": 834,
+        "scrollHeight": 1112,
+        "scrollWidth": 834
+      },
+      "dialog": {
+        "x": 42,
+        "y": 150,
+        "width": 751,
+        "height": 812,
+        "scrollHeight": 820,
+        "clientHeight": 812
+      },
+      "dialogTextLength": 1511,
+      "messageStrips": [],
+      "rowCount": 5,
+      "rowTextLengths": [
+        {
+          "index": 1,
+          "textLength": 296,
+          "x": 58,
+          "y": 340,
+          "width": 751,
+          "height": 129,
+          "scrollHeight": 129,
+          "clientHeight": 129
+        },
+        {
+          "index": 2,
+          "textLength": 235,
+          "x": 58,
+          "y": 469,
+          "width": 751,
+          "height": 97,
+          "scrollHeight": 97,
+          "clientHeight": 97
+        },
+        {
+          "index": 3,
+          "textLength": 265,
+          "x": 58,
+          "y": 566,
+          "width": 751,
+          "height": 129,
+          "scrollHeight": 129,
+          "clientHeight": 129
+        },
+        {
+          "index": 4,
+          "textLength": 208,
+          "x": 58,
+          "y": 695,
+          "width": 751,
+          "height": 97,
+          "scrollHeight": 97,
+          "clientHeight": 97
+        },
+        {
+          "index": 5,
+          "textLength": 227,
+          "x": 58,
+          "y": 792,
+          "width": 751,
+          "height": 114,
+          "scrollHeight": 114,
+          "clientHeight": 114
+        }
+      ],
+      "footer": {
+        "x": 42,
+        "y": 922,
+        "width": 751,
+        "height": 40,
+        "scrollHeight": 40,
+        "clientHeight": 40
+      },
+      "footerFits": true,
+      "buttons": [
+        {
+          "text": "Accept",
+          "textLength": 6,
+          "disabled": false,
+          "x": 378,
+          "y": 926,
+          "width": 58,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Reject",
+          "textLength": 6,
+          "disabled": false,
+          "x": 444,
+          "y": 926,
+          "width": 55,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Ignore",
+          "textLength": 6,
+          "disabled": false,
+          "x": 507,
+          "y": 926,
+          "width": 55,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Apply Classification",
+          "textLength": 20,
+          "disabled": true,
+          "x": 570,
+          "y": 926,
+          "width": 148,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Close",
+          "textLength": 5,
+          "disabled": false,
+          "x": 726,
+          "y": 926,
+          "width": 51,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        }
+      ]
+    },
+    "smartAssignment": {
+      "viewport": {
+        "clientHeight": 1112,
+        "clientWidth": 834,
+        "innerHeight": 1112,
+        "innerWidth": 834,
+        "scrollHeight": 1112,
+        "scrollWidth": 834
+      },
+      "dialog": {
+        "x": 42,
+        "y": 244,
+        "width": 751,
+        "height": 624,
+        "scrollHeight": 632,
+        "clientHeight": 624
+      },
+      "dialogTextLength": 1121,
+      "messageStrips": [
+        {
+          "index": 1,
+          "textLength": 116,
+          "x": 42,
+          "y": 284,
+          "width": 751,
+          "height": 33,
+          "scrollHeight": 31,
+          "clientHeight": 31
+        },
+        {
+          "index": 2,
+          "textLength": 118,
+          "x": 42,
+          "y": 317,
+          "width": 751,
+          "height": 33,
+          "scrollHeight": 31,
+          "clientHeight": 31
+        },
+        {
+          "index": 3,
+          "textLength": 141,
+          "x": 42,
+          "y": 358,
+          "width": 751,
+          "height": 50,
+          "scrollHeight": 48,
+          "clientHeight": 48
+        }
+      ],
+      "candidateCount": 1,
+      "candidateRows": [
+        {
+          "index": 1,
+          "textLength": 160,
+          "x": 42,
+          "y": 580,
+          "width": 751,
+          "height": 73,
+          "scrollHeight": 73,
+          "clientHeight": 73
+        }
+      ],
+      "search": [
+        {
+          "placeholderLength": 39,
+          "textLength": 0,
+          "x": 50,
+          "y": 518,
+          "width": 675,
+          "height": 26
+        }
+      ],
+      "footer": {
+        "x": 42,
+        "y": 828,
+        "width": 751,
+        "height": 40,
+        "scrollHeight": 40,
+        "clientHeight": 40
+      },
+      "footerFits": true,
+      "buttons": [
+        {
+          "text": "Accept",
+          "textLength": 6,
+          "disabled": false,
+          "x": 42,
+          "y": 467,
+          "width": 58,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Reject",
+          "textLength": 6,
+          "disabled": false,
+          "x": 108,
+          "y": 467,
+          "width": 55,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Ignore",
+          "textLength": 6,
+          "disabled": false,
+          "x": 171,
+          "y": 467,
+          "width": 55,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Assign",
+          "textLength": 6,
+          "disabled": true,
+          "x": 641,
+          "y": 833,
+          "width": 64,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Cancel",
+          "textLength": 6,
+          "disabled": false,
+          "x": 713,
+          "y": 833,
+          "width": 64,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        }
+      ]
+    },
+    "handoffSummary": {
+      "viewport": {
+        "clientHeight": 1112,
+        "clientWidth": 834,
+        "innerHeight": 1112,
+        "innerWidth": 834,
+        "scrollHeight": 1112,
+        "scrollWidth": 834
+      },
+      "dialog": {
+        "x": 42,
+        "y": 228,
+        "width": 751,
+        "height": 656,
+        "scrollHeight": 664,
+        "clientHeight": 656
+      },
+      "dialogTextLength": 2887,
+      "messageStrips": [
+        {
+          "index": 1,
+          "textLength": 109,
+          "x": 58,
+          "y": -49,
+          "width": 704,
+          "height": 33,
+          "scrollHeight": 31,
+          "clientHeight": 31
+        },
+        {
+          "index": 2,
+          "textLength": 163,
+          "x": 58,
+          "y": -8,
+          "width": 704,
+          "height": 50,
+          "scrollHeight": 48,
+          "clientHeight": 48
+        },
+        {
+          "index": 3,
+          "textLength": 103,
+          "x": 58,
+          "y": 49,
+          "width": 704,
+          "height": 33,
+          "scrollHeight": 31,
+          "clientHeight": 31
+        },
+        {
+          "index": 4,
+          "textLength": 134,
+          "x": 58,
+          "y": 594,
+          "width": 704,
+          "height": 50,
+          "scrollHeight": 48,
+          "clientHeight": 48
+        }
+      ],
+      "contentRows": [
+        {
+          "index": 1,
+          "textLength": 42,
+          "x": 58,
+          "y": 680,
+          "width": 704,
+          "height": 41,
+          "scrollHeight": 40,
+          "clientHeight": 40
+        },
+        {
+          "index": 2,
+          "textLength": 174,
+          "x": 58,
+          "y": 757,
+          "width": 704,
+          "height": 59,
+          "scrollHeight": 58,
+          "clientHeight": 58
+        },
+        {
+          "index": 3,
+          "textLength": 164,
+          "x": 58,
+          "y": 816,
+          "width": 704,
+          "height": 59,
+          "scrollHeight": 58,
+          "clientHeight": 58
+        },
+        {
+          "index": 4,
+          "textLength": 285,
+          "x": 58,
+          "y": 875,
+          "width": 704,
+          "height": 75,
+          "scrollHeight": 74,
+          "clientHeight": 74
+        },
+        {
+          "index": 5,
+          "textLength": 264,
+          "x": 58,
+          "y": 950,
+          "width": 704,
+          "height": 75,
+          "scrollHeight": 74,
+          "clientHeight": 74
+        },
+        {
+          "index": 6,
+          "textLength": 190,
+          "x": 58,
+          "y": 1025,
+          "width": 704,
+          "height": 59,
+          "scrollHeight": 58,
+          "clientHeight": 58
+        }
+      ],
+      "footer": {
+        "x": 42,
+        "y": 844,
+        "width": 751,
+        "height": 40,
+        "scrollHeight": 40,
+        "clientHeight": 40
+      },
+      "footerFits": true,
+      "buttons": [
+        {
+          "text": "Show More",
+          "textLength": 9,
+          "disabled": false,
+          "x": 58,
+          "y": 285,
+          "width": 70,
+          "height": 16,
+          "scrollHeight": 16,
+          "clientHeight": 16
+        },
+        {
+          "text": "Show More",
+          "textLength": 9,
+          "disabled": false,
+          "x": 58,
+          "y": 474,
+          "width": 70,
+          "height": 16,
+          "scrollHeight": 16,
+          "clientHeight": 16
+        },
+        {
+          "text": "Accept",
+          "textLength": 6,
+          "disabled": false,
+          "x": 534,
+          "y": 849,
+          "width": 58,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Reject",
+          "textLength": 6,
+          "disabled": false,
+          "x": 600,
+          "y": 849,
+          "width": 55,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Ignore",
+          "textLength": 6,
+          "disabled": false,
+          "x": 663,
+          "y": 849,
+          "width": 55,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        },
+        {
+          "text": "Close",
+          "textLength": 5,
+          "disabled": false,
+          "x": 726,
+          "y": 849,
+          "width": 51,
+          "height": 32,
+          "scrollHeight": 32,
+          "clientHeight": 32
+        }
+      ],
+      "flags": {
+        "hasWarning": true,
+        "pendingReview": true,
+        "reviewRequired": false,
+        "summaryPresent": true,
+        "verifiedTimeline": true
+      }
+    }
+  },
+  "visualNotes": {
+    "classification": "All 5 suggestion rows and footer visible at 834x1112; long suggested/reason text wraps.",
+    "smartAssignment": "One candidate row visible; explanation and availability warning wrap; Assign disabled; Cancel visible.",
+    "handoffSummary": "Footer visible; internal content scrolled with first two message strips above viewport (negative y in geometry), so top copy is partially clipped in captured state.",
+    "final": "All dialogs closed; business fields unchanged."
+  },
+  "provenance": {
+    "localDeterministicRegression": {
+      "script": "scripts/qa/test-idts127-ux002-responsive-browser.js",
+      "commit": "88a553d9c3e514a1d5fd2e35c5a3587b3d69c6c6",
+      "result": "PASS",
+      "scope": "Local CAP plus temporary SQLite fixtures with controlled in-browser responses; no provider or shared-BTP acceptance is claimed."
+    },
+    "liveEvidenceScope": "Current live UI recheck only; provider call counts and UI outcomes are preserved below, with no business mutation."
+  },
+  "artifacts": {
+    "screenshots": [
+      {
+        "path": "uat/UAT-UX-002/02-live-classification-review.jpg",
+        "encoding": "jpeg",
+        "dimensions": {
+          "width": 834,
+          "height": 1112
+        },
+        "bytes": 111931,
+        "sha256": "4AAB3B429257FED80B2806D1F1745CAA2268AE357FB93C9945BCF929B218A0A1"
+      }
+    ],
+    "receiptPath": "uat/UAT-UX-002/ux002-receipt.json"
+  },
+  "notes": [
+    "No Similar Bugs repeat.",
+    "No Apply, Assign, Confirm Duplicate, Accept, Save, Edit, transition, create, delete, comment, or attachment action invoked.",
+    "Provider call ledger is 1 prior Similar + 1 Classification + 1 Smart + 1 Handoff = 4 total.",
+    "Handoff matching network telemetry was absent after the successful UI completion; this is recorded as a telemetry gap, not guessed as a transport status."
+  ]
+}
