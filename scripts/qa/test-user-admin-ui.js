@@ -51,7 +51,7 @@ assert.equal(appPackageLock.packages[''].name, appPackage.name, 'HTML5 lockfile 
 assert.equal(appPackageLock.packages[''].license, appPackage.license, 'HTML5 lockfile root keeps package license')
 assert.deepEqual(appPackageLock.packages[''].devDependencies, appPackage.devDependencies, 'HTML5 lockfile root keeps dependency semantics')
 const bugPackage = JSON.parse(fs.readFileSync(path.join(root, 'app/bug-management-ui/package.json'), 'utf8'))
-assert.equal(bugPackage.version, '0.0.15', 'Smart Assignment binding fix must advance the Bug Management HTML5 cache identity')
+assert.equal(bugPackage.version, '0.0.16', 'IDTS-127 comment boundary fix must advance the Bug Management HTML5 cache identity')
 const [majorVersion, minorVersion, patchVersion] = appPackage.version.split('.').map(Number)
 assert.ok(
   majorVersion > 1 || minorVersion > 0 || patchVersion >= 13,

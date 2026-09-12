@@ -37,6 +37,8 @@ In Fiori Elements, an XML fragment is a reusable piece of UI inserted into a gen
 
 The fragment does not call the backend by itself. Its button uses `core:require` to load `BugCollaboration.js`, then calls `Collaboration.onAddComment`.
 
+The TextArea intentionally has no client-side `maxLength`. SAPUI5 truncates pasted text when `maxLength` is set, which could turn an invalid 1001-character comment into a valid but silently shortened 1000-character comment. IDTS sends the complete input to CAP instead; CAP owns the 1000-character trust boundary and returns a safe rejection without storing a partial comment.
+
 The comment list binds to the current bug's `comments` navigation property. That means each opened bug automatically shows only its own comments.
 
 ### Flow in IDTS
@@ -105,6 +107,8 @@ Nó thay phần bảng comment tự sinh cũ bằng khu vực dễ đọc hơn t
 Trong Fiori Elements, XML fragment là một mảnh UI được chèn vào page tự sinh. Object Page generated vẫn giữ phần shell, header, save behavior và routing. Fragment này chỉ phụ trách khu vực comment.
 
 Fragment không tự gọi backend. Nút bấm dùng `core:require` để load `BugCollaboration.js`, sau đó gọi `Collaboration.onAddComment`.
+
+TextArea cố ý không đặt `maxLength` phía client. SAPUI5 sẽ cắt text được paste khi có `maxLength`, nên comment sai 1001 ký tự có thể biến thành comment 1000 ký tự hợp lệ nhưng bị rút ngắn âm thầm. IDTS gửi nguyên input tới CAP; CAP sở hữu trust boundary 1000 ký tự và trả lỗi an toàn mà không lưu comment một phần.
 
 Danh sách comment bind vào navigation property `comments` của bug hiện tại. Vì vậy khi mở bug nào thì section chỉ hiện comment của bug đó.
 
