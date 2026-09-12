@@ -24,7 +24,6 @@
             rows="3"
             growing="true"
             growingMaxLines="6"
-            maxLength="1000"
             placeholder="{i18n>commentsInputPlaceholder}"
             enabled="{= ${IsActiveEntity} === true &amp;&amp; ${HasDraftEntity} !== true &amp;&amp; ${canAddComment} === true }"
             class="sapUiTinyMarginTop"

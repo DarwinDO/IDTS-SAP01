@@ -41,6 +41,7 @@ assert(commentsFragment.includes('$$ownRequest: true'), 'The relative comments l
 assert(commentsFragment.includes('idtsMentionRecipients'), 'Comments must expose a visible mention recipient picker')
 assert(commentsFragment.includes('MultiComboBox'), 'Mention picker must use a native multi-selection control')
 assert(commentsFragment.includes('commentsMentionRecipientsLabel'), 'Mention picker needs a visible localized label')
+assert(!commentsFragment.includes('maxLength="1000"'), 'Comment UI must not silently truncate oversized text before CAP can reject it')
 assert(!controller.includes('new XMLHttpRequest()'), 'Collaboration writes must not use raw XMLHttpRequest')
 assert(!controller.includes('pendingCreateAttachmentsByBugId'), 'Custom browser-memory attachment queue must be retired')
 assert(!controller.includes('BugService.draftEdit'), 'Attachment handling must not manually orchestrate draftEdit')
