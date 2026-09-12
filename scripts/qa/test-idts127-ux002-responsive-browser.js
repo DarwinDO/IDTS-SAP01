@@ -190,7 +190,27 @@ async function createBugFixture (db) {
   return ID
 }
 
-async function boundedTeardown (label, operation, { timeoutMs = 15000, fallback } = {}) {
+function teardownTimeoutError (label, timeoutMs) {
+  const error = new Error(`${label} timed out after ${timeoutMs}ms`)
+  error.teardownTimeout = true
+  return error
+}
+
+async function awaitWithHardDeadline (label, promise, timeoutMs) {
+  let timer
+  try {
+    return await Promise.race([
+      promise,
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(teardownTimeoutError(label, timeoutMs)), timeoutMs)
+      })
+    ])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+async function boundedTeardown (label, operation, { timeoutMs = 15000, settlementTimeoutMs = timeoutMs, fallbackTimeoutMs = timeoutMs * 3, fallback } = {}) {
   assert.equal(typeof fallback, 'function', `${label} requires an explicit fallback`)
   let operationSettled = false
   const primary = Promise.resolve().then(operation).then(
@@ -203,92 +223,134 @@ async function boundedTeardown (label, operation, { timeoutMs = 15000, fallback 
       throw error
     }
   )
-  let timer
-  let timedOut = false
   try {
-    const deadline = new Promise((_, reject) => {
-      timer = setTimeout(() => {
-        timedOut = true
-        reject(new Error(`${label} timed out after ${timeoutMs}ms`))
-      }, timeoutMs)
-    })
-    // The race only starts the explicit fallback. Awaiting primary below keeps
-    // a timed-out operation from becoming fire-and-forget teardown work.
-    return await Promise.race([primary, deadline])
+    // The first deadline only starts fallback; the second deadline below is
+    // terminal and prevents an unresolved teardown from reaching its caller.
+    return await awaitWithHardDeadline(label, primary, timeoutMs)
   } catch (error) {
-    if (!timedOut) throw error
+    if (!error?.teardownTimeout) throw error
 
+    const timeoutError = error
     let fallbackError
     try {
-      await fallback(error)
+      await awaitWithHardDeadline(`${label} fallback`, Promise.resolve().then(() => fallback(timeoutError)), fallbackTimeoutMs)
     } catch (error) {
       fallbackError = error
     }
 
     let settlementError
     try {
-      await primary
+      await awaitWithHardDeadline(`${label} settlement`, primary, settlementTimeoutMs)
     } catch (error) {
       settlementError = error
     }
 
-    const causes = [error]
+    const causes = [timeoutError]
     if (fallbackError) causes.push(fallbackError)
     if (settlementError) causes.push(settlementError)
-    if (fallbackError || settlementError) {
-      const aggregate = new AggregateError(causes, [
-        error.message,
-        fallbackError && `fallback: ${fallbackError.message || fallbackError}`,
-        settlementError && `settlement: ${settlementError.message || settlementError}`
-      ].filter(Boolean).join('; '))
-      aggregate.operationSettled = operationSettled
-      aggregate.fallbackInvoked = true
-      throw aggregate
-    }
-    error.operationSettled = operationSettled
-    error.fallbackInvoked = true
-    throw error
-  } finally {
-    clearTimeout(timer)
+    const fatalTeardown = Boolean(
+      fallbackError?.teardownTimeout ||
+      fallbackError?.fatalTeardown ||
+      settlementError?.teardownTimeout
+    )
+    const aggregate = new AggregateError(causes, [
+      timeoutError.message,
+      fallbackError && `fallback: ${fallbackError.message || fallbackError}`,
+      settlementError && `settlement: ${settlementError.message || settlementError}`
+    ].filter(Boolean).join('; '))
+    aggregate.operationSettled = operationSettled
+    aggregate.fallbackInvoked = true
+    aggregate.fallbackSettled = !fallbackError?.teardownTimeout
+    aggregate.fatalTeardown = fatalTeardown
+    aggregate.timeoutError = timeoutError
+    aggregate.fallbackError = fallbackError
+    aggregate.settlementError = settlementError
+    throw aggregate
   }
 }
 
-async function awaitSettledLocalTeardown (label, operation, timeoutMs = 15000) {
-  // @cap-js/sqlite uses DatabaseSync for this in-memory fixture and has no
-  // AbortSignal. Await settlement, then report an overrun instead of orphaning
-  // a local promise that could race the dependent shutdown.
-  const startedAt = Date.now()
-  try {
-    const result = await operation()
-    const elapsedMs = Date.now() - startedAt
-    if (elapsedMs > timeoutMs) {
-      const error = new Error(`${label} exceeded ${timeoutMs}ms before settling`)
-      error.operationSettled = true
-      throw error
-    }
-    return result
-  } catch (error) {
-    error.operationSettled = true
-    throw error
-  }
+function noCancellationFallback (label) {
+  const error = new Error(`${label}: @cap-js/sqlite exposes no cancellation API`)
+  error.noCancellation = true
+  throw error
 }
 
 function assertBrowserServerExited (browserServer, label) {
   const child = browserServer?.process?.()
-  if (!child) return
+  if (!child) throw new Error(`${label}: BrowserServer child process is unavailable`)
   if (child.exitCode === null && child.signalCode === null) {
     throw new Error(`${label}: browser server process ${child.pid} remains alive`)
   }
 }
 
+function childHasExited (child) {
+  return Boolean(child && (child.exitCode !== null || child.signalCode !== null))
+}
+
+function waitForChildExit (child, label, timeoutMs = 15000) {
+  if (childHasExited(child)) return Promise.resolve()
+  return new Promise((resolve, reject) => {
+    let settled = false
+    let timer
+    const finish = error => {
+      if (settled) return
+      settled = true
+      clearTimeout(timer)
+      child.removeListener('exit', onExit)
+      child.removeListener('close', onClose)
+      child.removeListener('error', onError)
+      error ? reject(error) : resolve()
+    }
+    const onExit = () => finish()
+    const onClose = () => finish()
+    const onError = error => finish(error)
+    child.once('exit', onExit)
+    child.once('close', onClose)
+    child.once('error', onError)
+    timer = setTimeout(() => finish(teardownTimeoutError(label, timeoutMs)), timeoutMs)
+    if (childHasExited(child)) finish()
+  })
+}
+
 async function forceCloseBrowserServer (browserServer, label) {
   if (!browserServer) throw new Error(`${label}: browser server is unavailable for force-close`)
   const child = browserServer.process?.()
-  if (child && (child.exitCode !== null || child.signalCode !== null)) return
+  if (!child) throw new Error(`${label}: BrowserServer child process is unavailable for force-close`)
+  if (childHasExited(child)) return
   if (typeof browserServer.kill !== 'function') throw new Error(`${label}: Playwright BrowserServer.kill() is unavailable`)
   // BrowserServer.kill is Playwright's supported force-close API and waits for
   // the child process to exit before returning.
-  await browserServer.kill()
+  const killPromise = Promise.resolve().then(() => browserServer.kill())
+  let killError
+  try {
+    await awaitWithHardDeadline(`${label}: BrowserServer.kill`, killPromise, 15000)
+  } catch (error) {
+    killError = error
+  }
+  if (killError) {
+    try {
+      if (!childHasExited(child)) {
+        if (typeof child.kill !== 'function') throw new Error(`${label}: direct child kill is unavailable`)
+        child.kill()
+        await waitForChildExit(child, `${label}: direct child kill settlement`)
+      }
+      assertBrowserServerExited(browserServer, label)
+      if (killError.teardownTimeout) {
+        await awaitWithHardDeadline(`${label}: BrowserServer.kill settlement`, killPromise, 15000)
+        const error = new Error(`${label}: BrowserServer.kill exceeded its deadline; direct child kill settled`)
+        error.operationSettled = true
+        error.directKillRecovered = true
+        throw error
+      }
+      throw killError
+    } catch (error) {
+      if (error === killError && !killError.teardownTimeout || error?.directKillRecovered) throw error
+      const aggregate = new AggregateError([killError, error], `${label}: browser server force-close did not settle safely`)
+      aggregate.fatalTeardown = true
+      aggregate.operationSettled = childHasExited(child)
+      throw aggregate
+    }
+  }
   assertBrowserServerExited(browserServer, label)
 }
 
@@ -310,9 +372,17 @@ async function cleanup (db, bugID, sessionID) {
   const failures = []
   const attempt = async (label, operation) => {
     try {
-      await awaitSettledLocalTeardown(label, operation)
+      // SQLite's DatabaseSync has no abort signal. A timeout therefore fails
+      // safely after the second settlement deadline instead of orphaning work.
+      await boundedTeardown(label, operation, {
+        fallback: () => noCancellationFallback(label)
+      })
     } catch (error) {
       failures.push({ label, error })
+      if (error.fatalTeardown || error.operationSettled === false) {
+        error.failures = failures
+        throw error
+      }
     }
   }
 
@@ -879,6 +949,7 @@ async function runCleanupNegativeControl () {
       }, 20)
     }), {
       timeoutMs: 5,
+      settlementTimeoutMs: 50,
       fallback: () => {
         throw new Error('synthetic fallback failure')
       }
@@ -889,6 +960,35 @@ async function runCleanupNegativeControl () {
   assert.match(fallbackFailure?.message || '', /synthetic fallback failure/)
   assert.equal(slowOperationSettled, true, 'fallback failure must still wait for primary settlement')
   assert.equal(fallbackFailure?.operationSettled, true, 'fallback failure must report settled primary operation')
+
+  let settlementFallbackInvoked = false
+  let settlementFailure
+  let guardTimer
+  const guard = new Promise((_, reject) => {
+    guardTimer = setTimeout(() => reject(new Error('synthetic settlement guard timed out')), 100)
+  })
+  try {
+    // Test-only guard keeps a regression in this negative control from hanging
+    // the runner; boundedTeardown owns the production second deadline.
+    await Promise.race([
+      boundedTeardown('synthetic settlement timeout', () => new Promise(() => {}), {
+        timeoutMs: 5,
+        settlementTimeoutMs: 5,
+        fallback: () => {
+          settlementFallbackInvoked = true
+        }
+      }),
+      guard
+    ])
+  } catch (error) {
+    settlementFailure = error
+  } finally {
+    clearTimeout(guardTimer)
+  }
+  assert.match(settlementFailure?.message || '', /settlement timed out/)
+  assert.equal(settlementFallbackInvoked, true, 'settlement timeout must invoke its fallback')
+  assert.equal(settlementFailure?.fatalTeardown, true, 'settlement timeout must be fatal')
+  assert.equal(settlementFailure?.operationSettled, false, 'settlement timeout must report unsettled primary operation')
   pass('cleanup timeout invokes fallback, waits for settlement, and surfaces fallback/settlement errors')
 }
 
@@ -1071,11 +1171,17 @@ async function main () {
     throw error
   } finally {
     const cleanupFailures = []
-    const attemptCleanup = async (label, operation) => {
+    let fatalCleanup = false
+    const attemptCleanup = async (label, operation, { synchronous = false } = {}) => {
+      if (fatalCleanup && !synchronous) {
+        console.error(`CLEANUP SKIP: ${label} after an unsettled fatal teardown`)
+        return
+      }
       try {
         await operation()
       } catch (error) {
         cleanupFailures.push({ label, error })
+        if (error?.fatalTeardown || error?.operationSettled === false) fatalCleanup = true
       }
     }
     await attemptCleanup('browser context close', () => boundedTeardown('browser context close', () => context?.close(), {
@@ -1089,30 +1195,41 @@ async function main () {
     }))
     await attemptCleanup('fixture cleanup', () => cleanup(db, bugID, session?.sessionID))
     await attemptCleanup('CAP server close', () => closeServer(testServer))
-    await attemptCleanup('CAP runtime shutdown', () => awaitSettledLocalTeardown('CAP runtime shutdown', () => {
-      if (!testServer) return
-      if (typeof cds.shutdown !== 'function') throw new Error('CAP runtime shutdown is unavailable')
-      return cds.shutdown()
+    // cds.shutdown only re-dispatches the already-closed in-memory database
+    // here, so explicit server and DB teardown avoids an unbounded runtime hook.
+    await attemptCleanup('in-memory DB disconnect', () => boundedTeardown('in-memory DB disconnect', () => db?.disconnect?.(), {
+      fallback: () => noCancellationFallback('in-memory DB disconnect')
     }))
-    await attemptCleanup('in-memory DB disconnect', () => awaitSettledLocalTeardown('in-memory DB disconnect', () => db?.disconnect?.()))
-    await attemptCleanup('in-memory DB shutdown check', () => awaitSettledLocalTeardown('in-memory DB shutdown check', () => assertDatabaseUnavailable(db)))
-    await attemptCleanup('temporary evidence cleanup', () => awaitSettledLocalTeardown('temporary evidence cleanup', () => {
+    await attemptCleanup('in-memory DB shutdown check', () => boundedTeardown('in-memory DB shutdown check', () => assertDatabaseUnavailable(db), {
+      fallback: () => noCancellationFallback('in-memory DB shutdown check')
+    }))
+    await attemptCleanup('temporary evidence cleanup', () => {
       if (!evidenceDir) return
       fs.rmSync(evidenceDir, { recursive: true, force: true })
       if (fs.existsSync(evidenceDir)) throw new Error('temporary evidence directory still exists')
-    }))
+    }, { synchronous: true })
     if (cleanupFailures.length) {
       const cleanupError = new Error(`CLEANUP FAILED: ${cleanupFailures.map(failure => `${failure.label}: ${failure.error?.message || failure.error}`).join('; ')}`)
       cleanupError.failures = cleanupFailures
+      cleanupError.fatalTeardown = fatalCleanup
       console.error(`CLEANUP FAIL: ${cleanupError.message}`)
-      if (runError) throw new AggregateError([runError, cleanupError], 'IDTS-127 test and cleanup failed')
+      if (runError) {
+        const aggregate = new AggregateError([runError, cleanupError], 'IDTS-127 test and cleanup failed')
+        aggregate.fatalTeardown = fatalCleanup
+        throw aggregate
+      }
       throw cleanupError
     }
   }
 }
 
+function hasFatalTeardown (error) {
+  return Boolean(error?.fatalTeardown || error?.errors?.some(hasFatalTeardown))
+}
+
 main().catch(error => {
   console.error('RESULT: FAIL')
+  if (hasFatalTeardown(error)) console.error('FATAL TEARDOWN: terminating after cleanup report')
   console.error(error?.stack || error)
   for (const nested of error?.errors || []) console.error(`CAUSE: ${nested?.stack || nested}`)
   process.exit(1)
