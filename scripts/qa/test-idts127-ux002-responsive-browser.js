@@ -20,7 +20,8 @@ const { DELETE, INSERT } = cds.ql
 const { createSessionToken, hashToken, addMinutes } = require('../../srv/auth/passwords')
 const { createHarness } = require('./lib/browser-harness')
 
-const BASE_URL = String(process.env.IDTS_QA_BASE_URL || 'http://localhost:4004').replace(/\/+$/, '')
+const LOCAL_BASE_URL = 'http://localhost:4004'
+const BASE_URL = LOCAL_BASE_URL
 const APP_URL = `${BASE_URL}/idts.bugmanagementui/index.html`
 const IS_LOCAL = /^https?:\/\/(?:localhost|127\.0\.0\.1)(?::\d+)?$/i.test(BASE_URL)
 const VIEWPORT = { width: 834, height: 1112 }
@@ -96,6 +97,17 @@ assert(HANDOFF_COMMENTS.length > 220 && HANDOFF_EVENTS.length > 220, 'controlled
 function pass (label) {
   console.log(`  PASS  ${label}`)
 }
+
+function assertAmbientBaseUrlIsolation () {
+  const ambientBaseUrl = String(process.env.IDTS_QA_BASE_URL || '').replace(/\/+$/, '')
+  assert.strictEqual(BASE_URL, LOCAL_BASE_URL)
+  if (ambientBaseUrl && ambientBaseUrl !== LOCAL_BASE_URL) {
+    assert.notStrictEqual(BASE_URL, ambientBaseUrl)
+  }
+  pass('ambient IDTS_QA_BASE_URL cannot override the deterministic localhost fixture target')
+}
+
+assertAmbientBaseUrlIsolation()
 
 async function launchBrowser () {
   const headless = !/^false$/i.test(process.env.IDTS_QA_HEADLESS || '')
