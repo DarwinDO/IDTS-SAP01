@@ -312,7 +312,7 @@ async function validateAssignee (req, entities, bug, { enforceCapacity = false, 
 function validateTransition (req, fromStatus, toStatus) {
   // `ALLOWED_TRANSITIONS` trong constants.js là state machine duy nhất của lifecycle.
   // Breakpoint tại `allowed` để phân biệt lỗi mapping action với rule transition thật.
-  if (!fromStatus || fromStatus === toStatus) return
+  if (!fromStatus) return
   const allowed = ALLOWED_TRANSITIONS[fromStatus] || []
   if (!allowed.includes(toStatus)) {
     return req.reject(400, `Status transition from ${fromStatus} to ${toStatus} is not allowed.`, 'status')

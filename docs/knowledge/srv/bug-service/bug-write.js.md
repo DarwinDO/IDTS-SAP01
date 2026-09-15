@@ -331,3 +331,27 @@ Khi sửa rule này, phải chứng minh parent inactive bị từ chối trư�
 `validateAssignee` checks the shared active-identity predicate only when a new assignee is selected or a new Bug is created. Updating an existing Bug with the same assignee does not revalidate identity readiness, so legacy Bug ownership is preserved. A new assignment to an unlinked/non-active-access Developer is rejected with a safe assignee error before the Bug write.
 
 `validateAssignee` chi check predicate active-identity dung khi chon assignee moi hoac tao Bug moi. Update Bug hien co voi cung assignee khong validate lai readiness, nen ownership Bug legacy duoc giu. Assignment moi vao Developer chua link/khong co active access bi reject voi loi assignee an toan truoc khi ghi Bug.
+
+## IDTS-127 UAT-LIFE-013 repeated lifecycle-action guard
+
+### English
+
+`validateTransition()` now bypasses validation only when the source status is missing. When both statuses are present, it always consults `ALLOWED_TRANSITIONS`, including for equal source and target values. This makes a repeated `startProgress` request from `IN_PROGRESS` fail with HTTP 400 before `transitionBug()` updates the Bug or writes `HistoryEvents`, `HistoryLogs`, `Notifications`, or `NotificationDeliveries`.
+
+The allowlist still contains `ASSIGNED -> ASSIGNED`, so the supported assignment/reassignment action remains valid while repeated lifecycle actions are rejected. The focused regression is `scripts/qa/test-idts6-programmatic.js` (`SC-02c` and `SC-04b`); it compares the Bug and all four audit/notification collections before and after the rejected request.
+
+- **Location**: `srv/bug-service/bug-write.js:312-320`, `validateTransition()`.
+  **IDTS concept**: A lifecycle command must be a valid state-machine edge, not an implicit no-op.
+  **Impact if broken**: Retried requests can create duplicate audit and notification records even when the Bug status does not change.
+  **Must check together**: `srv/bug-service/actions.js:261`, `srv/bug-service/constants.js:133-159`, and `scripts/qa/test-idts6-programmatic.js:227-257`.
+
+### Vietnamese
+
+`validateTransition()` hiện chỉ bỏ qua kiểm tra khi status nguồn bị thiếu. Khi cả status nguồn và status đích đều có giá trị, hàm luôn kiểm tra `ALLOWED_TRANSITIONS`, kể cả khi hai status giống nhau. Vì vậy request `startProgress` lặp lại từ `IN_PROGRESS` bị trả HTTP 400 trước khi `transitionBug()` update Bug hoặc ghi `HistoryEvents`, `HistoryLogs`, `Notifications` hay `NotificationDeliveries`.
+
+Allowlist vẫn có `ASSIGNED -> ASSIGNED`, nên action assignment/reassignment được hỗ trợ vẫn hợp lệ trong khi lifecycle action lặp lại bị từ chối. Regression tập trung nằm ở `scripts/qa/test-idts6-programmatic.js` (`SC-02c` và `SC-04b`); test so sánh Bug cùng bốn collection audit/notification trước và sau request bị reject.
+
+- **Vị trí**: `srv/bug-service/bug-write.js:312-320`, `validateTransition()`.
+  **Khái niệm IDTS**: Mỗi lifecycle command phải là một cạnh hợp lệ của state machine, không tự động trở thành no-op.
+  **Ảnh hưởng nếu sai**: Request retry có thể tạo bản ghi audit và notification trùng dù status Bug không đổi.
+  **Phải kiểm tra cùng**: `srv/bug-service/actions.js:261`, `srv/bug-service/constants.js:133-159`, và `scripts/qa/test-idts6-programmatic.js:227-257`.

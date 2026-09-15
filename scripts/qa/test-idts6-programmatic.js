@@ -80,6 +80,23 @@ async function runSrv(srv) {
     return srv.dispatch(req)
   }
 
+  async function lifecycleSnapshot (bugID) {
+    const read = (entity, filter) => cds.tx({}, tx => tx.run(
+      SELECT.from(srv.entities[entity]).where(filter).orderBy('ID')
+    ))
+    const bug = await cds.tx({}, tx => tx.run(
+      SELECT.one.from(srv.entities.Bugs).where({ ID: bugID })
+    ))
+    const historyEvents = await read('HistoryEvents', { bug_ID: bugID })
+    const historyLogs = await read('HistoryLogs', { bug_ID: bugID })
+    const notifications = await read('Notifications', { bug_ID: bugID })
+    const notificationIDs = notifications.map(notification => notification.ID)
+    const deliveries = notificationIDs.length
+      ? await read('NotificationDeliveries', { notification_ID: { in: notificationIDs } })
+      : []
+    return { bug, historyEvents, historyLogs, notifications, deliveries }
+  }
+
   console.log('')
 
   // ----------------------------------------------------------------
@@ -210,6 +227,9 @@ async function runSrv(srv) {
   const r2a = await callAction(BUG1, 'assignToDeveloper', { assigneeID: DEV_DAT, note: 'Assigned by QA test' })
   rec('SC-02a Assign BUG-0001 to DatDT', r2a.ok, r2a.code, 200, r2a.data?.status_code||r2a.msg)
 
+  const r2c = await callAction(BUG1, 'assignToDeveloper', { assigneeID: DEV_DAT, note: 'Keep the allowed Assigned to Assigned path.' })
+  rec('SC-02c Assigned -> Assigned assignment remains allowed', r2c.ok, r2c.code, 200, r2c.data?.status_code||r2c.msg)
+
   const r2b = await callAction(BUG1, 'assignToDeveloper', { note: 'no assigneeID' })
   rec('SC-02b Assign without assigneeID -> 400', !r2b.ok && r2b.code===400, r2b.code, 400, r2b.msg)
 
@@ -222,6 +242,19 @@ async function runSrv(srv) {
   console.log('SC-04: Start Progress')
   const r4a = await callAction(BUG1, 'startProgress', {})
   rec('SC-04a startProgress IN_REVIEW -> IN_PROGRESS', r4a.ok, r4a.code, 200, r4a.data?.status_code||r4a.msg)
+
+  const beforeRepeatedStartProgress = await lifecycleSnapshot(BUG1)
+  const r4b = await callAction(BUG1, 'startProgress', {})
+  const afterRepeatedStartProgress = await lifecycleSnapshot(BUG1)
+  const repeatedStartProgressWasRejected = !r4b.ok && r4b.code === 400
+  const repeatedStartProgressWasNoOp = JSON.stringify(afterRepeatedStartProgress) === JSON.stringify(beforeRepeatedStartProgress)
+  rec(
+    'SC-04b repeated startProgress -> 400 with no Bug/history/log/notification/delivery changes [UAT-LIFE-013]',
+    repeatedStartProgressWasRejected && repeatedStartProgressWasNoOp,
+    r4b.code,
+    400,
+    `${r4b.msg || 'accepted'}; unchanged=${repeatedStartProgressWasNoOp}`
+  )
 
   console.log('')
   console.log('SC-05: Request More Information')
