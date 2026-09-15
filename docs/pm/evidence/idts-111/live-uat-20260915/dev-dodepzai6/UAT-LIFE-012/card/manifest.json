@@ -1,0 +1,166 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "uat-summary-card",
+  "caseId": "UAT-LIFE-012",
+  "caseNumber": 33,
+  "rootVerdict": "PASS",
+  "status": "PASS",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "generatedAt": "2026-09-15T11:26:07.482Z",
+  "layoutCaption": "Current execution evidence summary — Evidence summary card",
+  "canonicalSource": {
+    "sheet": "Test Result READY",
+    "caseBlock": "Test Result READY — Case 33 — UAT-LIFE-012"
+  },
+  "evidenceRoot": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6",
+  "caseDefinition": {
+    "actorRole": "DEVELOPER",
+    "title": "Unauthorized lifecycle action is rejected",
+    "precondition": "Signed-in Developer does not own the Bug or action.",
+    "action": "Attempt the protected lifecycle action once, then reload the Bug.",
+    "expectedResult": "HTTP 403 is returned and no workflow side effect is persisted."
+  },
+  "actualResult": "PASS — Exactly one POST returned HTTP 403 with the expected safe rejection. BUG-0026 and the full readback counts remained unchanged after reload.",
+  "transport": {
+    "method": "POST",
+    "endpoint": "/idtsbugmanagementui/odata/v4/bug/Bugs(ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,IsActiveEntity=true)/BugService.startProgress",
+    "actionAttemptCount": 1,
+    "retry": false,
+    "httpStatus": 403,
+    "errorCode": "403",
+    "errorMessage": "Only the assigned developer, Tester, or PM can perform this bug processing action.",
+    "csrfFetchStatus": 200,
+    "csrfPresent": true
+  },
+  "persistenceReadback": {
+    "columns": [
+      "Before",
+      "After",
+      "Reload"
+    ],
+    "counts": {
+      "Bugs": [
+        1,
+        1,
+        1
+      ],
+      "Comments": [
+        0,
+        0,
+        0
+      ],
+      "HistoryEvents": [
+        3,
+        3,
+        3
+      ],
+      "HistoryLogs": [
+        7,
+        7,
+        7
+      ],
+      "Notifications": [
+        2,
+        2,
+        2
+      ],
+      "NotificationDeliveries": [
+        1,
+        1,
+        1
+      ]
+    },
+    "reloadState": {
+      "status": "ASSIGNED",
+      "bugNumber": "BUG-0026",
+      "technicalAssignee": "DatDT",
+      "nextProcessor": "DatDT",
+      "currentActionOwner": "DatDT"
+    },
+    "sameAsBaseline": true,
+    "unexpectedMutation": false,
+    "uiReloadConfirmed": true
+  },
+  "provenance": {
+    "evidenceKind": "Current UAT execution evidence summary",
+    "testFileLine": "Test Result READY — Case 33 — UAT-LIFE-012",
+    "executionSource": "Sanitized current live UAT package readback",
+    "sourceAssertions": "Actor role DEVELOPER; POST 403; postCount=1; sameAsBaseline=true; unexpectedMutation=false",
+    "sourceBaselineSha": null,
+    "sourceBaselineNote": "Not supplied by the sanitized package",
+    "executionTime": "2026-09-15 live package; per-request timestamp not supplied",
+    "structuredEvidence": [
+      "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\baseline-before.json",
+      "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\start-progress-post-receipt.json",
+      "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\after-readback.json"
+    ]
+  },
+  "sourceArtifacts": {
+    "baseline": {
+      "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\baseline-before.json",
+      "bytes": 910,
+      "sha256": "A9C423355B3E5536EB73E8EB1B440DA7EA7DEBF9EF06EBB4A2A0BE2F348ACF8B"
+    },
+    "postReceipt": {
+      "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\start-progress-post-receipt.json",
+      "bytes": 599,
+      "sha256": "15D4831B487E766BED2F1E1B99BF72008BD01C49FF7D7349788E4046087710FD"
+    },
+    "afterReadback": {
+      "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\after-readback.json",
+      "bytes": 703,
+      "sha256": "2286899233D6C6E88CD883B75CB71B945AC53629A0CE4BC9764764301AEFAB42"
+    },
+    "screenshots": [],
+    "screenshotsByteIdentical": false
+  },
+  "limitation": "No local viewport screenshot file is present in the UAT-LIFE-012 package. Full-page screenshot capture timed out; no runtime screenshot is embedded. The sanitized POST receipt and before/after JSON readback are the evidence for the HTTP outcome and no-mutation result.",
+  "sources": [
+    {
+      "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\baseline-before.json",
+      "role": "baseline readback",
+      "format": "JSON",
+      "bytes": 910,
+      "sha256": "A9C423355B3E5536EB73E8EB1B440DA7EA7DEBF9EF06EBB4A2A0BE2F348ACF8B"
+    },
+    {
+      "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\start-progress-post-receipt.json",
+      "role": "single protected POST receipt",
+      "format": "JSON",
+      "bytes": 599,
+      "sha256": "15D4831B487E766BED2F1E1B99BF72008BD01C49FF7D7349788E4046087710FD"
+    },
+    {
+      "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\after-readback.json",
+      "role": "post-reload readback",
+      "format": "JSON",
+      "bytes": 703,
+      "sha256": "2286899233D6C6E88CD883B75CB71B945AC53629A0CE4BC9764764301AEFAB42"
+    }
+  ],
+  "result": {
+    "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\card\\result.png",
+    "bytes": 103516,
+    "sha256": "CA769D0EE6AB05C00FD5A5BF69F36E5BED8A18AC2C81F7EA26563A22C7B8D8D2",
+    "signature": "89504E470D0A1A0A",
+    "isPng": true,
+    "width": 1280,
+    "height": 1940,
+    "nonBlank": true,
+    "fullPage": true
+  },
+  "verification": {
+    "pngReadable": true,
+    "dimensions": "1280x1940",
+    "nonBlank": true,
+    "hash": "CA769D0EE6AB05C00FD5A5BF69F36E5BED8A18AC2C81F7EA26563A22C7B8D8D2",
+    "fullPage": true,
+    "embeddedRuntimeScreenshot": false,
+    "sourceHashesVerified": true,
+    "noWorkbookOrDriveMutation": true,
+    "noRuntimeMutation": true,
+    "stateTextClean": true
+  },
+  "outputFolder": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\dev-dodepzai6\\UAT-LIFE-012\\card"
+}

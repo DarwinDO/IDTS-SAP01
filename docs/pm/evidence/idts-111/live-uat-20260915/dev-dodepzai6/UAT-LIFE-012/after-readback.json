@@ -1,0 +1,31 @@
+{
+  "caseId": "UAT-LIFE-012",
+  "uiReloadConfirmed": true,
+  "bug": {
+    "httpStatus": 200,
+    "count": 1,
+    "status": "ASSIGNED",
+    "assigneeDisplayName": "DatDT",
+    "currentActionOwnerDisplayName": "DatDT",
+    "nextProcessorRoleName": "Developer",
+    "canStartProgress": false
+  },
+  "scopedCounts": {
+    "Bugs": 1,
+    "Comments": 0,
+    "HistoryEvents": 3,
+    "HistoryLogs": 7,
+    "Notifications": 2,
+    "NotificationDeliveries": 1
+  },
+  "getStatuses": {
+    "Bug": 200,
+    "Comments": 200,
+    "HistoryEvents": 200,
+    "HistoryLogs": [200, 200, 200],
+    "Notifications": 200,
+    "NotificationDeliveries": [200, 200]
+  },
+  "sameAsBaseline": true,
+  "unexpectedMutation": false
+}

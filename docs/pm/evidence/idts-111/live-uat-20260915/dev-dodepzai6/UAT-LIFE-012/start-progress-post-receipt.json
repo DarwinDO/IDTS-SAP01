@@ -1,0 +1,22 @@
+{
+  "caseId": "UAT-LIFE-012",
+  "method": "POST",
+  "endpoint": "/idtsbugmanagementui/odata/v4/bug/Bugs(ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,IsActiveEntity=true)/BugService.startProgress",
+  "requestBody": {},
+  "csrf": {
+    "fetchStatus": 200,
+    "tokenPresent": true,
+    "tokenStored": false
+  },
+  "response": {
+    "status": 403,
+    "ok": false,
+    "errorCode": "403",
+    "errorMessage": "Only the assigned developer, Tester, or PM can perform this bug processing action."
+  },
+  "postCount": 1,
+  "networkObservation": {
+    "matchedStartProgressPostCount": 1,
+    "status": 403
+  }
+}

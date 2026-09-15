@@ -1,0 +1,69 @@
+{
+  "case": "UAT-ATT-007-setup",
+  "result": "PASS",
+  "checkedAt": "2026-09-15T18:36:40+07:00",
+  "environment": "shared-qa",
+  "session": {
+    "role": "DatDT / Developer",
+    "credentialValue": "not recorded",
+    "bugAssignedTo": "DatDT"
+  },
+  "bug": {
+    "id": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "number": "BUG-0026",
+    "status": "ASSIGNED",
+    "active": true,
+    "modifiedAt": "2026-09-15T11:36:40.824Z"
+  },
+  "uiFlow": [
+    "Fiori Edit",
+    "Attachments",
+    "select exactly one controlled text fixture",
+    "Upload",
+    "Save/activate once"
+  ],
+  "fixture": {
+    "filename": "idts-127-att007-controlled.txt",
+    "mimeType": "text/plain",
+    "body": "IDTS-127 ATT-007 controlled fixture",
+    "sha256": "3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E"
+  },
+  "attachment": {
+    "id": "dd853abe-3284-4d6c-8ef1-0158cf9603cb",
+    "bug": "BUG-0026",
+    "filename": "idts-127-att007-controlled.txt",
+    "mimeType": "text/plain",
+    "fileSize": 36,
+    "scanStatus": "Unscanned",
+    "createdBy": "DatDT (redacted)",
+    "contentReadback": {
+      "httpStatus": 200,
+      "bodyExact": true,
+      "sha256": "3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E"
+    }
+  },
+  "countsAfterSetup": {
+    "global": {
+      "Bugs": 26,
+      "HistoryEvents": 234,
+      "Notifications": 156,
+      "Comments": 20,
+      "DuplicateLinks": 3,
+      "NotificationDeliveries": 119,
+      "AiSuggestions": 103
+    },
+    "bug0026": {
+      "attachments": 1,
+      "historyEvents": 4,
+      "notifications": 2,
+      "comments": 0
+    }
+  },
+  "audit": {
+    "historyEntry": "Added attachment idts-127-att007-controlled.txt.",
+    "activeMetadataReadbackHttpStatus": 200,
+    "activeAttachmentVisibleAfterActivation": true,
+    "deleteAttempted": false,
+    "sourceDriveWorkbookChanged": false
+  }
+}

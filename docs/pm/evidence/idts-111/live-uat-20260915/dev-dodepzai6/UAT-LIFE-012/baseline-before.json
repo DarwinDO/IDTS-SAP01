@@ -1,0 +1,40 @@
+{
+  "caseId": "UAT-LIFE-012",
+  "capturedAtLocalDate": "2026-09-15",
+  "actor": {
+    "userId": "dodepzai6",
+    "role": "DEVELOPER",
+    "browserProfile": "Chrome Work",
+    "authenticated": true
+  },
+  "target": {
+    "bugNumber": "BUG-0026",
+    "bugId": "39ed5ffc-867d-4abe-956f-e54ae68c5c10"
+  },
+  "bug": {
+    "httpStatus": 200,
+    "count": 1,
+    "status": "ASSIGNED",
+    "assigneeDisplayName": "DatDT",
+    "currentActionOwnerDisplayName": "DatDT",
+    "nextProcessorRoleName": "Developer",
+    "canStartProgress": false
+  },
+  "scopedCounts": {
+    "Bugs": 1,
+    "Comments": 0,
+    "HistoryEvents": 3,
+    "HistoryLogs": 7,
+    "Notifications": 2,
+    "NotificationDeliveries": 1
+  },
+  "getStatuses": {
+    "Bug": 200,
+    "Comments": 200,
+    "HistoryEvents": 200,
+    "HistoryLogs": [200, 200, 200],
+    "Notifications": 200,
+    "NotificationDeliveries": [200, 200]
+  },
+  "postSent": false
+}
