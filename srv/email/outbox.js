@@ -245,7 +245,8 @@ function sanitizeTransportError (error) {
     ECONNECTION: 'SMTP connection failed.',
     ECONNREFUSED: 'SMTP connection was refused.',
     ESOCKET: 'SMTP connection failed.',
-    ETIMEDOUT: 'SMTP connection timed out.'
+    ETIMEDOUT: 'SMTP connection timed out.',
+    EMAIL_UAT_FORCED_FAILURE: 'Email delivery failed in the controlled UAT check.'
   }
   return {
     code,

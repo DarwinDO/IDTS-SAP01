@@ -5,6 +5,7 @@ const cds = require('@sap/cds')
 const { getEmailConfig } = require('./config')
 const { processEmailDeliveries, writeNotificationRecord } = require('./outbox')
 const { createEmailSender } = require('./sender')
+const { wrapEmailSenderForUat } = require('./uat-fault')
 const { processNotificationDigestDeliveries } = require('../notification/digest')
 const { getUserAdminConfig } = require('../user-admin/config')
 const { processUserOnboardingDeliveries } = require('../user-admin/delivery')
@@ -36,11 +37,12 @@ async function processEmailOutboxBatch ({ tx, dependencies = {} }) {
   const now = dependencies.now || new Date()
   const workerID = dependencies.workerID || cds.utils.uuid()
   const sendMail = message => batchSender.sendMail(message)
+  const notificationSendMail = wrapEmailSenderForUat(config, sendMail)
   try {
     const notifications = await processNotifications({
       tx,
       config,
-      sendMail
+      sendMail: notificationSendMail
     })
     const invitations = invitationConfig.ready
       ? await processInvitations({
