@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "idts-live-uat-post-receipt-1",
+  "caseId": "UAT-AI-003",
+  "sanitized": true,
+  "actor": { "user": "DatDT", "role": "DEVELOPER" },
+  "operation": "confirmDuplicateSuggestion",
+  "method": "POST",
+  "endpoint": "/idtsbugmanagementui/odata/v4/bug/confirmDuplicateSuggestion",
+  "requestCount": 1,
+  "retry": false,
+  "requestedAt": "2026-09-15T12:16:29.095Z",
+  "request": {
+    "suggestionID": "d193c69b-feaf-49cf-ba5e-cc12da75b7e1",
+    "candidateBugID": "23ca1377-65e7-4640-a0dc-60d067013ef6"
+  },
+  "csrf": {
+    "fetchStatus": 200,
+    "tokenPresent": true,
+    "tokenPersisted": false
+  },
+  "response": {
+    "httpStatus": 403,
+    "errorCode": "403",
+    "safeMessage": "Only Tester or PM users can confirm duplicate suggestions."
+  }
+}

@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "idts-live-uat-receipt-1",
+  "sanitized": true,
+  "caseId": "UAT-AI-003",
+  "verdict": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "observedAt": "2026-09-15",
+  "browser": {
+    "family": "Edge",
+    "tabId": "149229501",
+    "surface": "authenticated DatDT Developer session"
+  },
+  "actor": {
+    "user": "DatDT",
+    "role": "Developer"
+  },
+  "targetBug": {
+    "key": "BUG-0026",
+    "id": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "workflowState": "Assigned"
+  },
+  "source": {
+    "commitSha": "011e388c6951b05e8b32a76237192f0e12c4eeb2",
+    "runtimeSha256": null,
+    "catalogSha256": null,
+    "runtimeAndCatalogNote": "Exact live runtime/catalog hashes were not exposed by the allowed Edge surface; no runtime, source, catalog, Drive, or workbook mutation was made."
+  },
+  "suggestionGeneration": {
+    "fresh": false,
+    "reusedPersistedAcceptedSuggestion": true,
+    "surface": "Bug details > Find Similar Bugs",
+    "candidateCountObserved": 5,
+    "candidates": [
+      { "key": "BUG-0023", "id": "23ca1377-65e7-4640-a0dc-60d067013ef6", "matchPercent": 79, "workflowLabel": "Pending Assignment", "relation": "DUPLICATE" },
+      { "key": "BUG-0024", "id": "0f4428e3-a6bc-46de-8c19-b41dcac37d5f", "matchPercent": 75, "workflowLabel": "Pending Assignment", "relation": "SIMILAR" },
+      { "key": "BUG-0025", "id": "4a7cf16c-f516-46d4-a81b-6173c0b2a1b3", "matchPercent": 63, "workflowLabel": "In Review", "relation": "SIMILAR" },
+      { "key": "BUG-0005", "id": "792a32bf-31e0-4512-82fd-40d6fcbe8fc1", "matchPercent": 43, "workflowLabel": "Pending Assignment", "relation": "RELATED" },
+      { "key": "BUG-0008", "id": "c779091a-ade9-42bc-a170-525da451d10a", "matchPercent": 36, "workflowLabel": "Need More Information", "relation": "RELATED" }
+    ],
+    "selected": {
+      "key": "BUG-0023",
+      "id": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+      "selfCandidate": false,
+      "activeOpenAtSelection": true,
+      "selectionBasis": "highest-match non-self open candidate shown by the prior fresh UI suggestion list"
+    },
+    "acceptedSuggestionID": "d193c69b-feaf-49cf-ba5e-cc12da75b7e1"
+  },
+  "acceptUi": {
+    "performedPreviously": true,
+    "result": "Accepted",
+    "reviewedBy": "DatDT",
+    "uiTime": "2026-09-15 18:48 +07:00 (minute precision shown by UI)",
+    "dialogAfterAccept": "Accepted state remained visible and review controls were disabled"
+  },
+  "directConfirmDuplicateSuggestion": {
+    "operation": "confirmDuplicateSuggestion",
+    "method": "POST",
+    "endpoint": "/idtsbugmanagementui/odata/v4/bug/confirmDuplicateSuggestion",
+    "request": {
+      "suggestionID": "d193c69b-feaf-49cf-ba5e-cc12da75b7e1",
+      "candidateBugID": "23ca1377-65e7-4640-a0dc-60d067013ef6"
+    },
+    "expectedHttp": 403,
+    "attemptCount": 1,
+    "actualHttp": 403,
+    "requestedAt": "2026-09-15T12:16:29.095Z",
+    "csrfFetchStatus": 200,
+    "csrfPresent": true,
+    "csrfTokenPersisted": false,
+    "response": {
+      "errorCode": "403",
+      "safeMessage": "Only Tester or PM users can confirm duplicate suggestions."
+    },
+    "transportVerdict": "PASS"
+  },
+  "readbacks": {
+    "baseline": "baseline-before.json",
+    "after": "after-readback.json",
+    "postReceipt": "ai003-post-receipt.json",
+    "afterReadAt": "2026-09-15T12:16:59.297Z"
+  },
+  "invariantsObserved": {
+    "duplicatePairCount": 0,
+    "duplicateLinkCreated": false,
+    "acceptedSuggestionRemainedAccepted": true,
+    "bugWorkflowUnchanged": true,
+    "bugClassificationUnchanged": true,
+    "historyUnchanged": true,
+    "notificationsUnchanged": true,
+    "commentsUnchanged": true,
+    "auditCountsUnchanged": true,
+    "uiReloadConfirmed": false,
+    "unexpectedMutation": false
+  },
+  "screenshots": [],
+  "screenshotNote": "No runtime screenshot path was available from the controlled Edge surface. The companion card/result.png is a summary card only and is not claimed as runtime UI evidence.",
+  "noRuntimeScreenshotFabrication": true,
+  "noSourceDriveWorkbookMutation": true
+}

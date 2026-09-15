@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "uat-summary-card",
+  "caseId": "UAT-AI-003",
+  "caseNumber": 63,
+  "status": "PASS",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "generatedAt": "2026-09-15T12:33:29Z",
+  "layoutCaption": "Current execution evidence summary - authorization card",
+  "canonicalSource": {
+    "spreadsheetId": "1JJK0oCmY38KWlbvGdGCdSBQKNpJhzWjAFCZN5-gX_8Q",
+    "sheet": "Test Result READY",
+    "caseBlock": "Test Result READY - Case 63 - UAT-AI-003",
+    "title": "Developer cannot confirm duplicate",
+    "expectedResult": "HTTP 403 is returned and no DuplicateLink is created."
+  },
+  "evidenceRoot": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003",
+  "sourceManifest": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/receipt.json",
+  "receipt": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/receipt.json",
+  "caseDefinition": {
+    "actorRole": "DEVELOPER",
+    "title": "Developer cannot confirm duplicate",
+    "preconditions": "Developer is signed in and an accepted Similar Bugs suggestion and candidate are already persisted.",
+    "steps": [
+      "Send the protected direct request once using the persisted suggestion and candidate IDs."
+    ],
+    "expectedResult": "HTTP 403 is returned and no DuplicateLink is created."
+  },
+  "actualResult": "PASS - Exactly one CSRF-protected POST returned HTTP 403. The accepted suggestion, BUG-0026, the BUG-0026/BUG-0023 pair, and all captured audit counts remained unchanged.",
+  "transport": {
+    "method": "POST",
+    "path": "/idtsbugmanagementui/odata/v4/bug/confirmDuplicateSuggestion",
+    "expectedHttp": 403,
+    "observedHttp": 403,
+    "responseBody": "redacted; safe authorization message retained",
+    "requestCount": 1,
+    "csrfFetched": true,
+    "csrfTokenPersisted": false,
+    "suggestionID": "d193c69b-feaf-49cf-ba5e-cc12da75b7e1",
+    "candidateBugID": "23ca1377-65e7-4640-a0dc-60d067013ef6"
+  },
+  "observedAssertions": [
+    "Exactly one direct POST was issued with the persisted accepted suggestion and candidate IDs.",
+    "The authenticated DatDT Developer identity received HTTP 403 with the safe authorization message.",
+    "The BUG-0026/BUG-0023 DuplicateLinks pair remained absent; pair count stayed 0.",
+    "BUG-0026 remained ASSIGNED with its classification, ownership, and modifiedAt unchanged.",
+    "Bug and audit counts remained unchanged: Bugs 1, Comments 0, HistoryEvents 4, HistoryLogs 8, Notifications 2, NotificationDeliveries 1, DuplicateLinks total 3, AiSuggestions 9 for the Bug / 109 total."
+  ],
+  "persistenceReadback": {
+    "columns": [
+      "Check",
+      "Before",
+      "After"
+    ],
+    "rows": [
+      ["confirmDuplicateSuggestion POST", "N/A", "HTTP 403"],
+      ["DuplicateLinks pair BUG-0026 / BUG-0023", "0", "0"],
+      ["BUG-0026 workflow", "ASSIGNED", "ASSIGNED"],
+      ["HistoryEvents / HistoryLogs", "4 / 8", "4 / 8"],
+      ["AiSuggestions for Bug / total", "9 / 109", "9 / 109"]
+    ],
+    "baseline": "../UAT-AI-003/baseline-before.json",
+    "after": "../UAT-AI-003/after-readback.json",
+    "sameAsBaseline": true,
+    "unexpectedMutation": false,
+    "uiReloadConfirmed": false
+  },
+  "provenance": {
+    "evidenceKind": "Current UAT execution evidence summary",
+    "testFileLine": "Test Result READY - Case 63 - UAT-AI-003",
+    "executionSource": "Sanitized current live UAT package readback",
+    "sourceAssertions": "Actor role DEVELOPER; POST 403; requestCount=1; pair count=0; sameAsBaseline=true; unexpectedMutation=false",
+    "executionTime": "2026-09-15 live package; POST timestamp is recorded in ai003-post-receipt.json",
+    "structuredEvidence": [
+      "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/baseline-before.json",
+      "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/ai003-post-receipt.json",
+      "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/after-readback.json"
+    ],
+    "browserTab": "149229501",
+    "accountRole": "DatDT / Developer"
+  },
+  "sourceArtifacts": {
+    "baseline": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/baseline-before.json",
+      "bytes": 1948,
+      "sha256": "AE43D157DFBA9D4559565F565F2B92428DFFF4FA0F4116A613BAF914808BE247"
+    },
+    "postReceipt": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/ai003-post-receipt.json",
+      "bytes": 765,
+      "sha256": "4A2BE2D74F158E128C7724FE862F30F4ECF8E43B514B4D5A545E14FEE8AC0DEF"
+    },
+    "afterReadback": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/after-readback.json",
+      "bytes": 2481,
+      "sha256": "ECE2A3FAFB60B54F6614FEF0833A5D8C8FD6D592C708AD755C4453A98425D587"
+    },
+    "receipt": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/receipt.json",
+      "bytes": 4028,
+      "sha256": "E1E50131787A420B34B253F3DA8B3209CF548A29D2B36C57071CE8069E7CC9DC"
+    },
+    "card": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/card.md",
+      "bytes": 977,
+      "sha256": "9924A48E177A3A17EE632CA830B0D5EC5632CDB14D27C0E458A587F6E1793005"
+    }
+  },
+  "limitation": "No runtime screenshot was retained from the controlled Edge surface. This PNG is a summary card only and cannot substitute for runtime UI evidence; direct transport and readback JSON are the authoritative evidence.",
+  "noRuntimeScreenshot": true,
+  "result": {
+    "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/card/result.png",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 1020,
+    "bytes": 62887,
+    "sha256": "8EAFD98F5DA9B1697C7493CF68BF4A894CE9DB18C2BE3210C07464BABBB8F5C4",
+    "nonBlank": true,
+    "fullPage": true
+  },
+  "verification": {
+    "pngSignature": "PASS",
+    "nonBlank": "PASS",
+    "dimensions": "PASS",
+    "hash": "PASS",
+    "receiptReadback": "PASS",
+    "noRuntimeScreenshotFabrication": true,
+    "noUatRerun": true,
+    "noSourceDriveWorkbookMutation": true
+  },
+  "outputFolder": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-datdt/UAT-AI-003/card"
+}

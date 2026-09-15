@@ -1,0 +1,88 @@
+{
+  "schemaVersion": "idts-live-uat-readback-1",
+  "caseId": "UAT-AI-003",
+  "sanitized": true,
+  "readAt": "2026-09-15T12:16:59.297Z",
+  "actor": { "user": "DatDT", "role": "DEVELOPER" },
+  "targetBug": { "key": "BUG-0026", "id": "39ed5ffc-867d-4abe-956f-e54ae68c5c10" },
+  "acceptedSuggestion": {
+    "id": "d193c69b-feaf-49cf-ba5e-cc12da75b7e1",
+    "featureType": "Duplicate Detection",
+    "reviewState": "Accepted",
+    "reviewedBy": "DatDT",
+    "reviewedAt": "2026-09-15T11:48:19.491Z",
+    "expiresAt": null,
+    "modifiedAt": "2026-09-15T11:48:19.423Z"
+  },
+  "selectedCandidate": {
+    "key": "BUG-0023",
+    "id": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+    "relationType": "DUPLICATE"
+  },
+  "bug": {
+    "status": 200,
+    "ID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "bugNumber": "BUG-0026",
+    "status_code": "ASSIGNED",
+    "assignee_ID": "20000000-0000-0000-0000-000000000002",
+    "nextProcessorRole_code": "DEVELOPER",
+    "nextProcessorUser_ID": "10000000-0000-0000-0000-000000000003",
+    "currentActionOwnerDisplayName": "DatDT",
+    "sapModule_ID": null,
+    "applicationComponent_ID": "40000000-0000-0000-0000-000000000001",
+    "defectCategory_ID": "50000000-0000-0000-0000-000000000001",
+    "priority_code": "HIGH",
+    "severity_code": "MAJOR",
+    "modifiedAt": "2026-09-15T11:36:40.824Z"
+  },
+  "duplicatePair": {
+    "status": 200,
+    "count": 0,
+    "links": []
+  },
+  "counts": {
+    "Bugs": 1,
+    "Comments": 0,
+    "HistoryEvents": 4,
+    "HistoryLogs": 8,
+    "Notifications": 2,
+    "NotificationDeliveries": 1,
+    "DuplicateLinksForPair": 0,
+    "DuplicateLinksTotal": 3,
+    "AiSuggestionsForBug": 9,
+    "AiSuggestionsTotal": 109
+  },
+  "baselineCounts": {
+    "Bugs": 1,
+    "Comments": 0,
+    "HistoryEvents": 4,
+    "HistoryLogs": 8,
+    "Notifications": 2,
+    "NotificationDeliveries": 1,
+    "DuplicateLinksForPair": 0,
+    "DuplicateLinksTotal": 3,
+    "AiSuggestionsForBug": 9,
+    "AiSuggestionsTotal": 109
+  },
+  "invariants": {
+    "sameAsBaseline": true,
+    "duplicatePairUnchanged": true,
+    "suggestionStateUnchanged": true,
+    "auditCountsUnchanged": true,
+    "unexpectedMutation": false,
+    "uiReloadConfirmed": false
+  },
+  "readStatuses": {
+    "bug": 200,
+    "comments": 200,
+    "historyEvents": 200,
+    "historyLogs": 200,
+    "notifications": 200,
+    "notificationDeliveries": 200,
+    "duplicatePair": 200,
+    "duplicateAll": 200,
+    "aiTarget": 200,
+    "aiTargetBug": 200,
+    "aiAll": 200
+  }
+}

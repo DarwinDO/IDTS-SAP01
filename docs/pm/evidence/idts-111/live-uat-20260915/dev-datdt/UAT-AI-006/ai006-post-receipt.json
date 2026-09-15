@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "idts-live-uat-post-receipt-1",
+  "caseId": "UAT-AI-006",
+  "sanitized": true,
+  "actor": { "user": "DatDT", "role": "DEVELOPER" },
+  "operation": "applyClassificationSuggestion",
+  "method": "POST",
+  "endpoint": "/idtsbugmanagementui/odata/v4/bug/applyClassificationSuggestion",
+  "requestCount": 1,
+  "retry": false,
+  "requestedAt": "2026-09-15T12:17:31.708Z",
+  "request": {
+    "suggestionID": "85eaed78-5118-4109-9a23-c963631a9205"
+  },
+  "csrf": {
+    "fetchStatus": 200,
+    "tokenPresent": true,
+    "tokenPersisted": false
+  },
+  "response": {
+    "httpStatus": 403,
+    "errorCode": "403",
+    "safeMessage": "Only Tester or PM users can apply classification suggestions."
+  }
+}

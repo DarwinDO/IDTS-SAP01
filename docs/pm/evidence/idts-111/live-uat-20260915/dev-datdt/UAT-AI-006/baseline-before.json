@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "idts-live-uat-readback-1",
+  "caseId": "UAT-AI-006",
+  "sanitized": true,
+  "actor": { "user": "DatDT", "role": "DEVELOPER" },
+  "targetBug": { "key": "BUG-0026", "id": "39ed5ffc-867d-4abe-956f-e54ae68c5c10" },
+  "acceptedSuggestion": {
+    "id": "85eaed78-5118-4109-9a23-c963631a9205",
+    "featureType": "Classification Suggestion",
+    "reviewState": "Accepted",
+    "reviewedBy": "DatDT",
+    "reviewedAt": "2026-09-15T11:51:38.664Z",
+    "expiresAt": null
+  },
+  "bug": {
+    "status": 200,
+    "ID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "bugNumber": "BUG-0026",
+    "status_code": "ASSIGNED",
+    "sapModule_ID": null,
+    "applicationComponent_ID": "40000000-0000-0000-0000-000000000001",
+    "defectCategory_ID": "50000000-0000-0000-0000-000000000001",
+    "componentCategory_ID": "60000000-0000-0000-0000-000000000001",
+    "priority_code": "HIGH",
+    "severity_code": "MAJOR",
+    "modifiedAt": "2026-09-15T11:36:40.824Z"
+  },
+  "counts": {
+    "Bugs": 1,
+    "HistoryEvents": 4,
+    "HistoryLogs": 8,
+    "AiSuggestionsForBug": 9,
+    "AiSuggestionsTotal": 109
+  },
+  "readStatuses": {
+    "bug": 200,
+    "historyEvents": 200,
+    "historyLogs": 200,
+    "suggestion": 200,
+    "aiTargetBug": 200,
+    "aiAll": 200
+  },
+  "postSent": false
+}
