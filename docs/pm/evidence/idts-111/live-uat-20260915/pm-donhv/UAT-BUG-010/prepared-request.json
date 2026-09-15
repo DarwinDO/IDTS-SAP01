@@ -1,0 +1,48 @@
+{
+  "case": "UAT-BUG-010",
+  "status": "PREPARED_NOT_SENT",
+  "authenticatedPrincipal": {
+    "displayName": "DonHV",
+    "role": "Project Manager",
+    "transport": "Use the existing authenticated Edge app session; bearer token was not captured or persisted."
+  },
+  "expectedHttpStatus": 403,
+  "marker": "IDTS-UAT-BUG-010-20260915-978STK",
+  "request": {
+    "method": "POST",
+    "path": "/odata/v4/bug/Bugs",
+    "headers": {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "ID": "bab1d7da-907e-4032-8993-0d2986dfd890",
+      "title": "IDTS-UAT-BUG-010-20260915-978STK - PM draft NEW authorization probe",
+      "description": "Controlled authorization probe; no product defect is asserted. Marker: IDTS-UAT-BUG-010-20260915-978STK.",
+      "stepsToReproduce": "As authenticated DonHV (Project Manager), submit one valid draft-create POST to /odata/v4/bug/Bugs.",
+      "actualResult": "Authorization probe only; no product defect is asserted.",
+      "expectedResult": "HTTP 403; no active or draft Bug is created.",
+      "priority_code": "HIGH",
+      "severity_code": "MAJOR",
+      "environment_code": "QAS",
+      "applicationComponent_ID": "40000000-0000-0000-0000-000000000001",
+      "defectCategory_ID": "50000000-0000-0000-0000-000000000001"
+    }
+  },
+  "omittedServerManagedFields": [
+    "bugNumber",
+    "reporter_ID",
+    "retestOwner_ID",
+    "status_code",
+    "componentCategory_ID",
+    "nextProcessorUser_ID",
+    "nextProcessorRole_code"
+  ],
+  "sourceBasis": [
+    "scripts/qa/test-idts100-shared-qa-lifecycle.js:134-147 uses POST /odata/v4/bug/Bugs with the same required-field shape and verifies a 201 draft with IsActiveEntity=false for an authorized Tester.",
+    "srv/service.js:92-97 checks NEW Bugs.drafts before preparing reporter fields.",
+    "srv/bug-service/permissions.js:129-140 rejects non-Tester Bug creation with 403.",
+    "app/bug-management-ui/annotations/capabilities.cds:6 hides the standard UI Create action.",
+    "db/data confirms HIGH, MAJOR, QAS and the selected component/category pair are active."
+  ]
+}

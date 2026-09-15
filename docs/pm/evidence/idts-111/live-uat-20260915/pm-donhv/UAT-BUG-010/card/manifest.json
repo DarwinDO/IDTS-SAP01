@@ -1,0 +1,226 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "uat-summary-card",
+  "caseId": "UAT-BUG-010",
+  "caseNumber": 67,
+  "rootVerdict": "PASS",
+  "status": "PASS",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "generatedAt": "2026-09-15T11:31:52.223Z",
+  "layoutCaption": "Current execution evidence summary — Evidence summary card",
+  "canonicalSource": {
+    "sheet": "Test Result READY",
+    "caseBlock": "Test Result READY — Case 67 — UAT-BUG-010",
+    "title": "PM cannot create a new Bug",
+    "expectedResult": "Create Bug is not available to PM; the direct request returns HTTP 403 and no draft or active Bug is created."
+  },
+  "evidenceRoot": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010",
+  "caseDefinition": {
+    "actorRole": "PM",
+    "title": "PM cannot create a new Bug",
+    "preconditions": "PM is signed in and has no Tester business role.",
+    "steps": [
+      "Inspect the List Report actions.",
+      "Attempt the protected NEW draft request directly once.",
+      "Reload the Bug list."
+    ],
+    "expectedResult": "Create Bug is not available to PM; the direct request returns HTTP 403 and no draft or active Bug is created."
+  },
+  "title": "PM cannot create a new Bug",
+  "expectedResult": "Create Bug is not available to PM; the direct request returns HTTP 403 and no draft or active Bug is created.",
+  "actualResult": "PASS — PM Create/New was hidden. Exactly one authenticated POST /odata/v4/bug/Bugs with marker IDTS-UAT-BUG-010-20260915-978STK returned HTTP 403: Only Tester users can create bug reports. Marker active/draft readback remained 0/0 and Bugs 26, HistoryEvents 233, Notifications 156, and NotificationDeliveries 119 remained unchanged; no retry or mutation was observed.",
+  "transport": {
+    "method": "POST",
+    "path": "/odata/v4/bug/Bugs",
+    "expectedHttp": 403,
+    "observedHttp": 403,
+    "responseBody": "Only Tester users can create bug reports.",
+    "requestCount": 1,
+    "csrfAttached": true,
+    "marker": "IDTS-UAT-BUG-010-20260915-978STK"
+  },
+  "observedAssertions": [
+    "DonHV / Project Manager was confirmed in Edge; the Bugs List Report exposed no Create/New action.",
+    "Exactly one authenticated POST to /odata/v4/bug/Bugs used marker IDTS-UAT-BUG-010-20260915-978STK and returned HTTP 403.",
+    "The exact safe message was “Only Tester users can create bug reports.”; no retry was made and credentials were not persisted.",
+    "After reload, marker active count and draft count were both 0; UI search with Editing Status All returned All Bugs (0).",
+    "Counts were unchanged before and after: Bugs 26; HistoryEvents 233; Notifications 156; NotificationDeliveries 119.",
+    "The temporary BUG-0026 PM draft was discarded; the active route and Edit action returned and no draft lock remained."
+  ],
+  "persistenceReadback": {
+    "columns": [
+      "Before",
+      "After",
+      "Reload"
+    ],
+    "rows": [
+      [
+        "Create/New action",
+        "hidden",
+        "hidden",
+        "hidden"
+      ],
+      [
+        "Create POST",
+        "N/A",
+        "HTTP 403",
+        "not re-issued"
+      ],
+      [
+        "Marker active",
+        "0",
+        "0",
+        "0"
+      ],
+      [
+        "Marker draft",
+        "0",
+        "0",
+        "0"
+      ],
+      [
+        "Bugs",
+        "26",
+        "26",
+        "26"
+      ],
+      [
+        "HistoryEvents",
+        "233",
+        "233",
+        "not re-queried"
+      ],
+      [
+        "Notifications",
+        "156",
+        "156",
+        "not re-queried"
+      ],
+      [
+        "NotificationDeliveries",
+        "119",
+        "119",
+        "not re-queried"
+      ]
+    ],
+    "receipt": {
+      "markerReadback": {
+        "activeCount": 0,
+        "draftCount": 0,
+        "uiSearchEditingStatus": "All",
+        "uiSearchCountAfterReload": 0
+      },
+      "entityCounts": {
+        "before": {
+          "Bugs": 26,
+          "HistoryEvents": 233,
+          "Notifications": 156,
+          "NotificationDeliveries": 119
+        },
+        "after": {
+          "Bugs": 26,
+          "HistoryEvents": 233,
+          "Notifications": 156,
+          "NotificationDeliveries": 119
+        },
+        "unchanged": true
+      },
+      "uiAfterReload": {
+        "allBugsUnfiltered": 26,
+        "unreadNotificationBadge": 37,
+        "bug0026": {
+          "id": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+          "isActiveEntity": true,
+          "status": "Assigned",
+          "assignee": "DatDT",
+          "currentActionOwner": "DatDT",
+          "updatedAtDisplayed": "Sep 15, 2026, 4:05:47 PM",
+          "historyEventsVisible": 0,
+          "notificationsVisible": 0,
+          "attachmentsVisible": 0,
+          "draftLock": "No draft view; active URL and Edit action restored"
+        }
+      }
+    }
+  },
+  "provenance": {
+    "evidenceKind": "Current UAT execution evidence summary",
+    "testFileLine": "Test Result READY — Case 67 — UAT-BUG-010",
+    "executionSource": "Exact UAT-BUG-010 receipt, preflight, and prepared-request readback",
+    "sourceAssertions": "PM Create hidden; one authenticated POST; HTTP 403; marker active/draft 0/0; counts unchanged",
+    "sourceBaselineSha": null,
+    "sourceBaselineNote": "Not supplied by the UAT package",
+    "executionTime": "2026-09-15",
+    "structuredEvidence": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\receipt.json; E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\preflight.md; E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\prepared-request.json"
+  },
+  "sources": [],
+  "sourceArtifacts": {
+    "receipt": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\receipt.json",
+      "bytes": 2245,
+      "sha256": "A7DC0A6B3409C4026C9CCBCBE612D9A1F381C4EF5E1EB2FB38EB6371E3D11612"
+    },
+    "preflight": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\preflight.md",
+      "bytes": 2269,
+      "sha256": "3FBD57D8CDE265AFE02101985707386EB488FAD188737B3BE90CB8A214BFB791"
+    },
+    "preparedRequest": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\prepared-request.json",
+      "bytes": 2117,
+      "sha256": "97E329421DBDF07CA05D5660A13F770C6DB7DF083FF58FAA260D485A072DD037"
+    },
+    "cardMarkdown": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\card.md",
+      "bytes": 1157,
+      "sha256": "E3664A694B3D2E8F5F23E38DC884A5D38231DCDE5E3B41FCFDEBC9606080C9A7"
+    }
+  },
+  "limitation": "No local PNG screenshot path exists in the supplied UAT-BUG-010 package; Edge CUA screenshots were emitted inline only. This artifact summarizes the structured receipt and readback, is not runtime UI evidence, and does not fabricate a screenshot.",
+  "noRuntimeScreenshot": true,
+  "result": {
+    "file": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\card\\result.png",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 1280,
+    "bytes": 139034,
+    "sha256": "FA8C5F3E16704AA6C12BB58EDF645BC111E60AAA7A7D05616042103A4797925F",
+    "nonBlank": true,
+    "fullPage": true
+  },
+  "verification": {
+    "pngSignature": "PASS",
+    "nonBlank": "PASS",
+    "dimensions": "PASS",
+    "hash": "PASS",
+    "fullPage": true,
+    "receiptReadback": "PASS",
+    "noRuntimeScreenshotFabrication": true,
+    "noUatRerun": true,
+    "noBrowserControl": true,
+    "noDriveWorkbookOrSourceMutation": true
+  },
+  "receiptFiles": {
+    "json": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\receipt.json",
+      "bytes": 2245,
+      "sha256": "A7DC0A6B3409C4026C9CCBCBE612D9A1F381C4EF5E1EB2FB38EB6371E3D11612"
+    },
+    "preflight": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\preflight.md",
+      "bytes": 2269,
+      "sha256": "3FBD57D8CDE265AFE02101985707386EB488FAD188737B3BE90CB8A214BFB791"
+    },
+    "preparedRequest": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\prepared-request.json",
+      "bytes": 2117,
+      "sha256": "97E329421DBDF07CA05D5660A13F770C6DB7DF083FF58FAA260D485A072DD037"
+    },
+    "cardMarkdown": {
+      "path": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260915\\pm-donhv\\UAT-BUG-010\\card.md",
+      "bytes": 1157,
+      "sha256": "E3664A694B3D2E8F5F23E38DC884A5D38231DCDE5E3B41FCFDEBC9606080C9A7"
+    }
+  }
+}

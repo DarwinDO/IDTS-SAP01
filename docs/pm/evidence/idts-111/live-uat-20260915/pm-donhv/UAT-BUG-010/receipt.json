@@ -1,0 +1,75 @@
+{
+  "case": "UAT-BUG-010",
+  "verdict": "PASS",
+  "observedDate": "2026-09-15",
+  "identity": {
+    "displayName": "DonHV",
+    "role": "Project Manager",
+    "authMode": "SAP BTP XSUAA session",
+    "csrfAttached": true,
+    "credentialsPersisted": false
+  },
+  "request": {
+    "attempts": 1,
+    "method": "POST",
+    "path": "/odata/v4/bug/Bugs",
+    "marker": "IDTS-UAT-BUG-010-20260915-978STK",
+    "candidateID": "bab1d7da-907e-4032-8993-0d2986dfd890",
+    "preparedRequestFileSha256": "97E329421DBDF07CA05D5660A13F770C6DB7DF083FF58FAA260D485A072DD037",
+    "httpStatus": 403,
+    "errorCode": "403",
+    "errorMessage": "Only Tester users can create bug reports."
+  },
+  "markerReadback": {
+    "activeCount": 0,
+    "draftCount": 0,
+    "uiSearchEditingStatus": "All",
+    "uiSearchCountAfterReload": 0
+  },
+  "entityCounts": {
+    "before": {
+      "Bugs": 26,
+      "HistoryEvents": 233,
+      "Notifications": 156,
+      "NotificationDeliveries": 119
+    },
+    "after": {
+      "Bugs": 26,
+      "HistoryEvents": 233,
+      "Notifications": 156,
+      "NotificationDeliveries": 119
+    },
+    "unchanged": true
+  },
+  "uiAfterReload": {
+    "allBugsUnfiltered": 26,
+    "unreadNotificationBadge": 37,
+    "bug0026": {
+      "id": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+      "isActiveEntity": true,
+      "status": "Assigned",
+      "assignee": "DatDT",
+      "currentActionOwner": "DatDT",
+      "updatedAtDisplayed": "Sep 15, 2026, 4:05:47 PM",
+      "historyEventsVisible": 0,
+      "notificationsVisible": 0,
+      "attachmentsVisible": 0,
+      "draftLock": "No draft view; active URL and Edit action restored"
+    }
+  },
+  "draftDiscard": {
+    "bugNumber": "BUG-0026",
+    "draftID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "discardConfirmedByAppToast": "Draft discarded",
+    "activeRecordUnchanged": true,
+    "discardedOnlyTheDraftOpenedByThisUAT": true
+  },
+  "screenshots": {
+    "captured": [
+      "BUG-0026 unchanged draft before discard",
+      "BUG-0026 active view after discard"
+    ],
+    "storage": "Screenshots were emitted inline by the Edge CUA tool; no local screenshot-file export path is exposed by that tool."
+  },
+  "attachmentUAT": "Not attempted again; remains blocked as previously recorded."
+}
