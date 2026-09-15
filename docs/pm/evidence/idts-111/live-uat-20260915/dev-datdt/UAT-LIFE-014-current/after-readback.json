@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "idts-live-uat-receipt-2",
+  "sanitized": true,
+  "caseId": "UAT-LIFE-014-current",
+  "readPhase": "immediate-after-negative",
+  "observedOn": "2026-09-15",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "user": "DatDT",
+    "role": "Developer"
+  },
+  "bug": {
+    "key": "BUG-0025",
+    "id": "4a7cf16c-f516-46d4-a81b-6173c0b2a1b3",
+    "status": "In Review",
+    "statusCode": "IN_REVIEW",
+    "technicalAssignee": "DatDT",
+    "currentActionOwner": "DatDT",
+    "nextProcessorRole": "Developer"
+  },
+  "fields": {
+    "sapModule": null,
+    "applicationComponent": "IDTS Bug Report",
+    "defectCategory": "SAP Fiori UI5",
+    "priority": "High",
+    "severity": "Major",
+    "environment": "Quality Assurance"
+  },
+  "collections": {
+    "comments": [],
+    "historyEvents": [],
+    "notifications": [],
+    "attachments": []
+  },
+  "negativeAction": {
+    "operation": "Request More Information",
+    "reasonValue": "",
+    "confirmClickCount": 1,
+    "submitAttemptCount": 1,
+    "validationMessage": "This action requires a reason.",
+    "validationSurface": "Reason field",
+    "modalRemainedOpenAfterValidation": true,
+    "dialogClosedBy": "Cancel",
+    "cancelClickCount": 1,
+    "secondSubmitPerformed": false,
+    "lifecycleMutationObserved": false
+  },
+  "transport": {
+    "networkPanelExposed": false,
+    "httpStatus": null,
+    "expectedHttpStatus": 400,
+    "transportVerdict": "NOT_OBSERVABLE",
+    "limitation": "No direct Network/HTTP 400 was exposed by the allowed Chrome Work surface; this package does not claim an HTTP status."
+  },
+  "sameAsBaseline": true,
+  "mutationObserved": false
+}

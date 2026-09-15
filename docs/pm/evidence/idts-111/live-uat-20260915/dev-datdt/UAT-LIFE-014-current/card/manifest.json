@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "complete-atomic-evidence-card",
+  "templateReference": "UAT-LIFE-012 Complete atomic evidence",
+  "caseId": "UAT-LIFE-014",
+  "displayNumber": 79,
+  "status": "PASS_WITH_CATALOG_ACTOR_MISMATCH",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "DatDT",
+    "roleCode": "DEVELOPER"
+  },
+  "catalogActorRole": "TESTER",
+  "catalogActorMismatch": true,
+  "actualResult": "One blank-Reason Confirm displayed the field-targeted message and did not submit the lifecycle transition. After Cancel and one reload, BUG-0025 remained In Review and the scoped collections remained unchanged.",
+  "transport": {
+    "operation": "BugService.requestMoreInformation",
+    "confirmCount": 1,
+    "retry": false,
+    "fieldMessage": "This action requires a reason.",
+    "httpStatus": null,
+    "httpStatusClaimed": false
+  },
+  "readback": {
+    "bugNumber": "BUG-0025",
+    "statusBefore": "IN_REVIEW",
+    "statusAfter": "IN_REVIEW",
+    "statusReload": "IN_REVIEW",
+    "comments": [0, 0, 0],
+    "history": [0, 0, 0],
+    "notifications": [0, 0, 0],
+    "attachments": [0, 0, 0],
+    "unexpectedMutation": false
+  },
+  "sourceArtifacts": [
+    {"file":"baseline-before.json","bytes":2738,"sha256":"E10A1CF5CE3F71AB69C439B72772E06DC35660930039F6E2253C4B825466015A"},
+    {"file":"after-readback.json","bytes":1645,"sha256":"0A072C6903AC7F36615F19889E954066E56B6BE6BD451BAE9CA1D2E1C5088D9B"},
+    {"file":"final-reload-readback.json","bytes":1236,"sha256":"30208015D5DF04776741F49E551C8DA7720AE66758C09FAB067579F20126D95C"},
+    {"file":"life014-post-receipt.json","bytes":2245,"sha256":"21FCD4736D324D8A7395102996C4E76E21F74BD55D8B656972626CAC28C837BF"},
+    {"file":"card.md","bytes":2015,"sha256":"2B663D1EFE411E6EDEA5DC285D6FB8532E18DCFCA487B76E1667BB6018B06FC0"},
+    {"file":"runtime-final.jpg","bytes":67581,"sha256":"845B27D3DF45C766AA853C29597CCB17A7FEEACA5559FA6EA7B7859555F6D8BD"},
+    {"file":"card/card.html","bytes":6802,"sha256":"BFB07A47BE7B19578815615DAFF4B568491BB4D93ECD0D9829ED0A7813A34B6C"}
+  ],
+  "result": {
+    "file": "card/result.png",
+    "bytes": 321287,
+    "sha256": "2C9629FC4109424E00BC8C5AABE0B5035524C4A01E43BB5065FA65AADFB9B64A",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 2652,
+    "nonBlank": true,
+    "fullPage": true
+  },
+  "runtimeScreenshot": {
+    "file": "runtime-final.jpg",
+    "kind": "current runtime final reload",
+    "validationStatePersisted": false
+  },
+  "limitations": [
+    "No direct Network HTTP status was observable; no HTTP 400 is claimed.",
+    "The inline validation message was observed in the browser-control transcript; the persisted runtime image shows the final reload state."
+  ]
+}

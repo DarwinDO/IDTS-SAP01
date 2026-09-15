@@ -1,0 +1,63 @@
+{
+  "schemaVersion": "idts-live-uat-post-receipt-2",
+  "sanitized": true,
+  "caseId": "UAT-LIFE-014-current",
+  "verdict": "PASS",
+  "assertion": "Blank Reason is rejected at field level and no lifecycle mutation is observed.",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "user": "DatDT",
+    "role": "Developer"
+  },
+  "targetBug": {
+    "key": "BUG-0025",
+    "id": "4a7cf16c-f516-46d4-a81b-6173c0b2a1b3",
+    "eligibility": "In Review and assigned to DatDT",
+    "catalogActorRole": "TESTER",
+    "catalogMismatch": true,
+    "catalogMismatchNote": "Catalog declares actorRole TESTER; actual controlled execution actor and fixture owner are DatDT / Developer."
+  },
+  "browser": {
+    "browser": "Chrome",
+    "browserId": "2",
+    "profile": "Work",
+    "tabId": "1349670281",
+    "title": "Issue and Defect Tracking System"
+  },
+  "uiEmptyReasonValidation": {
+    "surface": "Request More Information dialog",
+    "blankReason": true,
+    "confirmClickCount": 1,
+    "submitAttemptCount": 1,
+    "validationMessage": "This action requires a reason.",
+    "messageSource": "Accessibility readback; field-error styling visible in runtime screenshot",
+    "modalRemainedOpenAfterValidation": true,
+    "dialogCancelledAfterValidation": true,
+    "secondSubmitPerformed": false,
+    "lifecycleMutationObserved": false
+  },
+  "transport": {
+    "operation": "BugService.requestMoreInformation",
+    "expectedHttpStatus": 400,
+    "observedHttpStatus": null,
+    "networkVisible": false,
+    "transportVerdict": "NOT_OBSERVABLE",
+    "safeSemantics": "The allowed Chrome Work surface exposed no direct Network/HTTP response; no HTTP status is claimed."
+  },
+  "readbacks": {
+    "preNegative": "baseline-before.json",
+    "immediateAfter": "after-readback.json",
+    "finalReload": "final-reload-readback.json"
+  },
+  "noLifecycleMutation": true,
+  "unchangedCollections": [
+    "comments",
+    "historyEvents",
+    "notifications",
+    "attachments"
+  ],
+  "screenshots": [
+    "runtime-final.jpg"
+  ],
+  "screenshotNote": "Clean baseline and validation-state screenshots were captured inline in the Chrome Work control transcript. runtime-final.jpg is the persisted final reload screenshot captured at 2026-09-15T21:59:53+07:00."
+}

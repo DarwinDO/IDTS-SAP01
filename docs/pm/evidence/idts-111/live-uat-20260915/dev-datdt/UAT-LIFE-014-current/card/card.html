@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Case 79 — UAT-LIFE-014</title>
+  <style>
+    :root { --ink:#07346c; --muted:#5f7898; --line:#ccd8e4; --blue:#2b88d8; --green:#087d3e; --green-bg:#dcefe4; --amber:#925500; --amber-bg:#fff4d6; }
+    * { box-sizing:border-box; }
+    html,body { margin:0; background:#eef2f5; }
+    body { width:1280px; padding:38px 44px; color:var(--ink); font:18px/1.42 "Segoe UI",Arial,sans-serif; text-rendering:optimizeLegibility; font-feature-settings:"kern" 1; }
+    main { padding:20px 34px 32px; background:#fff; border-radius:22px; }
+    header { border-top:5px solid var(--blue); padding:14px 4px 18px; border-bottom:1px solid var(--line); }
+    .eyebrow { color:var(--muted); font-size:15px; }
+    h1 { margin:4px 0 1px; font-size:29px; line-height:1.2; }
+    .subtitle { margin:0; font-size:20px; }
+    .summary { display:grid; grid-template-columns:1fr 1fr; gap:24px; padding:22px 4px 8px; }
+    .label { color:var(--muted); font-size:14px; }
+    .value { margin-top:4px; font-size:19px; }
+    .pill { display:inline-block; margin-top:8px; padding:8px 26px; border-radius:999px; background:var(--green-bg); color:var(--green); font-weight:700; }
+    section { padding:24px 4px 2px; border-top:1px solid var(--line); margin-top:24px; }
+    h2 { margin:0 0 14px; font-size:22px; }
+    .definition { display:grid; grid-template-columns:1fr 1fr 1fr; gap:28px; }
+    p { margin:5px 0; }
+    ul { margin:4px 0; padding-left:25px; }
+    li { margin:6px 0; }
+    table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums lining-nums; }
+    th,td { padding:8px 10px; border-bottom:1px solid var(--line); text-align:left; vertical-align:top; }
+    th { font-weight:700; }
+    code { font:16px Consolas,monospace; overflow-wrap:anywhere; }
+    .proof { display:grid; grid-template-columns:180px 1fr; gap:8px 18px; }
+    .proof .label { padding-top:2px; }
+    .notice { margin-top:16px; padding:14px 18px; background:var(--amber-bg); color:var(--amber); border-radius:12px; }
+    .runtime { margin-top:14px; padding:12px; background:#f5f7f9; border:1px solid var(--line); border-radius:12px; }
+    .runtime img { display:block; width:100%; height:auto; border-radius:7px; }
+    .caption { margin:9px 2px 0; color:var(--muted); font-size:14px; }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Complete atomic evidence</div>
+    <h1>Case 79 — UAT-LIFE-014</h1>
+    <p class="subtitle">Required lifecycle reason prevents submission when empty</p>
+  </header>
+
+  <div class="summary">
+    <div><div class="label">Result</div><div class="value">PASS WITH CATALOG ACTOR MISMATCH</div><div class="pill">PASS</div></div>
+    <div><div class="label">Executor</div><div class="value">NhanT (DonHV support)</div></div>
+  </div>
+
+  <section>
+    <h2>Test definition</h2>
+    <div class="definition">
+      <div><div class="label">Precondition</div><p>Controlled BUG-0025 is In Review; DatDT is the assigned Developer and current action owner.</p></div>
+      <div><div class="label">Action</div><p>Open Request More Information, leave Reason empty, and choose Confirm once.</p></div>
+      <div><div class="label">Expected result</div><p>The action is blocked with a field-targeted message; status, history, notifications, comments, and attachments remain unchanged.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Observed assertions</h2>
+    <ul>
+      <li>Chrome Work shared authentication identified DatDT with the Developer role.</li>
+      <li>Exactly one blank-Reason Confirm displayed “This action requires a reason.” beneath the Reason field.</li>
+      <li>The modal remained open after validation; Cancel closed it and no second submit was performed.</li>
+      <li>After reload, BUG-0025 remained In Review with DatDT as technical assignee and current action owner.</li>
+      <li>Comments, History, Notifications, and Attachments remained empty.</li>
+      <li>The catalog declares TESTER; the controlled UI action was available to the assigned DatDT Developer. This mismatch is disclosed, not hidden.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Persistence readback</h2>
+    <table>
+      <thead><tr><th>Entity</th><th>Before</th><th>After</th><th>Reload</th></tr></thead>
+      <tbody>
+        <tr><td>Bug status</td><td>In Review</td><td>In Review</td><td>In Review</td></tr>
+        <tr><td>Technical assignee</td><td>DatDT</td><td>DatDT</td><td>DatDT</td></tr>
+        <tr><td>Current action owner</td><td>DatDT</td><td>DatDT</td><td>DatDT</td></tr>
+        <tr><td>Comments</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>History</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>Notifications</td><td>0</td><td>0</td><td>0</td></tr>
+        <tr><td>Attachments</td><td>0</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Transport proof</h2>
+    <div class="proof">
+      <div class="label">Operation</div><div><code>BugService.requestMoreInformation</code></div>
+      <div class="label">UI request</div><div>One Confirm with blank Reason; no retry.</div>
+      <div class="label">Safe response</div><div>Field message: “This action requires a reason.”</div>
+      <div class="label">HTTP status</div><div>Not observable on the permitted Chrome surface; no HTTP 400 is claimed.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Provenance</h2>
+    <div class="proof">
+      <div class="label">Evidence kind</div><div>Current live UAT execution evidence summary</div>
+      <div class="label">Execution source</div><div>Chrome Work · DatDT · Developer · BUG-0025</div>
+      <div class="label">Structured evidence</div><div><code>baseline-before.json; life014-post-receipt.json; after-readback.json; final-reload-readback.json</code></div>
+      <div class="label">Catalog note</div><div>Case 79 declares TESTER; actual controlled actor was the assigned Developer.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Runtime screenshot</h2>
+    <div class="runtime"><img src="../runtime-final.jpg" alt="BUG-0025 after reload in Chrome Work"></div>
+    <p class="caption">Final runtime readback after the rejected blank-Reason interaction: BUG-0025 remains In Review with DatDT ownership. The inline validation message was observed during execution but no separate persisted validation-state screenshot is available.</p>
+    <div class="notice"><strong>Evidence limitation:</strong> the field validation was captured in the browser-control transcript, while the persisted runtime image shows the final reload state. The generated card does not fabricate a Network response or validation screenshot.</div>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "idts-live-uat-receipt-2",
+  "sanitized": true,
+  "caseId": "UAT-LIFE-014-current",
+  "readPhase": "final-reload",
+  "observedOn": "2026-09-15",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "user": "DatDT",
+    "role": "Developer"
+  },
+  "bug": {
+    "key": "BUG-0025",
+    "id": "4a7cf16c-f516-46d4-a81b-6173c0b2a1b3",
+    "status": "In Review",
+    "statusCode": "IN_REVIEW",
+    "technicalAssignee": "DatDT",
+    "currentActionOwner": "DatDT",
+    "nextProcessorRole": "Developer"
+  },
+  "fields": {
+    "sapModule": null,
+    "applicationComponent": "IDTS Bug Report",
+    "defectCategory": "SAP Fiori UI5",
+    "priority": "High",
+    "severity": "Major",
+    "environment": "Quality Assurance"
+  },
+  "collections": {
+    "comments": [],
+    "historyEvents": [],
+    "notifications": [],
+    "attachments": []
+  },
+  "reloadCount": 1,
+  "reloadConfirmed": true,
+  "sameAsBaseline": true,
+  "noLifecycleMutation": true,
+  "runtimeScreenshot": "runtime-final.jpg",
+  "runtimeScreenshotCapturedAt": "2026-09-15T21:59:53+07:00",
+  "runtimeScreenshotNote": "Screenshot captured from the final reloaded Chrome Work tab; validation text was captured in the immediate readback and inline runtime frame."
+}

@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "idts-live-uat-receipt-2",
+  "sanitized": true,
+  "caseId": "UAT-LIFE-014-current",
+  "readPhase": "pre-negative",
+  "observedOn": "2026-09-15",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "user": "DatDT",
+    "role": "Developer"
+  },
+  "browser": {
+    "browser": "Chrome",
+    "browserId": "2",
+    "profile": "Work",
+    "tabId": "1349670281",
+    "title": "Issue and Defect Tracking System",
+    "url": "https://f5648117trial-dev-idts-sap01-approuter.cfapps.ap21.hana.ondemand.com/idtsbugmanagementui/index.html#/Bugs(ID=4a7cf16c-f516-46d4-a81b-6173c0b2a1b3,IsActiveEntity=true)",
+    "authEvidence": "Profile menu DatDT; no login or credential entry performed"
+  },
+  "localSource": {
+    "repository": "E:/IDTS-SAP01",
+    "commitSha": "b700b0f75c150c02cf8188f5bc6362687f4ab482",
+    "branch": "docs/wp7-n2-rollout-evidence-donhv",
+    "runtimeSha256": null,
+    "catalogSha256": null,
+    "hashNote": "Runtime and catalog hashes are not asserted by this browser-derived receipt; generated evidence hashes are recorded in card/manifest.json."
+  },
+  "catalog": {
+    "caseId": "UAT-LIFE-014",
+    "displayNumber": "79",
+    "catalogActorRole": "TESTER",
+    "catalogExecutionOwner": "NhanT",
+    "mismatch": true,
+    "mismatchNote": "Catalog declares actorRole TESTER; this controlled execution used the requested DatDT / Developer actor."
+  },
+  "bug": {
+    "key": "BUG-0025",
+    "id": "4a7cf16c-f516-46d4-a81b-6173c0b2a1b3",
+    "title": "IDTS-127 controlled request-more-information negative UAT",
+    "description": "Controlled lifecycle fixture for required-reason rejection verification.",
+    "status": "In Review",
+    "statusCode": "IN_REVIEW",
+    "technicalAssignee": "DatDT",
+    "currentActionOwner": "DatDT",
+    "nextProcessorRole": "Developer",
+    "reporter": "NhanT",
+    "updatedAt": "Sep 14, 2026, 10:07:15 PM"
+  },
+  "fields": {
+    "sapModule": null,
+    "applicationComponent": "IDTS Bug Report",
+    "defectCategory": "SAP Fiori UI5",
+    "priority": "High",
+    "severity": "Major",
+    "environment": "Quality Assurance"
+  },
+  "collections": {
+    "comments": [],
+    "historyEvents": [],
+    "notifications": [],
+    "attachments": []
+  },
+  "hydration": {
+    "commentsLoaded": true,
+    "historyLoaded": true,
+    "notificationsLoaded": true,
+    "attachmentsLoaded": true
+  },
+  "uiSignals": {
+    "profileMenu": "DatDT",
+    "actionOwnerRole": "Developer",
+    "requestMoreInformationAvailable": true
+  },
+  "screenshot": {
+    "capturedInline": true,
+    "persistedFile": "runtime-final.jpg",
+    "capturedAt": "2026-09-15T21:59:53+07:00",
+    "note": "The clean pre-action view was captured inline; runtime-final.jpg is the persisted final reloaded view."
+  }
+}
