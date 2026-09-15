@@ -1,0 +1,52 @@
+{
+  "caseId": "UAT-ASG-008",
+  "actorRole": "DEVELOPER",
+  "bug": {
+    "status": 200,
+    "count": 1,
+    "value": [
+      {
+        "ID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+        "assignee_ID": "20000000-0000-0000-0000-000000000002",
+        "bugNumber": "BUG-0026",
+        "nextProcessorRole_code": "DEVELOPER",
+        "nextProcessorUser_ID": "10000000-0000-0000-0000-000000000003",
+        "reporter_ID": "10000000-0000-0000-0000-000000000004",
+        "status_code": "ASSIGNED",
+        "reporterDisplayName": "NhanT",
+        "assigneeDisplayName": "DatDT",
+        "nextProcessorUserDisplayName": "DatDT",
+        "nextProcessorRoleName": "Developer",
+        "currentActionOwnerDisplayName": "DatDT",
+        "canMarkInReview": true,
+        "canStartProgress": true,
+        "canResolve": false,
+        "canRequestMoreInfo": true,
+        "canReject": true,
+        "canSendToRetest": false,
+        "canClose": false,
+        "canReopen": false,
+        "canAssign": false,
+        "canMoveToPending": false,
+        "canResubmit": false,
+        "canAddComment": true,
+        "canEdit": true,
+        "canManageAttachments": true,
+        "canReassignRetestOwner": false,
+        "assigneeFieldControl": 1,
+        "bugRequiredFieldControl": 1,
+        "bugOptionalFieldControl": 1,
+        "IsActiveEntity": true
+      }
+    ]
+  },
+  "counts": {
+    "Bugs": 1,
+    "Comments": 0,
+    "HistoryEvents": 3,
+    "HistoryLogs": 7,
+    "Notifications": 2,
+    "NotificationDeliveries": 1
+  },
+  "postSent": false
+}

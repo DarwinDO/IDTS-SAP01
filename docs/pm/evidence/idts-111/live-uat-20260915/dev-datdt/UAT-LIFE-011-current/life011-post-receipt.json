@@ -1,0 +1,19 @@
+{
+  "caseId": "UAT-LIFE-011",
+  "method": "POST",
+  "endpoint": "/idtsbugmanagementui/odata/v4/bug/Bugs(ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,IsActiveEntity=true)/BugService.resolveBug",
+  "requestBody": {
+    "note": "UAT-LIFE-011 invalid resolve attempt from ASSIGNED"
+  },
+  "csrf": {
+    "fetchStatus": 200,
+    "present": true
+  },
+  "response": {
+    "status": 400,
+    "ok": false,
+    "errorCode": "400",
+    "errorMessage": "Status transition from ASSIGNED to RESOLVED is not allowed."
+  },
+  "postCount": 1
+}

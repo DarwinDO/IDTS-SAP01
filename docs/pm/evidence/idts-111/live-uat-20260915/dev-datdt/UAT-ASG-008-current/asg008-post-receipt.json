@@ -1,0 +1,20 @@
+{
+  "caseId": "UAT-ASG-008",
+  "method": "POST",
+  "endpoint": "/idtsbugmanagementui/odata/v4/bug/Bugs(ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,IsActiveEntity=true)/BugService.assignToDeveloper",
+  "requestBody": {
+    "assigneeID": "66984020-6b02-4fe8-b347-d5708caa365d",
+    "note": "UAT-ASG-008 forbidden developer reassignment attempt"
+  },
+  "csrf": {
+    "fetchStatus": 200,
+    "present": true
+  },
+  "response": {
+    "status": 403,
+    "ok": false,
+    "errorCode": "403",
+    "errorMessage": "Only the assigned developer, Tester, or PM can perform this bug processing action."
+  },
+  "postCount": 1
+}
