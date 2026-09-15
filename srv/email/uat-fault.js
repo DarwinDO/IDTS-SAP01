@@ -8,7 +8,7 @@ function wrapEmailSenderForUat (config, sendMail) {
   if (!config?.uatFailureEnabled || token.length < MIN_TOKEN_LENGTH || typeof sendMail !== 'function') return sendMail
 
   return async message => {
-    if (!consumedTokens.has(token) && message?.text === token) {
+    if (!consumedTokens.has(token) && typeof message?.text === 'string' && message.text.includes(token)) {
       consumedTokens.add(token)
       throw Object.assign(new Error('Controlled UAT email failure.'), { code: 'EMAIL_UAT_FORCED_FAILURE' })
     }
