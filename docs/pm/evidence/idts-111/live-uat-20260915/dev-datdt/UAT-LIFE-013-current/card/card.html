@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UAT-LIFE-013 evidence summary</title>
+  <style>
+    :root { color-scheme: light; --ink:#10213f; --muted:#52627a; --blue:#0a6ed1; --green:#107e3e; --line:#d9e2ec; --panel:#f7f9fb; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#eef2f5; color:var(--ink); font:16px/1.4 Arial, sans-serif; text-rendering:optimizeLegibility; font-feature-settings:"kern" 1; }
+    main { width:1120px; margin:32px auto; padding:34px 40px 42px; background:white; border-radius:18px; box-shadow:0 8px 24px #10213f18; }
+    header { border-top:4px solid var(--blue); padding-top:14px; }
+    .kicker { color:var(--blue); font-size:14px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; }
+    h1 { margin:3px 0 2px; font-size:30px; line-height:1.2; }
+    .subtitle { margin:0; color:var(--muted); }
+    .result { display:inline-block; margin:22px 0; padding:8px 24px; border-radius:999px; background:var(--green); color:white; font-weight:700; letter-spacing:.04em; }
+    h2 { margin:28px 0 10px; font-size:20px; }
+    .grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; }
+    .box { padding:16px; background:var(--panel); border:1px solid var(--line); border-radius:12px; }
+    .label { color:var(--muted); font-size:13px; letter-spacing:.04em; text-transform:uppercase; }
+    .value { margin-top:4px; font-weight:700; }
+    table { width:100%; border-collapse:collapse; font-variant-numeric:tabular-nums lining-nums; }
+    th { padding:10px 12px; border-bottom:1px solid var(--line); color:var(--muted); text-align:left; }
+    td { padding:11px 12px; border-bottom:1px solid #e9eef3; vertical-align:top; }
+    .pass { color:var(--green); font-weight:700; }
+    ul { margin:8px 0 0; padding-left:22px; }
+    li { margin:7px 0; }
+    code { font-family:Consolas, monospace; font-size:.92em; }
+    footer { margin-top:28px; padding-top:16px; border-top:1px solid var(--line); color:var(--muted); font-size:14px; }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="kicker">Current live UAT evidence</div>
+      <h1>UAT-LIFE-013</h1>
+      <p class="subtitle">Repeated lifecycle action is idempotently rejected</p>
+    </header>
+    <div class="result">PASS</div>
+
+    <div class="grid">
+      <div class="box"><div class="label">Fixture</div><div class="value">BUG-0026</div></div>
+      <div class="box"><div class="label">Actor</div><div class="value">DatDT · Developer</div></div>
+      <div class="box"><div class="label">Executor</div><div class="value">NhanT (DonHV support)</div></div>
+    </div>
+
+    <h2>Observed action sequence</h2>
+    <table>
+      <thead><tr><th>Attempt</th><th>Transport result</th><th>Persisted result</th></tr></thead>
+      <tbody>
+        <tr><td>First <code>startProgress</code></td><td>OData batch · HTTP 200</td><td>Status became <code>IN_PROGRESS</code></td></tr>
+        <tr><td>Repeated <code>startProgress</code></td><td>HTTP 400</td><td>Status remained <code>IN_PROGRESS</code></td></tr>
+      </tbody>
+    </table>
+
+    <h2>Safe rejection</h2>
+    <div class="box"><code>Status transition from IN_PROGRESS to IN_PROGRESS is not allowed.</code></div>
+
+    <h2>Persistence readback</h2>
+    <table>
+      <thead><tr><th>Entity</th><th>Current observation</th><th>Assertion</th></tr></thead>
+      <tbody>
+        <tr><td>Bug status</td><td><code>IN_PROGRESS</code></td><td class="pass">Preserved</td></tr>
+        <tr><td>Start Progress history</td><td>Exactly 1 event</td><td class="pass">No duplicate</td></tr>
+        <tr><td>Notifications</td><td>2 pre-existing rows</td><td class="pass">No duplicate</td></tr>
+        <tr><td>Attachments</td><td>1 controlled fixture</td><td class="pass">Unchanged</td></tr>
+      </tbody>
+    </table>
+
+    <h2>Deployment provenance</h2>
+    <ul>
+      <li>Source merge: <code>64bb215bd1b5b7d83f4d4557e8433874b68e703b</code>.</li>
+      <li>Blue-green operation: <code>7855cb3b-b104-11f1-840e-eeee0a848ae2</code>.</li>
+      <li>Scope: CAP module <code>idts-sap01-srv</code> only.</li>
+      <li>Readiness: app 1/1; health 200; ready 200; <strong>DEMO READY</strong>.</li>
+    </ul>
+
+    <footer>Evidence sources: sanitized CAP application/router logs and current runtime UI readback. No database, schema, seed, UI, or AppRouter deployment was performed.</footer>
+  </main>
+</body>
+</html>

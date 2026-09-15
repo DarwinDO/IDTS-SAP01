@@ -1,0 +1,34 @@
+{
+  "caseId": "UAT-LIFE-013",
+  "readbackKind": "current live UI after repeated request",
+  "bug": {
+    "bugNumber": "BUG-0026",
+    "status": "IN_PROGRESS",
+    "technicalOwner": "DatDT",
+    "currentActionOwner": "DatDT",
+    "modifiedAtLocal": "2026-09-15T20:05:43+07:00"
+  },
+  "history": {
+    "visibleEventCount": 5,
+    "startProgressEventCount": 1,
+    "startProgressEvent": {
+      "actor": "DatDT",
+      "observedAtLocal": "2026-09-15T20:05:43+07:00",
+      "summary": "Started progress on the bug."
+    },
+    "duplicateStartProgressEvent": false
+  },
+  "notifications": {
+    "visibleCount": 2,
+    "rows": [
+      "Pending Assignment",
+      "Assigned"
+    ],
+    "duplicateStartProgressNotification": false
+  },
+  "attachments": {
+    "visibleCount": 1,
+    "filename": "idts-127-att007-controlled.txt"
+  },
+  "unexpectedMutationObserved": false
+}

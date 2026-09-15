@@ -1,0 +1,24 @@
+{
+  "caseId": "UAT-LIFE-013",
+  "bugId": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+  "bugNumber": "BUG-0026",
+  "actor": "DatDT",
+  "actorRole": "DEVELOPER",
+  "action": "BugService.startProgress",
+  "firstAttempt": {
+    "observedAtLocal": "2026-09-15T20:05:43+07:00",
+    "transport": "OData batch",
+    "outerHttpStatus": 200,
+    "correlationId": "0a599063-f67a-4900-7bdb-e3b15ae904ee",
+    "resultingStatus": "IN_PROGRESS"
+  },
+  "repeatedAttempt": {
+    "observedAtLocal": "2026-09-15T20:06:50+07:00",
+    "transport": "direct bound action POST",
+    "httpStatus": 400,
+    "correlationId": "4d622239-d42d-4703-4ab1-4cc390f160d9",
+    "target": "status",
+    "safeError": "Status transition from IN_PROGRESS to IN_PROGRESS is not allowed."
+  },
+  "secretsOmitted": true
+}

@@ -1,0 +1,77 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "uat-summary-card",
+  "caseId": "UAT-LIFE-013",
+  "status": "PASS",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "DatDT",
+    "roleCode": "DEVELOPER"
+  },
+  "fixture": {
+    "bugNumber": "BUG-0026",
+    "bugId": "39ed5ffc-867d-4abe-956f-e54ae68c5c10"
+  },
+  "actualResult": "The first startProgress completed through OData batch HTTP 200 and persisted IN_PROGRESS. The repeated direct startProgress returned HTTP 400. Current UI readback shows exactly one Start Progress history event, two unchanged pre-existing notifications, and one unchanged attachment.",
+  "deployment": {
+    "commit": "64bb215bd1b5b7d83f4d4557e8433874b68e703b",
+    "operationId": "7855cb3b-b104-11f1-840e-eeee0a848ae2",
+    "module": "idts-sap01-srv",
+    "strategy": "blue-green",
+    "demoReady": true
+  },
+  "transport": {
+    "firstAttemptHttpStatus": 200,
+    "repeatedAttemptHttpStatus": 400,
+    "safeError": "Status transition from IN_PROGRESS to IN_PROGRESS is not allowed."
+  },
+  "readback": {
+    "status": "IN_PROGRESS",
+    "startProgressHistoryCount": 1,
+    "notificationCount": 2,
+    "duplicateNotification": false,
+    "attachmentCount": 1,
+    "unexpectedMutation": false
+  },
+  "sourceArtifacts": [
+    {
+      "file": "deployment-receipt.json",
+      "bytes": 575,
+      "sha256": "7DC689259AA79E2908CEB44F60A6EF2032AD1437A3FF769BD7AA704F2B8B5138"
+    },
+    {
+      "file": "live-action-receipt.json",
+      "bytes": 776,
+      "sha256": "A7688AD43DC31BAA42190E7B8A210D25B3A51BFC52E36829F1D0E4F1F2E8DE20"
+    },
+    {
+      "file": "ui-readback.json",
+      "bytes": 864,
+      "sha256": "65B18195F33007E1FBADF1D7416B1B15A741673BD3BDB95FFD2042FC06EBB499"
+    },
+    {
+      "file": "evidence-summary.md",
+      "bytes": 1263,
+      "sha256": "9A148EF6B53D81E9D4A12007ED23CA85340A3B4489865C4AEF820893D41C260B"
+    },
+    {
+      "file": "card/card.html",
+      "bytes": 4459,
+      "sha256": "140257699669BEAE446C27B9BE9A14023815E87DEC22B817675069AEF1E17273"
+    }
+  ],
+  "result": {
+    "file": "card/result.png",
+    "bytes": 75402,
+    "sha256": "45D3EFFF0CE665AFB1A0703B97E3983D544BF5200EA3A77411FFB7019524176E",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 1257,
+    "nonBlank": true,
+    "fullPage": true
+  },
+  "limitations": [
+    "The PNG is a generated evidence summary card; sanitized CAP logs and current runtime UI readback are authoritative."
+  ]
+}
