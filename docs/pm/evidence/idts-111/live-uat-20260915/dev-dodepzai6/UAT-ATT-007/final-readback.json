@@ -1,0 +1,64 @@
+{
+  "schemaVersion": "uat-attachment-final-readback/1.0",
+  "caseId": "UAT-ATT-007",
+  "phase": "after-confirmed-draft-attempt-and-discard",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER"
+  },
+  "observedDate": "2026-09-15",
+  "requestOutcome": {
+    "intendedMethod": "DELETE",
+    "draftChildPreflightHttpStatus": 404,
+    "deleteSent": false,
+    "exactCatalogHttpStatus": 403,
+    "exactCatalogStatusObserved": false,
+    "disposition": "DOES_NOT_MEET_EXPECTED_RESULT",
+    "reasonCode": "CATALOG_EXPECTATION_MISMATCH_DRAFT_ISOLATION"
+  },
+  "cleanup": {
+    "action": "Discard Draft",
+    "performedBy": "Coordinator using the DatDT Edge session",
+    "uiOutcome": "The UI returned to BUG-0026 IsActiveEntity=true with Edit available.",
+    "activeBugHttpStatus": 200,
+    "activeBugHasDraftEntity": false,
+    "draftLockRemains": false
+  },
+  "bug": {
+    "ID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "bugNumber": "BUG-0026",
+    "status_code": "ASSIGNED",
+    "IsActiveEntity": true,
+    "HasDraftEntity": false
+  },
+  "activeAttachments": {
+    "httpStatus": 200,
+    "count": 1,
+    "rows": [
+      {
+        "ID": "dd853abe-3284-4d6c-8ef1-0158cf9603cb",
+        "IsActiveEntity": true,
+        "HasDraftEntity": false,
+        "filename": "idts-127-att007-controlled.txt",
+        "mimeType": "text/plain",
+        "fileSize": 36,
+        "createdByDisplayName": "DatDT"
+      }
+    ]
+  },
+  "contentReadback": {
+    "httpStatus": 200,
+    "byteLength": 36,
+    "bodyExact": true,
+    "content": "IDTS-127 ATT-007 controlled fixture\n",
+    "sha256": "3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E"
+  },
+  "integrity": {
+    "activeAttachmentRemains": true,
+    "attachmentHashUnchanged": true,
+    "deleteHistoryEventAdded": false,
+    "securityDenialEffective": true
+  },
+  "secretsOmitted": true
+}

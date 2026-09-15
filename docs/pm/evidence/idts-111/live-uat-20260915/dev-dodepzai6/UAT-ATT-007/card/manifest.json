@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "uat-summary-card",
+  "caseId": "UAT-ATT-007",
+  "caseNumber": 81,
+  "rootVerdict": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "status": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "candidateOutcome": "DOES_NOT_MEET_EXPECTED_RESULT",
+  "assertionPassed": false,
+  "securityDenialAndNoMutationConfirmed": true,
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "authenticated": true
+  },
+  "generatedAt": "2026-09-15T12:59:41.8589823Z",
+  "layoutCaption": "Current live UAT evidence summary — draft isolation and catalog expectation mismatch",
+  "evidenceRoot": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007",
+  "caseDefinition": {
+    "actorRole": "DEVELOPER",
+    "title": "Unauthorized attachment deletion is rejected",
+    "preconditions": "Attachment exists and Developer lacks delete permission for the context.",
+    "steps": [
+      "Attempt the protected delete request.",
+      "Reload the Bug."
+    ],
+    "catalogExpectedResult": "HTTP 403 is returned and both metadata and binary remain accessible to authorized users.",
+    "currentSourceContract": "Direct active Bugs.attachments writes, including DELETE, fail closed with HTTP 405; attachment changes use the Bug draft and Save boundary."
+  },
+  "actualResult": "Exactly one confirmed protected sequence reached the draft-child preflight GET and returned HTTP 404. DELETE was not dispatched because the child was isolated from the authenticated dodepzai6 session. The catalog's exact HTTP 403 assertion is therefore unobserved and does not meet the expected result. An earlier direct active attachment DELETE returned HTTP 405, and final readback confirms no mutation.",
+  "transport": {
+    "intendedMethod": "DELETE",
+    "intendedEndpoint": "/idtsbugmanagementui/odata/v4/bug/Bugs_attachments(ID=dd853abe-3284-4d6c-8ef1-0158cf9603cb,IsActiveEntity=false)",
+    "preflight": {
+      "method": "GET",
+      "httpStatus": 404,
+      "deleteDispatched": false,
+      "reason": "Draft-child isolation"
+    },
+    "deleteRequestCount": 0,
+    "retry": false,
+    "catalogExpectedHttpStatus": 403,
+    "observedHttpStatus": null,
+    "exactCatalogStatusObserved": false,
+    "csrfStatus": null,
+    "csrfPresent": null,
+    "secretsOmitted": true
+  },
+  "historicalActiveBoundary": {
+    "label": "Earlier direct active attachment DELETE; supplemental evidence",
+    "method": "DELETE",
+    "endpoint": "/idtsbugmanagementui/odata/v4/bug/Bugs(ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,IsActiveEntity=true)/attachments(up__ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,ID=dd853abe-3284-4d6c-8ef1-0158cf9603cb,IsActiveEntity=true)",
+    "httpStatus": 405,
+    "errorMessage": "Attachment changes must be made in Edit mode and committed with Save.",
+    "mutationPersisted": false,
+    "attachmentContentHashUnchanged": true
+  },
+  "cleanup": {
+    "action": "Discard Draft",
+    "performedBy": "Coordinator using the DatDT Edge session",
+    "uiOutcome": "Returned to BUG-0026 IsActiveEntity=true with Edit available.",
+    "activeBugGetStatus": 200,
+    "activeBugHasDraftEntity": false,
+    "activeAttachmentCollectionGetStatus": 200,
+    "activeAttachmentCount": 1,
+    "activeAttachmentHasDraftEntity": false
+  },
+  "persistenceReadback": {
+    "bug": {
+      "ID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+      "bugNumber": "BUG-0026",
+      "status": "ASSIGNED",
+      "technicalOwner": "DatDT",
+      "currentActionOwner": "DatDT",
+      "HasDraftEntity": false
+    },
+    "attachment": {
+      "ID": "dd853abe-3284-4d6c-8ef1-0158cf9603cb",
+      "filename": "idts-127-att007-controlled.txt",
+      "mimeType": "text/plain",
+      "fileSize": 36,
+      "active": true,
+      "HasDraftEntity": false,
+      "sha256": "3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E"
+    },
+    "content": {
+      "httpStatus": 200,
+      "byteLength": 36,
+      "bodyExact": true,
+      "sha256": "3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E"
+    },
+    "scopedCounts": {
+      "Bugs": 1,
+      "Attachments": 1,
+      "HistoryEvents": 4,
+      "Notifications": 2,
+      "Comments": 0
+    },
+    "globalActiveBugs": 26,
+    "deleteHistoryEventAdded": false,
+    "unexpectedMutation": false
+  },
+  "provenance": {
+    "evidenceKind": "Current live UAT execution evidence",
+    "catalogSource": "docs/qa/idts-111-uat-catalog.json — UAT-ATT-007 / display number 81",
+    "sourceContractBasis": "Current active attachment guard: direct active attachment writes fail closed with HTTP 405 and require draft/SAVE.",
+    "executionSource": "Coordinator-confirmed dodepzai6 Developer session sequence and post-discard readback"
+  },
+  "sourceArtifacts": {
+    "deleteReceipt": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/delete-receipt.json",
+      "bytes": 2224,
+      "sha256": "BCB567E849635DF8B300A7D1C063A3E3E2160DD9837D773CB61F60C93C9CC47C"
+    },
+    "historicalActiveDeleteReceipt": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/active-delete-405-receipt.json",
+      "bytes": 1335,
+      "sha256": "15F22B95CB5F3ABCDAE5C13D482331D3F7197818F6DE121741B4D8D5AB29D53B"
+    },
+    "finalReadback": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/final-readback.json",
+      "bytes": 1900,
+      "sha256": "7DA8E83EE37F60BCD485F5E9948B71FEAEA1F3013A2FB01DC72F2D8999964608"
+    },
+    "historicalBaselineBefore": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/baseline-before.json",
+      "bytes": 5426,
+      "sha256": "183E3D8066C801FF59CD4839EF0E5B0CBA670DAA108F1ED9EF48CFB5C8131043"
+    },
+    "historicalAfterReadback": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/after-readback.json",
+      "bytes": 5400,
+      "sha256": "F09C76C8CCC3E9E7069855F14C2FE3236C2C51A0F941FB57F5296A32B195CC6A"
+    },
+    "summary": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/evidence-summary.md",
+      "bytes": 3678,
+      "sha256": "C6FAE46671022F137EAB281AFA604C57B95F1CF58C6222F911D1119A0B1BBA3D"
+    },
+    "cardHtml": {
+      "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/card/card.html",
+      "bytes": 10112,
+      "sha256": "06A3D9402B9E3E7682A694212E8DC8FF2BCB4E0C09965C39961A9B2F4FECBB59"
+    }
+  },
+  "result": {
+    "file": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/card/result.png",
+    "bytes": 287537,
+    "sha256": "D88D23678394BF8B72AF808CB2C0EC22D1FC931CA229D82C14C3C96186F145F0",
+    "signature": "89504E470D0A1A0A",
+    "isPng": true,
+    "width": 1280,
+    "height": 2387,
+    "nonBlank": true,
+    "fullPage": true
+  },
+  "verification": {
+    "jsonParse": true,
+    "pngReadable": true,
+    "dimensions": "1280x2387",
+    "nonBlank": true,
+    "hashesVerified": true,
+    "noRuntimeScreenshotFabrication": true,
+    "noSourceCatalogDriveWorkbookMutation": true,
+    "noAdditionalRuntimeMutation": true,
+    "stateTextClean": true
+  },
+  "limitations": [
+    "The catalog's exact HTTP 403 assertion was not observable because draft-child preflight GET returned 404 before DELETE dispatch.",
+    "The confirmed attempt handoff did not include an exact request timestamp; observedAt is null rather than inferred.",
+    "card/result.png is a generated trace summary, not a runtime screenshot; JSON receipts and readbacks are authoritative."
+  ],
+  "outputFolder": "E:/IDTS-SAP01/docs/pm/evidence/idts-111/live-uat-20260915/dev-dodepzai6/UAT-ATT-007/card"
+}

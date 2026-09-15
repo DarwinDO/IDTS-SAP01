@@ -1,0 +1,159 @@
+{
+  "schemaVersion": "uat-attachment-readback/1.0",
+  "caseId": "UAT-ATT-007",
+  "phase": "after",
+  "capturedAt": "2026-09-15T11:56:21.029Z",
+  "captureWindow": {
+    "first": "2026-09-15T11:56:21.029Z",
+    "last": "2026-09-15T11:56:21.029Z",
+    "note": "Fresh read-only OData reads after the 405 response."
+  },
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "roleName": "Developer",
+    "canAdministerUsers": false
+  },
+  "bug": {
+    "ID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "bugNumber": "BUG-0026",
+    "title": "IDTS-127 controlled assignment/lifecycle UAT 20260915",
+    "status_code": "ASSIGNED",
+    "priority_code": "HIGH",
+    "severity_code": "MAJOR",
+    "environment_code": "QAS",
+    "reporterDisplayName": "NhanT",
+    "assigneeDisplayName": "DatDT",
+    "nextProcessorUserDisplayName": "DatDT",
+    "nextProcessorRoleName": "Developer",
+    "currentActionOwnerDisplayName": "DatDT",
+    "createdAt": "2026-09-15T08:09:11.254Z",
+    "modifiedAt": "2026-09-15T11:36:40.824Z",
+    "canManageAttachments": false,
+    "canEdit": false,
+    "canAddComment": true,
+    "IsActiveEntity": true,
+    "HasActiveEntity": false,
+    "HasDraftEntity": false
+  },
+  "attachment": {
+    "ID": "dd853abe-3284-4d6c-8ef1-0158cf9603cb",
+    "up__ID": "39ed5ffc-867d-4abe-956f-e54ae68c5c10",
+    "filename": "idts-127-att007-controlled.txt",
+    "mimeType": "text/plain",
+    "fileSize": 36,
+    "hash": "3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E",
+    "status": "Unscanned",
+    "note": null,
+    "createdAt": "2026-09-15T11:36:40.824Z",
+    "createdByDisplayName": "DatDT",
+    "modifiedAt": "2026-09-15T11:36:40.824Z",
+    "modifiedByDisplayName": "DatDT",
+    "IsActiveEntity": true,
+    "HasActiveEntity": false,
+    "HasDraftEntity": false
+  },
+  "content": {
+    "status": 200,
+    "byteLength": 36,
+    "content": "IDTS-127 ATT-007 controlled fixture\n",
+    "sha256": "3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E",
+    "contentType": "text/plain; charset=utf-8",
+    "contentDisposition": "attachment; filename=\"idts-127-att007-controlled.txt\""
+  },
+  "counts": {
+    "globalActiveBugs": 26,
+    "scoped": {
+      "Bugs": 1,
+      "Attachments": 1,
+      "HistoryEvents": 4,
+      "Notifications": 2,
+      "Comments": 0
+    }
+  },
+  "historyEvents": [
+    {
+      "ID": "dc98f3cb-c3df-4aab-a1ab-0b1fd7fb91f2",
+      "actionTypeName": "Edit",
+      "actionType_code": "EDIT",
+      "actorDisplayName": "DatDT",
+      "actorRoleName": "Developer",
+      "createdAt": "2026-09-15T11:36:40.824Z",
+      "summary": "Added attachment idts-127-att007-controlled.txt.",
+      "reason": null,
+      "changeCount": 1,
+      "groupedChangeContext": "Attachment: idts-127-att007-controlled.txt",
+      "IsActiveEntity": true
+    },
+    {
+      "ID": "3d8f97a8-2843-44bf-bd42-5185c0eb30b3",
+      "actionTypeName": "Assign to Developer",
+      "actionType_code": "ASSIGN_TO_DEVELOPER",
+      "actorDisplayName": "DonHV",
+      "actorRoleName": "Project Manager",
+      "createdAt": "2026-09-15T09:05:47.714Z",
+      "summary": "Assigned bug to DatDT. Status changed from Pending Assignment to Assigned.",
+      "reason": "ASG-007 controlled valid UAT",
+      "changeCount": 4,
+      "groupedChangeContext": "Status: Pending Assignment → Assigned · Assignee: DatDT · Current Action Owner: DonHV → DatDT · +1 more changes",
+      "IsActiveEntity": true
+    },
+    {
+      "ID": "82584499-e406-4bf8-92c8-9d77ee219c71",
+      "actionTypeName": "Edit",
+      "actionType_code": "EDIT",
+      "actorDisplayName": "DonHV",
+      "actorRoleName": "Project Manager",
+      "createdAt": "2026-09-15T09:01:33.331Z",
+      "summary": "Updated Defect Category, Component Category.",
+      "reason": null,
+      "changeCount": 2,
+      "groupedChangeContext": "Defect Category: SAP CAP Backend → SAP Fiori UI5 · Component Category: IDTS Bug Report / SAP CAP Backe… → IDTS Bug Report / SAP Fiori UI5",
+      "IsActiveEntity": true
+    },
+    {
+      "ID": "01c16a54-0004-4ef8-9628-e267299640d2",
+      "actionTypeName": "Create",
+      "actionType_code": "CREATE",
+      "actorDisplayName": "NhanT",
+      "actorRoleName": "Tester",
+      "createdAt": "2026-09-15T08:09:11.254Z",
+      "summary": "Created bug report with initial status Pending Assignment.",
+      "reason": "Bug report created.",
+      "changeCount": 1,
+      "groupedChangeContext": "Status: Pending Assignment",
+      "IsActiveEntity": true
+    }
+  ],
+  "notifications": [
+    {
+      "ID": "aec0941d-5e25-470b-949a-9113c6b0a410",
+      "createdAt": "2026-09-15T08:10:04.082Z",
+      "recipientDisplayName": "DonHV",
+      "eventTypeName": "Pending Assignment",
+      "channelName": "In App",
+      "message": "BUG-0026 is waiting for assignment.",
+      "sentAt": "2026-09-15T08:10:05.176Z",
+      "IsActiveEntity": true
+    },
+    {
+      "ID": "bf7c09d9-31e7-4fb9-99c9-d30500cbce8c",
+      "createdAt": "2026-09-15T09:05:47.714Z",
+      "recipientDisplayName": "DatDT",
+      "eventTypeName": "Assigned",
+      "channelName": "In App",
+      "message": "BUG-0026 has been reassigned.",
+      "sentAt": "2026-09-15T09:05:48.127Z",
+      "IsActiveEntity": true
+    }
+  ],
+  "httpStatuses": {
+    "bug": 200,
+    "attachment": 200,
+    "content": 200,
+    "history": 200,
+    "comments": 200,
+    "notifications": 200
+  },
+  "secretsOmitted": true
+}

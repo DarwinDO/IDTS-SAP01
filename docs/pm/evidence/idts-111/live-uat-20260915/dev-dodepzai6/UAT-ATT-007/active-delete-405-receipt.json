@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "uat-attachment-active-delete-receipt/1.0",
+  "caseId": "UAT-ATT-007",
+  "supplementalEvidence": true,
+  "label": "Earlier direct active attachment DELETE; not the confirmed draft-child attempt",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "authenticated": true
+  },
+  "observedAt": "2026-09-15T11:54:05Z",
+  "request": {
+    "method": "DELETE",
+    "endpoint": "/idtsbugmanagementui/odata/v4/bug/Bugs(ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,IsActiveEntity=true)/attachments(up__ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,ID=dd853abe-3284-4d6c-8ef1-0158cf9603cb,IsActiveEntity=true)",
+    "body": null,
+    "csrfFetchStatus": 200,
+    "csrfPresent": true
+  },
+  "response": {
+    "status": 405,
+    "statusText": "",
+    "headers": {
+      "content-type": "application/json; charset=utf-8",
+      "content-length": "134",
+      "odata-version": "4.0"
+    },
+    "body": {
+      "error": {
+        "message": "Attachment changes must be made in Edit mode and committed with Save.",
+        "code": "405",
+        "@Common.numericSeverity": 4
+      }
+    },
+    "bodyLength": 134
+  },
+  "readback": {
+    "mutationPersisted": false,
+    "attachmentContentHashUnchanged": true,
+    "deleteHistoryEventAdded": false
+  },
+  "secretsOmitted": true
+}

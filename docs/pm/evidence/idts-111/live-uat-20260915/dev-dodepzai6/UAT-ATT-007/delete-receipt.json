@@ -1,0 +1,60 @@
+{
+  "schemaVersion": "uat-attachment-delete-receipt/1.0",
+  "caseId": "UAT-ATT-007",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "authenticated": true
+  },
+  "observedDate": "2026-09-15",
+  "observedAt": null,
+  "timestampNote": "The coordinator handoff supplied the confirmed sequence but no exact request timestamp; no time is invented.",
+  "attemptCount": 1,
+  "retry": false,
+  "deleteSent": false,
+  "request": {
+    "intendedMethod": "DELETE",
+    "target": "/idtsbugmanagementui/odata/v4/bug/Bugs_attachments(ID=dd853abe-3284-4d6c-8ef1-0158cf9603cb,IsActiveEntity=false)",
+    "preflight": {
+      "method": "GET",
+      "status": 404,
+      "outcome": "The draft child was not visible under the authenticated dodepzai6 session; draft isolation stopped the sequence.",
+      "deleteDispatched": false
+    },
+    "body": null,
+    "csrf": {
+      "status": null,
+      "present": null,
+      "note": "Not supplied; the preflight stopped before DELETE dispatch."
+    }
+  },
+  "observedResponse": null,
+  "catalogAssertion": {
+    "expectedHttpStatus": 403,
+    "observedHttpStatus": null,
+    "status": "DOES_NOT_MEET_EXPECTED_RESULT",
+    "reasonCode": "CATALOG_EXPECTATION_MISMATCH_DRAFT_ISOLATION",
+    "note": "The exact catalog 403 cannot be observed because the draft-child preflight returned 404 before DELETE dispatch."
+  },
+  "securityDisposition": {
+    "effectiveDenialConfirmed": true,
+    "noMutationObserved": true,
+    "basis": [
+      "Earlier direct active attachment DELETE returned HTTP 405 with the current draft/SAVE boundary message.",
+      "Final readback retained exactly one active attachment and its content/hash after cleanup."
+    ]
+  },
+  "cleanup": {
+    "action": "Discard Draft",
+    "performedBy": "Coordinator using the DatDT Edge session",
+    "uiOutcome": "Returned to the BUG-0026 active route with Edit available.",
+    "activeBugGetStatus": 200,
+    "activeBugHasDraftEntity": false,
+    "activeAttachmentCollectionGetStatus": 200,
+    "activeAttachmentCount": 1,
+    "activeAttachmentId": "dd853abe-3284-4d6c-8ef1-0158cf9603cb",
+    "activeAttachmentHasDraftEntity": false
+  },
+  "secretsOmitted": true
+}

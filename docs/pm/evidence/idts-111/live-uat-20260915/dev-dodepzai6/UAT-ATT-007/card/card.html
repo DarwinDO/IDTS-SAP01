@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UAT-ATT-007 evidence summary</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #172033;
+      --muted: #5c687e;
+      --line: #dfe5ee;
+      --surface: #ffffff;
+      --wash: #f4f7fb;
+      --navy: #12345b;
+      --amber: #a45a00;
+      --amber-wash: #fff4df;
+      --red: #9c2c32;
+      --red-wash: #fff0f0;
+      --green: #176b4c;
+      --green-wash: #e9f7ef;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--wash); }
+    body {
+      width: 1280px;
+      min-height: 1760px;
+      padding: 56px 62px 64px;
+      color: var(--ink);
+      background: linear-gradient(135deg, #f4f7fb 0%, #eef3f9 100%);
+      font-family: "Segoe UI", Arial, sans-serif;
+      font-size: 19px;
+      line-height: 1.42;
+      font-feature-settings: "kern" 1, "liga" 1;
+      text-rendering: optimizeLegibility;
+    }
+    .card {
+      overflow: hidden;
+      border: 1px solid #d6deea;
+      border-radius: 24px;
+      background: var(--surface);
+      box-shadow: 0 18px 54px rgba(18, 52, 91, 0.12);
+    }
+    .hero {
+      padding: 42px 48px 38px;
+      background: var(--navy);
+      color: #fff;
+    }
+    .eyebrow, .label {
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .eyebrow { color: #b9d4f2; }
+    h1 {
+      margin: 10px 0 6px;
+      font-size: 40px;
+      line-height: 1.12;
+      letter-spacing: -0.02em;
+      hyphens: none;
+    }
+    .subtitle { margin: 0; color: #dbe9f8; font-size: 21px; }
+    .status {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 24px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: var(--red-wash);
+      color: var(--red);
+      font-size: 17px;
+      font-weight: 750;
+      letter-spacing: 0.04em;
+    }
+    .hero-note { margin: 14px 0 0; color: #dbe9f8; font-size: 16px; }
+    .body { padding: 38px 48px 50px; }
+    .notice {
+      margin-bottom: 30px;
+      padding: 20px 22px;
+      border-left: 6px solid var(--red);
+      border-radius: 12px;
+      background: var(--red-wash);
+    }
+    .notice strong { color: var(--red); }
+    .section { margin-top: 34px; }
+    h2 {
+      margin: 0 0 14px;
+      color: var(--navy);
+      font-size: 24px;
+      line-height: 1.2;
+      hyphens: none;
+    }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
+    .item {
+      padding: 14px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfe;
+    }
+    .item .label { color: var(--muted); font-size: 12px; }
+    .value { margin-top: 4px; font-weight: 650; }
+    code {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 16px;
+      overflow-wrap: anywhere;
+    }
+    .endpoint {
+      padding: 14px 16px;
+      border-radius: 12px;
+      background: #f0f4f9;
+      color: #1a3557;
+    }
+    .boundary {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .boundary-item {
+      padding: 15px 16px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfcfe;
+    }
+    .boundary-item .label { color: var(--muted); font-size: 12px; }
+    .boundary-item strong { display: block; margin-top: 6px; font-size: 24px; }
+    .boundary-item.fail { background: var(--red-wash); border-color: #f0c9cb; }
+    .boundary-item.fail strong { color: var(--red); }
+    .boundary-item.safe { background: var(--green-wash); border-color: #bde3ce; }
+    .boundary-item.safe strong { color: var(--green); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums;
+    }
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: var(--muted);
+      font-size: 13px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .match { color: var(--green); font-weight: 700; }
+    .not-met { color: var(--red); font-weight: 700; }
+    .small { color: var(--muted); font-size: 16px; }
+    .footer {
+      margin-top: 34px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: var(--muted);
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <header class="hero">
+      <div class="eyebrow">Current live UAT evidence summary</div>
+      <h1>UAT-ATT-007 &mdash; unauthorized attachment deletion</h1>
+      <p class="subtitle">BUG-0026 &middot; controlled attachment &middot; draft-isolation boundary</p>
+      <div class="status">DOES_NOT_MEET_EXPECTED_RESULT</div>
+      <p class="hero-note">Disposition: <code>CATALOG_EXPECTATION_MISMATCH_DRAFT_ISOLATION</code></p>
+    </header>
+
+    <div class="body">
+      <div class="notice">
+        <strong>Exact catalog assertion not met:</strong> the catalog requires HTTP 403. The one confirmed protected sequence stopped at a draft-child preflight GET HTTP 404, so DELETE was not dispatched and no exact 403 status was observed. The earlier direct active DELETE returned HTTP 405 under the current draft/SAVE boundary; final readback confirms no mutation.
+      </div>
+
+      <section class="section">
+        <h2>Execution identity and target</h2>
+        <div class="grid">
+          <div class="item"><div class="label">Executor</div><div class="value">NhanT (DonHV support)</div></div>
+          <div class="item"><div class="label">Actor</div><div class="value"><code>dodepzai6</code> &middot; Developer</div></div>
+          <div class="item"><div class="label">Bug</div><div class="value">BUG-0026 &middot; ASSIGNED</div></div>
+          <div class="item"><div class="label">Technical/current owner</div><div class="value">DatDT</div></div>
+          <div class="item"><div class="label">Attachment</div><div class="value"><code>dd853abe-3284-4d6c-8ef1-0158cf9603cb</code></div></div>
+          <div class="item"><div class="label">Security signal</div><div class="value">Actor cannot manage this attachment</div></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Confirmed protected sequence</h2>
+        <div class="endpoint"><code>GET /idtsbugmanagementui/odata/v4/bug/Bugs_attachments(ID=dd853abe-3284-4d6c-8ef1-0158cf9603cb,IsActiveEntity=false)</code></div>
+        <div class="boundary">
+          <div class="boundary-item fail"><div class="label">Catalog expects</div><strong>HTTP 403</strong></div>
+          <div class="boundary-item fail"><div class="label">Preflight observed</div><strong>HTTP 404</strong></div>
+          <div class="boundary-item safe"><div class="label">DELETE dispatch</div><strong>Not sent</strong></div>
+        </div>
+        <p class="small">The draft child was isolated from the authenticated <code>dodepzai6</code> session. A root draft read for the other user also returned 404. The active Bug GET returned 200 with <code>HasDraftEntity=true</code> before cleanup.</p>
+      </section>
+
+      <section class="section">
+        <h2>Earlier active-write boundary</h2>
+        <div class="endpoint"><code>DELETE /idtsbugmanagementui/odata/v4/bug/Bugs(ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,IsActiveEntity=true)/attachments(up__ID=39ed5ffc-867d-4abe-956f-e54ae68c5c10,ID=dd853abe-3284-4d6c-8ef1-0158cf9603cb,IsActiveEntity=true)</code></div>
+        <table style="margin-top:14px">
+          <thead><tr><th>Attempt</th><th>Observed</th><th>Safe result</th></tr></thead>
+          <tbody>
+            <tr><td>Earlier direct active DELETE</td><td class="not-met">HTTP 405</td><td>Attachment changes must be made in Edit mode and committed with Save.</td></tr>
+            <tr><td>Current draft-child sequence</td><td class="not-met">GET 404</td><td>DELETE not dispatched; exact catalog 403 remains unobserved.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Cleanup and final readback</h2>
+        <div class="grid">
+          <div class="item"><div class="label">Cleanup action</div><div class="value">Discard Draft confirmed in DatDT Edge session</div></div>
+          <div class="item"><div class="label">Active Bug GET</div><div class="value match">HTTP 200 &middot; HasDraftEntity = false</div></div>
+          <div class="item"><div class="label">Attachment collection</div><div class="value match">HTTP 200 &middot; exactly 1 active row</div></div>
+          <div class="item"><div class="label">Draft child after cleanup</div><div class="value match">None &middot; HasDraftEntity = false</div></div>
+        </div>
+        <table style="margin-top:18px">
+          <tbody>
+            <tr><th>Filename</th><td><code>idts-127-att007-controlled.txt</code></td></tr>
+            <tr><th>MIME / size</th><td>text/plain &middot; 36 bytes</td></tr>
+            <tr><th>Content</th><td><code>IDTS-127 ATT-007 controlled fixture\n</code></td></tr>
+            <tr><th>SHA-256</th><td><code>3B115B4A49349F9A5C4EC9B2D70AA9525649E9D6A94594EC0E0B92CB9D20113E</code></td></tr>
+            <tr><th>Integrity</th><td class="match">Active attachment, content, and hash remain intact; no delete history event.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="section">
+        <h2>Evidence disposition</h2>
+        <p>The machine-readable receipt records the confirmed preflight and the fact that DELETE was not sent. The final readback records the post-discard active state. The catalog result is classified <strong>DOES_NOT_MEET_EXPECTED_RESULT</strong> because its exact HTTP 403 assertion was not observed; the effective security denial and no-mutation outcome remain evidenced separately.</p>
+        <div class="footer">Sanitized evidence &middot; tokens, cookies, credentials, and email addresses omitted &middot; no source, catalog, Drive, workbook, unrelated Bug, or additional runtime state changed.</div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>
