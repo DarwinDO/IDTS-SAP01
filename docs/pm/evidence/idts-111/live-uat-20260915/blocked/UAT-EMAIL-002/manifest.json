@@ -1,0 +1,100 @@
+{
+  "schemaVersion": "idts-live-uat-blocked-1",
+  "sanitized": true,
+  "artifactType": "uat-case-blocked-evidence",
+  "caseId": "UAT-EMAIL-002",
+  "caseNumber": 48,
+  "status": "BLOCKED",
+  "executor": "NhanT (DonHV support)",
+  "generatedAt": "2026-09-15T19:41:18.646+07:00",
+  "catalog": {
+    "source": "origin/dev",
+    "originDevHead": "64bb215bd1b5b7d83f4d4557e8433874b68e703b",
+    "catalogBaselineSha": "e019f7799fd30a419fafb048b41653d72a837083",
+    "displayNumber": "48",
+    "domain": "Audit and notification",
+    "journey": "Verify side effects",
+    "title": "Temporary email failure retries without rolling back Bug workflow",
+    "actorRole": "PM",
+    "executionOwner": "DonHV",
+    "classification": "RECOVERY",
+    "priority": "HIGH",
+    "preconditions": "Controlled provider failure is available.",
+    "testData": "Use controlled SAP BTP QA data; do not use production or private personal data.",
+    "steps": [
+      "Perform the workflow action.",
+      "Observe delivery retry state.",
+      "Reload the Bug."
+    ],
+    "expectedResult": "Bug workflow remains committed; delivery records a bounded retry/failure state without duplicate business history.",
+    "postcondition": "Keep controlled QA data unless the case explicitly tests deletion.",
+    "sourceTrace": [
+      "srv/bug-service/history.js",
+      "srv/bug-service/history-read-models.js",
+      "srv/email/outbox.js",
+      "srv/email/worker.js"
+    ],
+    "environment": "SAP BTP AppRouter + XSUAA + SAP HANA Cloud; external provider checks only where stated.",
+    "evidenceRequirements": [
+      "case-specific UI screenshot",
+      "sanitized case manifest with role, timestamp, baseline/deploy SHA, expected and actual result",
+      "sanitized Network status or safe error screenshot"
+    ]
+  },
+  "execution": {
+    "status": "BLOCKED",
+    "actualResult": "BLOCKED before execution: the approved scope does not provide an authorized isolated per-delivery provider-failure mechanism or a local full Bug workflow harness that can prove the Bug commit, retry/failure state, reload readback, and absence of duplicate business history together.",
+    "runtimeEvidenceCaptured": false,
+    "runtimeScreenshotCaptured": false,
+    "providerCalled": false,
+    "bugWorkflowExecuted": false,
+    "liveDataMutated": false
+  },
+  "governance": {
+    "decision": "DEC-064",
+    "boundary": "No raw email/provider body or ID, lock/lease/idempotency value, identity hash, token/JWT, credential, endpoint, binding/env/log control, arbitrary audit export, outage simulation, schema/index change, or live provider/data mutation.",
+    "finding": "Existing local email tests use an isolated SQLite/in-memory setup and exercise email/outbox functions, but they do not invoke a real Bug workflow or prove the complete UAT assertion that no duplicate business history is created.",
+    "missingPrecondition": "An approved isolated per-delivery failure mechanism or a local full Bug workflow harness with case-specific runtime-equivalent readback.",
+    "requiredNextEvidence": "Official UAT must capture case-specific runtime evidence for the workflow action, bounded retry/failure state, Bug reload/readback, and duplicate-history check after the missing precondition is approved and available."
+  },
+  "evidence": {
+    "files": [
+      "manifest.json",
+      "evidence-summary.md",
+      "BLOCKED card result.png"
+    ],
+    "runtimeScreenshots": [],
+    "runtimeEvidenceClaimed": false,
+    "cardDescription": "Generated blocker summary card only; it is not a runtime screenshot and does not substitute for official UAT evidence.",
+    "card": {
+      "file": "BLOCKED card result.png",
+      "sha256": "F705FEE97E4F477A53071396FB103B1246C892EC59E3E51E6CE5DE0E70A7E5E3",
+      "format": "PNG",
+      "width": 1600,
+      "height": 1000,
+      "nonBlank": true
+    }
+  },
+  "hashes": {
+    "evidenceSummarySha256": "86ED50A5253C5365E2CE39A9A2FB9D3AAFA6ED7C047136107BF963DA414B94EB",
+    "cardSha256": "F705FEE97E4F477A53071396FB103B1246C892EC59E3E51E6CE5DE0E70A7E5E3"
+  },
+  "scopeGuard": {
+    "sourceChanged": false,
+    "catalogChanged": false,
+    "driveChanged": false,
+    "workbookChanged": false,
+    "btpChanged": false,
+    "liveProviderChanged": false,
+    "liveDataChanged": false,
+    "passClaimed": false
+  },
+  "verification": {
+    "jsonValidated": true,
+    "pngValidated": true,
+    "hashesValidated": true,
+    "secretScanValidated": true,
+    "secretScanResult": "PASS: no credential-like patterns found in sanitized text artifacts",
+    "validatedAt": "2026-09-15T19:41:18.646+07:00"
+  }
+}
