@@ -12,7 +12,9 @@ const DEFAULTS = Object.freeze({
   pollIntervalMs: 15000,
   batchSize: 10,
   maxConnections: 3,
-  testMode: false
+  testMode: false,
+  uatFailureEnabled: false,
+  uatFailureToken: null
 })
 
 function getEmailConfig () {
@@ -20,8 +22,16 @@ function getEmailConfig () {
   const bindingEmail = cds.env.requires?.objectStore?.credentials?.email || {}
   return normalizeEmailConfig({
     ...(cds.env.idts?.email || {}),
-    ...bindingEmail
+    ...bindingEmail,
+    ...runtimeOverrides(process.env)
   })
+}
+
+function runtimeOverrides (env = {}) {
+  return Object.fromEntries([
+    ['uatFailureEnabled', env.IDTS_EMAIL_UAT_FAILURE_ENABLED],
+    ['uatFailureToken', env.IDTS_EMAIL_UAT_FAILURE_TOKEN]
+  ].filter(([, value]) => value !== undefined))
 }
 
 function normalizeEmailConfig (raw = {}) {
@@ -45,7 +55,9 @@ function normalizeEmailConfig (raw = {}) {
     batchSize: toPositiveInteger(raw.batchSize, DEFAULTS.batchSize),
     maxConnections: toPositiveInteger(raw.maxConnections, DEFAULTS.maxConnections),
     testMode: toBoolean(raw.testMode, DEFAULTS.testMode),
-    defaultTestRecipient: toStringOrNull(raw.defaultTestRecipient)
+    defaultTestRecipient: toStringOrNull(raw.defaultTestRecipient),
+    uatFailureEnabled: toBoolean(raw.uatFailureEnabled, DEFAULTS.uatFailureEnabled),
+    uatFailureToken: toStringOrNull(raw.uatFailureToken)
   }
 
   config.missing = requiredFields(config).filter(field => !config[field])
