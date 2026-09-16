@@ -1,58 +1,153 @@
 {
-  "schemaVersion": "1.0",
+  "schemaVersion": "1.1",
   "caseId": "UAT-AUTH-005",
   "catalogStatus": "PREPARED",
-  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
-  "executor": "NhanT",
+  "candidateExecutionStatus": "EXECUTED_CURRENT_PASS_PENDING_DONHV_ACCEPTANCE",
+  "currentResult": "PASS",
+  "executor": "NhanT (DonHV support)",
   "actorRole": "TESTER",
-  "executedAt": "2026-08-04T18:27:00+07:00",
-  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
-  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
-  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
-  "expectedResult": "The old session cannot access protected data and SAP sign-in is required again without a blank page or raw error.",
-  "actualResult": "Sign Out navigated to the IDTS signed-out confirmation. Reopening the exact protected BUG-0025 route redirected to SAP Accounts Sign In and exposed no BUG-0025/profile data.",
+  "executedAt": "2026-09-16T12:48:53.627+07:00",
+  "captureCompletedAt": "2026-09-16T12:50:29.617+07:00",
+  "reportFinalizedAt": "2026-09-16T12:52:43.096+07:00",
+  "executionBaselineSha": "d472f2c9e20d4b684c9ebe721181b21989562aba",
+  "deployedRuntimeSha": "d472f2c9e20d4b684c9ebe721181b21989562aba",
+  "shaEvidence": {
+    "status": "CORROBORATED_SAME_DAY_RUNTIME",
+    "source": "docs/pm/evidence/idts-111/live-uat-20260916/pm-donhv/UAT-EMAIL-002-current/assignment-sent.json and cleanup-readiness.json",
+    "note": "The auth capture report records readiness but its shell output emits no SHA; the same-day current-runtime deployment evidence records the SHA above. The older 2026-08-04 SHA values are retained only in historical-manifest-20260804.json."
+  },
+  "expectedResult": "The old session cannot access protected data and SAP sign-in is required again.",
+  "actualResult": "PASS — Chrome Work NhanT/TESTER signed out once from the controlled BUG-0025 route, displayed the clean IDTS signed-out confirmation, and one Sign in with SAP BTP action reached the SAP ID credential screen without protected Bug/profile data; no credential entry or second logout occurred.",
   "candidateOutcome": "MEETS_EXPECTED_RESULT",
-  "reviewBoundary": "Current-runtime candidate PASS only; DonHV owns final acceptance and disposition of historical IDTS-117 evidence.",
+  "acceptanceBoundary": "Current-runtime evidence package is PASS; DonHV owns final UAT acceptance and disposition. This package does not update the catalog, workbook, Drive, Jira, or runtime.",
+  "readiness": {
+    "command": "npm run btp:demo:check",
+    "result": "DEMO READY",
+    "observed": "CAP 1/1; AppRouter 1/1; /health 200; /ready 200; protected /odata/v4/auth/me 401 without a session; Web entry 200.",
+    "timestampNote": "The shell output emitted no timestamp; readiness completed before the first candidate capture recorded above."
+  },
   "evidence": [
     {
-      "id": "UAT-AUTH-005-E01",
-      "file": "01-signed-out-confirmation.png",
-      "description": "IDTS signed-out confirmation with SAP BTP sign-in link.",
-      "sha256": "CF3C479AF1008A2347C74FC58A58584DDE5B9AC10DBC6E75D59E7C663428ABD1"
+      "id": "UAT-AUTH-005-20260916-E01",
+      "file": "01-authenticated-protected-route-20260916.png",
+      "description": "Authenticated controlled BUG-0025 Object Page before the one-time logout; profile menu closed.",
+      "mimeType": "image/png",
+      "format": "PNG",
+      "width": 1440,
+      "height": 709,
+      "bytes": 227225,
+      "sha256": "E29A250550C862BEE3169C0DC8C71D38E5B5F4C1C99A454E0B638B89D9964859",
+      "capturedAt": "2026-09-16T12:48:53.627+07:00",
+      "normalization": "Decoded from the reviewed JPEG/JFIF candidate and re-encoded as lossless PNG pixels."
     },
     {
-      "id": "UAT-AUTH-005-E02",
-      "file": "02-protected-route-blank.png",
-      "description": "Historical protected-route blank-page evidence retained for regression traceability; superseded by E04.",
-      "sha256": "AFB18C5005D43BE40F71005911C4CC573E461962AA1631954920E772A9183846"
+      "id": "UAT-AUTH-005-20260916-E02",
+      "file": "02-signed-out-confirmation-20260916.png",
+      "description": "Clean IDTS signed-out confirmation with the SAP BTP sign-in action.",
+      "mimeType": "image/png",
+      "format": "PNG",
+      "width": 1440,
+      "height": 709,
+      "bytes": 93263,
+      "sha256": "DFFB1B1DE0C8A9BCB7E21F51D5D25F5CDB71BAA41C1D25EB021BCB0F7DD61930",
+      "capturedAt": "2026-09-16T12:49:17.368+07:00",
+      "normalization": "Decoded from the reviewed JPEG/JFIF candidate and re-encoded as lossless PNG pixels."
     },
     {
-      "id": "UAT-AUTH-005-E03",
-      "file": "03-current-runtime-signed-out-20260804.png",
-      "description": "Current runtime shows the IDTS signed-out confirmation after ending the NhanT application session.",
-      "sha256": "36981C39D3BFA7C267A3BAF28AE1FED870A1E9834DBF368B4FE95450AFACBA2A"
-    },
-    {
-      "id": "UAT-AUTH-005-E04",
-      "file": "04-current-runtime-protected-sign-in-20260804.png",
-      "description": "Current protected BUG-0025 route redirected to SAP ID Sign In; screenshot is cropped above the prefilled identifier field.",
-      "sha256": "C74EAB451818D5C31001657DB2F6A6AE35793F913950C72B9CE2C50ECBCDF6C2"
+      "id": "UAT-AUTH-005-20260916-E03",
+      "file": "03-protected-route-sap-sign-in-20260916.png",
+      "description": "Privacy-safe crop of the SAP ID credential screen; the identifier value is outside the crop.",
+      "mimeType": "image/png",
+      "format": "PNG",
+      "width": 500,
+      "height": 230,
+      "bytes": 20246,
+      "sha256": "CD351D279DC522F4342A6B99540CEE0D86C107030BA2277D75D160DD8B65C2F9",
+      "capturedAt": "2026-09-16T12:50:29.617+07:00",
+      "normalization": "Copied from the reviewed candidate after verifying the PNG signature; no identifier value is retained."
     }
   ],
+  "manualConfirmationContext": {
+    "file": "manual-confirmations-20260916.md",
+    "bytes": 931,
+    "sha256": "00ACD119069D1816E69F2B99E6F9E8012A354011F155C7226BCBF1B97DE71F12",
+    "summary": "User-provided Chrome and InPrivate manual confirmations corroborate that the protected-route re-open required the SAP credential screen after the one-time logout; no login completed and no second logout occurred.",
+    "privacy": "No account email, credential, OTP, token, cookie, provider identifier, or raw URL is stored."
+  },
+  "imageQuality": {
+    "status": "PASS",
+    "note": "All three current evidence files have the PNG signature 89504E470D0A1A0A and are nonblank. The first two retain the reviewed pixels after JPEG decode and lossless PNG re-encoding; the third is already PNG. The 1440 x 709 viewport and 500 x 230 privacy crop are readable presentation limitations."
+  },
   "privacyReview": {
     "status": "PASS",
-    "notes": "Current screenshots contain no email, credential, token, cookie, protected Bug data, or private diagnostic. The SAP Sign In proof is intentionally cropped before the prefilled identifier field."
+    "notes": "The raw SAP screenshot containing a browser-prefilled identifier is excluded. Current retained images expose only controlled BUG-0025/display-name context and generic sign-in text; no email, password, OTP, token, cookie, secret, or raw URL is stored."
   },
-  "issueClassification": "historical deployed-auth-flow defect no longer reproduced in current runtime",
+  "transientPriorObservation": {
+    "observedAt": "2026-09-16T10:40:30+07:00 through 2026-09-16T10:42:22+07:00",
+    "result": "DOES_NOT_MEET_EXPECTED_RESULT",
+    "path": ".superpowers/auth005-recapture-20260916/03-protected-route-unexpected-reauthenticated.png",
+    "description": "The earlier staging run returned protected application data after automatic reauthentication on protected-route reopen. It remains retained as a real transient observation and is not copied into this current PASS-only evidence block.",
+    "retained": true,
+    "currentDisposition": "The later 12:48–12:50 run is the current PASS, corroborated by manual Chrome and InPrivate confirmations; the earlier observation is disclosed, not erased or relabeled."
+  },
+  "historicalEvidence": {
+    "historicalManifest": {
+      "file": "historical-manifest-20260804.json",
+      "bytes": 3050,
+      "sha256": "2DC230F76A78603F126CE43AA10F6B6F6812BEB4773422E46E7C5C58B6593939"
+    },
+    "historicalPassCard": {
+      "file": "historical-current-runtime-pass-card-20260804.png",
+      "bytes": 97523,
+      "sha256": "283E4502CA8990AA111A2A66BA62F59B5E552DF0179CEDE7EF2CF6449265F239",
+      "dimensions": "1280x1272"
+    },
+    "originalEvidenceRetained": [
+      {
+        "file": "01-signed-out-confirmation.png",
+        "bytes": 17206,
+        "sha256": "CF3C479AF1008A2347C74FC58A58584DDE5B9AC10DBC6E75D59E7C663428ABD1"
+      },
+      {
+        "file": "02-protected-route-blank.png",
+        "bytes": 8406,
+        "sha256": "AFB18C5005D43BE40F71005911C4CC573E461962AA1631954920E772A9183846"
+      },
+      {
+        "file": "03-current-runtime-signed-out-20260804.png",
+        "bytes": 14772,
+        "sha256": "36981C39D3BFA7C267A3BAF28AE1FED870A1E9834DBF368B4FE95450AFACBA2A"
+      },
+      {
+        "file": "04-current-runtime-protected-sign-in-20260804.png",
+        "bytes": 3304,
+        "sha256": "C74EAB451818D5C31001657DB2F6A6AE35793F913950C72B9CE2C50ECBCDF6C2"
+      }
+    ]
+  },
+  "card": {
+    "rootFile": "current-runtime-pass-card.png",
+    "sourceFile": "card/result.png",
+    "bytes": 316352,
+    "sha256": "5E59FC3AB9FBCF2493FB57A96038AFBB6D52C877182A9860D6E4E5CC4599776D",
+    "format": "PNG",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 2442,
+    "fullPage": true,
+    "nonBlank": true,
+    "reviewFieldRendered": false,
+    "supportingFiles": [
+      "card/card.html",
+      "card/visible-text.txt",
+      "card/manifest.json",
+      "card/sha256.txt"
+    ]
+  },
   "limitations": [
-    "The tab intentionally remains at SAP Sign In after the recheck; NhanT must sign in again before additional SAP UAT."
-  ],
-  "donhvLatestReview": {
-    "jiraCommentId": "10962",
-    "reviewDate": "2026-08-04",
-    "category": "CURRENT_RUNTIME_POSITIVE",
-    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
-    "preservesHistoricalCandidateTruth": true,
-    "finalPassApproved": false
-  }
+    "The three current PNGs omit browser chrome and a direct post-logout route-reopen URL; route continuity relies on the sanitized AX/readback record and the manual confirmations documented in manual-confirmations-20260916.md.",
+    "The capture shell output did not emit a SHA; executionBaselineSha and deployedRuntimeSha are the same-day current-runtime SHA corroborated by UAT-EMAIL-002 evidence, not a newly emitted auth-capture field.",
+    "The current Chrome Work tab remained at the SAP credential screen after the capture; no login completion or second logout was attempted.",
+    "The earlier 2026-09-16 automatic-reauthentication observation remains a transient negative staging record outside the current PASS-only block."
+  ]
 }

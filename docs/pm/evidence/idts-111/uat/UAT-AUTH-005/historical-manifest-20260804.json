@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "UAT-AUTH-005",
+  "catalogStatus": "PREPARED",
+  "candidateExecutionStatus": "EXECUTED_PENDING_DONHV_REVIEW",
+  "executor": "NhanT",
+  "actorRole": "TESTER",
+  "executedAt": "2026-08-04T18:27:00+07:00",
+  "catalogMergeSha": "6f01affc2c2945e51d18199137c8a89a20c77600",
+  "executionBaselineSha": "fbea12cd996d8c1e13bd834fd6e054c8a37c32e6",
+  "deployedRuntimeSha": "67b1bf86169e9696c9365ef4846b99ffae30d4e2",
+  "expectedResult": "The old session cannot access protected data and SAP sign-in is required again without a blank page or raw error.",
+  "actualResult": "Sign Out navigated to the IDTS signed-out confirmation. Reopening the exact protected BUG-0025 route redirected to SAP Accounts Sign In and exposed no BUG-0025/profile data.",
+  "candidateOutcome": "MEETS_EXPECTED_RESULT",
+  "reviewBoundary": "Current-runtime candidate PASS only; DonHV owns final acceptance and disposition of historical IDTS-117 evidence.",
+  "evidence": [
+    {
+      "id": "UAT-AUTH-005-E01",
+      "file": "01-signed-out-confirmation.png",
+      "description": "IDTS signed-out confirmation with SAP BTP sign-in link.",
+      "sha256": "CF3C479AF1008A2347C74FC58A58584DDE5B9AC10DBC6E75D59E7C663428ABD1"
+    },
+    {
+      "id": "UAT-AUTH-005-E02",
+      "file": "02-protected-route-blank.png",
+      "description": "Historical protected-route blank-page evidence retained for regression traceability; superseded by E04.",
+      "sha256": "AFB18C5005D43BE40F71005911C4CC573E461962AA1631954920E772A9183846"
+    },
+    {
+      "id": "UAT-AUTH-005-E03",
+      "file": "03-current-runtime-signed-out-20260804.png",
+      "description": "Current runtime shows the IDTS signed-out confirmation after ending the NhanT application session.",
+      "sha256": "36981C39D3BFA7C267A3BAF28AE1FED870A1E9834DBF368B4FE95450AFACBA2A"
+    },
+    {
+      "id": "UAT-AUTH-005-E04",
+      "file": "04-current-runtime-protected-sign-in-20260804.png",
+      "description": "Current protected BUG-0025 route redirected to SAP ID Sign In; screenshot is cropped above the prefilled identifier field.",
+      "sha256": "C74EAB451818D5C31001657DB2F6A6AE35793F913950C72B9CE2C50ECBCDF6C2"
+    }
+  ],
+  "privacyReview": {
+    "status": "PASS",
+    "notes": "Current screenshots contain no email, credential, token, cookie, protected Bug data, or private diagnostic. The SAP Sign In proof is intentionally cropped before the prefilled identifier field."
+  },
+  "issueClassification": "historical deployed-auth-flow defect no longer reproduced in current runtime",
+  "limitations": [
+    "The tab intentionally remains at SAP Sign In after the recheck; NhanT must sign in again before additional SAP UAT."
+  ],
+  "donhvLatestReview": {
+    "jiraCommentId": "10962",
+    "reviewDate": "2026-08-04",
+    "category": "CURRENT_RUNTIME_POSITIVE",
+    "currentStatus": "CURRENT_RUNTIME_RERUN_COMPLETE_PENDING_DONHV_REVIEW",
+    "preservesHistoricalCandidateTruth": true,
+    "finalPassApproved": false
+  }
+}

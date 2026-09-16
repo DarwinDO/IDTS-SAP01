@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "uat-summary-card",
+  "caseId": "UAT-AUTH-005",
+  "rootVerdict": "PASS",
+  "status": "PASS",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "layoutCaption": "Current execution evidence summary — white vertical card",
+  "evidenceRoot": "docs/pm/evidence/idts-111/uat/UAT-AUTH-005",
+  "title": "Logout ends the current session",
+  "expectedResult": "The old session cannot access protected data and SAP sign-in is required again.",
+  "actualResult": "PASS — one logout produced the clean IDTS confirmation and one SAP BTP sign-in action reached the SAP ID credential screen without protected Bug/profile data; no credential entry or second logout occurred.",
+  "runtimeReadiness": {
+    "command": "npm run btp:demo:check",
+    "result": "DEMO READY",
+    "capApp": "1/1",
+    "appRouter": "1/1",
+    "livenessHttp": 200,
+    "dbReadinessHttp": 200,
+    "protectedApiHttp": 401,
+    "sourceAndDeployedRuntimeSha": "d472f2c9e20d4b684c9ebe721181b21989562aba",
+    "shaEvidence": "Same-day current-runtime UAT-EMAIL-002 evidence; the auth capture shell output emitted no SHA."
+  },
+  "executionTime": "2026-09-16T12:48:53.627+07:00–2026-09-16T12:50:29.617+07:00",
+  "manualConfirmationContext": "User-provided Chrome and InPrivate confirmations corroborate the protected-route re-open requirement; no login completed and no second logout occurred.",
+  "transientPriorObservation": "The earlier 2026-09-16 automatic-reauthentication observation remains retained outside the PASS-only evidence block and is disclosed in the root manifest.",
+  "privacy": {
+    "status": "PASS",
+    "rawSapScreenshotIncluded": false,
+    "secretMaterialStored": false,
+    "note": "The SAP credential crop excludes the browser-prefilled identifier value; no account email, password, OTP, token, cookie, secret, or raw URL is stored."
+  },
+  "result": {
+    "file": "card/result.png",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 2442,
+    "bytes": 316352,
+    "sha256": "5E59FC3AB9FBCF2493FB57A96038AFBB6D52C877182A9860D6E4E5CC4599776D",
+    "nonBlank": true,
+    "fullPage": true,
+    "reviewFieldRendered": false
+  },
+  "rootCard": {
+    "file": "current-runtime-pass-card.png",
+    "bytes": 316352,
+    "sha256": "5E59FC3AB9FBCF2493FB57A96038AFBB6D52C877182A9860D6E4E5CC4599776D"
+  },
+  "sourceArtifacts": [
+    {
+      "path": "01-authenticated-protected-route-20260916.png",
+      "bytes": 227225,
+      "sha256": "E29A250550C862BEE3169C0DC8C71D38E5B5F4C1C99A454E0B638B89D9964859"
+    },
+    {
+      "path": "02-signed-out-confirmation-20260916.png",
+      "bytes": 93263,
+      "sha256": "DFFB1B1DE0C8A9BCB7E21F51D5D25F5CDB71BAA41C1D25EB021BCB0F7DD61930"
+    },
+    {
+      "path": "03-protected-route-sap-sign-in-20260916.png",
+      "bytes": 20246,
+      "sha256": "CD351D279DC522F4342A6B99540CEE0D86C107030BA2277D75D160DD8B65C2F9"
+    },
+    {
+      "path": "manual-confirmations-20260916.md",
+      "bytes": 931,
+      "sha256": "00ACD119069D1816E69F2B99E6F9E8012A354011F155C7226BCBF1B97DE71F12"
+    },
+    {
+      "path": "card/card.html",
+      "bytes": 462255,
+      "sha256": "87FCD56BC0D23D95828198B182122DD43C4B6499CD8E526943058D73C6D6799D"
+    },
+    {
+      "path": "card/visible-text.txt",
+      "bytes": 3072,
+      "sha256": "47E327571AFFCCFCBC40A45C670FFD258634109EB8D0104A48FAE525D48AB224"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+Case UAT-AUTH-005
+Logout ends the current session
+
+Result: PASS
+Executor: NhanT (DonHV support)
+
+Test definition
+Precondition: Chrome Work showed NhanT with the TESTER role; the controlled BUG-0025 route was available on the current demo runtime.
+Action: Open the protected route, choose Sign Out once, confirm the IDTS signed-out page, then use Sign in with SAP BTP once.
+Expected result: The old session cannot access protected data and SAP sign-in is required again.
+
+Observed assertions
+- The controlled BUG-0025 Object Page was visible before logout; no email or credential value is retained.
+- One Sign Out produced the clean IDTS confirmation with the SAP BTP sign-in action.
+- One sign-in action reached the SAP ID credential screen; no identifier value, password, login, or second logout was entered.
+- The current result is corroborated by the user-provided Chrome and InPrivate manual confirmations.
+
+Execution provenance
+Readiness: Read-only npm run btp:demo:check returned DEMO READY before the first capture; CAP/AppRouter 1/1, health/readiness 200, protected API 401 without a session.
+Source and deployed runtime SHA: d472f2c9e20d4b684c9ebe721181b21989562aba, corroborated by same-day current-runtime deployment evidence; the capture shell output itself emitted no SHA.
+Execution time: 2026-09-16T12:48:53.627+07:00 through 2026-09-16T12:50:29.617+07:00 (Asia/Bangkok).
+Structured evidence: docs/pm/evidence/idts-111/uat/UAT-AUTH-005/manifest.json
+Manual confirmation context: Sanitized Chrome and InPrivate confirmations corroborate the protected-route re-open requirement; no account email, credential, token, cookie, provider identifier, or raw URL is stored.
+
+Runtime evidence
+Three current PASS images are embedded below at readable sizes.
+01 — authenticated protected route before logout; real PNG normalized from the source JPEG-backed candidate.
+02 — clean IDTS signed-out confirmation with the SAP BTP sign-in action; real PNG normalized from the source JPEG-backed candidate.
+03 — privacy-safe SAP ID sign-in crop; the generic field label is visible and the identifier value is outside the crop.
+
+Historical context and limitations
+- The 2026-08-04 PASS manifest, images, and card are preserved under explicit historical names; they remain historical evidence.
+- An earlier 2026-09-16 staging run around 10:40–10:42 returned protected application data after automatic reauthentication. That transient negative observation remains retained outside this PASS-only block and is disclosed rather than erased.
+- The current PNGs omit browser chrome and a direct post-logout route-reopen URL, so that continuity relies on the sanitized AX/readback record and manual confirmations as documented in the manifest.
+- The first two captures are 1440 × 709 and the SAP crop is 500 × 230; required text is readable, but the viewport and crop are presentation limitations.
+
+Privacy: The raw SAP screenshot containing a browser-prefilled identifier is excluded from this package. No email, password, OTP, token, cookie, secret, or raw URL is exposed.
