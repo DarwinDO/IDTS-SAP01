@@ -68,7 +68,7 @@
     { "path": "assignment-sent.json", "bytes": 8218, "sha256": "26508cc939e4cda0da7ca69758f7a95e3d9d9b1c26868bed1edeb5c7ad8025ee" },
     { "path": "baseline-before.json", "bytes": 4010, "sha256": "80042e5c9ed96e26224e968d07d067fc54df4ffac5be88f9f167509d62f519b2" },
     { "path": "baseline-before.png", "bytes": 236993, "sha256": "fbe1f3421612b3740aea8fd39d08151dfd64d486abbfc1e1ebe211e37b73e847" },
-    { "path": "card.md", "bytes": 1819, "sha256": "91d6de107e14b4b0a93378a45321dabb00d2457391dfaf7284b71dd1756416a9" },
+    { "path": "card.md", "bytes": 1815, "sha256": "15c8ba5f9a55836745dba4370033b3f01c825558411e40227ad07fae5a01065c" },
     { "path": "card/card.html", "bytes": 351221, "sha256": "381c1f4dc688da61b7d574940ecfc10009871f0aa73abc90a6f9872b59679cb1" },
     { "path": "card/result.png", "bytes": 286050, "sha256": "fd1df4bf084b3a2ede50a546e98d50085c5ac189941b780b67737eddf8737ab7" },
     { "path": "card/visible-text.txt", "bytes": 2961, "sha256": "f8e9f9b34afde46e6f53c62d8b303bf2424413c659cea01cd700c116038b49d0" },
