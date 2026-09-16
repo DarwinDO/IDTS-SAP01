@@ -1,0 +1,227 @@
+{
+  "caseId": "UAT-EMAIL-002",
+  "capturedAt": "2026-09-16T01:51:02.206Z",
+  "environment": "live-demo",
+  "deploySha": "d472f2c9e20d4b684c9ebe721181b21989562aba",
+  "browser": {
+    "family": "Edge",
+    "profile": "Profile 1",
+    "account": "DonHV",
+    "role": "Project Manager"
+  },
+  "target": {
+    "bugNumber": "BUG-0023",
+    "bugId": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+    "title": "IDTS-127 controlled AI assignment explanation UAT",
+    "workflowTitle": "IDTS-127 controlled AI assignment explanation UAT [UAT-MARKER-REDACTED]",
+    "originalTitle": "IDTS-127 controlled AI assignment explanation UAT"
+  },
+  "titleEdit": {
+    "temporaryMarker": "UAT-MARKER-REDACTED",
+    "saveOnce": true,
+    "noTargetEmailDelivery": true,
+    "cleanupPending": false,
+    "cleanupSaveOnce": true,
+    "cleanupResult": "Original title restored; cleanup Edit is outside the assignment delta assertion."
+  },
+  "assignment": {
+    "actionEndpoint": "POST /idtsbugmanagementui/odata/v4/bug/$batch -> Bugs(...)/BugService.assignToDeveloper",
+    "workflowHttp": 200,
+    "requestId": "37080.112",
+    "requestBody": {
+      "assigneeID": "[developer-id-redacted]"
+    },
+    "responseActionHttp": 200,
+    "followupBatchHttp": 200,
+    "bugAfterAction": {
+      "status": "ASSIGNED",
+      "assignee": "DEVELOPER_REDACTED",
+      "nextProcessorRole": "Developer"
+    },
+    "assignmentHistoryId": "f16f9fb3-3f0b-424f-99e3-ef0742762dfb",
+    "assignmentNotificationId": "d45efae0-a8ab-4004-8944-8ab794f912b8"
+  },
+  "historyNotificationCounts": {
+    "baseline": {
+      "history": 2,
+      "notifications": 2
+    },
+    "afterAssignment": {
+      "history": 3,
+      "notifications": 3
+    },
+    "finalReadback": {
+      "history": 4,
+      "notifications": 3
+    },
+    "assignmentHistoryDelta": 1,
+    "assignmentNotificationDelta": 1,
+    "cleanupHistoryDelta": 1,
+    "duplicateAssignmentHistory": 0,
+    "duplicateAssignmentNotification": 0
+  },
+  "deliveryTransition": {
+    "deliveryId": "b0c1fe5d-03d1-4db0-b51a-306dda1c8dc3",
+    "notificationId": "d45efae0-a8ab-4004-8944-8ab794f912b8",
+    "before": {
+      "status": "FAILED",
+      "attemptCount": 1,
+      "lastErrorCode": "EMAIL_UAT_FORCED_FAILURE",
+      "lastErrorSummary": "Email delivery failed in the controlled UAT check.",
+      "nextAttemptAt": "2026-09-16T01:39:01.932Z",
+      "sentAt": null
+    },
+    "after": {
+      "status": "SENT",
+      "attemptCount": 2,
+      "lastErrorCode": null,
+      "lastErrorSummary": null,
+      "nextAttemptAt": null,
+      "sentAt": "2026-09-16T01:47:31.709Z",
+      "lastAttemptAt": "2026-09-16T01:47:31.709Z"
+    },
+    "sameDeliveryId": true,
+    "providerMessageIdStored": false
+  },
+  "unrelatedDeliveries": {
+    "baselineCount": 120,
+    "postAssignmentCount": 120,
+    "baselineDigest": "00bc4526ae49b4a0e0b8963f5f7b9c1b533835e9acd7a512217f3edf6c2d2fe1",
+    "postAssignmentDigest": "00bc4526ae49b4a0e0b8963f5f7b9c1b533835e9acd7a512217f3edf6c2d2fe1",
+    "unchanged": true
+  },
+  "scheduler": {
+    "jobId": 3252425,
+    "temporaryScheduleId": "0a7f4a9c-d22b-4026-8a12-f53fc4e618ad",
+    "createHttp": 201,
+    "completedAt": "2026-09-16T01:47:31.709Z",
+    "outboxRunOnce": true,
+    "temporaryScheduleDeleteHttp": 200
+  },
+  "gmail": {
+    "used": true,
+    "authorizedProfilesChecked": [
+      "donhvse180099@fpt.edu.vn",
+      "nguyendo836660@gmail.com"
+    ],
+    "exactAssignmentMessageFound": false,
+    "digestFound": true,
+    "digestSubject": "[IDTS] Daily notification digest - 2026-09-16",
+    "digestContainsBugNumber": true,
+    "digestRole": "Supplemental receipt only; not proof of FAILED-to-SENT retry.",
+    "authority": "DB/outbox same-delivery transition"
+  },
+  "persistedRows": {
+    "bug": {
+      "id": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+      "status": "ASSIGNED",
+      "assignee": "DEVELOPER_REDACTED",
+      "nextProcessorRole": "DEVELOPER",
+      "title": "IDTS-127 controlled AI assignment explanation UAT"
+    },
+    "history": [
+      {
+        "ID": "c717c2d1-bb69-4b4c-a40b-7eb654eee2f4",
+        "IsActiveEntity": true,
+        "actionTypeName": "Create",
+        "actorDisplayName": "NhanT",
+        "actorRoleName": "Tester",
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "changeCount": 1,
+        "createdAt": "2026-09-14T07:48:09.688Z",
+        "groupedChangeContext": "Status: Pending Assignment",
+        "modifiedAt": "2026-09-14T07:48:09.688Z",
+        "summary": "Created bug report with initial status Pending Assignment."
+      },
+      {
+        "ID": "5f668d89-8574-4bc1-a875-fcaa8e89e3e2",
+        "IsActiveEntity": true,
+        "actionTypeName": "Edit",
+        "actorDisplayName": "DonHV",
+        "actorRoleName": "Project Manager",
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "changeCount": 1,
+        "createdAt": "2026-09-16T01:27:48.414Z",
+        "groupedChangeContext": "Title: IDTS-127 controlled AI assignme… → IDTS-127 controlled AI assignme…",
+        "modifiedAt": "2026-09-16T01:27:48.414Z",
+        "summary": "Updated title."
+      },
+      {
+        "ID": "f16f9fb3-3f0b-424f-99e3-ef0742762dfb",
+        "IsActiveEntity": true,
+        "actionTypeName": "Assign to Developer",
+        "actorDisplayName": "DonHV",
+        "actorRoleName": "Project Manager",
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "changeCount": 4,
+        "createdAt": "2026-09-16T01:38:00.732Z",
+        "groupedChangeContext": "Status: Pending Assignment → Assigned · Assignee: DEVELOPER_REDACTED · Current Action Owner: DonHV → DEVELOPER_REDACTED · +1 more changes",
+        "modifiedAt": "2026-09-16T01:38:00.732Z",
+        "summary": "Assigned bug to DEVELOPER_REDACTED. Status changed from Pending Assignment to Assigned."
+      }
+    ],
+    "cleanupHistoryEvent": {
+      "actionTypeName": "Edit",
+      "actorDisplayName": "DonHV",
+      "actorRoleName": "Project Manager",
+      "createdAt": "2026-09-16T01:51:41Z",
+      "summary": "Updated title.",
+      "note": "Observed in final-history.png; cleanup Edit is excluded from assignmentHistoryDelta."
+    },
+    "notifications": [
+      {
+        "ID": "ffc8753f-473b-43e1-a787-f23eb6b07fe2",
+        "IsActiveEntity": true,
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "channelName": "In App",
+        "createdAt": "2026-09-14T08:10:03.368Z",
+        "deliveryStatusName": "Sent",
+        "eventTypeName": "Pending Assignment",
+        "message": "BUG-0023 is waiting for assignment.",
+        "modifiedAt": "2026-09-14T08:10:03.368Z",
+        "recipientDisplayName": "DonHV",
+        "sentAt": "2026-09-14T08:10:03.925Z"
+      },
+      {
+        "ID": "4bf05c48-159e-49de-86ee-03b081484f76",
+        "IsActiveEntity": true,
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "channelName": "In App",
+        "createdAt": "2026-09-15T08:10:04.082Z",
+        "deliveryStatusName": "Sent",
+        "eventTypeName": "Pending Assignment",
+        "message": "BUG-0023 has been pending assignment for 24 hours.",
+        "modifiedAt": "2026-09-15T08:10:04.082Z",
+        "recipientDisplayName": "DonHV",
+        "sentAt": "2026-09-15T08:10:04.802Z"
+      },
+      {
+        "ID": "d45efae0-a8ab-4004-8944-8ab794f912b8",
+        "IsActiveEntity": true,
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "channelName": "In App",
+        "createdAt": "2026-09-16T01:38:00.732Z",
+        "deliveryStatusName": "Sent",
+        "eventTypeName": "Assigned",
+        "message": "BUG-0023 has been reassigned.",
+        "modifiedAt": "2026-09-16T01:38:00.732Z",
+        "recipientDisplayName": "DEVELOPER_REDACTED",
+        "sentAt": "2026-09-16T01:38:01.523Z"
+      }
+    ],
+    "delivery": {
+      "ID": "b0c1fe5d-03d1-4db0-b51a-306dda1c8dc3",
+      "attemptCount": 2,
+      "channel_code": "EMAIL",
+      "lastAttemptAt": "2026-09-16T01:47:31.709Z",
+      "lastErrorCode": null,
+      "lastErrorSummary": null,
+      "nextAttemptAt": null,
+      "notification_ID": "d45efae0-a8ab-4004-8944-8ab794f912b8",
+      "sentAt": "2026-09-16T01:47:31.709Z",
+      "status_code": "SENT",
+      "templateKey": "BUG_ASSIGNED",
+      "modifiedAt": "2026-09-16T01:47:31.710Z"
+    }
+  }
+}

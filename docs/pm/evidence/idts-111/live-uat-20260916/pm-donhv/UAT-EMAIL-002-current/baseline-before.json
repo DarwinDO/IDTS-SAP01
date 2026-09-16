@@ -1,0 +1,120 @@
+{
+  "caseId": "UAT-EMAIL-002",
+  "capturedAt": "2026-09-16T01:29:41.508Z",
+  "role": "PM",
+  "actor": "DonHV",
+  "deploySha": "d472f2c9e20d4b684c9ebe721181b21989562aba",
+  "bug": {
+    "ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+    "bugNumber": "BUG-0023",
+    "title": "IDTS-127 controlled AI assignment explanation UAT [UAT-MARKER-REDACTED]",
+    "status_code": "PENDING_ASSIGNMENT",
+    "assignee_ID": null,
+    "nextProcessorUser_ID": "10000000-0000-0000-0000-000000000001",
+    "nextProcessorRole_code": "PM",
+    "modifiedAt": "2026-09-16T01:27:48.414Z"
+  },
+  "baseline": {
+    "historyCount": 2,
+    "history": [
+      {
+        "ID": "c717c2d1-bb69-4b4c-a40b-7eb654eee2f4",
+        "actionTypeName": "Create",
+        "actorDisplayName": "NhanT",
+        "actorRoleName": "Tester",
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "changeCount": 1,
+        "createdAt": "2026-09-14T07:48:09.688Z",
+        "groupedChangeContext": "Status: Pending Assignment",
+        "modifiedAt": "2026-09-14T07:48:09.688Z",
+        "summary": "Created bug report with initial status Pending Assignment."
+      },
+      {
+        "ID": "5f668d89-8574-4bc1-a875-fcaa8e89e3e2",
+        "actionTypeName": "Edit",
+        "actorDisplayName": "DonHV",
+        "actorRoleName": "Project Manager",
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "changeCount": 1,
+        "createdAt": "2026-09-16T01:27:48.414Z",
+        "groupedChangeContext": "Title: IDTS-127 controlled AI assignme… → IDTS-127 controlled AI assignme…",
+        "modifiedAt": "2026-09-16T01:27:48.414Z",
+        "summary": "Updated title."
+      }
+    ],
+    "notificationCount": 2,
+    "notifications": [
+      {
+        "ID": "ffc8753f-473b-43e1-a787-f23eb6b07fe2",
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "channelName": "In App",
+        "createdAt": "2026-09-14T08:10:03.368Z",
+        "deliveryStatusName": "Sent",
+        "eventTypeName": "Pending Assignment",
+        "message": "BUG-0023 is waiting for assignment.",
+        "modifiedAt": "2026-09-14T08:10:03.368Z",
+        "recipientDisplayName": "DonHV",
+        "sentAt": "2026-09-14T08:10:03.925Z"
+      },
+      {
+        "ID": "4bf05c48-159e-49de-86ee-03b081484f76",
+        "bug_ID": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+        "channelName": "In App",
+        "createdAt": "2026-09-15T08:10:04.082Z",
+        "deliveryStatusName": "Sent",
+        "eventTypeName": "Pending Assignment",
+        "message": "BUG-0023 has been pending assignment for 24 hours.",
+        "modifiedAt": "2026-09-15T08:10:04.082Z",
+        "recipientDisplayName": "DonHV",
+        "sentAt": "2026-09-15T08:10:04.802Z"
+      }
+    ],
+    "notificationDeliveriesForBug": [],
+    "allDeliveryCount": 120,
+    "allDeliveryDigest": "00bc4526ae49b4a0e0b8963f5f7b9c1b533835e9acd7a512217f3edf6c2d2fe1"
+  },
+  "titleSave": {
+    "postCount": 1,
+    "request": [
+      {
+        "method": "POST",
+        "endpoint": "/idtsbugmanagementui/odata/v4/bug/$batch",
+        "requestId": "30968.119",
+        "bodySummary": "PATCH draft title"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/idtsbugmanagementui/odata/v4/bug/$batch",
+        "requestId": "30968.120",
+        "bodySummary": "draftActivate"
+      },
+      {
+        "method": "POST",
+        "endpoint": "/idtsbugmanagementui/odata/v4/bug/$batch",
+        "requestId": "30968.122",
+        "bodySummary": "other"
+      }
+    ],
+    "response": [
+      {
+        "requestId": "30968.119",
+        "status": 200
+      },
+      {
+        "requestId": "30968.120",
+        "status": 200
+      },
+      {
+        "requestId": "30968.122",
+        "status": 200
+      }
+    ],
+    "deliveryRowsForBugAfterTitleSave": [],
+    "assertion": "PATCH and draft activation completed; title edit added one Edit history event but no NotificationDelivery row."
+  },
+  "privacy": {
+    "uatToken": "omitted",
+    "uatTokenHash": "omitted",
+    "titleMarker": "UAT-MARKER-REDACTED"
+  }
+}

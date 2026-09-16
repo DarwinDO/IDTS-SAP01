@@ -1,0 +1,51 @@
+{
+  "caseId": "UAT-EMAIL-002",
+  "capturedAt": "2026-09-16T01:38:01.932Z",
+  "target": {
+    "bugNumber": "BUG-0023",
+    "bugId": "23ca1377-65e7-4640-a0dc-60d067013ef6",
+    "title": "IDTS-127 controlled AI assignment explanation UAT [UAT-MARKER-REDACTED]",
+    "originalTitle": "IDTS-127 controlled AI assignment explanation UAT"
+  },
+  "assignment": {
+    "actionEndpoint": "POST /idtsbugmanagementui/odata/v4/bug/$batch -> Bugs(...)/BugService.assignToDeveloper",
+    "workflowHttp": 200,
+    "requestId": "37080.112",
+    "requestBody": {
+      "assigneeID": "[developer-id-redacted]"
+    },
+    "responseActionHttp": 200,
+    "followupBatchHttp": 200,
+    "bugAfterAction": {
+      "status": "ASSIGNED",
+      "assignee": "DEVELOPER_REDACTED",
+      "nextProcessorRole": "Developer"
+    },
+    "assignmentHistoryId": "f16f9fb3-3f0b-424f-99e3-ef0742762dfb",
+    "assignmentNotificationId": "d45efae0-a8ab-4004-8944-8ab794f912b8"
+  },
+  "delivery": {
+    "status": "FAILED",
+    "attemptCount": 1,
+    "lastErrorCode": "EMAIL_UAT_FORCED_FAILURE",
+    "lastErrorSummary": "Email delivery failed in the controlled UAT check.",
+    "nextAttemptAt": "2026-09-16T01:39:01.932Z",
+    "sentAt": null
+  },
+  "historyNotificationCounts": {
+    "history": 2,
+    "notifications": 2
+  },
+  "unrelatedDeliveries": {
+    "baselineCount": 120,
+    "postAssignmentCount": 120,
+    "baselineDigest": "00bc4526ae49b4a0e0b8963f5f7b9c1b533835e9acd7a512217f3edf6c2d2fe1",
+    "postAssignmentDigest": "00bc4526ae49b4a0e0b8963f5f7b9c1b533835e9acd7a512217f3edf6c2d2fe1",
+    "unchanged": true
+  },
+  "privacy": {
+    "token": "[REDACTED]",
+    "providerMessageId": "[OMITTED]",
+    "recipientEmail": "[OMITTED]"
+  }
+}

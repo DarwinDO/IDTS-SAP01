@@ -1,0 +1,42 @@
+Case UAT-EMAIL-002
+UAT-EMAIL-002 — controlled assignment email fault injection
+
+Result: PASS
+Executor: NhanT (DonHV support)
+Evidence kind: BTP_INTEGRATION
+
+Test definition
+Precondition: CAP d472f2c9 deployed; UAT seam enabled; Edge Profile 1 PM DonHV authenticated; BUG-0023 was Pending Assignment; Job Scheduler was available.
+Action: Append a redacted marker and save once, select one eligible Developer, click Assign once after immediate confirmation, then run the existing outbox scheduler once at or after nextAttemptAt and restore the original title.
+Expected result: Assignment returns HTTP 200; exactly one assignment History event and Notification are created; the same delivery transitions FAILED attempt 1 to SENT attempt 2; cleanup removes the marker and the runtime returns DEMO READY.
+
+Observed assertions
+- Workflow HTTP 200; assignToDeveloper action HTTP 200; no assignment retry was issued.
+- Assignment-specific History delta +1 and Notification delta +1; duplicate assignment counts 0/0.
+- Same delivery ID: FAILED attempt 1 -> SENT attempt 2; error fields cleared after retry.
+- Unrelated delivery count 120 and digest remained unchanged.
+- Final title is original; final History count 4 includes cleanup Edit, while assignment delta remains +1.
+- Both UAT fault-injection variables are absent after restage; CAP/AppRouter 1/1 and DEMO READY passed.
+- Supplemental Gmail digest mentions BUG-0023; no exact assigned-message subject was found, so it is not retry proof.
+
+Persistence readback
+Entity | Before | After | Reload
+BUG-0023 | Pending Assignment; assignee none | ASSIGNED; Developer owner | ASSIGNED; original title restored
+HistoryEvents | 2 | 3 | 4
+Notifications | 2 | 3 | 3
+unrelated NotificationDeliveries | 120 | N/A | N/A
+workflow HTTP | N/A | 200 | N/A
+delivery | N/A | FAILED; attempt 1; EMAIL_UAT_FORCED_FAILURE | SENT; attempt 2; same delivery ID
+UAT seam | N/A | N/A | both variables absent
+DEMO READY | N/A | N/A | true
+
+Provenance
+File/line: docs/pm/evidence/idts-111/live-uat-20260916/pm-donhv/UAT-EMAIL-002-current/assignment-sent.json:1
+Command: Live UAT-EMAIL-002: PM Smart Assign + existing Job Scheduler one-shot + btp:demo:check
+Source assertions: srv/bug-service/history.js#recordBugChangeSideEffects; srv/email/worker.js#processEmailOutboxBatch; srv/email/outbox.js#processEmailDeliveries
+Source baseline: d472f2c9e20d4b684c9ebe721181b21989562aba
+Execution time: 2026-09-16T01:27:48.414Z–2026-09-16T01:53:52Z
+Structured evidence: docs/pm/evidence/idts-111/live-uat-20260916/pm-donhv/UAT-EMAIL-002-current/assignment-sent.json
+
+Runtime screenshot: embedded PNG supplied
+Limitation: Gmail search was limited to the two authorized profiles and the exact recent BUG-0023 scope. No exact assigned-message subject was found. The supplied daily digest is supplemental receipt evidence only; DB/outbox persistence is authoritative. Raw UAT token, provider message ID, credentials, and message body were not stored.

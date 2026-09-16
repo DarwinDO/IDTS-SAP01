@@ -1,0 +1,55 @@
+{
+  "caseId": "UAT-EMAIL-002",
+  "capturedAt": "2026-09-16T01:53:52Z",
+  "deploySha": "d472f2c9e20d4b684c9ebe721181b21989562aba",
+  "titleCleanup": {
+    "bugNumber": "BUG-0023",
+    "title": "IDTS-127 controlled AI assignment explanation UAT",
+    "status": "ASSIGNED",
+    "finalHistoryCount": 4,
+    "finalNotificationCount": 3,
+    "assignmentHistoryDelta": 1,
+    "assignmentNotificationDelta": 1,
+    "cleanupHistoryDelta": 1,
+    "duplicateAssignmentHistory": 0,
+    "duplicateAssignmentNotification": 0
+  },
+  "uatSeam": {
+    "IDTS_EMAIL_UAT_FAILURE_ENABLED_present": false,
+    "IDTS_EMAIL_UAT_FAILURE_TOKEN_present": false,
+    "restageCompleted": true,
+    "rawValuesStored": false
+  },
+  "runtimeReadiness": {
+    "capApp": "1/1",
+    "appRouter": "1/1",
+    "livenessHttp": 200,
+    "dbReadinessHttp": 200,
+    "protectedApiHttp": 401,
+    "webEntryHttp": 200,
+    "demoReady": true,
+    "checkCommand": "npm run btp:demo:check"
+  },
+  "scheduler": {
+    "jobId": 3252425,
+    "oneShotRunOnce": true,
+    "temporaryScheduleDeleted": true,
+    "sameDeliveryId": "b0c1fe5d-03d1-4db0-b51a-306dda1c8dc3",
+    "finalStatus": "SENT",
+    "finalAttemptCount": 2
+  },
+  "gmail": {
+    "profilesChecked": 2,
+    "authorizedProfilesOnly": true,
+    "exactAssignedMessageFound": false,
+    "supplementalDigestFound": true,
+    "supplementalDigestSubject": "[IDTS] Daily notification digest - 2026-09-16",
+    "supplementalDigestContains": "BUG-0023",
+    "authority": "DB/outbox same-delivery transition; digest is not retry proof"
+  },
+  "privacy": {
+    "uatToken": "[REDACTED]",
+    "providerMessageId": "[OMITTED]",
+    "credentials": "[NOT STORED]"
+  }
+}

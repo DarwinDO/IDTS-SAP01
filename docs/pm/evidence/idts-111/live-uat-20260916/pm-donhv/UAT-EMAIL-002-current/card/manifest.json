@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "uat-summary-card",
+  "caseId": "UAT-EMAIL-002",
+  "rootVerdict": "PASS",
+  "status": "PASS",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "generatedAt": "2026-09-16T02:24:08.1881524Z",
+  "layoutCaption": "Current execution evidence summary — white vertical card",
+  "evidenceRoot": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260916\\pm-donhv\\UAT-EMAIL-002-current",
+  "title": "Controlled assignment email fault injection recovery",
+  "expectedResult": "One confirmed assignment; same delivery FAILED attempt 1 to SENT attempt 2; one assignment History/Notification; cleanup and readiness pass.",
+  "actualResult": "PASS — workflow HTTP 200, same-delivery FAILED-to-SENT transition, no assignment duplicates, title cleanup, UAT seam absent, DEMO READY.",
+  "transport": {
+    "workflowHttp": 200,
+    "assignmentActionHttp": 200,
+    "schedulerJobId": 3252425,
+    "oneShotRunOnce": true,
+    "temporaryScheduleDeleted": true
+  },
+  "persistenceReadback": {
+    "assignmentHistoryDelta": 1,
+    "assignmentNotificationDelta": 1,
+    "cleanupHistoryDelta": 1,
+    "finalHistoryCount": 4,
+    "finalNotificationCount": 3,
+    "duplicateAssignmentHistory": 0,
+    "duplicateAssignmentNotification": 0,
+    "deliveryId": "b0c1fe5d-03d1-4db0-b51a-306dda1c8dc3",
+    "deliveryTransition": "FAILED attempt 1 EMAIL_UAT_FORCED_FAILURE -> SENT attempt 2"
+  },
+  "runtimeReadiness": {
+    "deploySha": "d472f2c9e20d4b684c9ebe721181b21989562aba",
+    "capApp": "1/1",
+    "appRouter": "1/1",
+    "livenessHttp": 200,
+    "dbReadinessHttp": 200,
+    "protectedApiHttp": 401,
+    "demoReady": true,
+    "uatFlagsPresent": false
+  },
+  "gmail": {
+    "authorizedProfilesOnly": true,
+    "exactAssignedMessageFound": false,
+    "supplementalDigestFound": true,
+    "authority": "DB/outbox same-delivery transition"
+  },
+  "privacy": {
+    "rawUatToken": false,
+    "providerMessageId": "omitted",
+    "credentials": "not stored",
+    "messageBody": "not stored"
+  },
+  "result": {
+    "file": "card/result.png",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 2078,
+    "bytes": 286050,
+    "sha256": "fd1df4bf084b3a2ede50a546e98d50085c5ac189941b780b67737eddf8737ab7",
+    "nonBlank": true,
+    "fullPage": true,
+    "reviewFieldRendered": false
+  },
+  "sourceArtifacts": [
+    { "path": "assignment-failed.json", "bytes": 1698, "sha256": "ceb5bda9860f974e250ba0ea55e72989340d605cc95c4608f3fc204a155ae78c" },
+    { "path": "assignment-sent.json", "bytes": 8218, "sha256": "26508cc939e4cda0da7ca69758f7a95e3d9d9b1c26868bed1edeb5c7ad8025ee" },
+    { "path": "baseline-before.json", "bytes": 4010, "sha256": "80042e5c9ed96e26224e968d07d067fc54df4ffac5be88f9f167509d62f519b2" },
+    { "path": "baseline-before.png", "bytes": 236993, "sha256": "fbe1f3421612b3740aea8fd39d08151dfd64d486abbfc1e1ebe211e37b73e847" },
+    { "path": "card.md", "bytes": 1819, "sha256": "91d6de107e14b4b0a93378a45321dabb00d2457391dfaf7284b71dd1756416a9" },
+    { "path": "card/card.html", "bytes": 351221, "sha256": "381c1f4dc688da61b7d574940ecfc10009871f0aa73abc90a6f9872b59679cb1" },
+    { "path": "card/result.png", "bytes": 286050, "sha256": "fd1df4bf084b3a2ede50a546e98d50085c5ac189941b780b67737eddf8737ab7" },
+    { "path": "card/visible-text.txt", "bytes": 2961, "sha256": "f8e9f9b34afde46e6f53c62d8b303bf2424413c659cea01cd700c116038b49d0" },
+    { "path": "cleanup-readiness.json", "bytes": 1663, "sha256": "485e650384d9836ffef0bb0f45cfe9b27ca3ce686c706b21d94bcddcb8a51e5e" },
+    { "path": "final-history.png", "bytes": 222489, "sha256": "4bb2906c55a56f4ce7a62d186702b8cd762b2aeade0c937f7334e98adccfbc5f" },
+    { "path": "final-notifications.png", "bytes": 242422, "sha256": "dad0c4dae869dd16743992a0df689150244a8bade96711e8cf5342df27c17f1f" },
+    { "path": "final-runtime.png", "bytes": 257425, "sha256": "f01c38d7396c1695ae12c5b0246cfc28c9f1dd195498c101b92a9ff36655d2d0" },
+    { "path": "supplemental-gmail-connected-accounts.png", "bytes": 26238, "sha256": "acd8b292502040323d1f151994fbb7ed9fcfb1b7b9e6e8cbc23b995e2c1b4b6e" },
+    { "path": "supplemental-gmail-digest-bug0023.png", "bytes": 129156, "sha256": "86cdecc88ec700f154a2c47593d4e48a1c2ca796058f6b454bdf89328a731386" }
+  ]
+}
