@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Case 81 &mdash; UAT-ATT-007</title>
+  <style>
+    :root {
+      --ink: #07346c;
+      --muted: #5f7898;
+      --line: #ccd8e4;
+      --blue: #2b88d8;
+      --green: #087d3e;
+      --green-bg: #dcefe4;
+      --amber: #925500;
+      --amber-bg: #fff4d6;
+      --red: #9a2d34;
+      --red-bg: #fff0f0;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: #eef2f5; }
+    body {
+      width: 1280px;
+      padding: 38px 44px;
+      color: var(--ink);
+      background: #eef2f5;
+      font: 18px/1.42 "Segoe UI", Arial, sans-serif;
+      text-rendering: optimizeLegibility;
+      font-feature-settings: "kern" 1, "liga" 1;
+      orphans: 2;
+      widows: 2;
+    }
+    main {
+      padding: 20px 34px 32px;
+      background: #fff;
+      border-radius: 22px;
+    }
+    header {
+      border-top: 5px solid var(--blue);
+      padding: 14px 4px 18px;
+      border-bottom: 1px solid var(--line);
+    }
+    .eyebrow {
+      color: var(--muted);
+      font-size: 15px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 4px 0 1px;
+      font-size: 29px;
+      line-height: 1.2;
+      hyphens: none;
+    }
+    .subtitle { margin: 0; font-size: 20px; }
+    .summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      padding: 22px 4px 8px;
+    }
+    .label {
+      color: var(--muted);
+      font-size: 14px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    .value { margin-top: 4px; font-size: 19px; }
+    .pill {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 8px 26px;
+      border-radius: 999px;
+      background: var(--green-bg);
+      color: var(--green);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+    section {
+      padding: 24px 4px 2px;
+      border-top: 1px solid var(--line);
+      margin-top: 24px;
+    }
+    h2 {
+      margin: 0 0 14px;
+      font-size: 22px;
+      hyphens: none;
+      page-break-after: avoid;
+    }
+    .definition {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 28px;
+    }
+    p { margin: 5px 0; max-width: 70ch; }
+    ul { margin: 4px 0; padding-left: 25px; }
+    li { margin: 6px 0; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-variant-numeric: tabular-nums lining-nums;
+    }
+    th, td {
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+    thead th {
+      border-bottom: 1px solid var(--line);
+      font-weight: 700;
+    }
+    code {
+      font: 16px/1.35 Consolas, "Courier New", monospace;
+      overflow-wrap: anywhere;
+    }
+    .proof {
+      display: grid;
+      grid-template-columns: 205px 1fr;
+      gap: 8px 18px;
+    }
+    .proof .label { padding-top: 2px; }
+    .transport-table td:first-child {
+      width: 34%;
+      font-weight: 600;
+    }
+    .status-ok { color: var(--green); font-weight: 700; }
+    .status-denied {
+      color: var(--red);
+      font-weight: 700;
+    }
+    .notice {
+      margin-top: 16px;
+      padding: 14px 18px;
+      background: var(--amber-bg);
+      color: var(--amber);
+      border-radius: 12px;
+    }
+    .runtime {
+      margin-top: 14px;
+      padding: 12px;
+      background: #f5f7f9;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .runtime img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border-radius: 7px;
+    }
+    .caption {
+      margin: 9px 2px 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    a {
+      color: var(--blue);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 2px;
+    }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">Complete atomic evidence</div>
+    <h1>Case 81 &mdash; UAT-ATT-007</h1>
+    <p class="subtitle">Unauthorized attachment deletion is rejected</p>
+  </header>
+
+  <div class="summary">
+    <div>
+      <div class="label">Result</div>
+      <div class="value">Protected delete denied; metadata and binary unchanged</div>
+      <div class="pill">PASS</div>
+    </div>
+    <div>
+      <div class="label">Executor</div>
+      <div class="value">NhanT (DonHV support)</div>
+    </div>
+  </div>
+
+  <section>
+    <h2>Test definition</h2>
+    <div class="definition">
+      <div>
+        <div class="label">Precondition</div>
+        <p><code>BUG-0024</code> is Assigned to <code>dodepzai6@gmail.com</code>; the saved attachment was created by the DonHV Project Manager identity.</p>
+      </div>
+      <div>
+        <div class="label">Action</div>
+        <p>In the Developer draft, choose Delete for the PM-created attachment and confirm exactly once.</p>
+      </div>
+      <div>
+        <div class="label">Expected result</div>
+        <p>The protected delete returns HTTP 403, the draft is discarded, and an authorized PM can still read the metadata and binary with no Delete History event.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Observed assertions</h2>
+    <ul>
+      <li>Exactly one UI Delete and one in-app confirmation were performed by the authenticated <code>dodepzai6</code> Developer.</li>
+      <li>No retry or alternate request path was used; Discard Draft succeeded and the active edit view returned.</li>
+      <li>The OData <code>$batch</code> envelope returned outer <code>HTTP/1.1 200 OK</code>; its actual attachment DELETE response was inner <code>HTTP/1.1 403 Forbidden</code>.</li>
+      <li>The safe response message was: <q>Only the attachment uploader or a PM user can delete this attachment.</q></li>
+      <li>The final DonHV PM readback showed one attachment, the expected filename, <code>Unscanned</code>, 62 bytes, and the expected downloaded SHA-256.</li>
+      <li>History contained exactly three entries and zero Delete events.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Persistence readback</h2>
+    <table>
+      <thead>
+        <tr><th>Entity</th><th>Before</th><th>After discard</th><th>Final PM readback</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Bug status</td><td>Assigned</td><td>Assigned</td><td>Assigned</td></tr>
+        <tr><td>Technical/current owner</td><td><code>dodepzai6@gmail.com</code></td><td><code>dodepzai6@gmail.com</code></td><td><code>dodepzai6@gmail.com</code></td></tr>
+        <tr><td>Attachment rows</td><td>1</td><td>1</td><td>1</td></tr>
+        <tr><td>Attachment metadata</td><td>PM-created; <code>Unscanned</code>; 62 bytes</td><td>unchanged</td><td>present and unchanged</td></tr>
+        <tr><td>Attachment binary</td><td>SHA-256 verified</td><td>unchanged</td><td>downloaded; SHA-256 verified</td></tr>
+        <tr><td>History entries</td><td>3</td><td>3</td><td>3</td></tr>
+        <tr><td>Delete History events</td><td>0</td><td>0</td><td>0</td></tr>
+      </tbody>
+    </table>
+    <p><span class="label">Binary SHA-256</span><br><code>28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645</code></p>
+    <p class="notice">The supplied PM readback is the authoritative post-discard state. The capture report does not retain a distinct reload action, so the final readback is not presented as a separately timestamped reload.</p>
+  </section>
+
+  <section>
+    <h2>Transport proof</h2>
+    <table class="transport-table">
+      <thead><tr><th>Layer</th><th>Observed response</th></tr></thead>
+      <tbody>
+        <tr><td>OData <code>$batch</code> outer envelope</td><td class="status-ok"><code>HTTP/1.1 200 OK</code></td></tr>
+        <tr><td>Attachment DELETE inner response</td><td class="status-denied"><code>HTTP/1.1 403 Forbidden</code></td></tr>
+        <tr><td>Safe message</td><td><q>Only the attachment uploader or a PM user can delete this attachment.</q></td></tr>
+        <tr><td>Request count</td><td>1 DELETE; 1 confirmation; no retry</td></tr>
+        <tr><td>HAR</td><td>Not retained; no HAR is claimed</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section>
+    <h2>Provenance</h2>
+    <div class="proof">
+      <div class="label">Evidence kind</div><div>Current live UAT execution evidence summary</div>
+      <div class="label">Catalog</div><div><code>docs/qa/idts-111-uat-catalog.json</code> &middot; UAT-ATT-007 / display number 81</div>
+      <div class="label">Capture source</div><div><code>att007-capture-report.md</code> plus the coordinator-confirmed Developer transport chronology</div>
+      <div class="label">Structured evidence</div><div><code>baseline-before.json</code>; <code>setup.json</code>; <code>delete-receipt.json</code>; <code>after-readback.json</code>; <code>final-reload-readback.json</code>; <code>pm-readback.json</code></div>
+      <div class="label">Sanitization</div><div>Credentials, cookies, tokens, and other secrets are omitted. No HAR is claimed.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Runtime screenshot</h2>
+    <div class="runtime"><img src="../runtime-final.png" alt="BUG-0024 final PM History readback"></div>
+    <p class="caption"><a href="../runtime-final.png">runtime-final.png</a> &mdash; supplied final Edge Profile 1 screenshot showing <code>BUG-0024</code> History with the three setup/assignment entries and no Delete entry. The screenshot is retained unchanged; the generated card is a separate summary artifact.</p>
+  </section>
+</main>
+</body>
+</html>

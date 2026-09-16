@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "uat-attachment-setup/1.0",
+  "sanitized": true,
+  "caseId": "UAT-ATT-007",
+  "phase": "pm-setup-and-assignment",
+  "observedAt": "2026-09-15T17:21:18Z",
+  "executor": "NhanT (DonHV support)",
+  "pmIdentity": {
+    "displayName": "DonHV",
+    "email": "nguyendo836660@gmail.com",
+    "role": "Project Manager",
+    "browserFamily": "Edge",
+    "profile": "Profile 1",
+    "browserId": "3",
+    "tabId": "149228906",
+    "tabTitle": "Issue and Defect Tracking System"
+  },
+  "bug": {
+    "ID": "0f4428e3-a6bc-46de-8c19-b41dcac37d5f",
+    "bugNumber": "BUG-0024",
+    "title": "IDTS-127 controlled AI assignment explanation UAT — controlled candidate",
+    "statusBeforeAssignment": "Pending Assignment",
+    "statusAfterAssignment": "Assigned",
+    "assigneeAfterAssignment": "dodepzai6@gmail.com",
+    "currentActionOwnerAfterAssignment": "dodepzai6@gmail.com",
+    "actionOwnerRoleAfterAssignment": "Developer"
+  },
+  "supportedFlow": {
+    "steps": ["Fiori Edit", "Attachments", "Upload", "Save"],
+    "uploadCount": 1,
+    "saveCount": 1,
+    "assignmentCount": 1,
+    "retry": false
+  },
+  "attachment": {
+    "ID": "4ee6d012-3783-437a-bfa1-9bde1c64d01f",
+    "up__ID": "0f4428e3-a6bc-46de-8c19-b41dcac37d5f",
+    "filename": "idts-127-att007-bug0024-donhv-20260916.txt",
+    "fileSize": 62,
+    "mimeType": "text/plain",
+    "status": "Unscanned",
+    "createdAtDisplayed": "Sep 16, 2026, 12:21:18 AM",
+    "createdByDisplayName": "nguyendo836660@gmail.com",
+    "createdByRole": "Project Manager",
+    "preDeleteSha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645"
+  },
+  "content": {
+    "byteLength": 62,
+    "sha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645",
+    "text": "UAT-ATT-007 BUG-0024 PM fixture\ncreator=DonHV\ndate=2026-09-16\n",
+    "source": "PM fixture used for the one supported upload; the same bytes were downloaded from the attachment link during readback."
+  },
+  "provenance": {
+    "setupSource": "Coordinator-confirmed PM setup chronology and current Edge PM object page",
+    "secretsOmitted": true
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "uat-attachment-readback/1.0",
+  "sanitized": true,
+  "caseId": "UAT-ATT-007",
+  "readPhase": "after-denied-delete-post-discard",
+  "observedOn": "2026-09-16",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "roleName": "Developer",
+    "authenticated": true
+  },
+  "bug": {
+    "ID": "0f4428e3-a6bc-46de-8c19-b41dcac37d5f",
+    "bugNumber": "BUG-0024",
+    "status": "Assigned",
+    "status_code": "ASSIGNED",
+    "assignee": "dodepzai6@gmail.com",
+    "currentActionOwner": "dodepzai6@gmail.com",
+    "actionOwnerRole": "Developer"
+  },
+  "draft": {
+    "discarded": true,
+    "discardSucceeded": true,
+    "activeEditReturned": true,
+    "mutationPersisted": false
+  },
+  "attachment": {
+    "count": 1,
+    "ID": "4ee6d012-3783-437a-bfa1-9bde1c64d01f",
+    "filename": "idts-127-att007-bug0024-donhv-20260916.txt",
+    "fileSize": 62,
+    "createdBy": "nguyendo836660@gmail.com",
+    "scanStatus": "Unscanned",
+    "metadataUnchanged": true,
+    "binaryAccessibleToPm": true,
+    "postDeleteSha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645"
+  },
+  "history": {
+    "count": 3,
+    "deleteEventCount": 0,
+    "noDeleteEventVisible": true
+  },
+  "transport": {
+    "batchOuterHttpStatus": 200,
+    "batchOuterStatusLine": "HTTP/1.1 200 OK",
+    "innerDeleteHttpStatus": 403,
+    "innerDeleteStatusLine": "HTTP/1.1 403 Forbidden",
+    "innerDeleteMessage": "Only the attachment uploader or a PM user can delete this attachment.",
+    "deleteRequestCount": 1,
+    "retry": false,
+    "sourceReceipt": "delete-receipt.json"
+  },
+  "mutationObserved": false,
+  "readbackSource": "pm-readback.json",
+  "readbackBoundary": "The supplied DonHV Project Manager readback is the authoritative post-discard state; no separate immediate Developer after-state capture was retained.",
+  "secretsOmitted": true
+}

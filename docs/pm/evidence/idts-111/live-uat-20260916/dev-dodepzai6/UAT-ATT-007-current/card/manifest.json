@@ -1,0 +1,128 @@
+{
+  "schemaVersion": "uat-summary-card/1.0",
+  "artifactType": "complete-atomic-evidence-card",
+  "templateReference": "UAT-LIFE-014 Complete atomic evidence",
+  "caseId": "UAT-ATT-007",
+  "displayNumber": 81,
+  "status": "PASS",
+  "assertionPassed": true,
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "roleName": "Developer",
+    "authenticated": true
+  },
+  "actualResult": "Exactly one confirmed protected attachment delete reached the OData batch transport. The outer batch envelope returned HTTP 200, the inner DELETE returned HTTP 403 Forbidden with the safe authorization message, the Developer draft was discarded, and the authorized PM readback found the attachment metadata and binary unchanged.",
+  "testDefinition": {
+    "precondition": "BUG-0024 is Assigned to dodepzai6@gmail.com and the saved attachment was created by the DonHV Project Manager identity.",
+    "action": "In the Developer draft, choose Delete for the PM-created attachment and confirm exactly once.",
+    "expectedResult": "HTTP 403 is returned and authorized readback confirms the attachment remains present with unchanged metadata and binary."
+  },
+  "transport": {
+    "operation": "DELETE draft attachment",
+    "deleteRequestCount": 1,
+    "confirmationCount": 1,
+    "retry": false,
+    "batchOuterHttpStatus": 200,
+    "batchOuterStatusLine": "HTTP/1.1 200 OK",
+    "innerDeleteHttpStatus": 403,
+    "innerDeleteStatusLine": "HTTP/1.1 403 Forbidden",
+    "innerDeleteMessage": "Only the attachment uploader or a PM user can delete this attachment.",
+    "harRetained": false,
+    "httpStatusClaimed": true
+  },
+  "readback": {
+    "bugNumber": "BUG-0024",
+    "statusBefore": "ASSIGNED",
+    "statusAfterDiscard": "ASSIGNED",
+    "statusFinal": "ASSIGNED",
+    "technicalOwnerBefore": "dodepzai6@gmail.com",
+    "technicalOwnerAfterDiscard": "dodepzai6@gmail.com",
+    "technicalOwnerFinal": "dodepzai6@gmail.com",
+    "attachmentRows": [1, 1, 1],
+    "historyEntries": [3, 3, 3],
+    "deleteHistoryEvents": [0, 0, 0],
+    "binaryBytes": [62, 62, 62],
+    "binarySha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645",
+    "metadataUnchanged": true,
+    "binaryAccessibleToPm": true,
+    "draftDiscarded": true,
+    "separateReloadActionRetained": false,
+    "unexpectedMutation": false
+  },
+  "sourceArtifacts": [
+    {
+      "file": "baseline-before.json",
+      "bytes": 1961,
+      "sha256": "B7C0A1E17E03196FF43E5909C70803BCFC6616BD3A5CB5EEF47D1DA776921329"
+    },
+    {
+      "file": "setup.json",
+      "bytes": 2109,
+      "sha256": "F960865FE08C5D3BE9DCA39B160358A5ECE501551361AB4C92E0FD52E9CE1F63"
+    },
+    {
+      "file": "delete-receipt.json",
+      "bytes": 1633,
+      "sha256": "29969484AA27F36006C5E5861A9B17FC24F4AD499CD129702E8BC44ADA5508CD"
+    },
+    {
+      "file": "after-readback.json",
+      "bytes": 1916,
+      "sha256": "8D6934440DB332EE0360368F7D17E9CF77AD8FFACCF021C529CF93ABA306D6A7"
+    },
+    {
+      "file": "final-reload-readback.json",
+      "bytes": 1411,
+      "sha256": "5C798D3CD83F4B042AC3417AB066E38234917D48020D5DB2FC2E721D284D02FE"
+    },
+    {
+      "file": "pm-readback.json",
+      "bytes": 3090,
+      "sha256": "0AD2F23BA2B0258603F329B1129220306D260F4EAC58F66E0A7EF4354001A3C4"
+    },
+    {
+      "file": "card.md",
+      "bytes": 3814,
+      "sha256": "416CD1143C7D994943234C687C142CBACAE3EC333D5CE05877CD9DF98A06F7F0"
+    },
+    {
+      "file": "card/card.html",
+      "bytes": 9428,
+      "sha256": "F1345F93E3FB860247D8AC58A348AAE708BA93B9D8813B1E484EC66898F2E333"
+    },
+    {
+      "file": "runtime-final.png",
+      "bytes": 246986,
+      "sha256": "6627064200BF080C99BE316382AFDC46969B68DCF042033275A396E0C0D550F7"
+    }
+  ],
+  "result": {
+    "file": "card/result.png",
+    "bytes": 369328,
+    "sha256": "7087393DAE22AA93E2F3C77E3C7022C2BBC7F12C49339E08F38D243FE874F5E7",
+    "signature": "89504E470D0A1A0A",
+    "width": 1280,
+    "height": 2905,
+    "nonBlank": true,
+    "fullPage": true
+  },
+  "runtimeScreenshot": {
+    "file": "runtime-final.png",
+    "kind": "current PM final readback",
+    "capturedAt": "2026-09-16",
+    "validationStatePersisted": null
+  },
+  "provenance": {
+    "catalogSource": "docs/qa/idts-111-uat-catalog.json — UAT-ATT-007 / display number 81",
+    "captureSource": "att007-capture-report.md plus coordinator-confirmed Developer transport chronology",
+    "sanitized": true,
+    "secretsOmitted": true
+  },
+  "limitations": [
+    "The browser DevTools HAR was not retained; the transport statement is the coordinator-confirmed chronology and no HAR is claimed.",
+    "The supplied capture report does not retain a distinct immediate Developer after-state capture or a separately timestamped reload action; after-readback.json and final-reload-readback.json point to the authoritative PM post-discard readback.",
+    "card/result.png is a generated summary card and not the runtime screenshot."
+  ]
+}

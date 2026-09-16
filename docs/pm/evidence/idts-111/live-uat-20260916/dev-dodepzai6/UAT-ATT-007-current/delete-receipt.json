@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "uat-attachment-delete-receipt/1.0",
+  "sanitized": true,
+  "caseId": "UAT-ATT-007",
+  "result": "PASS",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "roleName": "Developer",
+    "authenticated": true
+  },
+  "uiSequence": {
+    "developerDeleteClicks": 1,
+    "confirmationCount": 1,
+    "retry": false,
+    "alternatePath": false,
+    "draftDiscardSucceeded": true,
+    "activeEditReturned": true
+  },
+  "request": {
+    "method": "DELETE",
+    "target": {
+      "entity": "draft attachment row",
+      "bugNumber": "BUG-0024",
+      "bugID": "0f4428e3-a6bc-46de-8c19-b41dcac37d5f",
+      "attachmentID": "4ee6d012-3783-437a-bfa1-9bde1c64d01f",
+      "isActiveEntity": false
+    },
+    "exactRequestUrlRetained": false,
+    "note": "The coordinator supplied the actual $batch chronology and inner response; no HAR or fabricated full request URL is included."
+  },
+  "transport": {
+    "batchEnvelope": {
+      "status": 200,
+      "statusLine": "HTTP/1.1 200 OK",
+      "containedDeleteResponse": true
+    },
+    "innerDeleteResponse": {
+      "status": 403,
+      "statusLine": "HTTP/1.1 403 Forbidden",
+      "message": "Only the attachment uploader or a PM user can delete this attachment."
+    },
+    "deleteRequestCount": 1,
+    "retry": false
+  },
+  "provenance": {
+    "source": "Coordinator-confirmed Developer browser DevTools chronology",
+    "harRetained": false,
+    "transcriptTruth": "The outer OData $batch returned 200 and contained the actual DELETE inner response 403; no HAR is claimed."
+  },
+  "secretsOmitted": true
+}

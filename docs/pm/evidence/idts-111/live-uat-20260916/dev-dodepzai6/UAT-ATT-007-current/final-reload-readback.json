@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "uat-attachment-readback/1.0",
+  "sanitized": true,
+  "caseId": "UAT-ATT-007",
+  "readPhase": "final-readback",
+  "observedOn": "2026-09-16",
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "DonHV",
+    "roleCode": "PROJECT_MANAGER",
+    "roleName": "Project Manager",
+    "authenticated": true
+  },
+  "bug": {
+    "bugNumber": "BUG-0024",
+    "status": "Assigned",
+    "status_code": "ASSIGNED",
+    "assignee": "dodepzai6@gmail.com",
+    "currentActionOwner": "dodepzai6@gmail.com",
+    "actionOwnerRole": "Developer"
+  },
+  "attachment": {
+    "count": 1,
+    "filename": "idts-127-att007-bug0024-donhv-20260916.txt",
+    "createdBy": "nguyendo836660@gmail.com",
+    "scanStatus": "Unscanned",
+    "fileSize": 62,
+    "downloadedSha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645",
+    "metadataPresent": true,
+    "binaryPresent": true
+  },
+  "history": {
+    "count": 3,
+    "deleteEventCount": 0,
+    "noDeleteEventVisible": true
+  },
+  "reload": {
+    "performed": null,
+    "confirmed": false,
+    "note": "The supplied capture report does not retain a distinct reload action; this final readback is the current PM state after the Developer draft was discarded."
+  },
+  "sameAsBaseline": true,
+  "noMutationObserved": true,
+  "readbackSource": "pm-readback.json",
+  "runtimeScreenshot": "runtime-final.png",
+  "secretsOmitted": true
+}

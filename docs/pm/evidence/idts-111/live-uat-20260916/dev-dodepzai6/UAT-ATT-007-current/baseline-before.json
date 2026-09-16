@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "uat-attachment-readback/1.0",
+  "sanitized": true,
+  "caseId": "UAT-ATT-007",
+  "phase": "before-unauthorized-delete",
+  "capturedAt": null,
+  "captureWindow": {
+    "note": "The exact Developer pre-delete UI timestamp was not retained in the supplied transport chronology; no time is invented.",
+    "source": "Coordinator-confirmed chronology for the one Developer draft attempt"
+  },
+  "executor": "NhanT (DonHV support)",
+  "actor": {
+    "displayName": "dodepzai6",
+    "roleCode": "DEVELOPER",
+    "roleName": "Developer",
+    "authenticated": true
+  },
+  "bug": {
+    "ID": "0f4428e3-a6bc-46de-8c19-b41dcac37d5f",
+    "bugNumber": "BUG-0024",
+    "title": "IDTS-127 controlled AI assignment explanation UAT — controlled candidate",
+    "status": "Assigned",
+    "status_code": "ASSIGNED",
+    "assignee": "dodepzai6@gmail.com",
+    "currentActionOwner": "dodepzai6@gmail.com",
+    "actionOwnerRole": "Developer"
+  },
+  "draft": {
+    "owner": "dodepzai6@gmail.com",
+    "ownerRole": "Developer",
+    "opened": true,
+    "containsUploaderOwnedAttachment": true,
+    "isActiveEntity": false
+  },
+  "attachment": {
+    "ID": "4ee6d012-3783-437a-bfa1-9bde1c64d01f",
+    "up__ID": "0f4428e3-a6bc-46de-8c19-b41dcac37d5f",
+    "filename": "idts-127-att007-bug0024-donhv-20260916.txt",
+    "fileSize": 62,
+    "createdByDisplayName": "nguyendo836660@gmail.com",
+    "createdByRole": "Project Manager",
+    "preDeleteSha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645"
+  },
+  "content": {
+    "byteLength": 62,
+    "sha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645",
+    "source": "Pre-delete fixture/hash supplied in the controlled chronology and matched by the PM attachment download."
+  },
+  "scope": {
+    "deleteAttemptsBeforeControlledAttempt": 0,
+    "deleteAttemptsInControlledAttempt": 1,
+    "retry": false,
+    "fieldsChangedByReadbackAgent": []
+  },
+  "secretsOmitted": true
+}

@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "uat-attachment-pm-readback/1.0",
+  "sanitized": true,
+  "capture": {
+    "case": "UAT-ATT-007",
+    "capturedAt": "2026-09-16",
+    "environment": "dev",
+    "browser": "Edge",
+    "profile": "Profile 1",
+    "browserId": "2",
+    "tabId": "149229966",
+    "url": "https://f5648117trial-dev-idts-sap01-approuter.cfapps.ap21.hana.ondemand.com/idtsbugmanagementui/index.html#/Bugs(ID=0f4428e3-a6bc-46de-8c19-b41dcac37d5f,IsActiveEntity=true)",
+    "readOnly": true
+  },
+  "identity": {
+    "displayName": "DonHV",
+    "email": "nguyendo836660@gmail.com",
+    "role": "Project Manager",
+    "evidence": "Edge Profile 1 profile menu visibly showed DonHV, nguyendo836660@gmail.com, Project Manager."
+  },
+  "bug": {
+    "bugNumber": "BUG-0024",
+    "title": "IDTS-127 controlled AI assignment explanation UAT — controlled candidate",
+    "status": "Assigned",
+    "assigneeTechnicalOwner": "dodepzai6@gmail.com",
+    "currentActionOwner": "dodepzai6@gmail.com",
+    "actionOwnerRole": "Developer",
+    "reporter": "NhanT",
+    "priority": "High",
+    "severity": "Major",
+    "environment": "Quality Assurance"
+  },
+  "attachment": {
+    "count": 1,
+    "filename": "idts-127-att007-bug0024-donhv-20260916.txt",
+    "createdOn": "Sep 16, 2026, 12:21:18 AM",
+    "createdBy": "nguyendo836660@gmail.com",
+    "scanStatus": "Unscanned",
+    "statusText": "Unscanned (Object Status: Warning issued)",
+    "sizeBytes": 62,
+    "download": {
+      "path": "E:\\Downloads\\idts-127-att007-bug0024-donhv-20260916 (3).txt",
+      "sizeBytes": 62,
+      "sha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645",
+      "expectedSha256": "28B9E0CA658C97A037AA4B0B82414ACB8C0038CDEDAF6B71D773DC1456B91645",
+      "hashMatchesExpected": true,
+      "latestSavedCopy": true,
+      "note": "Latest UI-saved copy was already present as (3); no additional download was triggered during final capture."
+    }
+  },
+  "history": {
+    "count": 3,
+    "deleteEventCount": 0,
+    "noDeleteEventVisible": true,
+    "entries": [
+      {
+        "event": "Assign to Developer",
+        "by": "DonHV",
+        "at": "Sep 16, 2026, 12:22:39 AM",
+        "detail": "Assigned bug to dodepzai6@gmail.com. Status changed from Pending Assignment to Assigned."
+      },
+      {
+        "event": "Edit",
+        "by": "DonHV",
+        "at": "Sep 16, 2026, 12:21:18 AM",
+        "detail": "Added attachment idts-127-att007-bug0024-donhv-20260916.txt."
+      },
+      {
+        "event": "Create",
+        "by": "NhanT",
+        "at": "Sep 14, 2026, 4:33:56 PM",
+        "detail": "Created bug report with initial status Pending Assignment."
+      }
+    ],
+    "proof": "The PM History view showed exactly these three entries and no Delete entry."
+  },
+  "artifacts": {
+    "runtimeScreenshot": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260916\\dev-dodepzai6\\UAT-ATT-007-current\\runtime-final.png",
+    "readbackJson": "E:\\IDTS-SAP01\\docs\\pm\\evidence\\idts-111\\live-uat-20260916\\dev-dodepzai6\\UAT-ATT-007-current\\pm-readback.json"
+  },
+  "secretsOmitted": true
+}
