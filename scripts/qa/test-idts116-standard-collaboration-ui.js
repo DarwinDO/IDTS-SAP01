@@ -28,7 +28,7 @@ assert(controller.includes('BugService.addComment(...)'), 'Comment must use the 
 assert(controller.includes('.setParameter("content", content)'), 'Comment must set the bound action parameter')
 assert(controller.includes('.setParameter("mentionedUserIDs", mentionedUserIDs)'), 'Comment must send selected UUIDs separately from text')
 assert(controller.includes('BugService.getMentionCandidates(...)'), 'Mention picker must load candidates through the Bug-bound server operation')
-assert(commentsFragment.includes('modelContextChange'), 'Mention candidates must refresh for the current Bug context')
+assert(!commentsFragment.includes('modelContextChange="Collaboration.onMentionContextChanged"'), 'Hidden mention UI must not load candidates for the current Bug context')
 assert(controller.includes('operation.invoke("$direct")'), 'UI5 1.148 bound mention function must use invoke, not deprecated execute')
 assert(!controller.includes('operation.execute("$direct")'), 'Mention function must not use deprecated execute')
 assert(!controller.includes('loadItems'), 'MultiComboBox must not use unsupported loadItems')
@@ -38,9 +38,9 @@ assert(controller.includes('idtsCommentsFeed'), 'Comment success must refresh th
 assert(controller.includes('getBinding("items")'), 'Comment refresh must use the public list binding API')
 assert(controller.includes('requestRefresh("$direct")'), 'Comment refresh must use the Promise-returning OData V4 requestRefresh API')
 assert(commentsFragment.includes('$$ownRequest: true'), 'The relative comments list binding must own its request before requestRefresh() is supported')
-assert(commentsFragment.includes('idtsMentionRecipients'), 'Comments must expose a visible mention recipient picker')
-assert(commentsFragment.includes('MultiComboBox'), 'Mention picker must use a native multi-selection control')
-assert(commentsFragment.includes('commentsMentionRecipientsLabel'), 'Mention picker needs a visible localized label')
+assert(!commentsFragment.includes('idtsMentionRecipients'), 'Comments must not expose the mention recipient picker')
+assert(!commentsFragment.includes('commentsMentionRecipientsLabel'), 'Comments must not expose the mention recipient label')
+assert(!commentsFragment.includes('commentsMentionRecipientsHelp'), 'Comments must not expose mention recipient help text')
 assert(!commentsFragment.includes('maxLength="1000"'), 'Comment UI must not silently truncate oversized text before CAP can reject it')
 assert(!controller.includes('new XMLHttpRequest()'), 'Collaboration writes must not use raw XMLHttpRequest')
 assert(!controller.includes('pendingCreateAttachmentsByBugId'), 'Custom browser-memory attachment queue must be retired')
@@ -132,10 +132,13 @@ async function verifyCommentOperation (options = {}) {
     } : null,
     getMetadata: () => ({ getAllAggregations: () => ({}) })
   }
+  const rootContent = options.withoutMentionPicker
+    ? [textArea, commentsFeed]
+    : [textArea, mentionPicker, commentsFeed]
   const root = {
     getId: () => 'view--root',
     getMetadata: () => ({ getAllAggregations: () => ({ content: {} }) }),
-    getAggregation: name => name === 'content' ? [textArea, mentionPicker, commentsFeed] : null,
+    getAggregation: name => name === 'content' ? rootContent : null,
     getParent: () => null
   }
   const source = {
@@ -168,7 +171,13 @@ async function verifyCommentOperation (options = {}) {
   await new Promise(resolve => setTimeout(resolve, 0))
 
   assert.strictEqual(calls.path, bugContext.getPath() + '/BugService.addComment(...)')
-  assert.deepStrictEqual(calls.parameters, { content: 'verified comment', mentionedUserIDs: ['00000000-0000-4000-8000-000000000002'] })
+  assert.deepStrictEqual({
+    ...calls.parameters,
+    mentionedUserIDs: Array.from(calls.parameters.mentionedUserIDs)
+  }, {
+    content: 'verified comment',
+    mentionedUserIDs: options.withoutMentionPicker ? [] : ['00000000-0000-4000-8000-000000000002']
+  })
   assert.strictEqual(calls.invoked, '$auto')
   assert.strictEqual(calls.rootRefreshed, false)
   assert.strictEqual(calls.enabled, true)
@@ -183,7 +192,7 @@ async function verifyCommentOperation (options = {}) {
 
   assert.strictEqual(calls.listRefreshed, '$direct')
   assert.strictEqual(calls.clearedValue, '')
-  assert.deepStrictEqual(Array.from(calls.clearedMentionKeys), [])
+  assert.deepStrictEqual(Array.from(calls.clearedMentionKeys || []), [])
   assert.strictEqual(calls.error, undefined)
   assert.strictEqual(
     calls.toast,
@@ -273,6 +282,7 @@ async function verifyMentionContextRace () {
 
 verifyCompiledAttachmentFacet()
   .then(() => verifyCommentOperation())
+  .then(() => verifyCommentOperation({ withoutMentionPicker: true }))
   .then(() => verifyCommentOperation({ refreshReject: true }))
   .then(() => verifyCommentOperation({ refreshThrow: true }))
   .then(() => verifyCommentOperation({ actionReject: true }))

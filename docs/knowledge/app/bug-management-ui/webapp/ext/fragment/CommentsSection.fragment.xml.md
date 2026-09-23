@@ -1,10 +1,10 @@
 # Knowledge: `app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml`
 
-## Selected mention picker (N3 Task 8)
+## Hidden mention recipient controls (2026-09-23)
 
-**English:** The comment composer has a visibly labelled native `MultiComboBox` for server-authorized internal recipients. It deliberately does not use `loadItems` because SAPUI5 documents that `MultiComboBox` does not support that inherited event. Typing `@name` in the TextArea remains ordinary comment text.
+**English:** The comment composer intentionally exposes only the comment TextArea and Post Comment action. The recipient label, `MultiComboBox`, and explanatory help text are hidden. Posting still sends `mentionedUserIDs: []` through the existing bound OData action, so backend authorization and the action contract remain unchanged. Typing `@name` in the TextArea remains ordinary comment text.
 
-**Tiếng Việt:** Comment composer có `MultiComboBox` native với label rõ ràng cho recipient nội bộ đã được server authorize. Control cố ý không dùng `loadItems` vì SAPUI5 nêu rõ `MultiComboBox` không hỗ trợ inherited event này. Gõ `@name` trong TextArea vẫn chỉ là text comment thông thường.
+**Tiếng Việt:** Comment composer chủ ý chỉ hiển thị TextArea nhập comment và nút Post Comment. Label chọn người nhận, `MultiComboBox` và dòng hướng dẫn đã được ẩn. Khi post, UI vẫn gửi `mentionedUserIDs: []` qua bound OData action hiện có nên authorization backend và action contract không đổi. Gõ `@name` trong TextArea vẫn chỉ là text comment thông thường.
 
 ## IDTS-122 update
 
@@ -166,7 +166,7 @@ Danh sách comment bind vào navigation property `comments` của bug hiện t�
 - Source file: `app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml`
 - Knowledge mirror: `docs/knowledge/app/bug-management-ui/webapp/ext/fragment/CommentsSection.fragment.xml.md`
 - Source layer: `app`
-- Last reviewed: 2026-07-04
+- Last reviewed: 2026-09-23
 
 ## IDTS-55 runtime fix notes
 
