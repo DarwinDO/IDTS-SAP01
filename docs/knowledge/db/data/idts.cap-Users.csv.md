@@ -32,7 +32,7 @@ The login system also reads Users, but this CSV deliberately has no password col
 - `srv/auth.js` and authentication helpers: resolve a login identity to a User.
 - `srv/bug-service/read-models.js`: joins `Users.displayName` into `AssignableDevelopers` and workload rows.
 - `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`: displays the joined developer identity.
-- `scripts/db/upsert-developer-demo-data.js`: reads only the ten IDTS-90 IDs and performs an idempotent, password-preserving UPSERT.
+- `scripts/db/remove-developer-demo-data.js`: validates and removes only the ten retired IDTS-90 synthetic identities after checking business references.
 
 ### Safe editing checklist
 
@@ -75,7 +75,7 @@ Hệ thống login cũng đọc Users, nhưng CSV này cố ý không có cột 
 - `srv/auth.js` và auth helpers: tìm User tương ứng với danh tính login.
 - `srv/bug-service/read-models.js`: join `Users.displayName` vào `AssignableDevelopers` và workload.
 - `app/bug-management-ui/webapp/ext/actions/SmartAssignDeveloper.js`: hiển thị danh tính Developer đã join.
-- `scripts/db/upsert-developer-demo-data.js`: chỉ đọc mười ID của IDTS-90 và UPSERT idempotent mà không đụng password.
+- `scripts/db/remove-developer-demo-data.js`: chỉ xác thực và xóa mười identity giả IDTS-90 đã retired sau khi kiểm tra tham chiếu nghiệp vụ.
 
 ### Checklist sửa an toàn
 

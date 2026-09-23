@@ -1,4 +1,6 @@
-# IDTS-90 — Expand demo Developer accounts and responsibility coverage
+# IDTS-90 — Expand demo Developer accounts and responsibility coverage (retired)
+
+The ten synthetic developer users and profiles described in this historical task were retired on 2026-09-23. The execution notes remain for traceability; the canonical seed now contains only the four core users and two real developer profiles. Use `scripts/db/remove-developer-demo-data.js` for the guarded live-data cleanup.
 
 ## Status
 

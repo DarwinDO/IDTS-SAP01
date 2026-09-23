@@ -16,6 +16,7 @@ Module._resolveFilename = function (request, parent, isMain, options) {
 const cds = require('@sap/cds')
 const { DELETE, INSERT, SELECT } = cds.ql
 const { effectiveCapacity } = require('../../srv/bug-service/capacity')
+const { fixtureUser, seedActiveDeveloperIdentityAccess } = require('./idts-test-users')
 
 const DEV_DAT = '20000000-0000-0000-0000-000000000002'
 const DONHV_ID = '10000000-0000-0000-0000-000000000001'
@@ -62,7 +63,7 @@ async function callAssign (service, bugID) {
     target: service.entities.Bugs,
     params: [{ ID: bugID, IsActiveEntity: true }],
     data: { assigneeID: DEV_DAT, note: 'Capacity boundary verification' },
-    user: new cds.User({ id: 'DonHV', roles: ['PM', 'authenticated-user'] })
+    user: fixtureUser(cds, 'DonHV', ['PM', 'authenticated-user'])
   })
   return service.dispatch(req)
 }
@@ -74,7 +75,7 @@ async function callMarkInReview (service, bugID) {
     target: service.entities.Bugs,
     params: [{ ID: bugID, IsActiveEntity: true }],
     data: {},
-    user: new cds.User({ id: 'DatDT', roles: ['DEVELOPER', 'authenticated-user'] })
+    user: fixtureUser(cds, 'DatDT', ['DEVELOPER', 'authenticated-user'])
   })
   return service.dispatch(req)
 }
@@ -89,6 +90,7 @@ async function main () {
   const csn = await cds.load('srv/service.cds')
   const db = await cds.connect.to('db', { kind: 'sqlite', credentials: { url: ':memory:' } })
   await cds.deploy(csn).to(db)
+  await seedActiveDeveloperIdentityAccess(cds, db, ['DatDT'], 'capacity')
   const service = await cds.serve('BugService').from(csn)
 
   for (const entity of [
