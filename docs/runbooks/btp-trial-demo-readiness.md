@@ -24,24 +24,29 @@ npm run btp:demo:check
 ## What the script checks
 
 1. The Cloud Foundry CLI has an active target.
-2. `idts-sap01-srv` and `idts-sap01-approuter` are running `1/1`.
+2. `idts-sap01-srv`, `idts-sap01-approuter` and
+   `idts-user-access-broker` are running `1/1`.
 3. `/health` confirms the CAP process is alive.
 4. `/ready` performs database readiness through the real CAP/HDI binding.
 5. Protected OData returns HTTP 401 without a user session.
 6. The AppRouter web entry returns HTTP 200 or an authentication redirect.
+7. CAP/AppRouter core bindings and the broker's two dedicated bindings exist.
+8. AI, notification and invitation bindings are reported as readiness warnings.
 
 If database readiness fails, prepare mode requests the supported HANA start
 operation, waits for the database, then restarts CAP once to clear stale pooled
-connections. It does not run the HDI deployer, `cds deploy`, seed loading or any
-data mutation. `DB_PROBE_OK` remains the lower-level recovery evidence when an
-operator needs to diagnose the database binding directly.
+connections. Prepare mode also starts the access broker when stopped so approved
+access operations do not remain queued. It does not run the HDI deployer,
+`cds deploy`, seed loading or migration. `DB_PROBE_OK` remains the lower-level
+recovery evidence when an operator needs to diagnose the database binding
+directly.
 
 ## Expected stopped applications
 
-The migration runner and HDI deployer are one-shot applications. Their stopped
-state is normal. Do not start them to recover the website. XSUAA, Destination,
-HTML5 Repository and Job Scheduler are managed service instances rather than
-long-running Cloud Foundry applications.
+The migration runner, HDI deployer and historical POC applications are not
+runtime dependencies. Their stopped state is normal. Do not start them to
+recover the website. XSUAA, Destination, HTML5 Repository and Job Scheduler are
+managed service instances rather than long-running Cloud Foundry applications.
 
 ## If the result is not ready
 
@@ -49,6 +54,9 @@ long-running Cloud Foundry applications.
   reaches `Running`; then rerun prepare mode.
 - CAP not `1/1`: inspect recent `cf logs idts-sap01-srv --recent` output.
 - AppRouter not `1/1`: inspect `cf logs idts-sap01-approuter --recent`.
+- Access broker not `1/1`: inspect
+  `cf logs idts-user-access-broker --recent`; queued, approved operations cannot
+  reach `ACTIVE` while it is stopped.
 - `/health` 200 but `/ready` 503: the process is alive but the database binding
   is unavailable; restarting only the browser cannot fix it.
 - HTTP 403 after readiness passes: investigate the SAP identity and IDTS role

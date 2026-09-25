@@ -4,7 +4,8 @@ param(
   [int]$WaitMinutes = 15,
   [string]$HanaService = 'idts-113-hana-cloud-poc',
   [string]$ServiceApp = 'idts-sap01-srv',
-  [string]$AppRouter = 'idts-sap01-approuter'
+  [string]$AppRouter = 'idts-sap01-approuter',
+  [string]$BrokerApp = 'idts-user-access-broker'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -40,6 +41,23 @@ function Start-CfApp {
   Invoke-Cf -Arguments @('start', $Name) | Out-Null
 }
 
+function Get-AppBindingNames {
+  param([string]$Name)
+  $guid = ((Invoke-Cf -Arguments @('app', $Name, '--guid')) -join '').Trim()
+  $environment = ((Invoke-Cf -Arguments @('curl', "/v3/apps/$guid/env")) -join "`n") | ConvertFrom-Json
+  $names = foreach ($group in $environment.system_env_json.VCAP_SERVICES.PSObject.Properties) {
+    foreach ($binding in @($group.Value)) {
+      if ($binding.name) { $binding.name }
+    }
+  }
+  return @($names | Sort-Object -Unique)
+}
+
+function Test-RequiredBindings {
+  param([string[]]$Actual, [string[]]$Required)
+  return @($Required | Where-Object { $_ -notin $Actual }).Count -eq 0
+}
+
 function Get-HttpStatus {
   param([string]$Url)
   $status = & curl.exe -sS -o NUL -w '%{http_code}' --max-time 15 $Url 2>$null
@@ -50,9 +68,19 @@ function Get-HttpStatus {
 function Get-ReadinessSnapshot {
   $serviceRoute = Get-AppRoute -Name $ServiceApp
   $routerRoute = Get-AppRoute -Name $AppRouter
+  $serviceBindings = Get-AppBindingNames -Name $ServiceApp
+  $routerBindings = Get-AppBindingNames -Name $AppRouter
+  $brokerBindings = Get-AppBindingNames -Name $BrokerApp
   return [ordered]@{
     ServiceRunning = Test-AppRunning -Name $ServiceApp
     AppRouterRunning = Test-AppRunning -Name $AppRouter
+    BrokerRunning = Test-AppRunning -Name $BrokerApp
+    CoreBindingsReady = ((Test-RequiredBindings -Actual $serviceBindings -Required @('idts-sap01-auth', 'idts-sap01-db', 'idts-sap01-destination')) -and
+                         (Test-RequiredBindings -Actual $routerBindings -Required @('idts-sap01-auth', 'idts-sap01-html5-repo-runtime', 'idts-sap01-destination')))
+    BrokerBindingsReady = Test-RequiredBindings -Actual $brokerBindings -Required @('idts-user-access-broker-auth', 'idts-user-access-broker-api-access')
+    AiBindingReady = 'idts-sap01-ai-gateway' -in $serviceBindings
+    NotificationBindingsReady = Test-RequiredBindings -Actual $serviceBindings -Required @('idts-sap01-jobscheduler', 'idts-sap01-external-services')
+    InvitationBindingReady = 'idts-user-admin-invitation-config' -in $serviceBindings
     HealthStatus = Get-HttpStatus -Url "https://$serviceRoute/health"
     ReadyStatus = Get-HttpStatus -Url "https://$serviceRoute/ready"
     ProtectedStatus = Get-HttpStatus -Url "https://$serviceRoute/odata/v4/auth/me"
@@ -64,6 +92,12 @@ function Write-Snapshot {
   param([System.Collections.IDictionary]$Snapshot)
   Write-Host "CAP app:       $(if ($Snapshot.ServiceRunning) { 'PASS (1/1)' } else { 'FAIL' })"
   Write-Host "AppRouter:     $(if ($Snapshot.AppRouterRunning) { 'PASS (1/1)' } else { 'FAIL' })"
+  Write-Host "Access broker: $(if ($Snapshot.BrokerRunning) { 'PASS (1/1)' } else { 'FAIL' })"
+  Write-Host "Core bindings: $(if ($Snapshot.CoreBindingsReady) { 'PASS' } else { 'FAIL' })"
+  Write-Host "Broker bindings: $(if ($Snapshot.BrokerBindingsReady) { 'PASS (2/2)' } else { 'FAIL' })"
+  Write-Host "AI binding:    $(if ($Snapshot.AiBindingReady) { 'READY' } else { 'WARNING' })"
+  Write-Host "Notification services: $(if ($Snapshot.NotificationBindingsReady) { 'READY' } else { 'WARNING' })"
+  Write-Host "Invitation config: $(if ($Snapshot.InvitationBindingReady) { 'READY' } else { 'WARNING' })"
   Write-Host "Liveness:      HTTP $($Snapshot.HealthStatus)"
   Write-Host "DB readiness:  HTTP $($Snapshot.ReadyStatus)"
   Write-Host "Protected API: HTTP $($Snapshot.ProtectedStatus) (expected 401 without a session)"
@@ -74,6 +108,9 @@ function Test-DemoReady {
   param([System.Collections.IDictionary]$Snapshot)
   return ($Snapshot.ServiceRunning -and
           $Snapshot.AppRouterRunning -and
+          $Snapshot.BrokerRunning -and
+          $Snapshot.CoreBindingsReady -and
+          $Snapshot.BrokerBindingsReady -and
           $Snapshot.HealthStatus -eq 200 -and
           $Snapshot.ReadyStatus -eq 200 -and
           $Snapshot.ProtectedStatus -eq 401 -and
@@ -95,6 +132,7 @@ if ($CheckOnly) {
 
 Start-CfApp -Name $ServiceApp
 Start-CfApp -Name $AppRouter
+Start-CfApp -Name $BrokerApp
 
 $snapshot = Get-ReadinessSnapshot
 if ($snapshot.ReadyStatus -ne 200) {
