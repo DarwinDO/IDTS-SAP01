@@ -1,5 +1,13 @@
 # DonHV Status - Leader / BA-PM / Cross-Workstream Support
 
+## 2026-09-26 — Portable BTP SSO and local real-AI runtime helpers
+
+- **English — result:** Added a dedicated `npm run btp:login:sso` entry for the existing clipboard-only CF SSO helper. Added portable `dev:ai:preflight:btp` and `dev:ai:watch:btp` commands backed by `scripts/dev/run-cds-watch-real-ai.ps1`; the script derives the repo root, reads only the named AI Gateway binding through the authenticated CF CLI, keeps the credential in process memory, restores prior environment variables in `finally`, and performs no deploy, bind, migration, seed, user, role, or business-data mutation.
+- **Tiếng Việt — kết quả:** Đã thêm lệnh riêng `npm run btp:login:sso` cho helper CF SSO chỉ dùng clipboard hiện có. Đã thêm hai lệnh portable `dev:ai:preflight:btp` và `dev:ai:watch:btp` dùng `scripts/dev/run-cds-watch-real-ai.ps1`; script tự tìm repo root, chỉ đọc đúng AI Gateway binding qua CF CLI đã đăng nhập, giữ credential trong bộ nhớ process, khôi phục biến môi trường cũ trong `finally`, và không deploy, bind, migrate, seed, tạo user, đổi role hoặc đổi dữ liệu nghiệp vụ.
+- **Verification / evidence:** Intentional TDD RED showed the npm contract was absent. GREEN: `npm run qa:btp:local-helpers`, PowerShell parse checks for both helpers, `npm run qa:idts117:btp-relogin`, `npm run qa:secret-scan`, and `git diff --check`. Live read-only preflight returned `IDTS_REAL_AI_WATCH=PREFLIGHT_READY` and `AI_REQUEST_SENT=false`; no AI provider request was sent. OfficeCLI `1.0.152` completed the mandatory documentation preflight; Markdown remained repository-native.
+- **Scope note:** Canonical business documents remain unchanged because this is developer tooling only and does not change IDTS roles, workflow, data model, AI advisory boundaries, or deployed runtime behavior.
+- **Tooling issue, corrected:** A read-only PR-template search included the guessed path `docs/pm/templates`, which does not exist, so `rg` returned an expected missing-path error after still locating `.github/pull_request_template.md`. No file or external state changed; the follow-up reads only the confirmed template path.
+
 ## 2026-09-12 — IDTS-127 UAT remediation start
 
 - **Independent-review tooling limitation:** The requested Luna Max evidence review could not start because the model had reached its usage limit. No lower model or different reasoning effort was substituted. DonHV's coordinator therefore performed the final read-only diff, hash, JSON, card-render, catalog, curation, secret-scan and live-readiness checks; the lack of a fresh independent-agent verdict remains disclosed rather than represented as PASS.
