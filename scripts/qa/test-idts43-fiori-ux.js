@@ -58,7 +58,7 @@ async function main() {
   const manifest = JSON.parse(read(path.join('webapp', 'manifest.json')))
   const appPackage = JSON.parse(read('package.json'))
   const appPackageLock = JSON.parse(read('package-lock.json'))
-  assert.strictEqual(appPackage.version, '0.0.17', 'Comment mention UI cleanup must advance the Bug Management HTML5 cache identity')
+  assert.strictEqual(appPackage.version, '0.0.18', 'Invitation/session recovery rollout must advance the Bug Management HTML5 cache identity')
   assert.strictEqual(manifest['sap.app'].applicationVersion.version, appPackage.version)
   assert.strictEqual(appPackageLock.version, appPackage.version)
   assert.strictEqual(appPackageLock.packages[''].version, appPackage.version)

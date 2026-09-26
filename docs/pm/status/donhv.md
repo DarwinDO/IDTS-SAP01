@@ -15,6 +15,7 @@
 - **Verification:** Intentional RED reproduced missing guidance, missing callback helper, and missing 403 recovery. Focused onboarding page and IDTS-117 tests passed; full onboarding security/config/programmatic suite passed after retaining the existing `Continue with SAP` contract. OfficeCLI `1.0.152` completed the documentation preflight; Markdown editing remained repository-native.
 - **Scope:** No automatic logout, role bypass, identity fallback, database/schema change, provider mutation, email send, BTP deployment, or live user mutation. Canonical business documents remain unchanged because authorization and onboarding semantics are preserved; only guidance and safe session recovery changed.
 - **Release follow-up:** The merged UI remained at `0.0.17`; a dedicated cache-identity release gate now requires `0.0.18` in both the UI package and manifest before selective app-content rollout. A read-only `rg` probe also passed a Windows wildcard path literally and reported `The filename, directory name, or volume label syntax is incorrect`; the retry uses explicit file paths and no repository/runtime state changed.
+- **CI regression contract issue, corrected:** PR #419 first failed only in the focused IDTS-43 suite because its previous-release assertion still required `0.0.17`; that check also exposed the app-local lockfile still carrying `0.0.17`. The release delta now advances package, lockfile root/package entry, manifest, and both cache-identity regressions together to `0.0.18`.
 
 ## 2026-09-12 — IDTS-127 UAT remediation start
 
