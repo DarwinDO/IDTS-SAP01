@@ -70,14 +70,20 @@ export function safeErrorMessage (error) {
   }
 }
 
+export function refreshSapSignIn ({ storage, navigate }) {
+  storage.removeItem(STORAGE_KEY)
+  navigate('/do/logout')
+}
+
 function safeStatusError (status) {
   return Object.assign(new Error('Identity verification failed.'), { status: Number(status) || 500 })
 }
 
-function showResult (documentRef, message, type, retryable) {
+function showResult (documentRef, message, type, retryable, refreshSignIn = false) {
   const busy = documentRef.getElementById('busy-state')
   const result = documentRef.getElementById('result-message')
   const retry = documentRef.getElementById('retry-button')
+  const refresh = documentRef.getElementById('refresh-signin-button')
   if (busy) busy.hidden = true
   if (result) {
     result.hidden = false
@@ -86,6 +92,7 @@ function showResult (documentRef, message, type, retryable) {
     result.focus?.()
   }
   if (retry) retry.hidden = !retryable
+  if (refresh) refresh.hidden = !refreshSignIn
 }
 
 async function runAuthenticationPage (windowRef, documentRef) {
@@ -98,7 +105,7 @@ async function runAuthenticationPage (windowRef, documentRef) {
   try {
     await verifyInvitation({ token, fetchImpl: windowRef.fetch.bind(windowRef) })
     windowRef.sessionStorage.removeItem(STORAGE_KEY)
-    showResult(documentRef, 'SAP identity verified. IDTS access provisioning is pending.', 'success', false)
+    showResult(documentRef, 'SAP identity verified. IDTS access provisioning is pending. Once your account is ACTIVE, refresh your SAP sign-in before opening IDTS.', 'success', false, true)
   } catch (error) {
     const status = Number(error?.status || 0)
     if ([400, 403, 409, 410].includes(status)) windowRef.sessionStorage.removeItem(STORAGE_KEY)
@@ -133,12 +140,17 @@ function initializeBrowserPage () {
   }
   if (page === 'authenticate') {
     const retry = document.getElementById('retry-button')
+    const refresh = document.getElementById('refresh-signin-button')
     retry?.addEventListener('click', () => {
       retry.hidden = true
       const busy = document.getElementById('busy-state')
       if (busy) busy.hidden = false
       runAuthenticationPage(window, document)
     })
+    refresh?.addEventListener('click', () => refreshSapSignIn({
+      storage: window.sessionStorage,
+      navigate: value => window.location.replace(value)
+    }))
     runAuthenticationPage(window, document)
   }
 }

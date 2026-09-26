@@ -8,6 +8,13 @@
 - **Scope note:** Canonical business documents remain unchanged because this is developer tooling only and does not change IDTS roles, workflow, data model, AI advisory boundaries, or deployed runtime behavior.
 - **Tooling issue, corrected:** A read-only PR-template search included the guessed path `docs/pm/templates`, which does not exist, so `rg` returned an expected missing-path error after still locating `.github/pull_request_template.md`. No file or external state changed; the follow-up reads only the confirmed template path.
 
+## 2026-09-26 — User invitation guidance and stale XSUAA session recovery
+
+- **Product defect / root cause:** Invitation email exposed verification and SAP account links but no direct IDTS link or ordered instructions for recipients with/without an SAP Universal ID. After provisioning reached `ACTIVE`, an existing normal-browser XSUAA session could still carry the pre-provisioning role claims; `AuthService.me` correctly returned 403 while a private browser obtained a fresh JWT and succeeded. The UI collapsed every 403 into a generic administrator message with no recovery action.
+- **Fix:** The email now requires the invited email, explains both SAP-ID paths, retains `Continue with SAP`, adds the conditional post-activation IDTS link, and tells recipients to refresh sign-in. The verify page exposes `Refresh SAP sign-in` only after success. The 403 page keeps details private but provides a sign-out/retry action through AppRouter `/do/logout`.
+- **Verification:** Intentional RED reproduced missing guidance, missing callback helper, and missing 403 recovery. Focused onboarding page and IDTS-117 tests passed; full onboarding security/config/programmatic suite passed after retaining the existing `Continue with SAP` contract. OfficeCLI `1.0.152` completed the documentation preflight; Markdown editing remained repository-native.
+- **Scope:** No automatic logout, role bypass, identity fallback, database/schema change, provider mutation, email send, BTP deployment, or live user mutation. Canonical business documents remain unchanged because authorization and onboarding semantics are preserved; only guidance and safe session recovery changed.
+
 ## 2026-09-12 — IDTS-127 UAT remediation start
 
 - **Independent-review tooling limitation:** The requested Luna Max evidence review could not start because the model had reached its usage limit. No lower model or different reasoning effort was substituted. DonHV's coordinator therefore performed the final read-only diff, hash, JSON, card-render, catalog, curation, secret-scan and live-readiness checks; the lack of a fresh independent-agent verdict remains disclosed rather than represented as PASS.

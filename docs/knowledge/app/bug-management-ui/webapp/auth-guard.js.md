@@ -191,6 +191,16 @@ thoi chua san sang kem nut Retry. Guard khong hien raw error. Khi debug, kiem
 `/ready` vi endpoint nay cham database that; `/health` chi chung minh process
 Node con song.
 
+## Invitation activation recovery / Phục hồi sau khi invitation active
+
+### English
+
+A safe 403 can occur when the internal user is already `ACTIVE` but the browser still holds the XSUAA session created before the Role Collection assignment completed. The guard does not expose whether identity mapping or role alignment failed. It gives one safe explanation and a `Sign out and try another SAP account` button that clears IDTS browser state and navigates through `/do/logout`. This also covers a browser already signed into a different SAP account without disclosing account existence or role details.
+
+### Tiếng Việt
+
+HTTP 403 an toàn có thể xảy ra khi user nội bộ đã `ACTIVE` nhưng browser vẫn giữ XSUAA session được tạo trước khi gán xong Role Collection. Guard không làm lộ việc identity mapping hay role alignment đã fail. Nó hiển thị một hướng dẫn an toàn và nút `Sign out and try another SAP account`; nút này xóa state IDTS trong browser rồi đi qua `/do/logout`. Cách này cũng xử lý browser đang đăng nhập SAP account khác mà không tiết lộ account có tồn tại hay chi tiết role.
+
 Vietnamese: Sau logout hoàn toàn, request nền có thể nhận HTML đăng nhập XSUAA
 với HTTP 200. Guard không còn parse HTML như JSON hoặc hiện nhầm lỗi “account
 cannot access”. Nó chuyển cả tab tới `/login.html` để SAP hoàn tất session, rồi

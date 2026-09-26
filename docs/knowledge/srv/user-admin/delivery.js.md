@@ -4,6 +4,26 @@ The onboarding delivery worker claims one durable delivery row, reloads its invi
 
 Provider failures use the shared sanitized error mapping and retry schedule. Delivery state records only `FAILED`, retry time, safe code/summary, and cleared locks. The same safe code/summary is mirrored to the parent request so the administration screen can show a useful failure state; a later successful send clears those request fields. Provider secrets, raw errors, response bodies, endpoints, tokens, and message bodies are excluded. Expired or missing invitations become `SKIPPED`.
 
+## Invitation guidance and application link / Hướng dẫn invitation và link ứng dụng
+
+### English
+
+`buildInvitationMessage` now gives the recipient an ordered path for both cases: an existing SAP Universal ID or no SAP Universal ID yet. It requires the same email address that received the invitation, keeps the signed verification token only in the URL fragment, tells the recipient to wait for `ACTIVE`, and links to the IDTS application. After activation, the recipient must sign out and sign in again so XSUAA can issue a new session containing the assigned Role Collection.
+
+- **Location**: `buildInvitationMessage` — plain-text and HTML invitation bodies.
+  **IDTS concept**: invitation verification links an immutable SAP identity, while application entry also requires a fresh platform-role claim.
+  **Impact if broken**: recipients may verify successfully but keep a pre-provisioning JWT and receive a safe HTTP 403 from IDTS.
+  **Must check together**: `app/router/resources/onboarding/onboarding-page.mjs`, `app/bug-management-ui/webapp/auth-guard.js`, `srv/auth/platform-role.js`, and onboarding security tests.
+
+### Tiếng Việt
+
+`buildInvitationMessage` nay hướng dẫn theo thứ tự cho cả hai trường hợp: đã có SAP Universal ID hoặc chưa có SAP Universal ID. Email yêu cầu dùng đúng địa chỉ đã nhận invitation, tiếp tục giữ token xác minh chỉ trong URL fragment, yêu cầu chờ trạng thái `ACTIVE`, và cung cấp link vào IDTS. Sau khi active, người nhận cần đăng xuất rồi đăng nhập lại để XSUAA cấp session mới có Role Collection vừa được gán.
+
+- **Vị trí**: `buildInvitationMessage` — nội dung invitation dạng text và HTML.
+  **Khái niệm IDTS**: xác minh invitation liên kết SAP identity bất biến, còn mở ứng dụng cần platform-role claim mới.
+  **Ảnh hưởng nếu sai**: người nhận có thể xác minh thành công nhưng vẫn giữ JWT trước provisioning và nhận HTTP 403 an toàn từ IDTS.
+  **Phải kiểm tra cùng**: `app/router/resources/onboarding/onboarding-page.mjs`, `app/bug-management-ui/webapp/auth-guard.js`, `srv/auth/platform-role.js` và các test bảo mật onboarding.
+
 ## Gate 6 retry relationship / Quan hệ retry Gate 6
 
 ### English

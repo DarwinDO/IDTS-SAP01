@@ -237,9 +237,15 @@ async function runRegressionChecks () {
   assert.doesNotMatch(sentMessages[0].text, /\?token=/)
   assert.match(sentMessages[0].text, /https:\/\/account\.sap\.com\//)
   assert.match(sentMessages[0].text, /https:\/\/account\.sap\.com\/registration\//)
+  assert.match(sentMessages[0].text, /If you already have an SAP Universal ID/i)
+  assert.match(sentMessages[0].text, /If you do not have an SAP Universal ID/i)
+  assert.match(sentMessages[0].text, /same email address that received this invitation/i)
+  assert.match(sentMessages[0].text, /open IDTS: https:\/\/idts\.example\.invalid\/idtsbugmanagementui\/index\.html/)
+  assert.match(sentMessages[0].text, /sign out and sign in again/i)
   assert.match(sentMessages[0].text, /IDTS cannot check whether an email is registered with SAP/)
   assert.match(sentMessages[0].html, /https:\/\/account\.sap\.com\//)
   assert.match(sentMessages[0].html, /https:\/\/account\.sap\.com\/registration\//)
+  assert.match(sentMessages[0].html, /href="https:\/\/idts\.example\.invalid\/idtsbugmanagementui\/index\.html"/)
   assert.doesNotMatch(JSON.stringify(persisted), /local-programmatic-invitation-signing-key/)
   assert.doesNotMatch(JSON.stringify(delivery), /onboarding\/continue\?token=/)
 
@@ -1340,6 +1346,12 @@ async function runAtomicOnboardingCase (caseKey) {
         assert.doesNotMatch(body, /\bBearer\s+\S+/i)
       }
       assert.match(message.html, /<strong>Requested access:<\/strong> TESTER/)
+      assert.match(message.text, /If you already have an SAP Universal ID/i)
+      assert.match(message.text, /If you do not have an SAP Universal ID/i)
+      assert.match(message.text, /same email address that received this invitation/i)
+      assert.match(message.text, /open IDTS: https:\/\/idts\.example\.invalid\/idtsbugmanagementui\/index\.html/)
+      assert.match(message.text, /sign out and sign in again/i)
+      assert.match(message.html, /href="https:\/\/idts\.example\.invalid\/idtsbugmanagementui\/index\.html"/)
       const htmlExpiryValue = message.html.match(/<strong>Invitation expires:<\/strong> ([^<]*)<\/p>/)?.[1]
       const escapeHtmlForAssertion = value => String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;')
       assert.equal(htmlExpiryValue, escapeHtmlForAssertion(invitation.row.expiresAt))
@@ -1348,7 +1360,8 @@ async function runAtomicOnboardingCase (caseKey) {
       assert.equal(htmlLinks.filter(link => link.includes('#token=')).length, 1)
       assert.deepEqual(htmlLinks.filter(link => !link.includes('#token=')).sort(), [
         'https://account.sap.com/',
-        'https://account.sap.com/registration/'
+        'https://account.sap.com/registration/',
+        'https://idts.example.invalid/idtsbugmanagementui/index.html'
       ])
       const textSapUrls = [...message.text.matchAll(/https:\/\/account\.sap\.com\/[^\s<]*/g)].map(match => match[0])
       assert.deepEqual(textSapUrls, [
