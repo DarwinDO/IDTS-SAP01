@@ -127,6 +127,7 @@ async function processUserOnboardingDeliveries ({
 
 function buildInvitationMessage (request, token, invitationConfig, emailConfig) {
   const link = `${invitationConfig.invitationBaseUrl}#token=${encodeURIComponent(token)}`
+  const idtsUrl = new URL('/idtsbugmanagementui/index.html', invitationConfig.invitationBaseUrl).toString()
   const role = request.requestedRole_code
   const overlay = request.userAdminRequested ? ' with User Administration capability' : ''
   const subject = '[IDTS] IDTS access invitation'
@@ -135,15 +136,18 @@ function buildInvitationMessage (request, token, invitationConfig, emailConfig) 
     `Requested access: ${role}${overlay}`,
     `Invitation expires: ${request.expiresAt}`,
     '',
-    `Continue with SAP: ${link}`,
+    'Use the same email address that received this invitation for your SAP account.',
+    `1. If you already have an SAP Universal ID, sign in or manage it: ${SAP_ACCOUNT_URL}`,
+    `2. If you do not have an SAP Universal ID, register here: ${SAP_REGISTRATION_URL}`,
+    `3. Continue with SAP to verify your identity: ${link}`,
+    '4. Wait until an IDTS Project Manager confirms that your account is ACTIVE.',
+    `5. After activation, sign out and sign in again to refresh your SAP access, then open IDTS: ${idtsUrl}`,
     '',
-    `Already have an SAP account? Sign in or manage it: ${SAP_ACCOUNT_URL}`,
-    `Need an SAP Universal ID? Register here: ${SAP_REGISTRATION_URL}`,
     'For privacy, IDTS cannot check whether an email is registered with SAP.',
     '',
     'IDTS will never ask for your SAP password, OTP, passkey, or recovery code.'
   ].join('\n')
-  const html = `<!doctype html><html><body><p>An IDTS Project Manager requested access for this SAP identity.</p><p><strong>Requested access:</strong> ${escapeHtml(role + overlay)}</p><p><strong>Invitation expires:</strong> ${escapeHtml(request.expiresAt)}</p><p><a href="${escapeHtml(link)}">Continue with SAP</a></p><p><a href="${SAP_ACCOUNT_URL}">Sign in or manage your SAP account</a></p><p><a href="${SAP_REGISTRATION_URL}">Register an SAP Universal ID</a></p><p>For privacy, IDTS cannot check whether an email is registered with SAP.</p><p>IDTS will never ask for your SAP password, OTP, passkey, or recovery code.</p></body></html>`
+  const html = `<!doctype html><html><body><p>An IDTS Project Manager requested access for this SAP identity.</p><p><strong>Requested access:</strong> ${escapeHtml(role + overlay)}</p><p><strong>Invitation expires:</strong> ${escapeHtml(request.expiresAt)}</p><p>Use the same email address that received this invitation for your SAP account.</p><ol><li>If you already have an SAP Universal ID, <a href="${SAP_ACCOUNT_URL}">sign in or manage your SAP account</a>.</li><li>If you do not have an SAP Universal ID, <a href="${SAP_REGISTRATION_URL}">register one here</a>.</li><li><a href="${escapeHtml(link)}">Continue with SAP</a> to verify your identity.</li><li>Wait until an IDTS Project Manager confirms that your account is <strong>ACTIVE</strong>.</li><li>After activation, sign out and sign in again to refresh your SAP access, then <a href="${escapeHtml(idtsUrl)}">open IDTS</a>.</li></ol><p>For privacy, IDTS cannot check whether an email is registered with SAP.</p><p>IDTS will never ask for your SAP password, OTP, passkey, or recovery code.</p></body></html>`
 
   return {
     to: request.targetEmailNormalized,

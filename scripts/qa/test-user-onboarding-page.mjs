@@ -66,6 +66,17 @@ assert.equal(page.safeErrorMessage({ status: 410 }), 'This invitation has expire
 assert.equal(page.safeErrorMessage({ status: 503 }), 'Identity verification is temporarily unavailable. Try again.')
 assert.equal(page.safeErrorMessage({ status: 500, providerBody: 'private failure' }), 'Identity verification failed. Try again or contact an IDTS Project Manager.')
 
+const refreshStorage = new Map([[page.STORAGE_KEY, token]])
+const refreshCalls = []
+page.refreshSapSignIn({
+  storage: {
+    removeItem: key => refreshStorage.delete(key)
+  },
+  navigate: value => refreshCalls.push(value)
+})
+assert.equal(refreshStorage.has(page.STORAGE_KEY), false)
+assert.deepEqual(refreshCalls, ['/do/logout'])
+
 const router = JSON.parse(fs.readFileSync(path.join(root, 'app/router/xs-app.json'), 'utf8'))
 const publicRoute = router.routes.find(route => route.source === '^/onboarding/continue$')
 const protectedRoute = router.routes.find(route => route.source === '^/onboarding/authenticate$')
@@ -82,5 +93,13 @@ for (const name of ['continue.html', 'authenticate.html']) {
   assert.doesNotMatch(html, /<script(?![^>]+src=)/i)
   assert.doesNotMatch(html, /token=|@gmail\.com|api[_-]?key/i)
 }
+
+const authenticateHtml = fs.readFileSync(path.join(resources, 'authenticate.html'), 'utf8')
+assert.match(authenticateHtml, /id="refresh-signin-button"/)
+assert.match(authenticateHtml, /Refresh SAP sign-in/)
+
+const pageSource = fs.readFileSync(modulePath, 'utf8')
+assert.match(pageSource, /Once your account is ACTIVE/)
+assert.match(pageSource, /refresh-signin-button/)
 
 console.log('IDTS onboarding callback page checks: PASS')

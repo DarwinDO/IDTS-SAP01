@@ -63,6 +63,9 @@ assert.match(guard, /window\.location\.reload\(\)/)
 assert.match(guard, /sessionStorage\.removeItem\(XSUAA_RECOVERY_KEY\)/)
 assert.match(guard, /originalFetch\.apply\(this, arguments\)/)
 assert.match(guard, /loadBtpUser\(\)\.then[\s\S]*installXsuaaSessionMonitor\(\)/)
+assert.match(guard, /Your current SAP session cannot access IDTS/)
+assert.match(guard, /Sign out and try another SAP account/)
+assert.match(guard, /signOut\.addEventListener\("click"[\s\S]*window\.idtsLogout\(\)/)
 
 async function verifyXsuaaRecovery (transport) {
   const values = new Map([['idts_xsuaa_recovery', '1']])

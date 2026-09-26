@@ -218,8 +218,9 @@
 
     function showSafeAccessError() {
         renderSafeError(
-            "Your account cannot access IDTS. Please contact the project administrator.",
-            false
+            "Your current SAP session cannot access IDTS. If your invitation is ACTIVE, sign out and sign in again with the SAP account that uses the invited email address.",
+            false,
+            true
         );
     }
 
@@ -230,11 +231,12 @@
         );
     }
 
-    function renderSafeError(message, retryAllowed) {
+    function renderSafeError(message, retryAllowed, signOutAllowed) {
         function render() {
             var host = document.getElementById("idtsAuthError");
             var text;
             var retry;
+            var signOut;
             if (!host) return;
 
             host.replaceChildren();
@@ -250,6 +252,16 @@
                     window.location.reload();
                 });
                 host.appendChild(retry);
+            }
+
+            if (signOutAllowed) {
+                signOut = document.createElement("button");
+                signOut.type = "button";
+                signOut.textContent = "Sign out and try another SAP account";
+                signOut.addEventListener("click", function () {
+                    window.idtsLogout();
+                });
+                host.appendChild(signOut);
             }
 
             host.hidden = false;
