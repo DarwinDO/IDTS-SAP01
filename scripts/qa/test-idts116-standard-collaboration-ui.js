@@ -59,6 +59,7 @@ assert(uiXsApp.includes('"csrfProtection": true'), 'UI OData route must keep CSR
 assert(routerXsApp.includes('index\\\\.html|manifest\\\\.json|Component\\\\.js|Component-preload\\\\.js'), 'AppRouter must route HTML5 entry assets through an explicit cache-control rule')
 assert(routerXsApp.includes('"cacheControl": "no-cache, no-store, must-revalidate"'), 'HTML5 entry assets must be revalidated after app-content rollout')
 assert.strictEqual(uiManifest['sap.app'].applicationVersion.version, uiPackage.version, 'UI manifest and package versions must stay aligned for HTML5 app-content cache invalidation')
+assert.strictEqual(uiPackage.version, '0.0.18', 'Invitation/session recovery rollout must use a new HTML5 application version')
 assert.notStrictEqual(uiPackage.version, '0.0.1', 'Changed HTML5 app content must not reuse the original 0.0.1 application version')
 
 async function verifyCompiledAttachmentFacet () {
